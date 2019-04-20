@@ -53,8 +53,8 @@ public class ValidationOptionsImpl implements ValidationOptions {
 	@Override
 	public com.adobe.fd.forms.api.ValidationOptions toAdobeValidationOptions() {
 		com.adobe.fd.forms.api.ValidationOptions options = new com.adobe.fd.forms.api.ValidationOptions();
-		setIfNotNull(options::setContentRoot, this.contentRoot.toString());
-		setIfNotNull(options::setDebugDir, this.debugDir.toString());
+		if (this.contentRoot != null) options.setContentRoot(this.contentRoot.toString());
+		if (this.debugDir != null) options.setDebugDir(this.debugDir.toString());
 		return options;
 	}
 }
