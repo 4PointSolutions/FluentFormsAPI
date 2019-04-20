@@ -2,6 +2,7 @@ package com._4point.aem.fluentforms.impl.forms;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
@@ -51,7 +52,8 @@ public class FormsServiceImpl implements FormsService {
 	@Override
 	public Document renderPDFForm(Path filename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException {
-		Objects.requireNonNull(filename, "filename cannot be null.");
+		validateTemplatePath(filename);
+
 		return this.renderPDFForm(filename.toString(), data, pdfFormRenderOptions);
 	}
 
@@ -76,13 +78,21 @@ public class FormsServiceImpl implements FormsService {
 	@Override
 	public ValidationResult validate(Path template, Document data, ValidationOptions validationOptions)
 			throws FormsServiceException {
-		if (!template.toFile().exists()) { throw new FormsServiceException(new FileNotFoundException("Template file must exist.")); }
+		validateTemplatePath(template);
 		return adobeFormsService.validate(template.toString(), data, validationOptions);
 	}
 
 	@Override
 	public ValidateArgumentBuilder validate() {
 		return new ValidateArgumentBuilderImpl();
+	}
+
+	private void validateTemplatePath(Path filename) throws FormsServiceException {
+		Objects.requireNonNull(filename, "template cannot be null.");
+		if (!(Files.exists(filename) && Files.isRegularFile(filename))) {
+			String message = "Unable to find template (" + filename.toString() + ").";
+			throw new FormsServiceException(message, new FileNotFoundException(message));
+		}
 	}
 
 	public class ValidateArgumentBuilderImpl implements ValidateArgumentBuilder {
