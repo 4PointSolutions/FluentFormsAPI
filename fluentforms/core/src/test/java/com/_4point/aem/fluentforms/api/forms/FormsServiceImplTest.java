@@ -1,5 +1,5 @@
-package com._4point.aem.fluentforms.api;
-
+package com._4point.aem.fluentforms.api.forms;
+import static com._4point.aem.fluentforms.api.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.MalformedURLException;
@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
@@ -32,8 +33,6 @@ import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 @ExtendWith(AemContextExtension.class)
 @ExtendWith(MockitoExtension.class)
 class FormsServiceImplTest {
-	private final static Path SAMPLE_FORM = Paths.get("src","test", "resources", "SampleForms", "SampleForm.xdp");
-	
 	private final AemContext context = new AemContext();
 
 	@Mock
