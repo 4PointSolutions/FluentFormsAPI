@@ -11,9 +11,7 @@ import java.util.Objects;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.forms.FormsService;
-import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptionsSetter;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
-import com._4point.aem.fluentforms.api.forms.ValidationOptionsSetter;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
@@ -71,8 +69,7 @@ public class FormsServiceImpl implements FormsService {
 
 	@Override
 	public RenderPDFFormArgumentBuilder renderPDFForm() {
-		// TODO Auto-generated method stub
-		return null;
+		return new RenderPDFFormArgumentBuilderImpl();
 	}
 
 	@Override
@@ -83,7 +80,7 @@ public class FormsServiceImpl implements FormsService {
 	}
 
 	@Override
-	public ValidateArgumentBuilder validate() {
+	public ValidateArgumentBuilderImpl validate() {
 		return new ValidateArgumentBuilderImpl();
 	}
 
@@ -99,17 +96,18 @@ public class FormsServiceImpl implements FormsService {
 		ValidationOptionsBuilder validationOptions = new ValidationOptionsBuilder();
 		
 		@Override
-		public ValidationOptionsSetter setContentRoot(Path contentRootDir) {
+		public ValidateArgumentBuilder setContentRoot(Path contentRootDir) {
 			validationOptions.setContentRoot(contentRootDir);
 			return this;
 		}
 
 		@Override
-		public ValidationOptionsSetter setDebugDir(Path debugDir) {
+		public ValidateArgumentBuilder setDebugDir(Path debugDir) {
 			validationOptions.setDebugDir(debugDir);
 			return this;
 		}
 		
+		@Override
 		public ValidationResult executeOn(Path template, Document data) throws FormsServiceException {
 			try {
 				return adobeFormsService.validate(template.toString(), data, validationOptions.build());
@@ -124,59 +122,62 @@ public class FormsServiceImpl implements FormsService {
 		PDFFormRenderOptionsImpl options = new PDFFormRenderOptionsImpl();
 		
 		@Override
-		public PDFFormRenderOptionsSetter setAcrobatVersion(AcrobatVersion acrobatVersion) {
+		public RenderPDFFormArgumentBuilder setAcrobatVersion(AcrobatVersion acrobatVersion) {
 			options.setAcrobatVersion(acrobatVersion);
 			return this;
 		}
 
 		@Override
-		public PDFFormRenderOptionsSetter setCacheStrategy(CacheStrategy strategy) {
+		public RenderPDFFormArgumentBuilder setCacheStrategy(CacheStrategy strategy) {
 			options.setCacheStrategy(strategy);
 			return this;
 		}
 
 		@Override
-		public PDFFormRenderOptionsSetter setContentRoot(Path url) {
+		public RenderPDFFormArgumentBuilder setContentRoot(Path url) {
 			options.setContentRoot(url);
 			return this;
 		}
 
 		@Override
-		public PDFFormRenderOptionsSetter setDebugDir(Path debugDir) {
+		public RenderPDFFormArgumentBuilder setDebugDir(Path debugDir) {
 			options.setDebugDir(debugDir);
 			return this;
 		}
 
 		@Override
-		public PDFFormRenderOptionsSetter setLocale(Locale locale) {
+		public RenderPDFFormArgumentBuilder setLocale(Locale locale) {
 			options.setLocale(locale);
 			return this;
 		}
 
 		@Override
-		public PDFFormRenderOptionsSetter setSubmitUrls(List<URL> urls) {
+		public RenderPDFFormArgumentBuilder setSubmitUrls(List<URL> urls) {
 			options.setSubmitUrls(urls);
 			return this;
 		}
 
 		@Override
-		public PDFFormRenderOptionsSetter setTaggedPDF(boolean isTagged) {
+		public RenderPDFFormArgumentBuilder setTaggedPDF(boolean isTagged) {
 			options.setTaggedPDF(isTagged);
 			return this;
 		}
 
 		@Override
-		public PDFFormRenderOptionsSetter setXci(Document xci) {
+		public RenderPDFFormArgumentBuilder setXci(Document xci) {
 			options.setXci(xci);
 			return this;
 		}
 
 		@Override
 		public Document executeOn(Path template, Document data) throws FormsServiceException {
-			// TODO Auto-generated method stub
-			return null;
+			return renderPDFForm(template, data, options.toAdobePDFFormRenderOptions());
 		}
 		
+		@Override
+		public Document executeOn(URL template, Document data) throws FormsServiceException {
+			return renderPDFForm(template, data, options.toAdobePDFFormRenderOptions());
+		}
 	}
 
 	protected TraditionalFormsService getAdobeFormsService() {

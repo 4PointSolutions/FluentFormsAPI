@@ -108,17 +108,17 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 		com.adobe.fd.forms.api.PDFFormRenderOptions adobeOptions = new com.adobe.fd.forms.api.PDFFormRenderOptions();
 		setIfNotNull(adobeOptions::setAcrobatVersion,this.acrobatVersion);
 		setIfNotNull(adobeOptions::setCacheStrategy, this.cacheStrategy);
-		setIfNotNull(adobeOptions::setContentRoot, this.contentRoot.toString());
-		setIfNotNull(adobeOptions::setDebugDir, this.debugDir.toString());
-		setIfNotNull(adobeOptions::setLocale, this.locale.toString());
+		setIfNotNull((cr)->adobeOptions.setContentRoot(cr.toString()), this.contentRoot);
+		setIfNotNull((dd)->adobeOptions.setDebugDir(dd.toString()), this.debugDir);
+		setIfNotNull((l)->adobeOptions.setLocale(l.toString()), this.locale);
 		setIfNotNull(adobeOptions::setSubmitUrls, mapToStrings(this.submitUrls));
 		setIfNotNull(adobeOptions::setTaggedPDF, this.taggedPDF);
-		setIfNotNull(adobeOptions::setXci, this.xci.getAdobeDocument());
+		setIfNotNull((ad)->adobeOptions.setXci(ad.getAdobeDocument()), this.xci);
 		return adobeOptions;
 	}
 
 	private static List<String> mapToStrings(List<URL> urls) {
-		return urls.stream().map(URL::toString).collect(Collectors.toList());
+		return urls == null ? null : urls.stream().map(URL::toString).collect(Collectors.toList());
 	}
 
 }

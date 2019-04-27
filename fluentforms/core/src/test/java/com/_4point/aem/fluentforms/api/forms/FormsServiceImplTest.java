@@ -1,14 +1,22 @@
 package com._4point.aem.fluentforms.api.forms;
-import static com._4point.aem.fluentforms.api.TestUtils.*;
-import static org.junit.jupiter.api.Assertions.*;
 
+import static com._4point.aem.fluentforms.api.TestUtils.SAMPLE_FORM;
+import static com._4point.aem.fluentforms.api.TestUtils.SAMPLE_FORMS_DIR;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Locale;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,22 +26,20 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.fluentforms.api.Document;
-import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
-import com._4point.aem.fluentforms.api.forms.ValidationOptions;
-import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
+import com._4point.aem.fluentforms.impl.forms.ValidationOptionsImpl;
+import com.adobe.fd.forms.api.AcrobatVersion;
+import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
 import com.adobe.fd.forms.api.PDFFormRenderOptions;
 
-import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 
 @ExtendWith(AemContextExtension.class)
 @ExtendWith(MockitoExtension.class)
 class FormsServiceImplTest {
-	private final AemContext context = new AemContext();
 
 	@Mock
 	private TraditionalFormsService adobeFormsService;
@@ -130,11 +136,7 @@ class FormsServiceImplTest {
 	@Test
 	@DisplayName("Test RenderPDFForm(Path,...) Happy Path.")
 	void testRenderPDFFormPathDocumentPDFFormRenderOptions() throws FormsServiceException {
-		Document result = Mockito.mock(Document.class);
-		ArgumentCaptor<String> templateArg = ArgumentCaptor.forClass(String.class);
-		ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
-		ArgumentCaptor<PDFFormRenderOptions> optionsArg = ArgumentCaptor.forClass(PDFFormRenderOptions.class);
-		Mockito.when(adobeFormsService.renderPDFForm(templateArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
+		MockPdfRenderService svc = new MockPdfRenderService();
 		
 		Path filePath = SAMPLE_FORM;
 		Document data = Mockito.mock(Document.class);
@@ -142,10 +144,10 @@ class FormsServiceImplTest {
 		Document pdfResult = underTest.renderPDFForm(filePath, data, pdfFormRenderOptions);
 		
 		// Verify that all the results are correct.
-		assertEquals(filePath, Paths.get(templateArg.getValue()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(dataArg.getValue() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(optionsArg.getValue() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
-		assertTrue(pdfResult == result, "Expected the Document returned by AEM would match the Document result.");
+		assertEquals(filePath, Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -195,12 +197,8 @@ class FormsServiceImplTest {
 	@Test
 	@DisplayName("Test RenderPDFForm(URL,...) Happy Path.")
 	void testRenderPDFFormURLDocumentPDFFormRenderOptions() throws MalformedURLException, FormsServiceException {
-		Document result = Mockito.mock(Document.class);
-		ArgumentCaptor<String> templateArg = ArgumentCaptor.forClass(String.class);
-		ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
-		ArgumentCaptor<PDFFormRenderOptions> optionsArg = ArgumentCaptor.forClass(PDFFormRenderOptions.class);
-		Mockito.when(adobeFormsService.renderPDFForm(templateArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
-		
+		MockPdfRenderService svc = new MockPdfRenderService();
+
 		String filename = "file:foo/bar.xdp";
 		URL fileUrl = new URL(filename);
 		Document data = Mockito.mock(Document.class);
@@ -208,10 +206,10 @@ class FormsServiceImplTest {
 		Document pdfResult = underTest.renderPDFForm(fileUrl, data, pdfFormRenderOptions);
 		
 		// Verify that all the results are correct.
-		assertEquals(fileUrl, new URL(templateArg.getValue()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(dataArg.getValue() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(optionsArg.getValue() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
-		assertTrue(pdfResult == result, "Expected the Document returned by AEM would match the Document result.");
+		assertEquals(fileUrl, new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
+		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -293,13 +291,193 @@ class FormsServiceImplTest {
 	}
 	
 	@Test
-	void testRenderPDFForm() {
-		fail("Not yet implemented");
+	void testRenderPDFFormPath() throws FormsServiceException, MalformedURLException {
+		MockPdfRenderService svc = new MockPdfRenderService();
+
+		Path filePath = SAMPLE_FORM;
+		Document data = Mockito.mock(Document.class);
+
+		Document pdfResult = underTest.renderPDFForm()
+								   .setAcrobatVersion(AcrobatVersion.Acrobat_10)
+								   .setCacheStrategy(CacheStrategy.CONSERVATIVE)
+								   .setContentRoot(Paths.get("foo", "bar"))
+								   .setDebugDir(Paths.get("bar", "foo"))
+								   .setLocale(Locale.JAPAN)
+								   .setSubmitUrl(new URL("http://example.com"))
+								   .setTaggedPDF(true)
+								   .setXci(data)
+								   .executeOn(filePath, data);
+
+		assertEquals(filePath, Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+
+		PDFFormRenderOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 
 	@Test
-	void testValidate() {
-		fail("Not yet implemented");
+	void testRenderPDFFormPath_NoArgs() throws FormsServiceException {
+		MockPdfRenderService svc = new MockPdfRenderService();
+
+		Path filePath = SAMPLE_FORM;
+		Document data = Mockito.mock(Document.class);
+		Document pdfResult = underTest.renderPDFForm()
+				 				      .executeOn(filePath, data);
+
+		assertEquals(filePath, Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+
+		PDFFormRenderOptionsImplTest.assertEmpty(svc.getOptionsArg());
 	}
 
+	@Test
+	void testRenderPDFFormUrl() throws FormsServiceException, MalformedURLException {
+		MockPdfRenderService svc = new MockPdfRenderService();
+
+		URL fileUrl = new URL("http://example.com");
+		Document data = Mockito.mock(Document.class);
+
+		Document pdfResult = underTest.renderPDFForm()
+				   .setAcrobatVersion(AcrobatVersion.Acrobat_10)
+				   .setCacheStrategy(CacheStrategy.CONSERVATIVE)
+				   .setContentRoot(Paths.get("foo", "bar"))
+				   .setDebugDir(Paths.get("bar", "foo"))
+				   .setLocale(Locale.JAPAN)
+				   .setSubmitUrl(new URL("http://example.com"))
+				   .setTaggedPDF(true)
+				   .setXci(data)
+				   .executeOn(fileUrl, data);
+
+		assertEquals(fileUrl, new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+
+		PDFFormRenderOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
+	}
+
+	@Test
+	void testRenderPDFFormUrl_NoArgs() throws FormsServiceException, MalformedURLException {
+		MockPdfRenderService svc = new MockPdfRenderService();
+
+		URL fileUrl = new URL("http://example.com");
+		Document data = Mockito.mock(Document.class);
+		Document pdfResult = underTest.renderPDFForm()
+				 				      .executeOn(fileUrl, data);
+
+		assertEquals(fileUrl, new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+
+		PDFFormRenderOptionsImplTest.assertEmpty(svc.getOptionsArg());
+	}
+
+	@Test
+	void testValidate() throws FormsServiceException {
+		ValidationResult result = Mockito.mock(ValidationResult.class);
+		ArgumentCaptor<String> templateArg = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
+		ArgumentCaptor<ValidationOptions> optionsArg = ArgumentCaptor.forClass(ValidationOptions.class);
+		Mockito.when(adobeFormsService.validate(templateArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
+		
+		Path template = SAMPLE_FORM;
+		Document data = Mockito.mock(Document.class);
+		ValidationResult validationResult = underTest.validate()
+		 		 						   .setContentRoot(SAMPLE_FORMS_DIR)
+		 		 						   .setDebugDir(SAMPLE_FORMS_DIR)
+		 		 						   .executeOn(template, data);
+
+		// Verify that all the results are correct.
+		assertEquals(template, Paths.get(templateArg.getValue()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(dataArg.getValue() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(validationResult == result, "Expected the validation result returned by AEM would match the validation result.");
+		
+		ValidationOptions adobeValidationOptions = optionsArg.getValue();
+		assertEquals(SAMPLE_FORMS_DIR, adobeValidationOptions.getContentRoot());
+		assertEquals(SAMPLE_FORMS_DIR, adobeValidationOptions.getDebugDir());
+	}
+
+	@Test
+	void testValidate_NoArgs() throws FormsServiceException {
+		ValidationResult result = Mockito.mock(ValidationResult.class);
+		ArgumentCaptor<String> templateArg = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
+		ArgumentCaptor<ValidationOptions> optionsArg = ArgumentCaptor.forClass(ValidationOptions.class);
+		Mockito.when(adobeFormsService.validate(templateArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
+		
+		Path template = SAMPLE_FORM;
+		Document data = Mockito.mock(Document.class);
+		ValidationResult validationResult = underTest.validate()
+													 .executeOn(template, data);
+		
+		// Verify that all the results are correct.
+		assertEquals(template, Paths.get(templateArg.getValue()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(dataArg.getValue() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(validationResult == result, "Expected the validation result returned by AEM would match the validation result.");
+
+		ValidationOptions adobeValidationOptions = optionsArg.getValue();
+		assertNull(adobeValidationOptions.getContentRoot());
+		assertNull(adobeValidationOptions.getDebugDir());
+	}
+
+	@Test
+	void testToAdobeValidationOptions() throws FileNotFoundException {
+		ValidationOptionsImpl vo = new ValidationOptionsImpl(SAMPLE_FORMS_DIR, SAMPLE_FORMS_DIR);
+		com.adobe.fd.forms.api.ValidationOptions adobeValidationOptions = vo.toAdobeValidationOptions();
+		assertEquals(SAMPLE_FORMS_DIR.toString(), adobeValidationOptions.getContentRoot());
+		assertEquals(SAMPLE_FORMS_DIR.toString(), adobeValidationOptions.getDebugDir());
+	}
+
+	@Test
+	@DisplayName("Make sure bad filenames throw FileNotFoundExceptions")
+	void testValidationOptions_nullArguments() {
+		Path badFilename = Paths.get("foo", "bar");
+		FileNotFoundException ex1 = assertThrows(FileNotFoundException.class, ()->new ValidationOptionsImpl(badFilename, SAMPLE_FORMS_DIR));
+		String msg1 = ex1.getMessage();
+		assertThat(msg1, Matchers.containsString("content root"));
+		assertThat(msg1, Matchers.containsString(badFilename.toString()));
+		
+		FileNotFoundException ex2 = assertThrows(FileNotFoundException.class, ()->new ValidationOptionsImpl(SAMPLE_FORMS_DIR, badFilename));
+		String msg2 = ex2.getMessage();
+		assertThat(msg2, Matchers.containsString("debug dumps"));
+		assertThat(msg2, Matchers.containsString(badFilename.toString()));
+
+	}
+
+	@Test
+	void testToAdobeValidationOptions_nullArguments() throws FileNotFoundException {
+		ValidationOptionsImpl vo = new ValidationOptionsImpl(null, null);
+		com.adobe.fd.forms.api.ValidationOptions adobeValidationOptions = vo.toAdobeValidationOptions();
+		assertNull(adobeValidationOptions.getContentRoot());
+		assertNull(adobeValidationOptions.getDebugDir());
+	}
+
+
+	private class MockPdfRenderService {
+		private final Document result = Mockito.mock(Document.class);
+		private final ArgumentCaptor<String> templateArg = ArgumentCaptor.forClass(String.class);
+		private final ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
+		private final ArgumentCaptor<PDFFormRenderOptions> optionsArg = ArgumentCaptor.forClass(PDFFormRenderOptions.class);
+		
+		protected MockPdfRenderService() throws FormsServiceException {
+			super();
+			Mockito.when(adobeFormsService.renderPDFForm(templateArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
+		}
+
+		protected Document getResult() {
+			return result;
+		}
+
+		protected String getTemplateArg() {
+			return templateArg.getValue();
+		}
+
+		protected Document getDataArg() {
+			return dataArg.getValue();
+		}
+
+		protected PDFFormRenderOptions getOptionsArg() {
+			return optionsArg.getValue();
+		}
+	}
 }

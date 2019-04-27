@@ -1,13 +1,10 @@
 package com._4point.aem.fluentforms.impl.forms;
 
-import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
-
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
-
 
 public class ValidationOptionsImpl implements ValidationOptions {
 	

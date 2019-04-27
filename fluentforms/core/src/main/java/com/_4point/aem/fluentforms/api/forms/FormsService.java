@@ -2,9 +2,13 @@ package com._4point.aem.fluentforms.api.forms;
 
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Locale;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.Transformable;
+import com.adobe.fd.forms.api.AcrobatVersion;
+import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
 import com.adobe.fd.forms.api.PDFFormRenderOptions;
 
@@ -46,10 +50,51 @@ public interface FormsService {
 	}
 	
 	public static interface RenderPDFFormArgumentBuilder extends PDFFormRenderOptionsSetter, Transformable<RenderPDFFormArgumentBuilder> {
+		
+		@Override
+		public RenderPDFFormArgumentBuilder setAcrobatVersion(AcrobatVersion acrobatVersion);
+
+		@Override
+		public RenderPDFFormArgumentBuilder setCacheStrategy(CacheStrategy strategy);
+
+		@Override
+		public RenderPDFFormArgumentBuilder setContentRoot(Path url);
+
+		@Override
+		public RenderPDFFormArgumentBuilder setDebugDir(Path debugDir);
+
+		@Override
+		public RenderPDFFormArgumentBuilder setLocale(Locale locale);
+
+		@Override
+		public default RenderPDFFormArgumentBuilder setSubmitUrl(URL url) {
+			PDFFormRenderOptionsSetter.super.setSubmitUrl(url);
+			return this;
+		}
+
+		@Override
+		public RenderPDFFormArgumentBuilder setSubmitUrls(List<URL> urls);
+
+		@Override
+		public RenderPDFFormArgumentBuilder setTaggedPDF(boolean isTagged);
+
+		@Override
+		public RenderPDFFormArgumentBuilder setXci(Document xci);
+
 		public Document executeOn(Path template, Document data) throws FormsServiceException;
+		
+		public Document executeOn(URL template, Document data) throws FormsServiceException;
+
 	}
 	
 	public static interface ValidateArgumentBuilder extends ValidationOptionsSetter, Transformable<ValidateArgumentBuilder> {
+		
+		@Override
+		public ValidateArgumentBuilder setContentRoot(Path contentRootDir);
+
+		@Override
+		public ValidateArgumentBuilder setDebugDir(Path debugDir);
+
 		public ValidationResult executeOn(Path template, Document data) throws FormsServiceException;
 	}
 
