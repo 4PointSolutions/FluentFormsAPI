@@ -1,9 +1,12 @@
 package com._4point.aem.fluentforms.testing;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -14,10 +17,12 @@ import com.adobe.aemfd.docmanager.passivation.DocumentPassivationHandler;
 public class MockDocumentFactory implements DocumentFactory {
 
 	public final static Document GLOBAL_DUMMY_DOCUMENT = new MockDocumentImpl();
-	public final Document DUMMY_DOCUMENT = new MockDocumentImpl();
+	public final MockDocumentImpl DUMMY_DOCUMENT = new MockDocumentImpl();
+	public final static MockDocumentFactory GLOBAL_INSTANCE = new MockDocumentFactory();
 
 	@Override
 	public Document create(byte[] data) {
+		DUMMY_DOCUMENT.setInlineData(data);
 		return DUMMY_DOCUMENT;
 	}
 
@@ -68,93 +73,89 @@ public class MockDocumentFactory implements DocumentFactory {
 
 	private static class MockDocumentImpl implements Document {
 
+		private Map<String, Object> attributes = new TreeMap<>();
+		private String contentType;
+		private byte[] data = new byte[0];
+		private int maxInlineSize = 0;
+		
+		public void setInlineData(byte[] data) {
+			this.data = data;
+		}
+		
 		@Override
 		public void close() throws IOException {
-			// TODO Auto-generated method stub
-			
+			// NO-OP
 		}
 
 		@Override
 		public void copyToFile(File arg0) throws IOException {
-			// TODO Auto-generated method stub
-			
+			// NO-OP
 		}
 
 		@Override
 		public void dispose() {
-			// TODO Auto-generated method stub
-			
+			// NO-OP
 		}
 
 		@Override
 		public Object getAttribute(String name) {
-			// TODO Auto-generated method stub
-			return null;
+			return attributes.get(name);
 		}
 
 		@Override
 		public String getContentType() throws IOException {
-			// TODO Auto-generated method stub
-			return null;
+			return this.contentType;
 		}
 
 		@Override
 		public byte[] getInlineData() throws IOException {
-			// TODO Auto-generated method stub
-			return null;
+			return this.data;
 		}
 
 		@Override
 		public InputStream getInputStream() throws IOException {
-			// TODO Auto-generated method stub
-			return null;
+			return new ByteArrayInputStream(this.data);
 		}
 
 		@Override
 		public int getMaxInlineSize() {
-			// TODO Auto-generated method stub
-			return 0;
+			return this.maxInlineSize;
 		}
 
 		@Override
 		public long length() throws IOException {
-			// TODO Auto-generated method stub
-			return 0;
+			return this.data.length;
 		}
 
 		@Override
 		public void passivate() throws IOException {
-			// TODO Auto-generated method stub
-			
+			// NO-OP
 		}
 
 		@Override
 		public void removeAttribute(String name) {
-			// TODO Auto-generated method stub
-			
+			attributes.remove(name);
 		}
 
 		@Override
 		public void setAttribute(String name, Object val) {
-			// TODO Auto-generated method stub
-			
+			attributes.put(name, val);
 		}
 
 		@Override
 		public void setContentType(String contentType) {
-			// TODO Auto-generated method stub
-			
+			// TODO: Convert this to use the attributes Map with the correct key
+			this.contentType = contentType;
 		}
 
 		@Override
 		public void setMaxInlineSize(int maxInlineSize) {
-			// TODO Auto-generated method stub
-			
+			this.maxInlineSize = maxInlineSize;
 		}
 
 		@Override
 		public com.adobe.aemfd.docmanager.Document getAdobeDocument() {
-			// TODO Auto-generated method stub
+			// NO-OP
 			return null;
 		}
 		
