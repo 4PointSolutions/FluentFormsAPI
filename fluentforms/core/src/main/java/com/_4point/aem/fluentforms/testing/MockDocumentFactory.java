@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -20,10 +22,29 @@ public class MockDocumentFactory implements DocumentFactory {
 	public final MockDocumentImpl DUMMY_DOCUMENT = new MockDocumentImpl();
 	public final static MockDocumentFactory GLOBAL_INSTANCE = new MockDocumentFactory();
 
+	private final List<MockDocumentImpl> docsCreated = new ArrayList<>();
+	
+	public List<MockDocumentImpl> getDocsCreated() {
+		return docsCreated;
+	}
+
+	public boolean created(Document doc) {
+		if (doc instanceof MockDocumentImpl) {
+			for(MockDocumentImpl i:docsCreated) {
+				if (doc == i) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	@Override
 	public Document create(byte[] data) {
-		DUMMY_DOCUMENT.setInlineData(data);
-		return DUMMY_DOCUMENT;
+		MockDocumentImpl createdDoc = new MockDocumentImpl();
+		createdDoc.setInlineData(data);
+		docsCreated.add(createdDoc);
+		return createdDoc;
 	}
 
 	@Override
