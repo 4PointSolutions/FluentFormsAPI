@@ -4,6 +4,7 @@ public class ContentType {
 	private static final String WILDCARD_CHAR = "*";
 	private static final String SEPARATOR_CHAR = "/";
 	
+	public static final ContentType APPLICATION_XML = new ContentType("application/xml");
 	public static final ContentType APPLICATION_PDF = new ContentType("application/pdf");
 	public static final ContentType MULTIPART_FORMDATA = new ContentType("multipart/form-data");
 	public static final ContentType TEXT_HTML = new ContentType("text/html");

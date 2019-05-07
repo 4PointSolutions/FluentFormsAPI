@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,13 @@ import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 @ExtendWith(MockitoExtension.class)
 class ImportDataTest {
 
+	private static final String DATA_PARAM_NAME = "data";
+
+	private static final String PDF_PARAM_NAME = "pdf";
+
 	private static final String APPLICATION_XML = "application/xml";
+
+	private static final String APPLICATION_PDF = "application/pdf";
 
 	private final ImportData underTest =  new ImportData();
 
@@ -51,6 +58,8 @@ class ImportDataTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
+		// Always use the MockDocumentFactory() in the class that's under test because the Adobe Document object has unresolved dependencies.
+		junitx.util.PrivateAccessor.setField(underTest, "docFactory",  (DocumentFactory)mockDocumentFactory);
 	}
 	
 
@@ -67,17 +76,21 @@ class ImportDataTest {
 
 		// Create inputs
 		Map<String, Object> parameterMap = new HashMap<>();
-		String inputDataBytes = "InputData";
-		parameterMap.put("pdf", inputDataBytes);
+		String pdfDataBytes = "PDF Bytes";
+		parameterMap.put(PDF_PARAM_NAME, pdfDataBytes);
+		String xmlDataBytes = "XML Data";
+		parameterMap.put(DATA_PARAM_NAME, xmlDataBytes);
 		
-		// Set reqeust parameters
+		// Set request parameters
 		request.setParameterMap(parameterMap);
+
+		request.setHeader("Accept", APPLICATION_XML);
 
 		
 		underTest.doPost(request, response);
 		
 		// Validate the result
-		assertEquals(200, response.getStatus());
+		assertEquals(SlingHttpServletResponse.SC_OK, response.getStatus());
 		assertEquals(APPLICATION_XML, response.getContentType());
 		assertEquals(resultData, response.getOutputAsString());
 		assertEquals(resultDataBytes.length, response.getContentLength());
@@ -85,9 +98,15 @@ class ImportDataTest {
 		// Validate the inputs were used
 		ImportDataArgs importDataArgs = importDataMock.getImportDataArgs();
 		Document pdf = importDataArgs.getPdf();
-		byte[] inlineData = pdf.getInlineData();
-		assertArrayEquals(inputDataBytes.getBytes(), inlineData);
-		assertEquals(new String(inputDataBytes), new String(inlineData));
+		byte[] pdfData = pdf.getInlineData();
+		assertArrayEquals(pdfDataBytes.getBytes(), pdfData);
+		assertEquals(new String(pdfDataBytes), new String(pdfData));
+		Document data = importDataArgs.getData();
+		byte[] xmlData = data.getInlineData();
+		assertArrayEquals(xmlDataBytes.getBytes(), xmlData);
+		assertEquals(new String(xmlDataBytes), new String(xmlData));
+		
+		
 	}
 
 
@@ -96,11 +115,64 @@ class ImportDataTest {
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
+		// Create inputs
+		Map<String, Object> parameterMap = new HashMap<>();
+		String inputDataBytes = "XML Data";
+		parameterMap.put(DATA_PARAM_NAME, inputDataBytes);
+		// Set request parameters
+		request.setParameterMap(parameterMap);
+
 		underTest.doPost(request, response);
 		
-		assertEquals(400, response.getStatus());
-		assertThat("", response.geStatusMessage(), containsString("pdf"));
-		assertThat("", response.geStatusMessage(), containsStringIgnoringCase("missing"));
+		assertEquals(SlingHttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+		assertThat("Expected message to contain parameter name", response.geStatusMessage(), containsString(PDF_PARAM_NAME));
+		assertThat("Expected message to contain 'missing'", response.geStatusMessage(), containsStringIgnoringCase("missing"));
+	}
+	
+	@Test
+	void testDoPost_NoDataArg(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+
+		// Create inputs
+		Map<String, Object> parameterMap = new HashMap<>();
+		String inputDataBytes = "PDF";
+		parameterMap.put(PDF_PARAM_NAME, inputDataBytes);
+		// Set request parameters
+		request.setParameterMap(parameterMap);
+
+		underTest.doPost(request, response);
+		
+		assertEquals(SlingHttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+		assertThat("Expected message to contain parameter name", response.geStatusMessage(), containsString(DATA_PARAM_NAME));
+		assertThat("Expected message to contain 'missing'", response.geStatusMessage(), containsStringIgnoringCase("missing"));
+	}
+	
+	@Test
+	void testDoPost_BadAcceptHeader(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
+		String resultData = "testDoPost Bad Accept Header Result";
+		byte[] resultDataBytes = resultData.getBytes();
+		MockTraditionalFormsService importDataMock = mockImportData(resultDataBytes);
+
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+
+		// Create inputs
+		Map<String, Object> parameterMap = new HashMap<>();
+		String pdfDataBytes = "PDF Bytes";
+		parameterMap.put(PDF_PARAM_NAME, pdfDataBytes);
+		String xmlDataBytes = "XML Data";
+		parameterMap.put(DATA_PARAM_NAME, xmlDataBytes);
+		
+		// Set request parameters
+		request.setParameterMap(parameterMap);
+		request.setHeader("Accept", "text/plain");
+		
+		underTest.doPost(request, response);
+		
+		assertEquals(SlingHttpServletResponse.SC_NOT_ACCEPTABLE, response.getStatus());
+		
 	}
 	
 	public MockTraditionalFormsService mockImportData(byte[] resultDataBytes) throws NoSuchFieldException {
@@ -108,7 +180,6 @@ class ImportDataTest {
 		importDataResult.setContentType(APPLICATION_XML);
 		MockTraditionalFormsService importDataMock = MockTraditionalFormsService.createImportDataMock(importDataResult);
 		junitx.util.PrivateAccessor.setField(underTest, "adobeFormsService",  (TraditionalFormsService)importDataMock);
-		junitx.util.PrivateAccessor.setField(underTest, "docFactory",  (DocumentFactory)mockDocumentFactory);
 		return importDataMock;
 	}
 	

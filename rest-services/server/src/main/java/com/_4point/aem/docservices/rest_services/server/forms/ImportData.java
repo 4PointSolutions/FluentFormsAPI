@@ -3,6 +3,10 @@ package com._4point.aem.docservices.rest_services.server.forms;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -16,12 +20,14 @@ import org.apache.sling.servlets.annotations.SlingServletPaths;
 import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
+import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
+import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
 import com._4point.aem.docservices.rest_services.server.FormParameters;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
@@ -30,8 +36,8 @@ import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
-import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 
+@SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.ImportData Service"})
 @SlingServletResourceTypes(methods=HttpConstants.METHOD_POST, resourceTypes = { "" })
 @SlingServletPaths("/services/FormsService/ImportData")
@@ -39,6 +45,7 @@ import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 public class ImportData extends SlingAllMethodsServlet {
 
 	private static final String PDF_PARAM_NAME = "pdf";
+	private static final String DATA_PARAM_NAME = "data";
 	private static final Logger log = LoggerFactory.getLogger(ImportData.class);
 	private final TraditionalFormsService adobeFormsService = new AdobeFormsServiceAdapter();
 	private final DocumentFactory docFactory = DocumentFactory.getDefault();
@@ -54,33 +61,29 @@ public class ImportData extends SlingAllMethodsServlet {
 		} catch (InternalServerErrorException ise) {
 			log.error("Internal server error", ise);
 			response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, ise.getMessage());
+		} catch (NotAcceptableException nae) {
+			log.error("NotAcceptable error", nae);
+			response.sendError(SlingHttpServletResponse.SC_NOT_ACCEPTABLE, nae.getMessage());
 		} catch (Exception e) {  			// Some exception we haven't anticipated.
 			log.error(e.getMessage() != null ? e.getMessage() : e.getClass().getName() , e);	// Make sure this gets into our log.
 			throw e;
 		}
 	}
 
-	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws InternalServerErrorException, BadRequestException {
+	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws InternalServerErrorException, BadRequestException, NotAcceptableException {
 		FormsService formsService = new FormsServiceImpl(adobeFormsService);
-		
-		// TODO: Validate Accept headers
-		// TODO: Validate ContentType
-		
 		
 		RequestParameter pdfParameter = FormParameters.getMandatoryParameter(request, PDF_PARAM_NAME);
 		Document pdf = docFactory.create(pdfParameter.get());
+		RequestParameter dataParameter = FormParameters.getMandatoryParameter(request, DATA_PARAM_NAME);
+		Document data = docFactory.create(dataParameter.get());
 		
-		
-//		RequestParameter dataParameter = request.getRequestParameter("data");
-//		
-//		// TODO: Create Document objects from request parameters.
-//		
-//		Document pdf = MockDocumentFactory.GLOBAL_DUMMY_DOCUMENT;
-		Document data = MockDocumentFactory.GLOBAL_DUMMY_DOCUMENT;
 		try {
 			try (Document result = formsService.importData(pdf, data)) {
 			
-				response.setContentType(result.getContentType());
+				String contentType = result.getContentType();
+				validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
+				response.setContentType(contentType);
 				response.setContentLength((int)result.length());
 				transfer(result.getInputStream(), response.getOutputStream());
 			}
@@ -90,6 +93,15 @@ public class ImportData extends SlingAllMethodsServlet {
 			throw new BadRequestException("Bad arguments while importing data", ex2);
 		}
 		
+	}
+
+	private void validateAcceptHeader(String acceptHeaderStr, String generatedContentType) throws NotAcceptableException {
+		if ( acceptHeaderStr != null) {
+			// If we've been supplied with an accept header, make sure it is correct.
+			AcceptHeaders acceptHeaders = new AcceptHeaders(acceptHeaderStr);
+	        List<ContentType> acceptableContentTypes = Arrays.asList(new ContentType(generatedContentType));
+	        acceptHeaders.validateResponseContentType(acceptableContentTypes);
+		}
 	}
 
 	private void transfer(InputStream in, OutputStream out) throws IOException {
