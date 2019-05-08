@@ -29,6 +29,7 @@ import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestExc
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
 import com._4point.aem.docservices.rest_services.server.FormParameters;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.forms.FormsService;
@@ -82,10 +83,10 @@ public class ImportData extends SlingAllMethodsServlet {
 			try (Document result = formsService.importData(pdf, data)) {
 			
 				String contentType = result.getContentType();
-				validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
+				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
 				response.setContentType(contentType);
 				response.setContentLength((int)result.length());
-				transfer(result.getInputStream(), response.getOutputStream());
+				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
 			}
 		} catch (FormsServiceException | IOException ex1) {
 			throw new InternalServerErrorException("Internal Error while importing data", ex1);
@@ -95,23 +96,4 @@ public class ImportData extends SlingAllMethodsServlet {
 		
 	}
 
-	private void validateAcceptHeader(String acceptHeaderStr, String generatedContentType) throws NotAcceptableException {
-		if ( acceptHeaderStr != null) {
-			// If we've been supplied with an accept header, make sure it is correct.
-			AcceptHeaders acceptHeaders = new AcceptHeaders(acceptHeaderStr);
-	        List<ContentType> acceptableContentTypes = Arrays.asList(new ContentType(generatedContentType));
-	        acceptHeaders.validateResponseContentType(acceptableContentTypes);
-		}
-	}
-
-	private void transfer(InputStream in, OutputStream out) throws IOException {
-		byte[] buffer = new byte[1024];
-		int len;
-
-		// read bytes from the input stream and store them in buffer
-		while ((len = in.read(buffer)) != -1) {
-			// write bytes from the buffer into output stream
-			out.write(buffer, 0, len);
-		}
-	}
 }

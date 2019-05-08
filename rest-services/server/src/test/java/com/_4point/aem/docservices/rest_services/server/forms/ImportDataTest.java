@@ -41,11 +41,9 @@ import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 class ImportDataTest {
 
 	private static final String DATA_PARAM_NAME = "data";
-
 	private static final String PDF_PARAM_NAME = "pdf";
 
 	private static final String APPLICATION_XML = "application/xml";
-
 	private static final String APPLICATION_PDF = "application/pdf";
 
 	private final ImportData underTest =  new ImportData();
