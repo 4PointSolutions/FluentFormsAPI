@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
@@ -60,6 +61,19 @@ public class FormsServiceImpl implements FormsService {
 			throws FormsServiceException {
 		Objects.requireNonNull(url, "url cannot be null.");
 		return this.renderPDFForm(url.toString(), data, pdfFormRenderOptions);
+	}
+
+	@Override
+	public Document renderPDFForm(PathOrUrl template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+			throws FormsServiceException {
+		if (template.isPath())
+			return renderPDFForm(template.getPath(), data, pdfFormRenderOptions);
+		else if (template.isUrl()) {
+			return renderPDFForm(template.getUrl(), data, pdfFormRenderOptions);
+		} else {
+			// This should never be thrown.
+			throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
+		}
 	}
 
 	private Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
@@ -169,6 +183,18 @@ public class FormsServiceImpl implements FormsService {
 			return this;
 		}
 
+		@Override
+		public Document executeOn(PathOrUrl template, Document data) throws FormsServiceException {
+			if (template.isPath())
+				return renderPDFForm(template.getPath(), data, options.toAdobePDFFormRenderOptions());
+			else if (template.isUrl()) {
+				return renderPDFForm(template.getUrl(), data, options.toAdobePDFFormRenderOptions());
+			} else {
+				// This should never be thrown.
+				throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
+			}
+		}
+		
 		@Override
 		public Document executeOn(Path template, Document data) throws FormsServiceException {
 			return renderPDFForm(template, data, options.toAdobePDFFormRenderOptions());

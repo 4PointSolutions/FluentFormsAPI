@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.Transformable;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
@@ -21,6 +22,8 @@ public interface FormsService {
 	Document renderPDFForm(Path filename, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException;
 
 	Document renderPDFForm(URL url, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException;
+
+	Document renderPDFForm(PathOrUrl pathOrUrl, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException;
 
 	RenderPDFFormArgumentBuilder renderPDFForm();
 
@@ -80,6 +83,8 @@ public interface FormsService {
 
 		@Override
 		public RenderPDFFormArgumentBuilder setXci(Document xci);
+
+		public Document executeOn(PathOrUrl template, Document data) throws FormsServiceException;
 
 		public Document executeOn(Path template, Document data) throws FormsServiceException;
 		

@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
@@ -236,6 +237,70 @@ class FormsServiceImplTest {
 		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
 
 		URL filename = new URL("http://www.example.com/docs/resource1.html");
+		Document data = Mockito.mock(Document.class);
+		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
+		
+		assertThrows(FormsServiceException.class, ()->underTest.renderPDFForm(filename, data, pdfFormRenderOptions));
+	}
+
+	@Test
+	@DisplayName("Test RenderPDFForm(PathOrUrl,...) Happy Path.")
+	void testRenderPDFFormPathOrUrlDocumentPDFFormRenderOptions() throws MalformedURLException, FormsServiceException {
+		MockPdfRenderService svc = new MockPdfRenderService();
+
+		PathOrUrl filename = PathOrUrl.fromString("file:foo/bar.xdp");
+		Document data = Mockito.mock(Document.class);
+		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
+		Document pdfResult = underTest.renderPDFForm(filename, data, pdfFormRenderOptions);
+		
+		// Verify that all the results are correct.
+		assertEquals(filename.getUrl(), new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
+		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test RenderPDFForm(PathOrUrl,...) Happy Path.")
+	void testRenderPDFFormPathOrUrlPathDocumentPDFFormRenderOptions() throws FormsServiceException {
+		MockPdfRenderService svc = new MockPdfRenderService();
+		
+		PathOrUrl filePath = PathOrUrl.fromString(SAMPLE_FORM.toString());
+		Document data = Mockito.mock(Document.class);
+		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
+		Document pdfResult = underTest.renderPDFForm(filePath, data, pdfFormRenderOptions);
+		
+		// Verify that all the results are correct.
+		assertEquals(filePath.getPath(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test RenderPDFForm(PathOrUrl,...) null arguments.")
+	void testRenderPDFFormPathOrUrl_nullArguments() throws MalformedURLException, FormsServiceException {
+		PathOrUrl filename = PathOrUrl.fromString("http://www.example.com/docs/resource1.html");
+		Document data = Mockito.mock(Document.class);
+		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
+		URL nullFilename = null;
+		
+		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(nullFilename, data, pdfFormRenderOptions));
+		assertTrue(ex1.getMessage().contains("url"), ()->"'" + ex1.getMessage() + "' does not contain 'url'");
+		
+		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
+		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
+		
+		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, data, null));
+		assertTrue(ex3.getMessage().contains("pdfFormRenderOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'pdfFormRenderOptions'");
+	}
+	
+	@Test
+	@DisplayName("Test RenderPDFForm(PathOrUrl,...) throws FormsServiceException.")
+	void testRenderPDFFormPathOrUrl___FormsServiceExceptionThrown() throws MalformedURLException, FormsServiceException {
+		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
+
+		PathOrUrl filename = PathOrUrl.fromString("http://www.example.com/docs/resource1.html");
 		Document data = Mockito.mock(Document.class);
 		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
 		
