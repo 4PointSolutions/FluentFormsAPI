@@ -3,14 +3,16 @@ package com._4point.aem.docservices.rest_services.server.forms;
 import static com._4point.aem.docservices.rest_services.server.FormParameters.*;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -31,22 +33,18 @@ import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
-import com._4point.aem.docservices.rest_services.server.PathOrUrl;
 import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
-import com._4point.aem.fluentforms.api.Transformable;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
-import com._4point.aem.fluentforms.api.forms.FormsService.RenderPDFFormArgumentBuilder;
 import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
-import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl.RenderPDFFormArgumentBuilderImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
-import com.adobe.fd.forms.api.PDFFormRenderOptions;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.RenderPdfForm Service"})
@@ -83,13 +81,12 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws BadRequestException, InternalServerErrorException, NotAcceptableException {
 		FormsService formsService = new FormsServiceImpl(adobeFormsService);
 
-		// TODO: Extract parameters
-		List<RequestParameter> requestParameterList = request.getRequestParameterList();
-		Path template = Paths.get("src","test", "resources", "SampleForms").resolve("SampleForm.xdp");
-		Document data = MockDocumentFactory.GLOBAL_DUMMY_DOCUMENT;
-
+		RenderPdfFormParameters reqParameters = RenderPdfFormParameters.readFormParameters(request, false);	// TODO: Make the validation of XML a config parameter.
+		PathOrUrl template = reqParameters.getTemplate();
+		Document data = docFactory.create(reqParameters.getData());
+		Path url = null;
+		
 		try {
-			Path url = null;
 			// In the following call to the formsService, we only set the parameters if they are not null.
 			try (Document result = formsService.renderPDFForm()
 												.transform(b->url == null ? b : b.setContentRoot(url))
@@ -143,8 +140,8 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return acrobatVersion;
 		}
 
-		private RenderPdfFormParameters setAcrobatVersion(AcrobatVersion acrobatVersion) {
-			this.acrobatVersion = acrobatVersion;
+		private RenderPdfFormParameters setAcrobatVersion(String acrobatVersionStr) {
+			this.acrobatVersion = AcrobatVersion.valueOf(acrobatVersionStr);
 			return this;
 		}
 
@@ -152,8 +149,8 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return cacheStrategy;
 		}
 
-		private RenderPdfFormParameters setCacheStrategy(CacheStrategy cacheStrategy) {
-			this.cacheStrategy = cacheStrategy;
+		private RenderPdfFormParameters setCacheStrategy(String cacheStrategyStr) {
+			this.cacheStrategy = CacheStrategy.valueOf(cacheStrategyStr);
 			return this;
 		}
 
@@ -161,8 +158,8 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return contentRoot;
 		}
 
-		private RenderPdfFormParameters setContentRoot(PathOrUrl contentRoot) {
-			this.contentRoot = contentRoot;
+		private RenderPdfFormParameters setContentRoot(String contentRootStr) {
+			this.contentRoot = PathOrUrl.fromString(contentRootStr);
 			return this;
 		}
 
@@ -170,8 +167,8 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return debugDir;
 		}
 
-		private RenderPdfFormParameters setDebugDir(Path debugDir) {
-			this.debugDir = debugDir;
+		private RenderPdfFormParameters setDebugDir(String debugDirStr) {
+			this.debugDir = Paths.get(debugDirStr);
 			return this;
 		}
 
@@ -179,8 +176,8 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return locale;
 		}
 
-		private RenderPdfFormParameters setLocale(Locale locale) {
-			this.locale = locale;
+		private RenderPdfFormParameters setLocale(String localeStr) {
+			this.locale = Locale.forLanguageTag(localeStr);
 			return this;
 		}
 
@@ -188,8 +185,17 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return submitUrls;
 		}
 
-		private RenderPdfFormParameters setSubmitUrls(List<URL> submitUrls) {
-			this.submitUrls = submitUrls;
+		private RenderPdfFormParameters setSubmitUrls(RequestParameter[] submitUrlParms) throws BadRequestException {
+			this.submitUrls = new ArrayList<>();
+			for (RequestParameter str : submitUrlParms) {
+				String submitUrlStr = str.getString();
+				try {
+					URL url = new URL(submitUrlStr);
+					this.submitUrls.add(url);
+				} catch (MalformedURLException e) {
+					throw new BadRequestException("Badly formed submit Url parameter (" + submitUrlStr + ").", e);
+				}
+			}
 			return this;
 		}
 
@@ -197,8 +203,8 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return taggedPDF;
 		}
 
-		private RenderPdfFormParameters setTaggedPDF(Boolean taggedPDF) {
-			this.taggedPDF = taggedPDF;
+		private RenderPdfFormParameters setTaggedPDF(String taggedPDFStr) {
+			this.taggedPDF = Boolean.valueOf(taggedPDFStr);
 			return this;
 		}
 
@@ -219,17 +225,40 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return data;
 		}
 
+		/**
+		 * Read in the request parameters and translate them into a RenderPdfFormParameters object.
+		 * 
+		 * @param request
+		 * @param validateXml
+		 * @return
+		 * @throws BadRequestException
+		 */
 		public static RenderPdfFormParameters readFormParameters(SlingHttpServletRequest request, boolean validateXml) throws BadRequestException {
 			byte[] inputData = getMandatoryParameter(request, DATA_PARAM).get();
 			if (validateXml) {
 				validateXmlData(inputData);
 			}
 			
-			String template = getMandatoryParameter(request, TEMPLATE_PARAM).getString();
-//
-//			RenderPdfFormParameters result = new RenderPdfFormParameters(template, inputData);
+			PathOrUrl template = PathOrUrl.fromString(getMandatoryParameter(request, TEMPLATE_PARAM).getString());
 			
-			return null;
+
+			RenderPdfFormParameters result = new RenderPdfFormParameters(template, inputData);
+			
+			getOptionalParameter(request, ACROBAT_VERSION_PARAM).ifPresent(rp->result.setAcrobatVersion(rp.getString()));
+			getOptionalParameter(request, CACHE_STRATEGY_PARAM).ifPresent(rp->result.setCacheStrategy(rp.getString()));
+			getOptionalParameter(request, CONTENT_ROOT_PARAM).ifPresent(rp->result.setContentRoot(rp.getString()));
+			getOptionalParameter(request, DEBUG_DIR_PARAM).ifPresent(rp->result.setDebugDir(rp.getString()));
+			getOptionalParameter(request, LOCALE_PARAM).ifPresent(rp->result.setLocale(rp.getString()));
+			getOptionalParameter(request, TAGGED_PDF_PARAM).ifPresent(rp->result.setTaggedPDF(rp.getString()));
+			getOptionalParameter(request, XCI_PARAM).ifPresent(rp->result.setXci(rp.get()));
+
+			// Submit URLs parameter has to be handled differently because it throws exceptions.
+			Optional<RequestParameter[]> submitUrlParms = getOptionalParameters(request, SUBMIT_URL_PARAM);
+			if (submitUrlParms.isPresent()) {
+				result.setSubmitUrls(submitUrlParms.get());
+			}
+			
+			return result;
 		}
 	}
 }

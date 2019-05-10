@@ -3,6 +3,8 @@ package com._4point.aem.docservices.rest_services.server.forms;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.server.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
@@ -55,6 +58,11 @@ class RenderPdfFormTest {
 		
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+		
+		Map<String, Object> parameterMap = new HashMap<>();
+		parameterMap.put("template", TestUtils.SAMPLE_FORM.toString());
+		parameterMap.put("data", "formData");
+		request.setParameterMap(parameterMap );
 		
 		underTest.doPost(request, response);
 		
