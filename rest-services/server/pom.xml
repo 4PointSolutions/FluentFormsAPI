@@ -25,8 +25,8 @@
     </parent>
     <artifactId>rest-services.server</artifactId>
     <packaging>bundle</packaging>
-    <name>${appsFolderName} - Server</name>
-    <description>Core bundle for ${appsFolderName}</description>
+    <name>AEM Document Services REST Services - Server</name>
+    <description>Core bundle for AEM Document Services REST Services</description>
     <build>
         <plugins>
             <plugin>
@@ -173,12 +173,12 @@
             <artifactId>slf4j-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>com._4point.aem</groupId>
-            <artifactId>fluentforms.core</artifactId>
-        </dependency>
-        <dependency>
 			<groupId>org.apache.sling</groupId>
 			<artifactId>org.apache.sling.servlets.annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com._4point.aem</groupId>
+            <artifactId>fluentforms.core</artifactId>
         </dependency>
     </dependencies>
 </project>
