@@ -58,16 +58,13 @@
                 <configuration>
                     <exportScr>true</exportScr>
                     <instructions>
-                        <!-- Import any version of javax.inject, to allow 
-                            running on multiple versions of AEM -->
+                    	<Export-Package>com._4point.aem.fluentforms.*</Export-Package>
+                        <!-- Import any version of javax.inject, to allow running on multiple versions of AEM -->
                         <Import-Package>javax.inject;version=0.0.0,*</Import-Package>
-                        <Sling-Model-Packages>
-                            com._4point.aem.fluentforms.core
-                        </Sling-Model-Packages>
+                        <Sling-Model-Packages>com._4point.aem.fluentforms.core</Sling-Model-Packages>
                         <_dsannotations>*</_dsannotations>
                         <_metatypeannotations>*</_metatypeannotations>
-                        <!-- Allow the processing of SCR annotations via 
-                            a bnd plugin -->
+                        <!-- Allow the processing of SCR annotations via a bnd plugin -->
                         <_plugin>org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory}</_plugin>
                     </instructions>
                 </configuration>
