@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,17 +49,17 @@ public class MockDocumentFactory implements DocumentFactory {
 	}
 
 	@Override
-	public Document create(DocumentPassivationHandler passivationHandler) {
-		return DUMMY_DOCUMENT;
-	}
-
-	@Override
 	public Document create(File file, boolean ownFile) {
 		return DUMMY_DOCUMENT;
 	}
 
 	@Override
 	public Document create(File file) {
+		return DUMMY_DOCUMENT;
+	}
+
+	@Override
+	public Document create(Path file) {
 		return DUMMY_DOCUMENT;
 	}
 

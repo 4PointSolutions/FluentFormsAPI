@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Path;
 
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -29,14 +30,6 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 	}
 
 	/* (non-Javadoc)
-	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(com.adobe.aemfd.docmanager.passivation.DocumentPassivationHandler)
-	 */
-	@Override
-	public Document create(DocumentPassivationHandler passivationHandler) {
-		return new DocumentImpl(passivationHandler);
-	}
-
-	/* (non-Javadoc)
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.io.File, boolean)
 	 */
 	@Override
@@ -52,6 +45,14 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 		return new DocumentImpl(file);
 	}
 
+	/* (non-Javadoc)
+	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.nio.file.Path)
+	 */
+	@Override
+	public Document create(Path path) {
+		return new DocumentImpl(path.toFile());
+	}
+	
 	/* (non-Javadoc)
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.io.InputStream)
 	 */
@@ -103,10 +104,6 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 		
 		private DocumentImpl(byte[] data) {
 			doc = new com.adobe.aemfd.docmanager.Document(data);
-		}
-
-		private DocumentImpl(DocumentPassivationHandler passivationHandler) {
-			doc = new com.adobe.aemfd.docmanager.Document(passivationHandler);
 		}
 
 		private DocumentImpl(File file, boolean ownFile) {
@@ -262,4 +259,5 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 			return doc;
 		}
 	}
+
 }

@@ -3,6 +3,7 @@ package com._4point.aem.fluentforms.api;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Path;
 
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -13,11 +14,11 @@ public interface DocumentFactory {
 
 	public Document create(byte[] data);
 
-	public Document create(DocumentPassivationHandler passivationHandler);
-
 	public Document create(File file, boolean ownFile);
 
 	public Document create(File file);
+
+	public Document create(Path file);
 
 	public Document create(InputStream is);
 
