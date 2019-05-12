@@ -14,9 +14,9 @@ import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
-@Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.ImportData Service"})
+@Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.ExportData Service"})
 @SlingServletResourceTypes(methods=HttpConstants.METHOD_POST, resourceTypes = { "" })
-@SlingServletPaths("/services/FormsService/ImportData")
+@SlingServletPaths("/services/FormsService_ExportData")
 
 public class ExportData extends SlingAllMethodsServlet {
 
