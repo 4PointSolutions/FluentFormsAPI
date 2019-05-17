@@ -2,9 +2,11 @@ package com._4point.aem.docservices.rest_services.server.forms;
 
 import static com._4point.aem.docservices.rest_services.server.FormParameters.*;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -88,12 +90,19 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		RenderPdfFormParameters reqParameters = RenderPdfFormParameters.readFormParameters(request, false);	// TODO: Make the validation of XML a config parameter.
 		PathOrUrl template = reqParameters.getTemplate();
 		Document data = docFactory.create(reqParameters.getData());
-		Path url = null;
+		PathOrUrl contentRoot = reqParameters.getContentRoot();
+		AcrobatVersion acrobatVersion = reqParameters.getAcrobatVersion();
+		CacheStrategy cacheStrategy = reqParameters.getCacheStrategy();
+		Path debugDir = reqParameters.getDebugDir();
+		Locale locale = reqParameters.getLocale();
+		List<URL> submitUrls = reqParameters.getSubmitUrls();
+		Boolean taggedPDF = reqParameters.getTaggedPDF();
+		byte[] xci = reqParameters.getXci();
 		
 		try {
 			// In the following call to the formsService, we only set the parameters if they are not null.
 			try (Document result = formsService.renderPDFForm()
-												.transform(b->url == null ? b : b.setContentRoot(url))
+												.transform(b->contentRoot == null ? b : b.setContentRoot(contentRoot))
 												.executeOn(template, data)) {
 				
 				String contentType = result.getContentType();
@@ -102,10 +111,12 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 				response.setContentLength((int)result.length());
 				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
 			}
+		} catch (FileNotFoundException fnfex) {
+			throw new BadRequestException("Bad request parameter while rendering PDF (" + fnfex.getMessage() + ").", fnfex);
 		} catch (FormsServiceException | IOException ex1) {
 			throw new InternalServerErrorException("Internal Error while rendering PDF.", ex1);
 		} catch (IllegalArgumentException ex2) {
-			throw new BadRequestException("Bad arguments while importing data", ex2);
+			throw new BadRequestException("Bad arguments while rendering PDF", ex2);
 		}
 
 

@@ -75,7 +75,8 @@ class ImportDataTest {
 //		}
 	}
 
-	@Test
+	// TODO: Temporarily disabled until SlingServletHelpers is updated
+	@Disabled
 	void testDoPost_HappyPath_Bytes(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
 
 		String resultData = "testDoPost Happy Path Result";
@@ -206,7 +207,8 @@ class ImportDataTest {
 		assertThat("Expected message to contain 'missing'", response.geStatusMessage(), containsStringIgnoringCase("missing"));
 	}
 	
-	@Test
+	// TODO: Temporarily disabled until SlingServletHelpers is updated
+	@Disabled
 	void testDoPost_BadAcceptHeader(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
 		String resultData = "testDoPost Bad Accept Header Result";
 		byte[] resultDataBytes = resultData.getBytes();

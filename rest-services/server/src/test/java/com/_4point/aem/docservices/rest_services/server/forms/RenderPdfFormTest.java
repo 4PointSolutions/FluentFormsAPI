@@ -1,6 +1,8 @@
 package com._4point.aem.docservices.rest_services.server.forms;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -34,6 +36,8 @@ import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 class RenderPdfFormTest {
 	private static final String APPLICATION_XML = "application/xml";
 	private static final String APPLICATION_PDF = "application/pdf";
+	private static final String TEXT_PLAIN = "text/plain";
+	private static final String TEXT_HTML = "text/html";
 
 
 	private final RenderPdfForm underTest =  new RenderPdfForm();
@@ -74,7 +78,33 @@ class RenderPdfFormTest {
 		assertEquals(resultDataBytes.length, response.getContentLength());
 	
 	}
-	
+
+	@Test
+	void testDoPost_BadForm() throws ServletException, IOException, NoSuchFieldException {
+		String resultData = "testDoPost Happy Path Result";
+		byte[] resultDataBytes = resultData.getBytes();
+		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
+
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+		
+		Map<String, Object> parameterMap = new HashMap<>();
+		String badFormName = "bar.xdp";
+		parameterMap.put("template", "foo/" + badFormName);
+		parameterMap.put("data", "formData");
+		request.setParameterMap(parameterMap );
+		
+		underTest.doPost(request, response);
+		
+		// Validate the result
+		assertEquals(SlingHttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+		String statusMsg = response.geStatusMessage();
+		assertThat(statusMsg, containsStringIgnoringCase("Bad request parameter"));
+		assertThat(statusMsg, containsStringIgnoringCase("unable to find template"));
+		assertThat(statusMsg, containsString(badFormName));
+	}
+
 	public MockTraditionalFormsService mockRenderForm(byte[] resultDataBytes) throws NoSuchFieldException {
 		Document renderPdfResult = mockDocumentFactory.create(resultDataBytes);
 		renderPdfResult.setContentType(APPLICATION_PDF);
