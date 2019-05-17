@@ -11,7 +11,6 @@ import java.util.Objects;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
-import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptionsSetter;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com.adobe.fd.forms.api.AcrobatVersion;
@@ -40,7 +39,7 @@ public class FormsServiceImpl implements FormsService {
 
 	@Override
 	public Document renderPDFForm(Path filename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
-			throws FormsServiceException {
+			throws FormsServiceException, FileNotFoundException {
 		validateTemplatePath(filename);
 
 		return this.renderPDFForm(filename.toString(), data, pdfFormRenderOptions);
@@ -55,7 +54,7 @@ public class FormsServiceImpl implements FormsService {
 
 	@Override
 	public Document renderPDFForm(PathOrUrl template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
-			throws FormsServiceException {
+			throws FormsServiceException, FileNotFoundException {
 		if (template.isPath())
 			return renderPDFForm(template.getPath(), data, pdfFormRenderOptions);
 		else if (template.isUrl()) {
@@ -78,7 +77,7 @@ public class FormsServiceImpl implements FormsService {
 
 	@Override
 	public ValidationResult validate(Path template, Document data, ValidationOptions validationOptions)
-			throws FormsServiceException {
+			throws FormsServiceException, FileNotFoundException {
 		validateTemplatePath(template);
 		return adobeFormsService.validate(template.toString(), data, validationOptions);
 	}
@@ -88,11 +87,11 @@ public class FormsServiceImpl implements FormsService {
 		return new ValidateArgumentBuilderImpl();
 	}
 
-	private void validateTemplatePath(Path filename) throws FormsServiceException {
+	private void validateTemplatePath(Path filename) throws FormsServiceException, FileNotFoundException {
 		Objects.requireNonNull(filename, "template cannot be null.");
 		if (!(Files.exists(filename) && Files.isRegularFile(filename))) {
 			String message = "Unable to find template (" + filename.toString() + ").";
-			throw new FormsServiceException(message, new FileNotFoundException(message));
+			throw new FileNotFoundException(message);
 		}
 	}
 
@@ -180,7 +179,7 @@ public class FormsServiceImpl implements FormsService {
 		}
 
 		@Override
-		public Document executeOn(PathOrUrl template, Document data) throws FormsServiceException {
+		public Document executeOn(PathOrUrl template, Document data) throws FormsServiceException, FileNotFoundException {
 			if (template.isPath())
 				return renderPDFForm(template.getPath(), data, options.toAdobePDFFormRenderOptions());
 			else if (template.isUrl()) {
@@ -192,7 +191,7 @@ public class FormsServiceImpl implements FormsService {
 		}
 		
 		@Override
-		public Document executeOn(Path template, Document data) throws FormsServiceException {
+		public Document executeOn(Path template, Document data) throws FormsServiceException, FileNotFoundException {
 			return renderPDFForm(template, data, options.toAdobePDFFormRenderOptions());
 		}
 		

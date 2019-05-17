@@ -10,7 +10,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
-import com.adobe.aemfd.docmanager.passivation.DocumentPassivationHandler;
 
 
 public enum DocumentFactoryImpl implements DocumentFactory {

@@ -1,5 +1,6 @@
 package com._4point.aem.fluentforms.api.forms;
 
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
@@ -19,15 +20,15 @@ public interface FormsService {
 
 	Document importData(Document pdf, Document data) throws FormsServiceException;
 
-	Document renderPDFForm(Path filename, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException;
+	Document renderPDFForm(Path filename, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException, FileNotFoundException;
 
 	Document renderPDFForm(URL url, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException;
 
-	Document renderPDFForm(PathOrUrl pathOrUrl, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException;
+	Document renderPDFForm(PathOrUrl pathOrUrl, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException, FileNotFoundException;
 
 	RenderPDFFormArgumentBuilder renderPDFForm();
 
-	ValidationResult validate(Path template, Document data, ValidationOptions validationOptions) throws FormsServiceException;
+	ValidationResult validate(Path template, Document data, ValidationOptions validationOptions) throws FormsServiceException, FileNotFoundException;
 
 	ValidateArgumentBuilder validate();
 
@@ -93,9 +94,9 @@ public interface FormsService {
 		@Override
 		public RenderPDFFormArgumentBuilder setXci(Document xci);
 
-		public Document executeOn(PathOrUrl template, Document data) throws FormsServiceException;
+		public Document executeOn(PathOrUrl template, Document data) throws FormsServiceException, FileNotFoundException;
 
-		public Document executeOn(Path template, Document data) throws FormsServiceException;
+		public Document executeOn(Path template, Document data) throws FormsServiceException, FileNotFoundException;
 		
 		public Document executeOn(URL template, Document data) throws FormsServiceException;
 

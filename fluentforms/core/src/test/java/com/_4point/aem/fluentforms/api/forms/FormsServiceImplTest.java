@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,7 +53,7 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test exportData() Happy Path.")
-	void testExportData() throws com.adobe.fd.forms.api.FormsServiceException, FormsServiceException {
+	void testExportData() throws Exception {
 		Document result = Mockito.mock(Document.class);
 		ArgumentCaptor<com.adobe.fd.forms.api.DataFormat> dataFormatArg = ArgumentCaptor.forClass(com.adobe.fd.forms.api.DataFormat.class);
 		ArgumentCaptor<Document> documenttArg = ArgumentCaptor.forClass(Document.class);
@@ -73,7 +72,7 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test exportData() with null arguments throws exception and the exception contains the argument name.")
-	void testExportData_nullArguments() throws FormsServiceException {
+	void testExportData_nullArguments() throws Exception {
 		DataFormat dataFormat = DataFormat.XmlData;
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.exportData(null, dataFormat));
 		assertTrue(ex1.getMessage().contains("pdfOrXdp"));
@@ -85,7 +84,7 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test exportData() when exception is thrown.")
-	void testExportData_FormsServiceExceptionThrown() throws FormsServiceException {
+	void testExportData_FormsServiceExceptionThrown() throws Exception {
 		Mockito.when(adobeFormsService.exportData(Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
 		DataFormat dataFormat = DataFormat.XmlData;
 		Document pdfOrXdp = Mockito.mock(Document.class);
@@ -136,7 +135,7 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test RenderPDFForm(Path,...) Happy Path.")
-	void testRenderPDFFormPathDocumentPDFFormRenderOptions() throws FormsServiceException {
+	void testRenderPDFFormPathDocumentPDFFormRenderOptions() throws FormsServiceException, FileNotFoundException {
 		MockPdfRenderService svc = new MockPdfRenderService();
 		
 		Path filePath = SAMPLE_FORM;
@@ -153,7 +152,7 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test RenderPDFForm(Path,...) null arguments.")
-	void testRenderPDFFormPath_nullArguments() throws FormsServiceException {
+	void testRenderPDFFormPath_nullArguments() throws Exception {
 		Path filename = SAMPLE_FORM;
 		Document data = Mockito.mock(Document.class);
 		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
@@ -171,7 +170,7 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test RenderPDFForm(Path,...) throws FormsServiceException.")
-	void testRenderPDFFormPath__FormsServiceExceptionThrown() throws FormsServiceException {
+	void testRenderPDFFormPath__FormsServiceExceptionThrown() throws Exception {
 		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
 
 		Path filename = SAMPLE_FORM;
@@ -183,13 +182,13 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test RenderPDFForm(Path,...) throws FormsServiceException.")
-	void testRenderPDFFormPath__BadTemplate() throws FormsServiceException {
+	void testRenderPDFFormPath__BadTemplate() throws Exception {
 		String filename = "foo/bar.xdp";
 		Path filePath = Paths.get(filename);
 		Document data = Mockito.mock(Document.class);
 		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
 		
-		FormsServiceException ex1 = assertThrows(FormsServiceException.class, ()->underTest.renderPDFForm(filePath, data, pdfFormRenderOptions));
+		FileNotFoundException ex1 = assertThrows(FileNotFoundException.class, ()->underTest.renderPDFForm(filePath, data, pdfFormRenderOptions));
 		String message = ex1.getMessage();
 		assertTrue(message.contains("template"), ()->"Expected exception message to contain a mention of the template. (" + message + ").");
 		assertTrue(message.contains(filePath.toString()), "Expected exception message to contain the filepath provided. (" + message + ").");
@@ -197,7 +196,7 @@ class FormsServiceImplTest {
 	
 	@Test
 	@DisplayName("Test RenderPDFForm(URL,...) Happy Path.")
-	void testRenderPDFFormURLDocumentPDFFormRenderOptions() throws MalformedURLException, FormsServiceException {
+	void testRenderPDFFormURLDocumentPDFFormRenderOptions() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
 		String filename = "file:foo/bar.xdp";
@@ -215,7 +214,7 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test RenderPDFForm(URL,...) null arguments.")
-	void testRenderPDFFormURL_nullArguments() throws MalformedURLException, FormsServiceException {
+	void testRenderPDFFormURL_nullArguments() throws Exception {
 		URL filename = new URL("http://www.example.com/docs/resource1.html");
 		Document data = Mockito.mock(Document.class);
 		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
@@ -233,7 +232,7 @@ class FormsServiceImplTest {
 	
 	@Test
 	@DisplayName("Test RenderPDFForm(URL,...) throws FormsServiceException.")
-	void testRenderPDFFormURL___FormsServiceExceptionThrown() throws MalformedURLException, FormsServiceException {
+	void testRenderPDFFormURL___FormsServiceExceptionThrown() throws Exception {
 		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
 
 		URL filename = new URL("http://www.example.com/docs/resource1.html");
@@ -245,7 +244,7 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test RenderPDFForm(PathOrUrl,...) Happy Path.")
-	void testRenderPDFFormPathOrUrlDocumentPDFFormRenderOptions() throws MalformedURLException, FormsServiceException {
+	void testRenderPDFFormPathOrUrlDocumentPDFFormRenderOptions() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
 		PathOrUrl filename = PathOrUrl.fromString("file:foo/bar.xdp");
@@ -262,7 +261,7 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test RenderPDFForm(PathOrUrl,...) Happy Path.")
-	void testRenderPDFFormPathOrUrlPathDocumentPDFFormRenderOptions() throws FormsServiceException {
+	void testRenderPDFFormPathOrUrlPathDocumentPDFFormRenderOptions() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 		
 		PathOrUrl filePath = PathOrUrl.fromString(SAMPLE_FORM.toString());
@@ -279,7 +278,7 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test RenderPDFForm(PathOrUrl,...) null arguments.")
-	void testRenderPDFFormPathOrUrl_nullArguments() throws MalformedURLException, FormsServiceException {
+	void testRenderPDFFormPathOrUrl_nullArguments() throws Exception {
 		PathOrUrl filename = PathOrUrl.fromString("http://www.example.com/docs/resource1.html");
 		Document data = Mockito.mock(Document.class);
 		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
@@ -297,7 +296,7 @@ class FormsServiceImplTest {
 	
 	@Test
 	@DisplayName("Test RenderPDFForm(PathOrUrl,...) throws FormsServiceException.")
-	void testRenderPDFFormPathOrUrl___FormsServiceExceptionThrown() throws MalformedURLException, FormsServiceException {
+	void testRenderPDFFormPathOrUrl___FormsServiceExceptionThrown() throws Exception {
 		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
 
 		PathOrUrl filename = PathOrUrl.fromString("http://www.example.com/docs/resource1.html");
@@ -308,7 +307,7 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testValidatePathDocumentValidationOptions() throws FormsServiceException {
+	void testValidatePathDocumentValidationOptions() throws Exception {
 		ValidationResult result = Mockito.mock(ValidationResult.class);
 		ArgumentCaptor<String> templateArg = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
@@ -328,11 +327,11 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testValidate_badTemplate() throws FormsServiceException {
+	void testValidate_badTemplate() throws Exception {
 		Path template = Paths.get("foo", "bar.xdp");
 		Document data = Mockito.mock(Document.class);
 		ValidationOptions validationOptions = Mockito.mock(ValidationOptions.class);
-		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->underTest.validate(template, data, validationOptions));
+		FileNotFoundException ex = assertThrows(FileNotFoundException.class, ()->underTest.validate(template, data, validationOptions));
 		
 		String message = ex.getMessage();
 		assertTrue(message.contains("template"), ()->"Expected exception message to contain a mention of the template. (" + message + ").");
@@ -340,7 +339,7 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testValidate_nullArguments() throws FormsServiceException {
+	void testValidate_nullArguments() throws Exception {
 		Path template = SAMPLE_FORM;
 		Document data = Mockito.mock(Document.class);
 		ValidationOptions validationOptions = Mockito.mock(ValidationOptions.class);
@@ -356,7 +355,7 @@ class FormsServiceImplTest {
 	}
 	
 	@Test
-	void testRenderPDFFormPath() throws FormsServiceException, MalformedURLException {
+	void testRenderPDFFormPath() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
 		Path filePath = SAMPLE_FORM;
@@ -381,7 +380,7 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testRenderPDFFormPath_NoArgs() throws FormsServiceException {
+	void testRenderPDFFormPath_NoArgs() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
 		Path filePath = SAMPLE_FORM;
@@ -397,7 +396,7 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testRenderPDFFormUrl() throws FormsServiceException, MalformedURLException {
+	void testRenderPDFFormUrl() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
 		URL fileUrl = new URL("http://example.com");
@@ -422,7 +421,7 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testRenderPDFFormUrl_NoArgs() throws FormsServiceException, MalformedURLException {
+	void testRenderPDFFormUrl_NoArgs() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
 		URL fileUrl = new URL("http://example.com");
@@ -438,7 +437,7 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testValidate() throws FormsServiceException {
+	void testValidate() throws Exception {
 		ValidationResult result = Mockito.mock(ValidationResult.class);
 		ArgumentCaptor<String> templateArg = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
@@ -463,7 +462,7 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testValidate_NoArgs() throws FormsServiceException {
+	void testValidate_NoArgs() throws Exception {
 		ValidationResult result = Mockito.mock(ValidationResult.class);
 		ArgumentCaptor<String> templateArg = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
@@ -486,7 +485,7 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testToAdobeValidationOptions() throws FileNotFoundException {
+	void testToAdobeValidationOptions() throws Exception {
 		ValidationOptionsImpl vo = new ValidationOptionsImpl(SAMPLE_FORMS_DIR, SAMPLE_FORMS_DIR);
 		com.adobe.fd.forms.api.ValidationOptions adobeValidationOptions = vo.toAdobeValidationOptions();
 		assertEquals(SAMPLE_FORMS_DIR.toString(), adobeValidationOptions.getContentRoot());
@@ -510,7 +509,7 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testToAdobeValidationOptions_nullArguments() throws FileNotFoundException {
+	void testToAdobeValidationOptions_nullArguments() throws Exception {
 		ValidationOptionsImpl vo = new ValidationOptionsImpl(null, null);
 		com.adobe.fd.forms.api.ValidationOptions adobeValidationOptions = vo.toAdobeValidationOptions();
 		assertNull(adobeValidationOptions.getContentRoot());

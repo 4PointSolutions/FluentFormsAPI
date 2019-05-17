@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import com._4point.aem.fluentforms.impl.DocumentFactoryImpl;
-import com.adobe.aemfd.docmanager.passivation.DocumentPassivationHandler;
 
 public interface DocumentFactory {
 
