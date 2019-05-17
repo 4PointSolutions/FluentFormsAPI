@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptionsSetter;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
@@ -17,7 +18,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 
 	private AcrobatVersion acrobatVersion = null;
 	private CacheStrategy cacheStrategy = null;
-	private Path contentRoot = null;
+	private PathOrUrl contentRoot = null;
 	private Path debugDir = null;
 	private Locale locale = null;
 	private List<URL> submitUrls = null;
@@ -44,13 +45,19 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 		return this;
 	}
 
-	public Path getContentRoot() {
+	public PathOrUrl getContentRoot() {
 		return contentRoot;
 	}
 
 	@Override
-	public PDFFormRenderOptionsImpl setContentRoot(Path contentRoot) {
-		this.contentRoot = contentRoot;
+	public PDFFormRenderOptionsImpl setContentRoot(Path contentRootPath) {
+		this.contentRoot = new PathOrUrl(contentRootPath);
+		return this;
+	}
+
+	@Override
+	public PDFFormRenderOptionsSetter setContentRoot(URL contentRootUrl) {
+		this.contentRoot = new PathOrUrl(contentRootUrl);
 		return this;
 	}
 
@@ -120,5 +127,4 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 	private static List<String> mapToStrings(List<URL> urls) {
 		return urls == null ? null : urls.stream().map(URL::toString).collect(Collectors.toList());
 	}
-
 }

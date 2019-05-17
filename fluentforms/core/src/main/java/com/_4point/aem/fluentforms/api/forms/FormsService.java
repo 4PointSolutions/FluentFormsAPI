@@ -64,6 +64,15 @@ public interface FormsService {
 		public RenderPDFFormArgumentBuilder setContentRoot(Path url);
 
 		@Override
+		public RenderPDFFormArgumentBuilder setContentRoot(URL url);
+
+		@Override
+		public default RenderPDFFormArgumentBuilder setContentRoot(PathOrUrl url) {
+			PDFFormRenderOptionsSetter.super.setContentRoot(url);
+			return this;
+		}
+
+		@Override
 		public RenderPDFFormArgumentBuilder setDebugDir(Path debugDir);
 
 		@Override

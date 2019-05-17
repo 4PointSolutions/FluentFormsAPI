@@ -1,6 +1,12 @@
 package com._4point.aem.fluentforms.api;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
@@ -23,14 +29,20 @@ class PathOrUrlTest {
 		PathOrUrl result = PathOrUrl.fromString(path);
 		assertTrue(result.isPath(), "Expected that isPath() would be true");
 		assertFalse(result.isUrl(), "Expected that isUrl() would be false");
+		Path expected = Paths.get(path);
+		assertEquals(expected, result.getPath());
+		assertEquals(expected.toString(), result.toString());
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = { "http://example.com", "file:///~/calendar" })
-	void testFromString_Url(String url) {
+	void testFromString_Url(String url) throws MalformedURLException {
 		PathOrUrl result = PathOrUrl.fromString(url);
 		assertFalse(result.isPath(), "Expected that isPath() would be false");
 		assertTrue(result.isUrl(), "Expected that isUrl() would be true");
+		URL expected = new URL(url);
+		assertEquals(expected, result.getUrl());
+		assertEquals(expected.toString(), result.toString());
 	}
 
 	@ParameterizedTest
@@ -43,4 +55,6 @@ class PathOrUrlTest {
 	void testFromString_Null() {
 		assertThrows(NullPointerException.class, ()->PathOrUrl.fromString(null));
 	}
+	
+	
 }

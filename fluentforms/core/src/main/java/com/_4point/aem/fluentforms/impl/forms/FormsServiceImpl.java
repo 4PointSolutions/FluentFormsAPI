@@ -9,9 +9,9 @@ import java.util.Locale;
 import java.util.Objects;
 
 import com._4point.aem.fluentforms.api.Document;
-import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
+import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptionsSetter;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com.adobe.fd.forms.api.AcrobatVersion;
@@ -138,7 +138,13 @@ public class FormsServiceImpl implements FormsService {
 		}
 
 		@Override
-		public RenderPDFFormArgumentBuilder setContentRoot(Path url) {
+		public RenderPDFFormArgumentBuilder setContentRoot(Path filePath) {
+			options.setContentRoot(filePath);
+			return this;
+		}
+		
+		@Override
+		public RenderPDFFormArgumentBuilder setContentRoot(URL url) {
 			options.setContentRoot(url);
 			return this;
 		}

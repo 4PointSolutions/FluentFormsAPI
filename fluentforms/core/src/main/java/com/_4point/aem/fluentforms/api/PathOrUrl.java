@@ -50,4 +50,15 @@ public class PathOrUrl {
 			}
 		}
 	}
+
+	@Override
+	public String toString() {
+		if (this.isPath()) {
+			return this.path.toString();
+		} else if (this.isUrl()) {
+			return this.url.toString();
+		} else {
+			throw new IllegalStateException("PathOrUrl object is neither Path nor URL!");	// Should never happen.
+		}
+	}
 }
