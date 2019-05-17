@@ -23,16 +23,6 @@ public class FormsServiceImpl implements FormsService {
 	
 	private final TraditionalFormsService adobeFormsService;
 
-	public FormsServiceImpl() {
-		super();
-		this.adobeFormsService = new SafeFormsServiceAdapterWrapper(new AdobeFormsServiceAdapter());
-	}
-
-	public FormsServiceImpl(DocumentFactory documentFactory) {
-		super();
-		this.adobeFormsService = new SafeFormsServiceAdapterWrapper(new AdobeFormsServiceAdapter(documentFactory));
-	}
-
 	public FormsServiceImpl(TraditionalFormsService adobeFormsService) {
 		super();
 		this.adobeFormsService = new SafeFormsServiceAdapterWrapper(adobeFormsService);

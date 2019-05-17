@@ -1,6 +1,6 @@
 package com._4point.aem.fluentforms.impl.forms;
 
-import org.osgi.service.component.annotations.Reference;
+import java.util.Objects;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
@@ -14,17 +14,18 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 	
 	private final DocumentFactory documentFactory;
 
-	@Reference
-	private com.adobe.fd.forms.api.FormsService adobeFormsService;
+	private final com.adobe.fd.forms.api.FormsService adobeFormsService;
 
-	public AdobeFormsServiceAdapter() {
+	public AdobeFormsServiceAdapter(com.adobe.fd.forms.api.FormsService adobeFormsService) {
 		super();
 		this.documentFactory = DocumentFactory.getDefault();
+		this.adobeFormsService = Objects.requireNonNull(adobeFormsService, "adobeFormsService is null.");
 	}
 
-	public AdobeFormsServiceAdapter(DocumentFactory documentFactory) {
+	public AdobeFormsServiceAdapter(DocumentFactory documentFactory, com.adobe.fd.forms.api.FormsService adobeFormsService) {
 		super();
-		this.documentFactory = documentFactory;
+		this.documentFactory = Objects.requireNonNull(documentFactory, "documentFactory is null");
+		this.adobeFormsService = Objects.requireNonNull(adobeFormsService, "adobeFormsService is null");
 	}
 
 	@Override
@@ -62,5 +63,4 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 			throw new FormsServiceException(e);
 		}
 	}
-
 }
