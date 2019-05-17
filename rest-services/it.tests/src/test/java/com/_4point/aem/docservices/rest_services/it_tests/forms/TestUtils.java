@@ -1,8 +1,15 @@
 package com._4point.aem.docservices.rest_services.it_tests.forms;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.io.IOUtils;
 
 public class TestUtils {
 
@@ -24,6 +31,14 @@ public class TestUtils {
 			return Paths.get(classLoader.getResource(name).toURI());
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException("getResource returned invalid URI. (This should never happen!)", e);
+		}
+	}
+	
+	public static String readEntityToString(Response result) {
+		try {
+			return IOUtils.toString((InputStream)result.getEntity(), StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			throw new IllegalStateException("Exception while reading response stream.", e);
 		}
 	}
 }

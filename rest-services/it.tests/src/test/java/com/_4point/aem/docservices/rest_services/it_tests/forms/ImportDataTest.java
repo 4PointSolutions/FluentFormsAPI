@@ -56,7 +56,7 @@ class ImportDataTest {
 									  .post(Entity.entity(multipart, multipart.getMediaType()));
 			
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
-			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + readEntityToString(result) + "'.");
+			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
 			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
 			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ImportData_BytesResult.pdf")));
@@ -77,16 +77,9 @@ class ImportDataTest {
 									  .post(Entity.entity(multipart, multipart.getMediaType()));
 			
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
-			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + readEntityToString(result) + "'.");
+			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 
 		}
 	}
 
-	public String readEntityToString(Response result) {
-		try {
-			return IOUtils.toString((InputStream)result.getEntity(), StandardCharsets.UTF_8);
-		} catch (IOException e) {
-			throw new IllegalStateException("Exception while reading response stream.", e);
-		}
-	}
 }
