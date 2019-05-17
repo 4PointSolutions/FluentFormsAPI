@@ -25,6 +25,7 @@ public class TestUtils {
 	
 	public static final Path RESOURCES_DIR = Paths.get("src", "test", "resources");
 	public static final Path ACTUAL_RESULTS_DIR = RESOURCES_DIR.resolve("actualResults");
+	public static final Path SERVER_FORMS_DIR = Paths.get("D:", "FluentForms", "Forms");
 
 	private static Path getPath(String name) {
 		try {
