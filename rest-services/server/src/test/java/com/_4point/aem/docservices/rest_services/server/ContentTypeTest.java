@@ -11,13 +11,13 @@ public class ContentTypeTest {
 
 	// valid content types
 	private static final String TEXT_HTML_STR = "text/html";
-	private static final ContentType TEXT_HTML = new ContentType(TEXT_HTML_STR);
-	private static final ContentType TEXT_HTML_UC = new ContentType("TEXT/HTML");
-	private static final ContentType TEXT_PLAIN = new ContentType("text/plain");
-	private static final ContentType APPLICATION_PDF = new ContentType("application/PDF");
-	private static final ContentType APPLICATION_WILDCARD = new ContentType("application/*");
-	private static final ContentType MULTIPART_FORMDATA = new ContentType("multipart/form-data");
-	private static final ContentType WILDCARD = new ContentType("*/*");
+	private static final ContentType TEXT_HTML = ContentType.valueOf(TEXT_HTML_STR);
+	private static final ContentType TEXT_HTML_UC = ContentType.valueOf("TEXT/HTML");
+	private static final ContentType TEXT_PLAIN = ContentType.valueOf("text/plain");
+	private static final ContentType APPLICATION_PDF = ContentType.valueOf("application/PDF");
+	private static final ContentType APPLICATION_WILDCARD = ContentType.valueOf("application/*");
+	private static final ContentType MULTIPART_FORMDATA = ContentType.valueOf("multipart/form-data");
+	private static final ContentType WILDCARD = ContentType.valueOf("*/*");
 
 	
 	@Test
@@ -31,7 +31,7 @@ public class ContentTypeTest {
 
 	private void testContentTypeConstructor_BadArg(String contentTypeStr) {
 		
-		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, ()->new ContentType(contentTypeStr));
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, ()->ContentType.valueOf(contentTypeStr));
 		assertThat("Expected the error message to contain the offending string", e.getMessage(), containsString(contentTypeStr));
 	}
 

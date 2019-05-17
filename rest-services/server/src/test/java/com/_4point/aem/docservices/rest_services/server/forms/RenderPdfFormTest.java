@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.servlet.ServletException;
 
@@ -78,7 +79,7 @@ class RenderPdfFormTest {
 		Document renderPdfResult = mockDocumentFactory.create(resultDataBytes);
 		renderPdfResult.setContentType(APPLICATION_PDF);
 		MockTraditionalFormsService renderPdfMock = MockTraditionalFormsService.createRenderFormMock(renderPdfResult);
-		junitx.util.PrivateAccessor.setField(underTest, "adobeFormsService",  (TraditionalFormsService)renderPdfMock);
+		junitx.util.PrivateAccessor.setField(underTest, "formServiceFactory", (Supplier<TraditionalFormsService>)()->(TraditionalFormsService)renderPdfMock);
 		return renderPdfMock;
 	}
 

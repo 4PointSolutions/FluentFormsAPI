@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.servlet.Servlet;
@@ -26,6 +27,7 @@ import org.apache.sling.servlets.annotations.SlingServletPaths;
 import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +56,12 @@ import com.adobe.fd.forms.api.CacheStrategy;
 public class RenderPdfForm extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(ImportData.class);
-	private final TraditionalFormsService adobeFormsService = new AdobeFormsServiceAdapter();
 	private final DocumentFactory docFactory = DocumentFactory.getDefault();
-	
+	private final Supplier<TraditionalFormsService> formServiceFactory = this::getAdobeFormsService;
+
+	@Reference
+	private com.adobe.fd.forms.api.FormsService adobeFormsService;
+
 	@Override
 	protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
 			throws ServletException, IOException {
@@ -75,11 +80,10 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			log.error(e.getMessage() != null ? e.getMessage() : e.getClass().getName() , e);	// Make sure this gets into our log.
 			throw e;
 		}
-
 	}
 
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws BadRequestException, InternalServerErrorException, NotAcceptableException {
-		FormsService formsService = new FormsServiceImpl(adobeFormsService);
+		FormsService formsService = new FormsServiceImpl(formServiceFactory.get());
 
 		RenderPdfFormParameters reqParameters = RenderPdfFormParameters.readFormParameters(request, false);	// TODO: Make the validation of XML a config parameter.
 		PathOrUrl template = reqParameters.getTemplate();
@@ -105,6 +109,10 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		}
 
 
+	}
+
+	private TraditionalFormsService getAdobeFormsService() {
+		return new AdobeFormsServiceAdapter(adobeFormsService);
 	}
 
 	private static class RenderPdfFormParameters {

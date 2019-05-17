@@ -1,5 +1,7 @@
 package com._4point.aem.docservices.rest_services.server;
 
+import java.util.Objects;
+
 public class ContentType {
 	private static final String WILDCARD_CHAR = "*";
 	private static final String SEPARATOR_CHAR = "/";
@@ -16,7 +18,7 @@ public class ContentType {
 	private final String type;
 	private final String subtype;
 
-	public ContentType(String contentTypeStr) {
+	private ContentType(String contentTypeStr) {
 		String[] parts = contentTypeStr.split("/");
 		if (parts.length != 2) {
 			throw new IllegalArgumentException("Invalid content type string - '" + contentTypeStr + "'.  Expected exactly one separator character ('" + SEPARATOR_CHAR + "').");
@@ -27,6 +29,14 @@ public class ContentType {
 			throw new IllegalArgumentException("Invalid content type string - '" + contentTypeStr + "'.  Main type cannot be a wildcard if the subtype is not also a wildcard.");
 		}
 	}
+	
+	public static ContentType valueOf(String contentTypeStr) {
+		String trimmedVersion = Objects.requireNonNull(contentTypeStr, "Content Type String cannot be null.").trim();
+		if (trimmedVersion.isEmpty()) {
+			throw new IllegalArgumentException("Content Type String cannot be empty.");
+		}
+		return new ContentType(trimmedVersion);
+	}
 
 	public String getContentTypeStr() {
 		return type + SEPARATOR_CHAR + subtype;
@@ -35,7 +45,7 @@ public class ContentType {
 	public boolean isCompatibleWith(ContentType candidate) {
 		return areTypesCompatible(this.type, candidate.type) && areTypesCompatible(this.subtype, candidate.subtype);
 	}
-	
+
 	private static boolean areTypesCompatible(String type1, String type2) {
 		return type1.equals(WILDCARD_CHAR) || type2.equals(WILDCARD_CHAR) || type1.equals(type2); 
 	}

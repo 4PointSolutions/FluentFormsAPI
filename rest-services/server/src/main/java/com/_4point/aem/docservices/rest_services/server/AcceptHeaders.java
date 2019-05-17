@@ -23,7 +23,7 @@ public class AcceptHeaders {
 		for (String contentTypeString : contentTypeStrings) {
 			String trimmedString = contentTypeString.trim();
 			if (!trimmedString.isEmpty()) {		// ignore empty strings
-				acceptTypes.add(new ContentType(trimmedString));
+				acceptTypes.add(ContentType.valueOf(trimmedString));
 			}
 		}
 	}

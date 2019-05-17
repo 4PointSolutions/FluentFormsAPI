@@ -18,7 +18,7 @@ public class ServletUtils {
 		if ( acceptHeaderStr != null) {
 			// If we've been supplied with an accept header, make sure it is correct.
 			AcceptHeaders acceptHeaders = new AcceptHeaders(acceptHeaderStr);
-	        List<ContentType> acceptableContentTypes = Arrays.asList(new ContentType(generatedContentType));
+	        List<ContentType> acceptableContentTypes = Arrays.asList(ContentType.valueOf(generatedContentType));
 	        acceptHeaders.validateResponseContentType(acceptableContentTypes);
 		}
 	}
