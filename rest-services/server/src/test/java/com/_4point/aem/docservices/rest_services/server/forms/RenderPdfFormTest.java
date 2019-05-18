@@ -77,6 +77,8 @@ class RenderPdfFormTest {
 		assertEquals(resultData, response.getOutputAsString());
 		assertEquals(resultDataBytes.length, response.getContentLength());
 	
+		// Validate that the correct parameters were passed in to renderPdf
+		
 	}
 
 	@Test
@@ -99,7 +101,7 @@ class RenderPdfFormTest {
 		
 		// Validate the result
 		assertEquals(SlingHttpServletResponse.SC_BAD_REQUEST, response.getStatus());
-		String statusMsg = response.geStatusMessage();
+		String statusMsg = response.getStatusMessage();
 		assertThat(statusMsg, containsStringIgnoringCase("Bad request parameter"));
 		assertThat(statusMsg, containsStringIgnoringCase("unable to find template"));
 		assertThat(statusMsg, containsString(badFormName));

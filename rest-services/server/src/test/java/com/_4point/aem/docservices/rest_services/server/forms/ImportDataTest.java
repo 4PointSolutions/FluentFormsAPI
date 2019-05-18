@@ -75,8 +75,7 @@ class ImportDataTest {
 //		}
 	}
 
-	// TODO: Temporarily disabled until SlingServletHelpers is updated
-	@Disabled
+	@Test
 	void testDoPost_HappyPath_Bytes(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
 
 		String resultData = "testDoPost Happy Path Result";
@@ -87,15 +86,11 @@ class ImportDataTest {
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
-		// Create inputs
-		Map<String, Object> parameterMap = new HashMap<>();
-		String pdfDataBytes = "PDF Bytes";
-		parameterMap.put(PDF_PARAM_NAME, pdfDataBytes);
-		String xmlDataBytes = "XML Data";
-		parameterMap.put(DATA_PARAM_NAME, xmlDataBytes);
-		
 		// Set request parameters
-		request.setParameterMap(parameterMap);
+		String pdfDataBytes = "PDF Bytes";
+		String xmlDataBytes = "XML Data";
+		request.addRequestParameter(PDF_PARAM_NAME, pdfDataBytes.getBytes(), APPLICATION_PDF);
+		request.addRequestParameter(DATA_PARAM_NAME, xmlDataBytes.getBytes(), APPLICATION_XML);
 
 		request.setHeader("Accept", APPLICATION_PDF);
 
@@ -203,12 +198,11 @@ class ImportDataTest {
 		underTest.doPost(request, response);
 		
 		assertEquals(SlingHttpServletResponse.SC_BAD_REQUEST, response.getStatus());
-		assertThat("Expected message to contain parameter name", response.geStatusMessage(), containsString(DATA_PARAM_NAME));
-		assertThat("Expected message to contain 'missing'", response.geStatusMessage(), containsStringIgnoringCase("missing"));
+		assertThat("Expected message to contain parameter name", response.getStatusMessage(), containsString(DATA_PARAM_NAME));
+		assertThat("Expected message to contain 'missing'", response.getStatusMessage(), containsStringIgnoringCase("missing"));
 	}
 	
-	// TODO: Temporarily disabled until SlingServletHelpers is updated
-	@Disabled
+	@Test
 	void testDoPost_BadAcceptHeader(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
 		String resultData = "testDoPost Bad Accept Header Result";
 		byte[] resultDataBytes = resultData.getBytes();
@@ -218,15 +212,12 @@ class ImportDataTest {
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
-		// Create inputs
-		Map<String, Object> parameterMap = new HashMap<>();
-		String pdfDataBytes = "PDF Bytes";
-		parameterMap.put(PDF_PARAM_NAME, pdfDataBytes);
-		String xmlDataBytes = "XML Data";
-		parameterMap.put(DATA_PARAM_NAME, xmlDataBytes);
-		
 		// Set request parameters
-		request.setParameterMap(parameterMap);
+		String pdfDataBytes = "PDF Bytes";
+		String xmlDataBytes = "XML Data";
+		request.addRequestParameter(PDF_PARAM_NAME, pdfDataBytes.getBytes(), APPLICATION_PDF);
+		request.addRequestParameter(DATA_PARAM_NAME, xmlDataBytes.getBytes(), APPLICATION_XML);
+
 		request.setHeader("Accept", "text/plain");
 		
 		underTest.doPost(request, response);
