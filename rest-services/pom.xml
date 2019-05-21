@@ -637,6 +637,22 @@
 				<artifactId>org.apache.sling.servlet-helpers</artifactId>
 				<version>1.1.11-SNAPSHOT</version>
 			</dependency>
+			<!-- Jersey Dependencies -->
+			<dependency>
+				<groupId>org.glassfish.jersey.core</groupId>
+				<artifactId>jersey-client</artifactId>
+				<version>2.28</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-multipart</artifactId>
+				<version>2.28</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.inject</groupId>
+				<artifactId>jersey-hk2</artifactId>
+				<version>2.28</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
