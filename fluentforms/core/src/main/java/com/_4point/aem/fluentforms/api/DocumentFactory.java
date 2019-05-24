@@ -7,7 +7,7 @@ import java.nio.file.Path;
 
 import org.apache.sling.api.resource.ResourceResolver;
 
-import com._4point.aem.fluentforms.impl.DocumentFactoryImpl;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 
 public interface DocumentFactory {
 
@@ -32,7 +32,7 @@ public interface DocumentFactory {
 	public Document create(com.adobe.aemfd.docmanager.Document document);	
 
 	public static DocumentFactory getDefault() {
-		return DocumentFactoryImpl.getFactory();
+		return AdobeDocumentFactoryImpl.getFactory();
 	}
 
 }

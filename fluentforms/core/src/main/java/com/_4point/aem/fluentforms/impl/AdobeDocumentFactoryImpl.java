@@ -1,10 +1,14 @@
 package com._4point.aem.fluentforms.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -12,7 +16,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 
 
-public enum DocumentFactoryImpl implements DocumentFactory {
+public enum AdobeDocumentFactoryImpl implements DocumentFactory {
 	
 	INSTANCE;
 	
@@ -25,7 +29,7 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 	 */
 	@Override
 	public Document create(byte[] data) {
-		return new DocumentImpl(data);
+		return new AdobeDocumentImpl(data);
 	}
 
 	/* (non-Javadoc)
@@ -33,7 +37,7 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 	 */
 	@Override
 	public Document create(File file, boolean ownFile) {
-		return new DocumentImpl(file, ownFile);
+		return new AdobeDocumentImpl(file, ownFile);
 	}
 
 	/* (non-Javadoc)
@@ -41,7 +45,7 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 	 */
 	@Override
 	public Document create(File file) {
-		return new DocumentImpl(file);
+		return new AdobeDocumentImpl(file);
 	}
 
 	/* (non-Javadoc)
@@ -49,7 +53,7 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 	 */
 	@Override
 	public Document create(Path path) {
-		return new DocumentImpl(path.toFile());
+		return new AdobeDocumentImpl(path.toFile());
 	}
 	
 	/* (non-Javadoc)
@@ -57,7 +61,7 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 	 */
 	@Override
 	public Document create(InputStream is) {
-		return new DocumentImpl(is);
+		return new AdobeDocumentImpl(is);
 	}
 
 	/* (non-Javadoc)
@@ -65,7 +69,7 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 	 */
 	@Override
 	public Document create(String jcrPath, ResourceResolver resolver, boolean manageResolver) {
-		return new DocumentImpl(jcrPath, resolver, manageResolver);
+		return new AdobeDocumentImpl(jcrPath, resolver, manageResolver);
 	}
 
 	/* (non-Javadoc)
@@ -73,7 +77,7 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 	 */
 	@Override
 	public Document create(String jcrPath, ResourceResolver resolver) {
-		return new DocumentImpl(jcrPath, resolver);
+		return new AdobeDocumentImpl(jcrPath, resolver);
 	}
 
 	/* (non-Javadoc)
@@ -81,7 +85,7 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 	 */
 	@Override
 	public Document create(String jcrPath) {
-		return new DocumentImpl(jcrPath);
+		return new AdobeDocumentImpl(jcrPath);
 	}
 
 	/* (non-Javadoc)
@@ -89,51 +93,51 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 	 */
 	@Override
 	public Document create(URL url) {
-		return new DocumentImpl(url);
+		return new AdobeDocumentImpl(url);
 	}
 
 	public Document create(com.adobe.aemfd.docmanager.Document document) {
-		return new DocumentImpl(document);
+		return new AdobeDocumentImpl(document);
 	}
 
 	
-	private static class DocumentImpl implements Document {
+	private static class AdobeDocumentImpl implements Document {
 
 		private final com.adobe.aemfd.docmanager.Document doc;
 		
-		private DocumentImpl(byte[] data) {
+		private AdobeDocumentImpl(byte[] data) {
 			doc = new com.adobe.aemfd.docmanager.Document(data);
 		}
 
-		private DocumentImpl(File file, boolean ownFile) {
+		private AdobeDocumentImpl(File file, boolean ownFile) {
 			doc = new com.adobe.aemfd.docmanager.Document(file, ownFile);
 		}
 
-		private DocumentImpl(File file) {
+		private AdobeDocumentImpl(File file) {
 			doc = new com.adobe.aemfd.docmanager.Document(file);
 		}
 
-		private DocumentImpl(InputStream is) {
+		private AdobeDocumentImpl(InputStream is) {
 			doc = new com.adobe.aemfd.docmanager.Document(is);
 		}
 
-		private DocumentImpl(String jcrPath, ResourceResolver resolver, boolean manageResolver) {
+		private AdobeDocumentImpl(String jcrPath, ResourceResolver resolver, boolean manageResolver) {
 			doc = new com.adobe.aemfd.docmanager.Document(jcrPath, resolver, manageResolver);
 		}
 
-		private DocumentImpl(String jcrPath, ResourceResolver resolver) {
+		private AdobeDocumentImpl(String jcrPath, ResourceResolver resolver) {
 			doc = new com.adobe.aemfd.docmanager.Document(jcrPath, resolver);
 		}
 
-		private DocumentImpl(String jcrPath) {
+		private AdobeDocumentImpl(String jcrPath) {
 			doc = new com.adobe.aemfd.docmanager.Document(jcrPath);
 		}
 
-		private DocumentImpl(URL url) {
+		private AdobeDocumentImpl(URL url) {
 			doc = new com.adobe.aemfd.docmanager.Document(url);
 		}
 
-		private DocumentImpl(com.adobe.aemfd.docmanager.Document document) {
+		private AdobeDocumentImpl(com.adobe.aemfd.docmanager.Document document) {
 			doc = document;
 		}
 		
@@ -257,6 +261,91 @@ public enum DocumentFactoryImpl implements DocumentFactory {
 		public com.adobe.aemfd.docmanager.Document getAdobeDocument() {
 			return doc;
 		}
+	}
+
+	// Simplistic implementation of Document interface.
+	private static class MyDocumentImpl implements Document {
+		int maxInlineSize;
+		byte[] inlineData;
+		String contentType;
+		Map<String, Object> attributes = new TreeMap<>();
+		
+		@Override
+		public void close() throws IOException {
+			this.dispose();
+		}
+
+		@Override
+		public void copyToFile(File arg0) throws IOException {
+			// TODO: Implement this at some future date.
+			throw new UnsupportedOperationException("copyToFile is not supported at this time.");
+		}
+
+		@Override
+		public void dispose() {
+			this.inlineData = new byte[0]; 
+		}
+
+		@Override
+		public Object getAttribute(String name) {
+			return attributes.get(name);
+		}
+
+		@Override
+		public String getContentType() throws IOException {
+			return this.contentType;
+		}
+
+		@Override
+		public byte[] getInlineData() throws IOException {
+			return Arrays.copyOf(this.inlineData, this.inlineData.length);
+		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			return new ByteArrayInputStream(getInlineData());
+		}
+
+		@Override
+		public int getMaxInlineSize() {
+			return maxInlineSize;
+		}
+
+		@Override
+		public long length() throws IOException {
+			return this.inlineData.length;
+		}
+
+		@Override
+		public void passivate() throws IOException {
+			// Do nothing.
+		}
+
+		@Override
+		public void removeAttribute(String name) {
+			this.attributes.remove(name);
+		}
+
+		@Override
+		public void setAttribute(String name, Object val) {
+			this.attributes.put(name, val);
+		}
+
+		@Override
+		public void setContentType(String contentType) {
+			this.contentType = contentType;
+		}
+
+		@Override
+		public void setMaxInlineSize(int maxInlineSize) {
+			this.maxInlineSize = maxInlineSize;
+		}
+
+		@Override
+		public com.adobe.aemfd.docmanager.Document getAdobeDocument() {
+			return null;
+		}
+		
 	}
 
 }
