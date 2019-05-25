@@ -19,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -65,8 +67,11 @@ class RestServicesFormsServiceAdapterTest {
 		fail("Not yet implemented");
 	}
 
-	@Test
-	void testImportData_noSsl() throws Exception {
+	private enum HappyPaths { SSL, NO_SSL };
+	
+	@ParameterizedTest
+	@EnumSource(HappyPaths.class)
+	void testImportData_noSsl(HappyPaths codePath) throws Exception {
 
 		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
 		
@@ -80,7 +85,19 @@ class RestServicesFormsServiceAdapterTest {
 		when(response.hasEntity()).thenReturn(true);
 		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
 		
-		underTest = new RestServicesFormsServiceAdapter(TEST_MACHINE_NAME, TEST_MACHINE_PORT, false, ()->client);
+		boolean useSSL = false;
+		switch (codePath) {
+		case SSL:
+			useSSL = true;
+			break;
+		case NO_SSL:
+			useSSL = false;
+			break;
+		default:
+			throw new IllegalStateException("Found unexpected HappyPaths value (" + codePath.toString() + ").");
+		}
+		
+		underTest = new RestServicesFormsServiceAdapter(TEST_MACHINE_NAME, TEST_MACHINE_PORT, useSSL, ()->client);
 		
 		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
 		Document data = MockDocumentFactory.GLOBAL_INSTANCE.create("data Document Data".getBytes());
@@ -88,7 +105,8 @@ class RestServicesFormsServiceAdapterTest {
 		Document pdfResult = underTest.importData(pdf, data);
 		
 		// Make sure the correct URL is called.
-		assertThat("Expected target url contains 'http://'", machineName.getValue(), containsString("http://"));
+		final String expectedPrefix = useSSL ? "https://" : "http://";
+		assertThat("Expected target url contains '" + expectedPrefix + "'", machineName.getValue(), containsString(expectedPrefix));
 		assertThat("Expected target url contains TEST_MACHINE_NAME", machineName.getValue(), containsString(TEST_MACHINE_NAME));
 		assertThat("Expected target url contains TEST_MACHINE_PORT", machineName.getValue(), containsString(Integer.toString(TEST_MACHINE_PORT)));
 		assertThat("Expected target url contains 'ImportData'", path.getValue(), containsString("ImportData"));
@@ -135,6 +153,9 @@ class RestServicesFormsServiceAdapterTest {
 		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->underTest.importData(pdf, data));
 		assertThat(ex.getMessage(), containsString("should never happen"));
 	}
+	
+	// TODO:  Add more importData tests for exceptional case (i.e. those cases where exceptions are thrown.
+	
 	@Disabled
 	void testRenderPDFForm() {
 		fail("Not yet implemented");
