@@ -62,11 +62,11 @@ class ImportDataTest {
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
 			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
-			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ImportData_BytesResult.pdf")));
+			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ImportDataServer_BytesResult.pdf")));
 		}
 	}
 
-	@Disabled
+	@Test
 	void testImportData_Strings() throws IOException {
 
 		
@@ -80,8 +80,8 @@ class ImportDataTest {
 									  .post(Entity.entity(multipart, multipart.getMediaType()));
 			
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
-			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
-
+			// For now this isn't supported.
+			assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), result.getStatus(), ()->"Expected response to be 'Internal Status Error', entity='" + TestUtils.readEntityToString(result) + "'.");
 		}
 	}
 

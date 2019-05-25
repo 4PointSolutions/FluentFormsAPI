@@ -55,7 +55,7 @@ class RenderPdfFormTest {
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
 			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
-			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfForms_HappyPathResult.pdf")));
+			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfFormsServer_HappyPathResult.pdf")));
 		}
 
 	}
@@ -74,7 +74,7 @@ class RenderPdfFormTest {
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
 			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
-//			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfForms_JustFormAndData.pdf")));
+//			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfFormsServer_JustFormAndData.pdf")));
 		}
 
 	}
