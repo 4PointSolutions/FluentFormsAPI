@@ -26,8 +26,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import com._4point.aem.docservices.rest_services.it_tests.server.ByteArrayString;
-import com._4point.aem.docservices.rest_services.it_tests.server.TestUtils;
+import com._4point.aem.docservices.rest_services.it_tests.ByteArrayString;
+import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
 class ImportDataTest {
 
@@ -66,7 +66,7 @@ class ImportDataTest {
 		}
 	}
 
-	@Test
+	@Disabled
 	void testImportData_Strings() throws IOException {
 
 		

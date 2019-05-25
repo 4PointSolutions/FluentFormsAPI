@@ -22,8 +22,8 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com._4point.aem.docservices.rest_services.it_tests.server.ByteArrayString;
-import com._4point.aem.docservices.rest_services.it_tests.server.TestUtils;
+import com._4point.aem.docservices.rest_services.it_tests.ByteArrayString;
+import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
 class RenderPdfFormTest {
 

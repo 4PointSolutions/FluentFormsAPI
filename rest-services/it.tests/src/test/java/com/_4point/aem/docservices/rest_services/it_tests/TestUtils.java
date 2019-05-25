@@ -1,4 +1,4 @@
-package com._4point.aem.docservices.rest_services.it_tests.server;
+package com._4point.aem.docservices.rest_services.it_tests;
 
 import java.io.IOException;
 import java.io.InputStream;
