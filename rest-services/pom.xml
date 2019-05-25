@@ -628,6 +628,11 @@
 				<version>0.0.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
+				<groupId>com._4point.aem.docservices</groupId>
+				<artifactId>rest-services.client</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>2.6</version>
