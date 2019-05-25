@@ -1,4 +1,4 @@
-package com._4point.aem.docservices.rest_services.it_tests.forms;
+package com._4point.aem.docservices.rest_services.it_tests.server.forms;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -25,6 +25,9 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import com._4point.aem.docservices.rest_services.it_tests.server.ByteArrayString;
+import com._4point.aem.docservices.rest_services.it_tests.server.TestUtils;
 
 class ImportDataTest {
 

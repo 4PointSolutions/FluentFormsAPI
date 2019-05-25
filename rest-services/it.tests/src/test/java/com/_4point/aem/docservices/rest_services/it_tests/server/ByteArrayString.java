@@ -1,4 +1,4 @@
-package com._4point.aem.docservices.rest_services.it_tests.forms;
+package com._4point.aem.docservices.rest_services.it_tests.server;
 
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
