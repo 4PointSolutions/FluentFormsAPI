@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -46,7 +47,7 @@ class RestServicesFormsServiceAdapterTest {
 
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	
-	@Mock Client client;
+	@Mock(answer = Answers.RETURNS_SELF) Client client;	// answers used to mock Client's fluent interface. 
 	@Mock WebTarget target;
 	@Mock Response response;
 	@Mock Builder builder;
@@ -74,7 +75,8 @@ class RestServicesFormsServiceAdapterTest {
 	void testImportData_noSsl(HappyPaths codePath) throws Exception {
 
 		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
-		
+
+		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
 		when(client.target(machineName.capture())).thenReturn(target);
 		when(target.path(path.capture())).thenReturn(target);
 		when(target.request()).thenReturn(builder);
@@ -97,8 +99,14 @@ class RestServicesFormsServiceAdapterTest {
 			throw new IllegalStateException("Found unexpected HappyPaths value (" + codePath.toString() + ").");
 		}
 		
-		underTest = new RestServicesFormsServiceAdapter(TEST_MACHINE_NAME, TEST_MACHINE_PORT, useSSL, ()->client);
-		
+		underTest = RestServicesFormsServiceAdapter.builder()
+						.machineName(TEST_MACHINE_NAME)
+						.port(TEST_MACHINE_PORT)
+						.basicAuthentication("username", "password")
+						.useSsl(useSSL)
+						.clientFactory(()->client)
+						.build();
+				
 		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
 		Document data = MockDocumentFactory.GLOBAL_INSTANCE.create("data Document Data".getBytes());
 
@@ -145,7 +153,14 @@ class RestServicesFormsServiceAdapterTest {
 		when(response.getStatusInfo()).thenReturn(statusType);
 		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
 		
-		underTest = new RestServicesFormsServiceAdapter(TEST_MACHINE_NAME, TEST_MACHINE_PORT, false, ()->client);
+		underTest = RestServicesFormsServiceAdapter.builder()
+				.machineName(TEST_MACHINE_NAME)
+				.port(TEST_MACHINE_PORT)
+				.basicAuthentication("username", "password")
+				.useSsl(false)
+				.clientFactory(()->client)
+				.build();
+		
 		
 		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
 		Document data = MockDocumentFactory.GLOBAL_INSTANCE.create("data Document Data".getBytes());

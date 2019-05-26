@@ -13,7 +13,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
@@ -31,23 +33,12 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 	private static final String IMPORT_DATA_PATH = "/services/FormsService/ImportData";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	
-	private final static Supplier<Client> defaultClientFactory = ()->ClientBuilder.newClient();
-	
 	private final WebTarget target;
 
-	public RestServicesFormsServiceAdapter(String machineName, int port, boolean useSsl) {
+	// Only callable from Builder
+	private RestServicesFormsServiceAdapter(WebTarget target) {
 		super();
-		Client client = defaultClientFactory.get();
-		target = initTarget(machineName, port, useSsl, client);
-	}
-
-	/*
-	 *  For unit testing purposes only.
-	 */
-	protected RestServicesFormsServiceAdapter(String machineName, int port, boolean useSsl, Supplier<Client> clientFactory) {
-		super();
-		Client client = clientFactory.get();
-		target = initTarget(machineName, port, useSsl, client);
+		this.target = target;
 	}
 
 	@Override
@@ -58,12 +49,13 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 
 	@Override
 	public Document importData(Document pdf, Document data) throws FormsServiceException {
+		WebTarget importDataTarget = target.path(IMPORT_DATA_PATH);
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM_NAME, data.getInputStream(), MediaType.APPLICATION_XML_TYPE)
 					 .field(PDF_PARAM_NAME, pdf.getInputStream(), APPLICATION_PDF);
 
-			Response result = target.request()
+			Response result = importDataTarget.request()
 								    .accept(APPLICATION_PDF)
 								    .post(Entity.entity(multipart, multipart.getMediaType()));
 			
@@ -103,8 +95,57 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 		return null;
 	}
 
-	private static WebTarget initTarget(String machineName, int port, boolean useSsl, Client client) {
-		return client.target("http" + (useSsl ? "s" : "") + "://" + machineName + ":" + Integer.toString(port)).path(IMPORT_DATA_PATH);
+	public static Builder builder() {
+		return new Builder();
 	}
+	
+	public static class Builder {
+		private final static Supplier<Client> defaultClientFactory = ()->ClientBuilder.newClient();
+		
+		private String machineName = "localhost";
+		private int port = 4502;
+		private HttpAuthenticationFeature authFeature = null;
+		private boolean useSsl = false;
+		private Supplier<Client> clientFactory = defaultClientFactory;
+		
+		// Only callable from the containing class.
+		private Builder() {
+			super();
+		}
 
+		public Builder machineName(String machineName) {
+			this.machineName = machineName;
+			return this;
+		}
+
+		public Builder port(int port) {
+			this.port = port;
+			return this;
+		}
+
+		public Builder useSsl(boolean useSsl) {
+			this.useSsl = useSsl;
+			return this;
+		}
+
+		public Builder clientFactory(Supplier<Client> clientFactory) {
+			this.clientFactory = clientFactory;
+			return this;
+		}
+
+		public Builder basicAuthentication(String username, String password) {
+			this.authFeature = HttpAuthenticationFeature.basic(username, password);
+			return this;
+		}
+		
+		public RestServicesFormsServiceAdapter build() {
+			Client client = clientFactory.get();
+			client.register(MultiPartFeature.class);
+			if (this.authFeature != null) {
+				client.register(authFeature);
+			}
+			WebTarget localTarget = client.target("http" + (useSsl ? "s" : "") + "://" + machineName + ":" + Integer.toString(port));
+			return new RestServicesFormsServiceAdapter(localTarget);
+		}
+	}
 }
