@@ -178,8 +178,8 @@ class ImportDataTest {
 		underTest.doPost(request, response);
 		
 		assertEquals(SlingHttpServletResponse.SC_BAD_REQUEST, response.getStatus());
-		assertThat("Expected message to contain parameter name", response.geStatusMessage(), containsString(PDF_PARAM_NAME));
-		assertThat("Expected message to contain 'missing'", response.geStatusMessage(), containsStringIgnoringCase("missing"));
+		assertThat("Expected message to contain parameter name", response.getStatusMessage(), containsString(PDF_PARAM_NAME));
+		assertThat("Expected message to contain 'missing'", response.getStatusMessage(), containsStringIgnoringCase("missing"));
 	}
 	
 	@Test

@@ -95,7 +95,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		CacheStrategy cacheStrategy = reqParameters.getCacheStrategy();
 		Path debugDir = reqParameters.getDebugDir();
 		Locale locale = reqParameters.getLocale();
-		List<URL> submitUrls = reqParameters.getSubmitUrls();
+		List<String> submitUrls = reqParameters.getSubmitUrls();
 		Boolean taggedPDF = reqParameters.getTaggedPDF();
 		byte[] xci = reqParameters.getXci();
 		
@@ -103,6 +103,13 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			// In the following call to the formsService, we only set the parameters if they are not null.
 			try (Document result = formsService.renderPDFForm()
 												.transform(b->contentRoot == null ? b : b.setContentRoot(contentRoot))
+												.transform(b->acrobatVersion == null ? b : b.setAcrobatVersion(acrobatVersion))
+												.transform(b->cacheStrategy == null ? b : b.setCacheStrategy(cacheStrategy))
+												.transform(b->debugDir == null ? b : b.setDebugDir(debugDir))
+												.transform(b->locale == null ? b : b.setLocale(locale))
+//												.transform(b->submitUrls.isEmpty() ? b : b.setSubmitUrls(submitUrls))
+												.transform(b->taggedPDF == null ? b : b.setTaggedPDF(taggedPDF.booleanValue()))
+//												.transform(b->xci == null ? b : b.setXci(new Document(xci)))
 												.executeOn(template, data)) {
 				
 				String contentType = result.getContentType();
@@ -129,21 +136,21 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 	private static class RenderPdfFormParameters {
 		private static final String TEMPLATE_PARAM = "template";
 		private static final String DATA_PARAM = "data";
-		private static final String ACROBAT_VERSION_PARAM = "acrobatVersion";
-		private static final String CACHE_STRATEGY_PARAM = "cacheStrategy";
-		private static final String CONTENT_ROOT_PARAM = "contentRoot";
-		private static final String DEBUG_DIR_PARAM = "debugDir";
-		private static final String LOCALE_PARAM = "locale";
-		private static final String SUBMIT_URL_PARAM = "submitUrl";
-		private static final String TAGGED_PDF_PARAM = "taggedPdf";
-		private static final String XCI_PARAM = "xci";
+		private static final String ACROBAT_VERSION_PARAM = "renderOptions.acrobatVersion";
+		private static final String CACHE_STRATEGY_PARAM = "renderOptions.cacheStrategy";
+		private static final String CONTENT_ROOT_PARAM = "renderOptions.contentRoot";
+		private static final String DEBUG_DIR_PARAM = "renderOptions.debugDir";
+		private static final String LOCALE_PARAM = "renderOptions.locale";
+		private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
+		private static final String TAGGED_PDF_PARAM = "renderOptions.taggedPdf";
+		private static final String XCI_PARAM = "renderOptions.xci";
 		
 		private AcrobatVersion acrobatVersion = null;
 		private CacheStrategy cacheStrategy = null;
 		private PathOrUrl contentRoot = null;
 		private Path debugDir = null;
 		private Locale locale = null;
-		private List<URL> submitUrls = null;
+		private List<String> submitUrls = null;
 		private Boolean taggedPDF = null;
 		private byte[] xci = null;
 		private final PathOrUrl template;
@@ -200,20 +207,14 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return this;
 		}
 
-		public List<URL> getSubmitUrls() {
+		public List<String> getSubmitUrls() {
 			return submitUrls;
 		}
 
 		private RenderPdfFormParameters setSubmitUrls(RequestParameter[] submitUrlParms) throws BadRequestException {
 			this.submitUrls = new ArrayList<>();
 			for (RequestParameter str : submitUrlParms) {
-				String submitUrlStr = str.getString();
-				try {
-					URL url = new URL(submitUrlStr);
-					this.submitUrls.add(url);
-				} catch (MalformedURLException e) {
-					throw new BadRequestException("Badly formed submit Url parameter (" + submitUrlStr + ").", e);
-				}
+				this.submitUrls.add(str.getString());
 			}
 			return this;
 		}
@@ -253,31 +254,34 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		 * @throws BadRequestException
 		 */
 		public static RenderPdfFormParameters readFormParameters(SlingHttpServletRequest request, boolean validateXml) throws BadRequestException {
-			byte[] inputData = getMandatoryParameter(request, DATA_PARAM).get();
-			if (validateXml) {
-				validateXmlData(inputData);
+			try {
+				byte[] inputData = getMandatoryParameter(request, DATA_PARAM).get();
+				if (validateXml) {
+					validateXmlData(inputData);
+				}
+			
+				PathOrUrl template = PathOrUrl.fromString(getMandatoryParameter(request, TEMPLATE_PARAM).getString());
+				
+	
+				RenderPdfFormParameters result = new RenderPdfFormParameters(template, inputData);
+				
+				getOptionalParameter(request, ACROBAT_VERSION_PARAM).ifPresent(rp->result.setAcrobatVersion(rp.getString()));
+				getOptionalParameter(request, CACHE_STRATEGY_PARAM).ifPresent(rp->result.setCacheStrategy(rp.getString()));
+				getOptionalParameter(request, CONTENT_ROOT_PARAM).ifPresent(rp->result.setContentRoot(rp.getString()));
+				getOptionalParameter(request, DEBUG_DIR_PARAM).ifPresent(rp->result.setDebugDir(rp.getString()));
+				getOptionalParameter(request, LOCALE_PARAM).ifPresent(rp->result.setLocale(rp.getString()));
+				getOptionalParameter(request, TAGGED_PDF_PARAM).ifPresent(rp->result.setTaggedPDF(rp.getString()));
+				getOptionalParameter(request, XCI_PARAM).ifPresent(rp->result.setXci(rp.get()));
+				// Submit URLs parameter has to be handled differently because it throws exceptions.
+				Optional<RequestParameter[]> submitUrlParms = getOptionalParameters(request, SUBMIT_URL_PARAM);
+				if (submitUrlParms.isPresent()) {
+					result.setSubmitUrls(submitUrlParms.get());
+				}
+				
+				return result;
+			} catch (IllegalArgumentException e) {
+				throw new BadRequestException("There was a problem with one of the incoming parameters.", e);
 			}
-			
-			PathOrUrl template = PathOrUrl.fromString(getMandatoryParameter(request, TEMPLATE_PARAM).getString());
-			
-
-			RenderPdfFormParameters result = new RenderPdfFormParameters(template, inputData);
-			
-			getOptionalParameter(request, ACROBAT_VERSION_PARAM).ifPresent(rp->result.setAcrobatVersion(rp.getString()));
-			getOptionalParameter(request, CACHE_STRATEGY_PARAM).ifPresent(rp->result.setCacheStrategy(rp.getString()));
-			getOptionalParameter(request, CONTENT_ROOT_PARAM).ifPresent(rp->result.setContentRoot(rp.getString()));
-			getOptionalParameter(request, DEBUG_DIR_PARAM).ifPresent(rp->result.setDebugDir(rp.getString()));
-			getOptionalParameter(request, LOCALE_PARAM).ifPresent(rp->result.setLocale(rp.getString()));
-			getOptionalParameter(request, TAGGED_PDF_PARAM).ifPresent(rp->result.setTaggedPDF(rp.getString()));
-			getOptionalParameter(request, XCI_PARAM).ifPresent(rp->result.setXci(rp.get()));
-
-			// Submit URLs parameter has to be handled differently because it throws exceptions.
-			Optional<RequestParameter[]> submitUrlParms = getOptionalParameters(request, SUBMIT_URL_PARAM);
-			if (submitUrlParms.isPresent()) {
-				result.setSubmitUrls(submitUrlParms.get());
-			}
-			
-			return result;
 		}
 	}
 }
