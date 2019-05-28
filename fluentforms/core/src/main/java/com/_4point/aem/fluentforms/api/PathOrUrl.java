@@ -24,18 +24,18 @@ public class PathOrUrl {
 	}
 
 	public Path getPath() {
-		return path;
+		return this.path;
 	}
 
 	public URL getUrl() {
-		return url;
+		return this.url;
 	}
 
-	public boolean isPath() { return path != null; }
-	public boolean isUrl() { return url != null; }
+	public boolean isPath() { return this.path != null; }
+	public boolean isUrl() { return this.url != null; }
 	
 	public static PathOrUrl fromString(final String pathOrUrl) {
-		if (Objects.requireNonNull(pathOrUrl).isEmpty()) {
+		if (Objects.requireNonNull(pathOrUrl.trim()).isEmpty()) {
 			throw new IllegalArgumentException("Empty Path or Url provided.");
 		}
 		try {
