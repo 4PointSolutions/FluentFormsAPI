@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptionsSetter;
@@ -21,7 +22,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 	private PathOrUrl contentRoot = null;
 	private Path debugDir = null;
 	private Locale locale = null;
-	private List<URL> submitUrls = null;
+	private List<AbsoluteOrRelativeUrl> submitUrls = null;
 	private Boolean taggedPDF = null;
 	private Document xci = null;
 
@@ -81,12 +82,12 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 		return this;
 	}
 
-	public List<URL> getSubmitUrls() {
+	public List<AbsoluteOrRelativeUrl> getSubmitUrls() {
 		return submitUrls;
 	}
 
 	@Override
-	public PDFFormRenderOptionsImpl setSubmitUrls(List<URL> submitUrls) {
+	public PDFFormRenderOptionsImpl setSubmitUrls(List<AbsoluteOrRelativeUrl> submitUrls) {
 		this.submitUrls = submitUrls;
 		return this;
 	}
@@ -117,14 +118,14 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 		setIfNotNull(adobeOptions::setCacheStrategy, this.cacheStrategy);
 		setIfNotNull((cr)->adobeOptions.setContentRoot(cr.toString()), this.contentRoot);
 		setIfNotNull((dd)->adobeOptions.setDebugDir(dd.toString()), this.debugDir);
-		setIfNotNull((l)->adobeOptions.setLocale(l.toString()), this.locale);
+		setIfNotNull((l)->adobeOptions.setLocale(l.toLanguageTag()), this.locale);
 		setIfNotNull(adobeOptions::setSubmitUrls, mapToStrings(this.submitUrls));
 		setIfNotNull(adobeOptions::setTaggedPDF, this.taggedPDF);
 		setIfNotNull((ad)->adobeOptions.setXci(ad.getAdobeDocument()), this.xci);
 		return adobeOptions;
 	}
 
-	private static List<String> mapToStrings(List<URL> urls) {
-		return urls == null ? null : urls.stream().map(URL::toString).collect(Collectors.toList());
+	private static List<String> mapToStrings(List<AbsoluteOrRelativeUrl> urls) {
+		return urls == null ? null : urls.stream().map(AbsoluteOrRelativeUrl::toString).collect(Collectors.toList());
 	}
 }

@@ -52,6 +52,10 @@ public class AbsoluteOrRelativeUrl {
 			}
 	}
 
+	public static AbsoluteOrRelativeUrl fromUrl(URL url) {
+		return new AbsoluteOrRelativeUrl(url);
+	}
+
 	@Override
 	public String toString() {
 		if (this.isAbsolute()) {

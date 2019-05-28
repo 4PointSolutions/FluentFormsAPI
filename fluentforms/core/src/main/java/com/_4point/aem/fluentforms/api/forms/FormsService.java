@@ -1,11 +1,13 @@
 package com._4point.aem.fluentforms.api.forms;
 
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
+import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.Transformable;
@@ -86,7 +88,31 @@ public interface FormsService {
 		}
 
 		@Override
-		public RenderPDFFormArgumentBuilder setSubmitUrls(List<URL> urls);
+		public default RenderPDFFormArgumentBuilder setSubmitUrlStrings(List<String> stringList) throws MalformedURLException {
+			PDFFormRenderOptionsSetter.super.setSubmitUrlStrings(stringList);
+			return this;
+		}
+
+		@Override
+		public default RenderPDFFormArgumentBuilder setSubmitUrlsList(List<URL> urlList) {
+			PDFFormRenderOptionsSetter.super.setSubmitUrlsList(urlList);
+			return this;
+		}
+
+		@Override
+		public default RenderPDFFormArgumentBuilder setSubmitUrl(AbsoluteOrRelativeUrl url) {
+			PDFFormRenderOptionsSetter.super.setSubmitUrl(url);
+			return this;
+		}
+
+		@Override
+		public default RenderPDFFormArgumentBuilder setSubmitUrlString(String url) throws MalformedURLException {
+			PDFFormRenderOptionsSetter.super.setSubmitUrlString(url);
+			return this;
+		}
+
+		@Override
+		public RenderPDFFormArgumentBuilder setSubmitUrls(List<AbsoluteOrRelativeUrl> urls);
 
 		@Override
 		public RenderPDFFormArgumentBuilder setTaggedPDF(boolean isTagged);

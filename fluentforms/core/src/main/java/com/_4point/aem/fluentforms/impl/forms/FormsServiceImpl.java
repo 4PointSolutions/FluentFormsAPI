@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
@@ -161,7 +162,7 @@ public class FormsServiceImpl implements FormsService {
 		}
 
 		@Override
-		public RenderPDFFormArgumentBuilder setSubmitUrls(List<URL> urls) {
+		public RenderPDFFormArgumentBuilder setSubmitUrls(List<AbsoluteOrRelativeUrl> urls) {
 			options.setSubmitUrls(urls);
 			return this;
 		}

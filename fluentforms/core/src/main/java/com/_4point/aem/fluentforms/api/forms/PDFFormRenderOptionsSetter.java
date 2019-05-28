@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com.adobe.fd.forms.api.AcrobatVersion;
@@ -40,25 +41,40 @@ public interface PDFFormRenderOptionsSetter {
 
 	PDFFormRenderOptionsSetter setLocale(Locale locale);
 
-	PDFFormRenderOptionsSetter setSubmitUrls(List<URL> urls);
+	PDFFormRenderOptionsSetter setSubmitUrls(List<AbsoluteOrRelativeUrl> urls);
 
 	default PDFFormRenderOptionsSetter setSubmitUrlStrings(List<String> urlStrings) throws MalformedURLException {
 		int listLen = Objects.requireNonNull(urlStrings, "Submit URL Strings cannot be null.").size();
-		List<URL> urls = new ArrayList<>(listLen);
+		List<AbsoluteOrRelativeUrl> urls = new ArrayList<>(listLen);
 		for(String str : urlStrings) {
-			urls.add(new URL(str));
+			urls.add(AbsoluteOrRelativeUrl.fromString(str));
 		}
 		setSubmitUrls(urls);
 		return this;
 	}
 
-	default PDFFormRenderOptionsSetter setSubmitUrl(URL url) {
+	default PDFFormRenderOptionsSetter setSubmitUrlsList(List<URL> urlList) {
+		int listLen = Objects.requireNonNull(urlList, "Submit URL Strings cannot be null.").size();
+		List<AbsoluteOrRelativeUrl> urls = new ArrayList<>(listLen);
+		for(URL url : urlList) {
+			urls.add(AbsoluteOrRelativeUrl.fromUrl(url));
+		}
+		setSubmitUrls(urls);
+		return this;
+	}
+
+	default PDFFormRenderOptionsSetter setSubmitUrl(AbsoluteOrRelativeUrl url) {
 		setSubmitUrls(Arrays.asList(url));
 		return this;
 	}
 
 	default PDFFormRenderOptionsSetter setSubmitUrlString(String urlString) throws MalformedURLException {
-		setSubmitUrls(Arrays.asList(new URL(urlString)));
+		setSubmitUrls(Arrays.asList(AbsoluteOrRelativeUrl.fromString(urlString)));
+		return this;
+	}
+
+	default PDFFormRenderOptionsSetter setSubmitUrl(URL url) {
+		setSubmitUrls(Arrays.asList(AbsoluteOrRelativeUrl.fromUrl(url)));
 		return this;
 	}
 
