@@ -38,6 +38,7 @@ import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestExc
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
 import com._4point.aem.docservices.rest_services.server.ServletUtils;
+import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -95,7 +96,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		CacheStrategy cacheStrategy = reqParameters.getCacheStrategy();
 		Path debugDir = reqParameters.getDebugDir();
 		Locale locale = reqParameters.getLocale();
-		List<String> submitUrls = reqParameters.getSubmitUrls();
+		List<AbsoluteOrRelativeUrl> submitUrls = reqParameters.getSubmitUrls();
 		Boolean taggedPDF = reqParameters.getTaggedPDF();
 		byte[] xci = reqParameters.getXci();
 		
@@ -107,9 +108,9 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 												.transform(b->cacheStrategy == null ? b : b.setCacheStrategy(cacheStrategy))
 												.transform(b->debugDir == null ? b : b.setDebugDir(debugDir))
 												.transform(b->locale == null ? b : b.setLocale(locale))
-//												.transform(b->submitUrls.isEmpty() ? b : b.setSubmitUrls(submitUrls))
+												.transform(b->submitUrls == null || submitUrls.isEmpty() ? b : b.setSubmitUrls(submitUrls))
 												.transform(b->taggedPDF == null ? b : b.setTaggedPDF(taggedPDF.booleanValue()))
-//												.transform(b->xci == null ? b : b.setXci(new Document(xci)))
+												.transform(b->xci == null ? b : b.setXci(docFactory.create(xci)))
 												.executeOn(template, data)) {
 				
 				String contentType = result.getContentType();
@@ -150,7 +151,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		private PathOrUrl contentRoot = null;
 		private Path debugDir = null;
 		private Locale locale = null;
-		private List<String> submitUrls = null;
+		private List<AbsoluteOrRelativeUrl> submitUrls = null;
 		private Boolean taggedPDF = null;
 		private byte[] xci = null;
 		private final PathOrUrl template;
@@ -207,14 +208,18 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return this;
 		}
 
-		public List<String> getSubmitUrls() {
+		public List<AbsoluteOrRelativeUrl> getSubmitUrls() {
 			return submitUrls;
 		}
 
 		private RenderPdfFormParameters setSubmitUrls(RequestParameter[] submitUrlParms) throws BadRequestException {
 			this.submitUrls = new ArrayList<>();
 			for (RequestParameter str : submitUrlParms) {
-				this.submitUrls.add(str.getString());
+				try {
+					this.submitUrls.add(AbsoluteOrRelativeUrl.fromString(str.getString()));
+				} catch (IllegalArgumentException e) {
+					throw new BadRequestException("Bad sumbit Url (" + str.getString() + ").", e);
+				}
 			}
 			return this;
 		}

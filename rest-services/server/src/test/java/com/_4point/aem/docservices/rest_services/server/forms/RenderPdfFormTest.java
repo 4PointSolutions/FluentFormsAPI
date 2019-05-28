@@ -165,10 +165,12 @@ class RenderPdfFormTest {
 				()->assertEquals(CacheStrategy.CONSERVATIVE, pdfFormRenderOptions.getCacheStrategy()),	// AEM 6.5 Default
 				()->assertEquals(Paths.get(contentRootData), Paths.get(pdfFormRenderOptions.getContentRoot())),
 				()->assertEquals(Paths.get(debugDirData), Paths.get(pdfFormRenderOptions.getDebugDir())),
-				// TODO: Uncomment these tests and make work.
-//				()->assertEquals(localeData, pdfFormRenderOptions.getLocale()),
-//				()->assertEquals(submitUrlsData, pdfFormRenderOptions.getSubmitUrls()),
+				()->assertEquals(localeData, pdfFormRenderOptions.getLocale()),
+				()->assertEquals(submitUrlsData, pdfFormRenderOptions.getSubmitUrls().get(0)),
 				()->assertTrue(pdfFormRenderOptions.getTaggedPDF())
+				// This can't be tested because the mock objects can't create Adobe Document objects.  That is
+				// what is required because we're using the Adobe pdfRenderFormOptions object.  In order to get
+				// around that, we would need to create our own pdfRenderFormOptions object.
 //				()->assertArrayEquals(xciData.getBytes(), pdfFormRenderOptions.getXci().getInlineData())
 		);
 	}
