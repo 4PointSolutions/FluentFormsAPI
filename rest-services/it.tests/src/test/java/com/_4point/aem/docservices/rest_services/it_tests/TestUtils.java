@@ -13,6 +13,12 @@ import org.apache.commons.io.IOUtils;
 
 public class TestUtils {
 
+	public static final String TEST_MACHINE_NAME = "localhost";
+	public static final int TEST_MACHINE_PORT = 4502;
+	public static final String TEST_MACHINE_PORT_STR = Integer.toString(TEST_MACHINE_PORT);
+	public static final String TEST_USER = "admin";
+	public static final String TEST_USER_PASSWORD = "admin";
+	
 	private static final String SAMPLE_FORM_PDF_NAME = "SampleForm.pdf";
 	private static final String SAMPLE_FORM_XDP_NAME = "SampleForm.xdp";
 	private static final String SAMPLE_FORM_DATA_XML_NAME = "SampleForm_data.xml";

@@ -1,7 +1,11 @@
 package com._4point.aem.docservices.rest_services.client.forms;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.ws.rs.client.Client;
@@ -18,54 +22,68 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.Transformable;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
+import com.adobe.fd.forms.api.AcrobatVersion;
+import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
 import com.adobe.fd.forms.api.PDFFormRenderOptions;
 
 public class RestServicesFormsServiceAdapter implements TraditionalFormsService {
 
-	private static final String PDF_PARAM_NAME = "pdf";
-	private static final String DATA_PARAM_NAME = "data";
+	private static final String PDF_PARAM = "pdf";
+	private static final String DATA_PARAM = "data";
+	private static final String TEMPLATE_PARAM = "template";
+	private static final String ACROBAT_VERSION_PARAM = "renderOptions.acrobatVersion";
+	private static final String CACHE_STRATEGY_PARAM = "renderOptions.cacheStrategy";
+	private static final String CONTENT_ROOT_PARAM = "renderOptions.contentRoot";
+	private static final String DEBUG_DIR_PARAM = "renderOptions.debugDir";
+	private static final String LOCALE_PARAM = "renderOptions.locale";
+	private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
+	private static final String TAGGED_PDF_PARAM = "renderOptions.taggedPdf";
+	private static final String XCI_PARAM = "renderOptions.xci";
+	
+	
 	private static final String IMPORT_DATA_PATH = "/services/FormsService/ImportData";
+	private static final String RENDER_PDF_FORM_PATH = "/services/FormsService/RenderPdfForm";
+	
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	
-	private final WebTarget target;
+	private final WebTarget baseTarget;
 
 	// Only callable from Builder
 	private RestServicesFormsServiceAdapter(WebTarget target) {
 		super();
-		this.target = target;
+		this.baseTarget = target;
 	}
 
 	@Override
 	public Document exportData(Document pdfOrXdp, DataFormat dataFormat) throws FormsServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("exportData has not been implemented yet.");
 	}
 
 	@Override
 	public Document importData(Document pdf, Document data) throws FormsServiceException {
-		WebTarget importDataTarget = target.path(IMPORT_DATA_PATH);
+		WebTarget importDataTarget = baseTarget.path(IMPORT_DATA_PATH);
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM_NAME, data.getInputStream(), MediaType.APPLICATION_XML_TYPE)
-					 .field(PDF_PARAM_NAME, pdf.getInputStream(), APPLICATION_PDF);
+			multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE)
+					 .field(PDF_PARAM, pdf.getInputStream(), APPLICATION_PDF);
 
 			Response result = importDataTarget.request()
 								    .accept(APPLICATION_PDF)
 								    .post(Entity.entity(multipart, multipart.getMediaType()));
 			
-			// TODO: Check the result to make sure everything is OK.
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
 				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
 				if (result.hasEntity()) {
 					InputStream entityStream = (InputStream) result.getEntity();
-					//  TODO: Transfer the entity into the message.
+					message += "\n" + toString(entityStream);
 				}
 				throw new FormsServiceException(message);
 			}
@@ -77,22 +95,95 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 			return SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
 			
 		} catch (IOException e) {
-			throw new FormsServiceException("I/O Error while importing data. (" + target.getUri().toString() + ").", e);
+			throw new FormsServiceException("I/O Error while importing data. (" + baseTarget.getUri().toString() + ").", e);
 		}
 	}
 
 	@Override
-	public Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
-			throws FormsServiceException {
-		// TODO Auto-generated method stub
-		return null;
+	public Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException {
+		WebTarget renderPdfTarget = baseTarget.path(RENDER_PDF_FORM_PATH);
+		
+		AcrobatVersion acrobatVersion = pdfFormRenderOptions.getAcrobatVersion();
+		CacheStrategy cacheStrategy = pdfFormRenderOptions.getCacheStrategy();
+		String contentRoot = pdfFormRenderOptions.getContentRoot();
+		String debugDir = pdfFormRenderOptions.getDebugDir();
+		String locale = pdfFormRenderOptions.getLocale();
+		List<String> submitUrls = pdfFormRenderOptions.getSubmitUrls();
+		boolean taggedPDF = pdfFormRenderOptions.getTaggedPDF();
+		com.adobe.aemfd.docmanager.Document xci = pdfFormRenderOptions.getXci();
+		
+		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
+			multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, urlOrfilename)
+					 .field(TAGGED_PDF_PARAM, Boolean.toString(taggedPDF))
+					 ;
+					 
+			// This code sets the individual fields if they are not null. 
+			MultipartTransformer.create(multipart)
+								.transform((t)->acrobatVersion == null ? t : t.field(ACROBAT_VERSION_PARAM, acrobatVersion.toString()))
+								.transform((t)->cacheStrategy == null  ? t : t.field(CACHE_STRATEGY_PARAM, cacheStrategy.toString()))
+								.transform((t)->contentRoot == null ? t : t.field(CONTENT_ROOT_PARAM, contentRoot))
+								.transform((t)->debugDir == null ? t : t.field(DEBUG_DIR_PARAM, debugDir))
+								.transform((t)->locale == null ? t : t.field(LOCALE_PARAM, locale))
+//								.transform((t)->submitUrls == null ? t : t.field(SUBMIT_URL_PARAM, submitUrls))
+//								.transform((t)->xci == null ? t : t.field(XCI_PARAM, xci.getInputStream(), MediaType.APPLICATION_XML_TYPE))
+								;
+			
+			Response result = renderPdfTarget.request()
+									.accept(APPLICATION_PDF)
+									.post(Entity.entity(multipart, multipart.getMediaType()));
+
+			StatusType resultStatus = result.getStatusInfo();
+			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
+				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
+				if (result.hasEntity()) {
+					InputStream entityStream = (InputStream) result.getEntity();
+					message += "\n" + toString(entityStream);
+				}
+				throw new FormsServiceException(message);
+			}
+			if (!result.hasEntity()) {
+				throw new FormsServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
+			}
+			
+			return SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+		} catch (IOException e) {
+			throw new FormsServiceException("I/O Error while rendering PDF. (" + baseTarget.getUri().toString() + ").", e);
+		}
+		
 	}
 
+	private static class MultipartTransformer implements Transformable<MultipartTransformer> {
+		private final FormDataMultiPart m;
+
+		private MultipartTransformer(FormDataMultiPart m) {
+			super();
+			this.m = m;
+		}
+		
+		public static MultipartTransformer create(FormDataMultiPart fdm) { return new MultipartTransformer(fdm); }
+
+		public FormDataMultiPart get() {
+			return m;
+		}
+
+		public MultipartTransformer field(String name, String value) {
+			m.field(name, value);
+			return this;
+		}
+
+		public MultipartTransformer field(String name, Object entity, MediaType mediaType) {
+			m.field(name, entity, mediaType);
+			return this;
+		}
+		
+		
+	}
+	
 	@Override
 	public ValidationResult validate(String template, Document data, ValidationOptions validationOptions)
 			throws FormsServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("validate has not been implemented yet.");
 	}
 
 	public static Builder builder() {
@@ -147,5 +238,15 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 			WebTarget localTarget = client.target("http" + (useSsl ? "s" : "") + "://" + machineName + ":" + Integer.toString(port));
 			return new RestServicesFormsServiceAdapter(localTarget);
 		}
+	}
+	
+	private static String toString(InputStream inputStream) throws IOException {
+		ByteArrayOutputStream result = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int length;
+		while ((length = inputStream.read(buffer)) != -1) {
+		    result.write(buffer, 0, length);
+		}
+		return result.toString(StandardCharsets.UTF_8.name());
 	}
 }

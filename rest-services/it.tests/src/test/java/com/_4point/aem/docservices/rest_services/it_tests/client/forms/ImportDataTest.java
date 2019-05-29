@@ -3,6 +3,7 @@ package com._4point.aem.docservices.rest_services.it_tests.client.forms;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 
 import java.nio.file.Files;
 
@@ -22,8 +23,6 @@ import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 
 class ImportDataTest {
 
-	private static final String TEST_MACHINE_NAME = "localhost";
-	private static final int TEST_MACHINE_PORT = 4502;
 	
 	private FormsService underTest; 
 
@@ -32,7 +31,7 @@ class ImportDataTest {
 		RestServicesFormsServiceAdapter adapter = RestServicesFormsServiceAdapter.builder()
 														.machineName(TEST_MACHINE_NAME)
 														.port(TEST_MACHINE_PORT)
-														.basicAuthentication("admin", "admin")
+														.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
 														.useSsl(false)
 														.build();
 
@@ -43,13 +42,13 @@ class ImportDataTest {
 	@DisplayName("Test importData() Happy Path.")
 	void testImportData() throws Exception {
 
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML.toFile());
-		Document pdf = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_PDF.toFile());;
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_DATA_XML.toFile());
+		Document pdf = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_PDF.toFile());;
 		Document pdfResult = underTest.importData(pdf, data);
 
 		// Verify that all the results are correct.
 		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
-		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ImportDataClient_BytesResult.pdf")));
+		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("ImportDataClient_BytesResult.pdf")));
 	}
 
 }
