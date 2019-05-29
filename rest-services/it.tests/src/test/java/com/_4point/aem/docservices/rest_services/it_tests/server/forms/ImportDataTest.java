@@ -3,6 +3,7 @@ package com._4point.aem.docservices.rest_services.it_tests.server.forms;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,14 +34,14 @@ class ImportDataTest {
 
 	private static final String PDF_PARAM_NAME = "pdf";
 	private static final String DATA_PARAM_NAME = "data";
-	private static final String IMPORT_DATA_URL = "http://localhost:4502/services/FormsService/ImportData";
+	private static final String IMPORT_DATA_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/FormsService/ImportData";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	
 	private WebTarget target;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("admin", "admin");	// default AEM passwords
+		HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(TEST_USER, TEST_USER_PASSWORD);	// default AEM passwords
 		target = ClientBuilder.newClient()
 							  .register(feature)
 							  .register(MultiPartFeature.class)

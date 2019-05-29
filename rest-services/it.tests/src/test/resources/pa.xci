@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/">
+   <config xmlns="http://www.xfa.org/schema/xci/1.0/" xmlns:xfa="http://www.xfa.org/schema/xci/1.0/">
+      <present> <!--  [0..n]  -->
+         <common>
+            <data>
+               <adjustData>1</adjustData> <!-- 0|1 -->
+               <attributes>preserve</attributes> <!-- ignore|delegate|preserve -->
+               <outputXSL>
+                  <uri/>
+               </outputXSL>
+               <range/>
+               <record/>
+               <startNode/>
+               <uri/>
+               <window/>
+               <xsl>
+                  <debug>
+                     <uri/>
+                  </debug>
+                  <uri/>
+               </xsl>
+            </data>
+            <log> <!--  [0..n]  -->
+               <uri/>
+               <mode>append</mode> <!-- append|overwrite -->
+               <threshold>trace</threshold> <!-- trace|information|warning|error -->
+               <to>null</to> <!-- uri|memory|stdout|null|stderror|system -->
+            </log>
+            <temp>
+               <uri/>
+            </temp>
+            <template>
+               <base/>
+               <startPage>0</startPage>
+               <uri/>
+               <relevant/>
+            </template>
+            <locale/>
+         </common>
+         <copies>1</copies>
+         <destination/> <!-- pdf|ps|pcl -->
+         <driver> <!--  [0..n]  -->
+            <fontInfo>
+               <embed>0</embed> <!-- 0|1 -->
+               <map>
+                  <equate/> <!-- [0..n] Attributes: from='', to='' [0..n]  -->
+               </map>
+               <subsetBelow>100</subsetBelow>
+            </fontInfo>
+            <xdc>
+               <uri/>
+            </xdc>
+         </driver>
+         <pdf> <!--  [0..n]  -->
+         	<!-- Temporarily turned off until PDFUpdate is able to append with compression. -->
+            <compression>
+	       <compressLogicalStructure>1</compressLogicalStructure> <!-- 0|1 -->
+               <level>1</level> <!-- 0 - 9, 0=no compression 1=best speed 9=best compression -->
+               <type>none</type>
+            </compression>
+            <encryption>
+               <encrypt>0</encrypt> <!-- 0|1 -->
+               <encryptionLevel>40bit</encryptionLevel> <!-- 40bit|128bit -->
+               <masterPassword/>
+               <permissions>
+                  <accessibleContent>0</accessibleContent> <!-- 0|1 -->
+                  <contentCopy>0</contentCopy> <!-- 0|1 -->
+                  <documentAssembly>0</documentAssembly> <!-- 0|1 -->
+                  <formFieldFilling>0</formFieldFilling> <!-- 0|1 -->
+                  <modifyAnnots/>
+                  <plaintextMetadata>0</plaintextMetadata> <!-- 0|1 -->
+                  <print>1</print> <!-- 0|1 -->
+                  <printHighQuality/>
+                  <change>0</change> <!-- 0|1 -->
+               </permissions>
+               <userPassword/>
+            </encryption>
+            <fontInfo>
+               <embed>0</embed> <!-- 0|1 -->
+               <!--defaultTypeface>MyriadPro-Regular</defaultTypeface-->
+
+               <map>
+                  <!-- [0..n] Attributes: from='', to='' [0..n]  -->
+ 					<equate from='Courier_*_*' to='Courier New_*_*' force="0"/>
+					<equate from='CourierNew_*_*' to='Courier New_*_*' force="0"/>
+					<equate from='Courier-New_*_*' to='Courier New_*_*' force="0"/>
+					<equate from='MyriadPro_*_*' to='Myriad Pro_*_*' force="0"/>
+					<equate from='MyriadPro-Regular_*_*' to='Myriad Pro_*_*' force="0"/>
+					<equate from='MyriadPro-It_*_*' to='Myriad Pro_*_italic' force="0"/>
+					<equate from='MyriadPro-SemiboldSemiCn_*_*' to='Arial Narrow_bold_*' force="0"/>
+					<equate from='MyriadPro-SemiboldCond_*_*' to='Arial Narrow_bold_*' force="0"/>
+					<equate from='MinionPro_*_*' to='Minion Pro_*_*' force="0"/>
+					<equate from='MinionPro-Regular_*_*' to='Minion Pro_*_*' force="0"/>
+					<equate from='ArialNarrow_*_*' to='Arial Narrow_*_*' force="0"/>
+					<equate from='Arial-Narrow_*_*' to='Arial Narrow_*_*' force="0"/>
+					<equate from='ArialMT_*_*' to='Arial_*_*' force="0"/>
+					<equate from='DTLDocumentaSansT_bold_*' to='Arial Narrow_bold_*' force="0"/>
+					<equate from='DTLDocumentaSansST_bold_*' to='Arial Narrow_bold_*' force="0"/>
+					<equate from='Helvetica Black_*_*' to='Myriad Pro Black_*_*' force="0"/>
+					<equate from='HelveticaBlack_*_*' to='Myriad Pro Black_*_*' force="0"/>
+					<equate from='Helvetica-Black_*_*' to='Myriad Pro Black_*_*' force="0"/>
+					<equate from='Helvetica-Condensed-Black_*_*' to='Arial Narrow_bold_*' force="0"/>
+					<equate from='Helvetica-Condensed_*_*' to='Arial Narrow_*_*' force="0"/>
+					<equate from='HelveticaNeue-Roman_*_*' to='Myriad Pro_*_*' force="0"/>
+					<equate from='HelveticaNeue-Light_*_*' to='Myriad Pro_*_*' force="0"/>
+					<equate from='HelveticaNeue_*_*' to='Myriad Pro_*_*' force="0"/>
+					<equate from='Helvetica_*_*' to='Myriad Pro_*_*' force="0"/>
+					<equate from='Helv_*_*' to='Myriad Pro_*_*' force="0"/>
+					<equate from='Cour_*_*' to='Courier New_*_*' force="0"/>
+					<equate from='Times_*_*' to='Times New Roman_*_*' force="0"/>
+					<equate from='Times-Roman_*_*' to='Times New Roman_*_*' force="0"/>
+					<equate from='TimesNewRoman_*_*' to='Times New Roman_*_*' force="0"/>
+					<equate from='GillSans_*_*' to='Arial Narrow_*_*' force="0"/>
+					<equate from='HelvOut Blk' to='Myriad Pro' force="0"/>
+					<equate from='PDP Helv_*_*' to='Myriad Pro_*_*' force="0"/>
+					<equate from='CG Times_*_*' to='Minion Pro_*_*' force="0"/>
+					<equate from='ZapfDingbats_*_*' to='WingDings_*_*' force="0"/>
+					<equate from='FranklinGothic-Demi_*_*' to='Myriad Pro_bold_*' force="0"/>
+					<equate from='FormataCondensed-Light_*_*' to='Arial Narrow_*_*' force="0"/>
+					<equate from='FormataCondensed-Regular_*_*' to='Arial Narrow_*_*' force="0"/>
+					<equate from='FormataCondensed-Medium_*_*' to='Arial Narrow_bold_*' force="0"/>
+<!--					
+					<equate from='MS-PGothic_*_*' to='MS PGothic_*_*' force="0"/>
+					<equate from='MS-PGothic+1_*_*' to='MS PGothic_*_*' force="0"/>
+					<equate from='MS-PGothic+2_*_*' to='MS PGothic_*_*' force="0"/>
+					<equate from='MS-PGothic+3_*_*' to='MS PGothic_*_*' force="0"/>
+					<equate from='MS-PGothic+4_*_*' to='MS PGothic_*_*' force="0"/>
+-->			
+					<equate from='HGPSoeiKakugothicUB_*_*' to='MS Gothic_*_*' force="0"/>
+					<equate from='GothicBBB-Medium-Identity-H_*_*' to='MS Gothic_*_*' force="0"/>
+               </map>
+               <subsetBelow>100</subsetBelow> <!-- An integer value between 0-100 representing a percentage -->
+            </fontInfo>
+            <interactive>1</interactive> <!-- 0|1 -->
+            <openAction>
+               <destination>none</destination> <!-- none|pageFit -->
+            </openAction>
+            <creator>Adobe Experience Manager forms PDF forms</creator>
+            <producer>Adobe Experience Manager forms PDF forms</producer>
+            <scriptModel>XFA</scriptModel> <!-- XFA|none -->
+            <submitFormat>pdf</submitFormat> <!-- html|fdf|xml|pdf -->
+            <tagged>0</tagged> <!-- 0|1 -->
+            <xdc>
+               <uri/>
+            </xdc>
+            <version>1.7</version> <!-- 1.2=acrobat 3|1.3=acrobat 4 -->
+            <renderPolicy>server</renderPolicy>
+         </pdf>
+         
+         <zpl>
+			<fontInfo>
+				<defaultTypeface writingScript="Roman">CG Triumvirate</defaultTypeface>
+				<defaultTypeface writingScript="Japanese">Kozuka Mincho Pro-VI R</defaultTypeface>
+				<defaultTypeface writingScript="SimplifiedChinese">Adobe Song Std L</defaultTypeface>
+				<defaultTypeface writingScript="TraditionalChinese">Adobe Ming Std L</defaultTypeface>
+				<defaultTypeface writingScript="Korean">Adobe Myungjo Std M</defaultTypeface>
+				<map>
+					<equate from='MS Gothic_*_*' to='Kozuka Gothic Pro M_*_*' force="1"/>
+				</map>
+			</fontInfo>
+		</zpl>
+
+         <submitUrl/>
+         <webClient> <!--  [0..n]  -->
+            <fontInfo>
+               <embed>0</embed> <!-- 0|1 -->
+               <map>
+                  <equate/> <!-- [0..n] Attributes: from='', to='' [0..n]  -->
+               </map>
+               <subsetBelow>100</subsetBelow>
+            </fontInfo>
+            <xdc>
+               <uri/>
+            </xdc>
+         </webClient>
+         <xdp> <!--  [0..n]  -->
+            <embedRenderedOutput>1</embedRenderedOutput> <!-- 0|1 -->
+            <packets/>
+         </xdp>
+         <layout>paginate</layout> <!-- paginate|panel -->
+         <output>
+            <uri/>
+            <to>null</to> <!-- uri|memory|stdout|null -->
+            <type>native</type> <!-- native|xdp|mergedXDP -->
+         </output>
+         <script>
+            <currentPage/>
+            <exclude>nullTest formatTest</exclude>
+            <runScripts>both</runScripts> <!-- client|server|both -->
+         </script>
+     </present>
+     <acrobat>
+         <acrobat7>
+             <dynamicRender>forbidden</dynamicRender>
+         </acrobat7>
+     </acrobat>
+   </config>
+</xdp:xdp>

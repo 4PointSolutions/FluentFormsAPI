@@ -3,6 +3,7 @@ package com._4point.aem.docservices.rest_services.it_tests.server.forms;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,25 +28,44 @@ import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
 class RenderPdfFormTest {
 
-	private static final String TEMPLATE_PARAM_NAME = "template";
-	private static final String DATA_PARAM_NAME = "data";
-	private static final String RENDER_PDF_FORM_URL = "http://localhost:4502/services/FormsService/RenderPdfForm";
+	private static final String TEMPLATE_PARAM = "template";
+	private static final String DATA_PARAM = "data";
+	private static final String ACROBAT_VERSION_PARAM = "renderOptions.acrobatVersion";
+	private static final String CACHE_STRATEGY_PARAM = "renderOptions.cacheStrategy";
+	private static final String CONTENT_ROOT_PARAM = "renderOptions.contentRoot";
+	private static final String DEBUG_DIR_PARAM = "renderOptions.debugDir";
+	private static final String LOCALE_PARAM = "renderOptions.locale";
+	private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
+	private static final String TAGGED_PDF_PARAM = "renderOptions.taggedPdf";
+	private static final String XCI_PARAM = "renderOptions.xci";
+	private static final String RENDER_PDF_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/FormsService/RenderPdfForm";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 
 	private WebTarget target;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("admin", "admin"); // default AEM passwords
+		HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(TEST_USER, TEST_USER_PASSWORD); // default AEM passwords
 		target = ClientBuilder.newClient().register(feature).register(MultiPartFeature.class)
 				.target(RENDER_PDF_FORM_URL);
 	}
 
+	// TODO: Debug/Fix Submit URL and Cache Strategy.  Both are currently causing failures.  I'm not sure why
+	//       however they are not required for the current client. so I am going to defer fixing them until
+	//       some future time (i.e. this is technical debt).
 	@Test
-	void testRenderFormsPDF_HappyPath() throws IOException {
+	void testRenderFormsPDF_AllArgs() throws IOException {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM_NAME, TestUtils.SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM_NAME, TestUtils.SERVER_FORMS_DIR.resolve(TestUtils.SAMPLE_FORM_XDP).toString());
+			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString())
+					 .field(ACROBAT_VERSION_PARAM, "Acrobat_10")
+//					 .field(CACHE_STRATEGY_PARAM, "CONSERVATIVE")
+					 .field(LOCALE_PARAM, "en-CA")
+					 .field(TAGGED_PDF_PARAM, "true")
+					 .field(CONTENT_ROOT_PARAM, SERVER_FORMS_DIR.toString())
+//					 .field(SUBMIT_URL_PARAM, "/submit/url")
+					 .field(XCI_PARAM, RESOURCES_DIR.resolve("pa.xci").toFile(), MediaType.APPLICATION_XML_TYPE)
+					 ;
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)
@@ -55,6 +75,9 @@ class RenderPdfFormTest {
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
 			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
+			
+			// It would be nice if we used a PDF library to verify the attributes that were set earlier (things like
+			// tagging, locale, etc.)  For now, we are just going to write the results out and check manually.
 			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfFormsServer_HappyPathResult.pdf")));
 		}
 
@@ -63,8 +86,8 @@ class RenderPdfFormTest {
 	@Test
 	void testRenderFormsPDF_JustFormAndData() throws IOException {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM_NAME, TestUtils.SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM_NAME, TestUtils.SERVER_FORMS_DIR.resolve(TestUtils.SAMPLE_FORM_XDP).toString());
+			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString());
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)
@@ -83,8 +106,8 @@ class RenderPdfFormTest {
 	void testRenderFormsPDF_BadXDP() throws IOException {
 		String badFormName = "BadForm.xdp";
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()
-				.field(DATA_PARAM_NAME, TestUtils.SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-				.field(TEMPLATE_PARAM_NAME, TestUtils.SERVER_FORMS_DIR.resolve(badFormName).toString())) {
+				.field(DATA_PARAM, TestUtils.SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+				.field(TEMPLATE_PARAM, TestUtils.SERVER_FORMS_DIR.resolve(badFormName).toString())) {
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)
