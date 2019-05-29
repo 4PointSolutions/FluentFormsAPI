@@ -64,21 +64,24 @@ public enum AdobeDocumentFactoryImpl implements DocumentFactory {
 		return new AdobeDocumentImpl(is);
 	}
 
+//  Removed because this won't work with the client version of this library.  This may be re-instated later
+//	as part of a separate class however until its requirement is proven, we're going to leave it out.
+//	
 	/* (non-Javadoc)
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.lang.String, org.apache.sling.api.resource.ResourceResolver, boolean)
 	 */
-	@Override
-	public Document create(String jcrPath, ResourceResolver resolver, boolean manageResolver) {
-		return new AdobeDocumentImpl(jcrPath, resolver, manageResolver);
-	}
+//	@Override
+//	public Document create(String jcrPath, ResourceResolver resolver, boolean manageResolver) {
+//		return new AdobeDocumentImpl(jcrPath, resolver, manageResolver);
+//	}
 
 	/* (non-Javadoc)
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.lang.String, org.apache.sling.api.resource.ResourceResolver)
 	 */
-	@Override
-	public Document create(String jcrPath, ResourceResolver resolver) {
-		return new AdobeDocumentImpl(jcrPath, resolver);
-	}
+//	@Override
+//	public Document create(String jcrPath, ResourceResolver resolver) {
+//		return new AdobeDocumentImpl(jcrPath, resolver);
+//	}
 
 	/* (non-Javadoc)
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.lang.String)

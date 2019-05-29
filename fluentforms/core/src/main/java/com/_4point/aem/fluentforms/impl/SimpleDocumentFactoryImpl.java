@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.sling.api.resource.ResourceResolver;
+// import org.apache.sling.api.resource.ResourceResolver;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
@@ -68,22 +68,25 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 		return new SimpleDocumentImpl(is);
 	}
 
+//  Removed because this won't work with the client version of this library.  This may be re-instated later
+//	as part of a separate class however until its requirement is proven, we're going to leave it out.
+//	
 	/* (non-Javadoc)
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.lang.String, org.apache.sling.api.resource.ResourceResolver, boolean)
 	 */
-	@Override
-	public Document create(String jcrPath, ResourceResolver resolver, boolean manageResolver) {
-		throw new UnsupportedOperationException("constructing from jcrPath is not supported.");
-	}
+//	@Override
+//	public Document create(String jcrPath, ResourceResolver resolver, boolean manageResolver) {
+//		throw new UnsupportedOperationException("constructing from jcrPath is not supported.");
+//	}
 
 	/* (non-Javadoc)
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.lang.String, org.apache.sling.api.resource.ResourceResolver)
 	 */
-	@Override
-	public Document create(String jcrPath, ResourceResolver resolver) {
-		throw new UnsupportedOperationException("constructing from jcrPath is not supported.");
-	}
-
+//	@Override
+//	public Document create(String jcrPath, ResourceResolver resolver) {
+//		throw new UnsupportedOperationException("constructing from jcrPath is not supported.");
+//	}
+//
 	/* (non-Javadoc)
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.lang.String)
 	 */

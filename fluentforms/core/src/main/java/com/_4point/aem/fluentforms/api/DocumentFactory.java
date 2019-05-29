@@ -21,10 +21,13 @@ public interface DocumentFactory {
 
 	public Document create(InputStream is);
 
-	public Document create(String jcrPath, ResourceResolver resolver, boolean manageResolver);
-
-	public Document create(String jcrPath, ResourceResolver resolver);
-
+//  Removed because this won't work with the client version of this library.  This may be re-instated later
+//	as part of a separate class however until its requirement is proven, we're going to leave it out.
+//	
+//	public Document create(String jcrPath, ResourceResolver resolver, boolean manageResolver);
+//
+//	public Document create(String jcrPath, ResourceResolver resolver);
+//
 	public Document create(String jcrPath);
 
 	public Document create(URL url);
