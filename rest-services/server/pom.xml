@@ -26,7 +26,7 @@
     <artifactId>rest-services.server</artifactId>
     <packaging>bundle</packaging>
     <name>AEM Document Services REST Services - Server</name>
-    <description>Core bundle for AEM Document Services REST Services</description>
+    <description>Server bundle for AEM Document Services REST Services</description>
     <build>
         <plugins>
             <plugin>

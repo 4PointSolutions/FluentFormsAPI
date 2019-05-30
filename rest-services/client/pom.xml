@@ -25,8 +25,8 @@
     </parent>
     <artifactId>rest-services.client</artifactId>
     <packaging>bundle</packaging>
-    <name>${appsFolderName} - Client</name>
-    <description>Core bundle for ${appsFolderName}</description>
+    <name>AEM Document Services REST Services - Client</name>
+    <description>Client bundle for AEM Document Services REST Services</description>
     <build>
         <plugins>
             <plugin>
