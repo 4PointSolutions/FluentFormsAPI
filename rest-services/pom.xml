@@ -15,7 +15,7 @@
 	<artifactId>rest-services</artifactId>
 	<packaging>pom</packaging>
 	<version>0.0.1-SNAPSHOT</version>
-	<description>${appsFolderName}</description>
+	<description>AEM Document Services REST Services</description>
 
 	<modules>
 		<module>server</module>
