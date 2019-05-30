@@ -42,6 +42,8 @@ import java.util.List;
 @ExtendWith(MockitoExtension.class)
 class RestServicesFormsServiceAdapterTest {
 
+	private static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
+	private static final String CORRELATION_ID = "correlationId";
 	private static final String TEST_MACHINE_NAME = "testmachinename";
 	private static final int TEST_MACHINE_PORT = 8080;
 
@@ -56,6 +58,7 @@ class RestServicesFormsServiceAdapterTest {
 	@Captor ArgumentCaptor<String> machineName;
 	@Captor ArgumentCaptor<String> path;
 	@Captor ArgumentCaptor<Entity> entity;
+	@Captor ArgumentCaptor<String> correlationId;
 
 	RestServicesFormsServiceAdapter underTest;
 	
@@ -88,23 +91,32 @@ class RestServicesFormsServiceAdapterTest {
 		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
 		
 		boolean useSSL = false;
+		boolean useCorrelationId = false;
 		switch (codePath) {
 		case SSL:
 			useSSL = true;
+			useCorrelationId = true;
+			when(builder.header(eq(CORRELATION_ID_HTTP_HDR), correlationId.capture())).thenReturn(builder);
 			break;
 		case NO_SSL:
 			useSSL = false;
+			useCorrelationId = false;
 			break;
 		default:
 			throw new IllegalStateException("Found unexpected HappyPaths value (" + codePath.toString() + ").");
 		}
 		
-		underTest = RestServicesFormsServiceAdapter.builder()
+		com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter.Builder adapterBuilder = RestServicesFormsServiceAdapter.builder()
 						.machineName(TEST_MACHINE_NAME)
 						.port(TEST_MACHINE_PORT)
 						.basicAuthentication("username", "password")
 						.useSsl(useSSL)
-						.clientFactory(()->client)
+						.clientFactory(()->client);
+		if (useCorrelationId) {
+			adapterBuilder.correlationId(()->CORRELATION_ID);
+		}
+		
+		underTest = adapterBuilder
 						.build();
 				
 		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
@@ -127,6 +139,10 @@ class RestServicesFormsServiceAdapterTest {
 		assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
 		validateDocumentFormField(postedData, "pdf", new MediaType("application", "pdf"), pdf.getInlineData());
 		validateDocumentFormField(postedData, "data", MediaType.APPLICATION_XML_TYPE, data.getInlineData());
+		
+		if (useCorrelationId) {
+			assertEquals(CORRELATION_ID, correlationId.getValue());
+		}
 		
 		// Make sure the response is correct.
 		assertArrayEquals(responseData.getInlineData(), pdfResult.getInlineData());

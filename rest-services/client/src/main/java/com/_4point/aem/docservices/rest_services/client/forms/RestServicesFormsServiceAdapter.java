@@ -50,15 +50,25 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 	
 	private static final String IMPORT_DATA_PATH = "/services/FormsService/ImportData";
 	private static final String RENDER_PDF_FORM_PATH = "/services/FormsService/RenderPdfForm";
+	private static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	
 	private final WebTarget baseTarget;
+	private final Supplier<String> correlationIdFn;
 
 	// Only callable from Builder
 	private RestServicesFormsServiceAdapter(WebTarget target) {
 		super();
 		this.baseTarget = target;
+		this.correlationIdFn = null;
+	}
+
+	// Only callable from Builder
+	private RestServicesFormsServiceAdapter(WebTarget target, Supplier<String> correlationId) {
+		super();
+		this.baseTarget = target;
+		this.correlationIdFn = correlationId;
 	}
 
 	@Override
@@ -74,9 +84,7 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 			multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE)
 					 .field(PDF_PARAM, pdf.getInputStream(), APPLICATION_PDF);
 
-			Response result = importDataTarget.request()
-								    .accept(APPLICATION_PDF)
-								    .post(Entity.entity(multipart, multipart.getMediaType()));
+			Response result = postToServer(importDataTarget, multipart);
 			
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
@@ -128,11 +136,9 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 //								.transform((t)->submitUrls == null ? t : t.field(SUBMIT_URL_PARAM, submitUrls))
 //								.transform((t)->xci == null ? t : t.field(XCI_PARAM, xci.getInputStream(), MediaType.APPLICATION_XML_TYPE))
 								;
-			
-			Response result = renderPdfTarget.request()
-									.accept(APPLICATION_PDF)
-									.post(Entity.entity(multipart, multipart.getMediaType()));
 
+			Response result = postToServer(renderPdfTarget, multipart);
+			
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
 				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
@@ -153,6 +159,26 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 		
 	}
 
+	@Override
+	public ValidationResult validate(String template, Document data, ValidationOptions validationOptions)
+			throws FormsServiceException {
+		throw new UnsupportedOperationException("validate has not been implemented yet.");
+	}
+
+	private Response postToServer(WebTarget localTarget, final FormDataMultiPart multipart) {
+		javax.ws.rs.client.Invocation.Builder invokeBuilder = localTarget.request().accept(APPLICATION_PDF);
+		if (this.correlationIdFn != null) {
+			invokeBuilder.header(CORRELATION_ID_HTTP_HDR, this.correlationIdFn.get());
+		}
+		Response result = invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType()));
+		return result;
+	}
+
+	/**
+	 * This class is to add a transform() method on the Multipart object so that we can make
+	 * the "set if not null" operations more succinct. 
+	 *
+	 */
 	private static class MultipartTransformer implements Transformable<MultipartTransformer> {
 		private final FormDataMultiPart m;
 
@@ -180,12 +206,11 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 		
 	}
 	
-	@Override
-	public ValidationResult validate(String template, Document data, ValidationOptions validationOptions)
-			throws FormsServiceException {
-		throw new UnsupportedOperationException("validate has not been implemented yet.");
-	}
-
+	/**
+	 * Creates a Builder object for building a RestServicesFormServiceAdapter object.
+	 * 
+	 * @return build object
+	 */
 	public static Builder builder() {
 		return new Builder();
 	}
@@ -198,6 +223,7 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 		private HttpAuthenticationFeature authFeature = null;
 		private boolean useSsl = false;
 		private Supplier<Client> clientFactory = defaultClientFactory;
+		private Supplier<String> correlationIdFn = null;
 		
 		// Only callable from the containing class.
 		private Builder() {
@@ -229,6 +255,11 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 			return this;
 		}
 		
+		public Builder correlationId(Supplier<String> correlationIdFn) {
+			this.correlationIdFn = correlationIdFn;
+			return this;
+		}
+
 		public RestServicesFormsServiceAdapter build() {
 			Client client = clientFactory.get();
 			client.register(MultiPartFeature.class);
@@ -236,7 +267,7 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 				client.register(authFeature);
 			}
 			WebTarget localTarget = client.target("http" + (useSsl ? "s" : "") + "://" + machineName + ":" + Integer.toString(port));
-			return new RestServicesFormsServiceAdapter(localTarget);
+			return new RestServicesFormsServiceAdapter(localTarget, this.correlationIdFn);
 		}
 	}
 	
