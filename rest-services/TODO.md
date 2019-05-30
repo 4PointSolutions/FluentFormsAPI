@@ -9,6 +9,8 @@ This file contains a list of things that I would like to do to improve on the ex
    1. Add more importData tests for exceptional case (i.e. those cases where exceptions are thrown.
    2. Improve mocking based on [https://maciejwalkowiak.com/mocking-fluent-interfaces/](https://maciejwalkowiak.com/mocking-fluent-interfaces/) 
 
+1. Add support for a Correlation ID header field (write it out to the log).  This has already been added in the client code, but needs to be added to the server code.
+
 ## Longer Term Items
 1. Having an automated test of the PDFs returned from the integration tests would be nice.  This is probably a lot of work however, so it is on the back burner.
 
