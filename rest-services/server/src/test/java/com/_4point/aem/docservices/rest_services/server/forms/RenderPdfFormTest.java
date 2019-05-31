@@ -73,7 +73,48 @@ class RenderPdfFormTest {
 	}
 
 	@Test
-	void testDoPost_HappyPath_MinArgs() throws ServletException, IOException, NoSuchFieldException {
+	void testDoPost_HappyPath_JustForm() throws ServletException, IOException, NoSuchFieldException {
+		String resultData = "testDoPost Happy Path Result";
+		String templateData = TestUtils.SAMPLE_FORM.toString();
+		
+		byte[] resultDataBytes = resultData.getBytes();
+		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
+
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+		
+		Map<String, Object> parameterMap = new HashMap<>();
+		parameterMap.put(TEMPLATE_PARAM, templateData);
+		request.setParameterMap(parameterMap );
+		
+		underTest.doPost(request, response);
+		
+		// Validate the result
+		assertEquals(SlingHttpServletResponse.SC_OK, response.getStatus());
+		assertEquals(APPLICATION_PDF, response.getContentType());
+		assertEquals(resultData, response.getOutputAsString());
+		assertEquals(resultDataBytes.length, response.getContentLength());
+	
+		// Validate that the correct parameters were passed in to renderPdf
+		RenderPDFFormArgs renderPDFFormArgs = renderPdfMock.getRenderPDFFormArgs();
+		assertNull(renderPDFFormArgs.getData());
+		assertEquals(templateData, renderPDFFormArgs.getUrlOrfilename());
+		PDFFormRenderOptions pdfFormRenderOptions = renderPDFFormArgs.getPdfFormRenderOptions();
+		assertAll(
+				()->assertEquals(AcrobatVersion.Acrobat_11, pdfFormRenderOptions.getAcrobatVersion()),	// AEM 6.5 Default
+				()->assertEquals(CacheStrategy.AGGRESSIVE, pdfFormRenderOptions.getCacheStrategy()),	// AEM 6.5 Default
+				()->assertNull(pdfFormRenderOptions.getContentRoot()),
+				()->assertNull(pdfFormRenderOptions.getDebugDir()),
+				()->assertNull(pdfFormRenderOptions.getLocale()),
+				()->assertNull(pdfFormRenderOptions.getSubmitUrls()),
+				()->assertFalse(pdfFormRenderOptions.getTaggedPDF()),
+				()->assertNull(pdfFormRenderOptions.getXci())
+			);
+	}
+
+	@Test
+	void testDoPost_HappyPath_JustFormAndData() throws ServletException, IOException, NoSuchFieldException {
 		String formData = "formData";
 		String resultData = "testDoPost Happy Path Result";
 		String templateData = TestUtils.SAMPLE_FORM.toString();

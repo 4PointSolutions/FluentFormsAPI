@@ -121,8 +121,10 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 		com.adobe.aemfd.docmanager.Document xci = pdfFormRenderOptions.getXci();
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, urlOrfilename)
+			if (data != null) {
+				multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE);
+			}
+			multipart.field(TEMPLATE_PARAM, urlOrfilename)
 					 .field(TAGGED_PDF_PARAM, Boolean.toString(taggedPDF))
 					 ;
 					 

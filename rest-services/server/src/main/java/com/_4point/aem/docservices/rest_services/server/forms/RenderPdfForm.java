@@ -90,7 +90,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 
 		RenderPdfFormParameters reqParameters = RenderPdfFormParameters.readFormParameters(request, false);	// TODO: Make the validation of XML a config parameter.
 		PathOrUrl template = reqParameters.getTemplate();
-		Document data = docFactory.create(reqParameters.getData());
+		Document data = reqParameters.getData() != null ? docFactory.create(reqParameters.getData()) : null;
 		PathOrUrl contentRoot = reqParameters.getContentRoot();
 		AcrobatVersion acrobatVersion = reqParameters.getAcrobatVersion();
 		CacheStrategy cacheStrategy = reqParameters.getCacheStrategy();
@@ -161,6 +161,12 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			super();
 			this.template = template;
 			this.data = data;
+		}
+
+		public RenderPdfFormParameters(PathOrUrl template) {
+			super();
+			this.template = template;
+			this.data = null;
 		}
 
 		public AcrobatVersion getAcrobatVersion() {
@@ -260,15 +266,16 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		 */
 		public static RenderPdfFormParameters readFormParameters(SlingHttpServletRequest request, boolean validateXml) throws BadRequestException {
 			try {
-				byte[] inputData = getMandatoryParameter(request, DATA_PARAM).get();
-				if (validateXml) {
+				
+				PathOrUrl template = PathOrUrl.fromString(getMandatoryParameter(request, TEMPLATE_PARAM).getString());
+
+				// Data parameter is optional.  If Data is not supplied, then an empty form is produced.
+				byte[] inputData = getOptionalParameter(request, DATA_PARAM).map(RequestParameter::get).orElse(null);
+				if (inputData != null && validateXml) {
 					validateXmlData(inputData);
 				}
-			
-				PathOrUrl template = PathOrUrl.fromString(getMandatoryParameter(request, TEMPLATE_PARAM).getString());
-				
 	
-				RenderPdfFormParameters result = new RenderPdfFormParameters(template, inputData);
+				RenderPdfFormParameters result = inputData == null ? new RenderPdfFormParameters(template) : new RenderPdfFormParameters(template, inputData);
 				
 				getOptionalParameter(request, ACROBAT_VERSION_PARAM).ifPresent(rp->result.setAcrobatVersion(rp.getString()));
 				getOptionalParameter(request, CACHE_STRATEGY_PARAM).ifPresent(rp->result.setCacheStrategy(rp.getString()));
