@@ -7,4 +7,7 @@ This file contains a list of things that I would like to do to improve on the ex
 1. Modify the setContentRoot to take a Path or URL rather than a String.
 
 1. Modify setXci to take a byte[] or a Path in addition to taking a Document object.  This will help remove boilerplate code for setting the XCI.
+
+1. Add support for not specifying a data file in renderForm().  Use overloading to differentiate between when a data
+file is omitted and when a null is passed in by mistake. 
    

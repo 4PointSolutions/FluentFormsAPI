@@ -160,9 +160,10 @@ class FormsServiceImplTest {
 		
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(nullFilename, data, pdfFormRenderOptions));
 		assertTrue(ex1.getMessage().contains("template"), ()->"'" + ex1.getMessage() + "' does not contain 'template'");
-		
-		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
-		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
+
+		// Null Data is allowed.
+//		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
+//		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
 		
 		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, data, null));
 		assertTrue(ex3.getMessage().contains("pdfFormRenderOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'pdfFormRenderOptions'");
@@ -223,8 +224,9 @@ class FormsServiceImplTest {
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(nullFilename, data, pdfFormRenderOptions));
 		assertTrue(ex1.getMessage().contains("url"), ()->"'" + ex1.getMessage() + "' does not contain 'url'");
 		
-		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
-		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
+		// Null Data is allowed.
+//		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
+//		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
 		
 		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, data, null));
 		assertTrue(ex3.getMessage().contains("pdfFormRenderOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'pdfFormRenderOptions'");
@@ -287,8 +289,9 @@ class FormsServiceImplTest {
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(nullFilename, data, pdfFormRenderOptions));
 		assertTrue(ex1.getMessage().contains("url"), ()->"'" + ex1.getMessage() + "' does not contain 'url'");
 		
-		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
-		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
+		// Null Data is allowed.
+//		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
+//		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
 		
 		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, data, null));
 		assertTrue(ex3.getMessage().contains("pdfFormRenderOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'pdfFormRenderOptions'");
