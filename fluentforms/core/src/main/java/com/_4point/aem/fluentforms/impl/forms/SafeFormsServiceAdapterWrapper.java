@@ -36,7 +36,7 @@ public class SafeFormsServiceAdapterWrapper implements TraditionalFormsService {
 	public Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException {
 		Objects.requireNonNull(urlOrfilename, "urlOrFilename cannot be null.");  // Already handled above.
-		Objects.requireNonNull(data, "data cannot be null.");
+//		Objects.requireNonNull(data, "data cannot be null.");	// Data can be null to produce empty form.
 		Objects.requireNonNull(pdfFormRenderOptions, "pdfFormRenderOptions cannot be null.");
 		return formsService.renderPDFForm(urlOrfilename, data, pdfFormRenderOptions);
 	}

@@ -49,7 +49,7 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 	@Override
 	public Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException {
 		try {
-			return documentFactory.create(adobeFormsService.renderPDFForm(urlOrfilename, data.getAdobeDocument(), pdfFormRenderOptions));
+			return documentFactory.create(adobeFormsService.renderPDFForm(urlOrfilename, (data != null ? data.getAdobeDocument() : null), pdfFormRenderOptions));
 		} catch (com.adobe.fd.forms.api.FormsServiceException e) {
 			throw new FormsServiceException(e);
 		}
