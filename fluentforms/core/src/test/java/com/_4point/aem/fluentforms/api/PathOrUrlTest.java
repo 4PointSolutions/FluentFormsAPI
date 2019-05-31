@@ -29,8 +29,9 @@ class PathOrUrlTest {
 		assertEquals(expected.toString(), result.toString());
 	}
 
+	// TODO: Need to add , "crx:///content/dam/formsanddocument" to the list of test URLs (and make it work too!)
 	@ParameterizedTest
-	@ValueSource(strings = { "http://example.com", "file:///~/calendar" })
+	@ValueSource(strings = { "http://example.com", "https://example.com", "file:///~/calendar" })
 	void testFromString_Url(String url) throws MalformedURLException {
 		PathOrUrl result = PathOrUrl.fromString(url);
 		assertFalse(result.isPath(), "Expected that isPath() would be false");
