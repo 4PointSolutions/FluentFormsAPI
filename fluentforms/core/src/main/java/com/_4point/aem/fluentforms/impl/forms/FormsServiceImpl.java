@@ -14,6 +14,7 @@ import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
+import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
@@ -22,10 +23,12 @@ import com.adobe.fd.forms.api.PDFFormRenderOptions;
 public class FormsServiceImpl implements FormsService {
 	
 	private final TraditionalFormsService adobeFormsService;
+	private final UsageContext usageContext;
 
-	public FormsServiceImpl(TraditionalFormsService adobeFormsService) {
+	public FormsServiceImpl(TraditionalFormsService adobeFormsService, UsageContext usageContext) {
 		super();
 		this.adobeFormsService = new SafeFormsServiceAdapterWrapper(adobeFormsService);
+		this.usageContext = usageContext;
 	}
 
 	@Override
@@ -90,7 +93,7 @@ public class FormsServiceImpl implements FormsService {
 
 	private void validateTemplatePath(Path filename) throws FormsServiceException, FileNotFoundException {
 		Objects.requireNonNull(filename, "template cannot be null.");
-		if (!(Files.exists(filename) && Files.isRegularFile(filename))) {
+		if (this.usageContext == UsageContext.SERVER_SIDE && !(Files.exists(filename) && Files.isRegularFile(filename))) {
 			String message = "Unable to find template (" + filename.toString() + ").";
 			throw new FileNotFoundException(message);
 		}

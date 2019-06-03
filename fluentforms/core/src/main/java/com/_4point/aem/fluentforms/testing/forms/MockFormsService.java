@@ -3,6 +3,7 @@ package com._4point.aem.fluentforms.testing.forms;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
+import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.ExportDataArgs;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.ImportDataArgs;
@@ -12,15 +13,15 @@ import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.Val
 public class MockFormsService extends FormsServiceImpl {
 
 	public MockFormsService() {
-		super(new MockTraditionalFormsService());
+		super(new MockTraditionalFormsService(), UsageContext.SERVER_SIDE);
 	}
 
 	public MockFormsService(DocumentFactory documentFactory) {
-		super(new MockTraditionalFormsService(documentFactory));
+		super(new MockTraditionalFormsService(documentFactory), UsageContext.SERVER_SIDE);
 	}
 
 	public MockFormsService(MockTraditionalFormsService formsService) {
-		super(formsService);
+		super(formsService, UsageContext.SERVER_SIDE);
 	}
 
 	public static MockFormsService createExportDataMock(Document exportDataResult) {

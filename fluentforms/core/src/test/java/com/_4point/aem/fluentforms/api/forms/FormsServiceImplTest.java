@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
+import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com._4point.aem.fluentforms.impl.forms.ValidationOptionsImpl;
@@ -48,7 +49,7 @@ class FormsServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		underTest = new FormsServiceImpl(adobeFormsService);
+		underTest = new FormsServiceImpl(adobeFormsService, UsageContext.SERVER_SIDE);
 	}
 
 	@Test

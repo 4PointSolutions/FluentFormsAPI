@@ -21,6 +21,7 @@ import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
+import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
@@ -38,7 +39,7 @@ class RenderPdfFormTest {
 				.useSsl(false)
 				.build();
 
-		underTest = new FormsServiceImpl(adapter);
+		underTest = new FormsServiceImpl(adapter, UsageContext.SERVER_SIDE);
 	}
 
 	@Test

@@ -39,6 +39,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
+import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
@@ -79,7 +80,7 @@ public class ImportData extends SlingAllMethodsServlet {
 	}
 
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws InternalServerErrorException, BadRequestException, NotAcceptableException {
-		FormsService formsService = new FormsServiceImpl(formServiceFactory.get());
+		FormsService formsService = new FormsServiceImpl(formServiceFactory.get(), UsageContext.SERVER_SIDE);
 		
 		RequestParameter pdfParameter = FormParameters.getMandatoryParameter(request, PDF_PARAM_NAME);
 		RequestParameter dataParameter = FormParameters.getMandatoryParameter(request, DATA_PARAM_NAME);
