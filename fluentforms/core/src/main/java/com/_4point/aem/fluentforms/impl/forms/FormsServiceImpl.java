@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -44,9 +45,15 @@ public class FormsServiceImpl implements FormsService {
 	@Override
 	public Document renderPDFForm(Path filename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException, FileNotFoundException {
-		validateTemplatePath(filename);
+		Objects.requireNonNull(filename, "template cannot be null.");
 
-		return this.renderPDFForm(filename.toString(), data, pdfFormRenderOptions);
+		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
+		String contentRoot = Objects.requireNonNull(pdfFormRenderOptions, "pdfFormRenderOptions cannot be null!").getContentRoot();
+		TemplateValues tvs = TemplateValues.determineTemplateValues(filename, (contentRoot != null ? Paths.get(contentRoot) : null), this.usageContext);
+		
+		Path finalContentRoot = tvs.getContentRoot();
+		pdfFormRenderOptions.setContentRoot(finalContentRoot != null ? finalContentRoot.toString() : null);
+		return this.renderPDFForm(tvs.getTemplate().toString(), data, pdfFormRenderOptions);
 	}
 
 	@Override
@@ -90,6 +97,7 @@ public class FormsServiceImpl implements FormsService {
 	public ValidateArgumentBuilderImpl validate() {
 		return new ValidateArgumentBuilderImpl();
 	}
+
 
 	private void validateTemplatePath(Path filename) throws FormsServiceException, FileNotFoundException {
 		Objects.requireNonNull(filename, "template cannot be null.");
@@ -208,4 +216,55 @@ public class FormsServiceImpl implements FormsService {
 	protected TraditionalFormsService getAdobeFormsService() {
 		return adobeFormsService;
 	}
+	
+	// This class is public so that we can run unit tests against it directly.
+	public static class TemplateValues {
+		private final Path contentRoot;
+		private final Path template;
+		
+		private TemplateValues(String contentRoot, String template) {
+			super();
+			this.contentRoot = contentRoot != null ? Paths.get(contentRoot) : null;
+			this.template = Paths.get(template);
+		}
+
+		// Move any parent on the template to the provided content root (i.e. templates dir).  This is because all fragments in a template
+		// are relative to that template in Designer but relative to the content root when rendering.  We need to make sure the content root
+		// points to the directory where the template resides so that fragments are found.
+		public static TemplateValues determineTemplateValues(Path template, Path templatesDir, UsageContext usageContext) throws FileNotFoundException {
+			Path templateParentDir = template.getParent();
+			String contentRoot;
+			if (templatesDir == null && templateParentDir != null) {
+				// No templatesDir but there's a parent dir on the template
+				// use the parent dir as the content root
+				contentRoot = templateParentDir.toString();
+			} else if (templatesDir != null && templateParentDir == null) {
+				// There's a templatesDir but no parent dir on the template
+				// so just use the templatesDir as the content root
+				contentRoot = templatesDir.toString();
+			} else if (templatesDir != null && templateParentDir != null) {
+				// There's a templatesDir and there's a parent dir on the template
+				// append the parent dir onto the templates dir to create the content root
+				contentRoot = templatesDir.resolve(templateParentDir).toString();
+			} else {	// templatesDir == null && templateParentDir == null
+				// No templatesDir and no parent dir on the template, so no content root
+				contentRoot = null;
+			}
+			String templateFileName = template.getFileName().toString();
+			Path formsPath = contentRoot != null ? Paths.get(contentRoot, templateFileName) : Paths.get(templateFileName);
+			if (usageContext == UsageContext.SERVER_SIDE && (Files.notExists(formsPath) || !Files.isRegularFile(formsPath))) {
+				throw new FileNotFoundException("Unable to find template (" + formsPath.toString() + ").");
+			}
+			return new TemplateValues(contentRoot, templateFileName);
+		}
+
+		public Path getContentRoot() {
+			return contentRoot;
+		}
+
+		public Path getTemplate() {
+			return template;
+		}
+	}
+
 }

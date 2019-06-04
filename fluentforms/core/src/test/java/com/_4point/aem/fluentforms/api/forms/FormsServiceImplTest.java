@@ -29,6 +29,7 @@ import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
+import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl.TemplateValues;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com._4point.aem.fluentforms.impl.forms.ValidationOptionsImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
@@ -145,7 +146,7 @@ class FormsServiceImplTest {
 		Document pdfResult = underTest.renderPDFForm(filePath, data, pdfFormRenderOptions);
 		
 		// Verify that all the results are correct.
-		assertEquals(filePath, Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
 		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
 		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
 		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
@@ -273,7 +274,7 @@ class FormsServiceImplTest {
 		Document pdfResult = underTest.renderPDFForm(filePath, data, pdfFormRenderOptions);
 		
 		// Verify that all the results are correct.
-		assertEquals(filePath.getPath(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(filePath.getPath().getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
 		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
 		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
 		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
@@ -362,7 +363,7 @@ class FormsServiceImplTest {
 	void testRenderPDFFormPath() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
-		Path filePath = SAMPLE_FORM;
+		Path filePath = SAMPLE_FORM.toAbsolutePath();
 		Document data = Mockito.mock(Document.class);
 
 		Document pdfResult = underTest.renderPDFForm()
@@ -376,7 +377,7 @@ class FormsServiceImplTest {
 								   .setXci(data)
 								   .executeOn(filePath, data);
 
-		assertEquals(filePath, Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
 		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
 		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 
@@ -392,11 +393,11 @@ class FormsServiceImplTest {
 		Document pdfResult = underTest.renderPDFForm()
 				 				      .executeOn(filePath, data);
 
-		assertEquals(filePath, Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
 		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
 		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 
-		PDFFormRenderOptionsImplTest.assertEmpty(svc.getOptionsArg());
+		PDFFormRenderOptionsImplTest.assertEmpty(svc.getOptionsArg(), filePath.getParent().toString());
 	}
 
 	@Test
@@ -437,7 +438,7 @@ class FormsServiceImplTest {
 		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
 		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 
-		PDFFormRenderOptionsImplTest.assertEmpty(svc.getOptionsArg());
+		PDFFormRenderOptionsImplTest.assertEmpty(svc.getOptionsArg(), null);
 	}
 
 	@Test
@@ -520,6 +521,106 @@ class FormsServiceImplTest {
 		assertNull(adobeValidationOptions.getDebugDir());
 	}
 
+	private static final String BAD_CONTENT_ROOT = "D:\\foobar";
+	private static final String BAD_TEMPLATE = "NonExistentForm.xdp";
+	
+	@Test
+	@DisplayName("TemplateValues Test: Absolute Path in form with content root")
+	public void testTemplateValuesAbsPathwDir() throws Exception {
+		Path template = SAMPLE_FORM.toAbsolutePath();
+		Path templatesDir = SAMPLE_FORMS_DIR.getParent().toAbsolutePath();
+		
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		
+		// Content Root should be ignored.
+		assertEquals(template.getParent(), resultTv.getContentRoot(), "Content Root wasn't what was expected.");
+		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
+	}
+
+	@Test
+	@DisplayName("TemplateValues Test: Relative Path in form with content root")
+	public void testTemplateValuesRelPathwDir() throws Exception {
+		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
+		Path templatesDir = SAMPLE_FORMS_DIR.getParent();
+		
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		
+		assertEquals(SAMPLE_FORMS_DIR, resultTv.getContentRoot(), "Content Root wasn't what was expected.");
+		assertEquals(SAMPLE_FORM.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
+	}
+
+	@Test
+	@DisplayName("TemplateValues Test: Relative Path in form with no content root")
+	public void testTemplateValuesRelPathwNoDir() throws Exception {
+		Path template = SAMPLE_FORM;
+		Path templatesDir = null;
+		
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		
+		assertEquals(template.getParent(), resultTv.getContentRoot(), "Content Root wasn't what was expected.");
+		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
+	}
+
+	@Test
+	@DisplayName("TemplateValues Test: Relative Path in form with no content root")
+	public void testTemplateValuesNoPathwNoDir() throws Exception {
+		Path template = SAMPLE_FORM.getFileName();
+		Path templatesDir = null;
+		
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.CLIENT_SIDE);
+		
+		assertNull(resultTv.getContentRoot(), "Content Root wasn't what was expected.");
+		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
+	}
+
+	@Test
+	@DisplayName("TemplateValues Test: Bad template with content root")
+	public void testBadTemplateValuesAbsPathwDir_Client() throws Exception {
+		Path template = Paths.get(BAD_TEMPLATE);
+		Path templatesDir = SAMPLE_FORMS_DIR.toAbsolutePath();
+		
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.CLIENT_SIDE);
+		assertEquals(templatesDir, resultTv.getContentRoot(), "Content Root wasn't what was expected.");
+		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
+	}
+	
+	@Test
+	@DisplayName("TemplateValues Test: Bad template with content root")
+	public void testBadTemplateValuesAbsPathwDir_Server() {
+		Path template = Paths.get(BAD_TEMPLATE);
+		Path templatesDir = SAMPLE_FORMS_DIR.toAbsolutePath();
+
+		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
+		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
+		assertTrue(e.getMessage().contains(BAD_TEMPLATE), "Expected template name to be in the message.");
+		assertTrue(e.getMessage().contains(SAMPLE_FORMS_DIR.toString()), "Expected content root to be in the message.");
+	}
+
+	@Test
+	@DisplayName("TemplateValues Test: Template with bad content root")
+	public void testBadTemplateValuesAbsPathwDir2() {
+		Path template = SAMPLE_FORM.getFileName();
+		Path templatesDir = Paths.get(BAD_CONTENT_ROOT);
+
+		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
+		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
+		assertTrue(e.getMessage().contains(template.toString()), "Expected template name to be in the message.");
+		assertTrue(e.getMessage().contains(BAD_CONTENT_ROOT), "Expected content root to be in the message.");
+	}
+
+	@Test
+	@DisplayName("TemplateValues Test: Non-existent relative template with content root")
+	public void testBadTemplateValuesRelPathwDir() {
+		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
+		Path templatesDir = Paths.get(BAD_CONTENT_ROOT);
+
+		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
+		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
+		assertTrue(e.getMessage().contains(template.toString()), "Expected template name to be in the message.");
+		assertTrue(e.getMessage().contains(BAD_CONTENT_ROOT), "Expected content root to be in the message.");
+	}
+
+	
 	// TODO: Test the Forms Service interface default methods here
 	//       They are not currently being tested...
 

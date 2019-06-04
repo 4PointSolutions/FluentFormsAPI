@@ -26,13 +26,13 @@ class PDFFormRenderOptionsImplTest {
 		
 		com.adobe.fd.forms.api.PDFFormRenderOptions adobePDFFormRenderOptions = underTest.toAdobePDFFormRenderOptions();
 		
-		assertEmpty(adobePDFFormRenderOptions);
+		assertEmpty(adobePDFFormRenderOptions, null);
 	}
 
-	public static void assertEmpty(com.adobe.fd.forms.api.PDFFormRenderOptions adobePDFFormRenderOptions) {
+	public static void assertEmpty(com.adobe.fd.forms.api.PDFFormRenderOptions adobePDFFormRenderOptions, String contentRoot) {
 		assertEquals(emptyPDFFormRenderOptions.getAcrobatVersion(), adobePDFFormRenderOptions.getAcrobatVersion());
 		assertEquals(emptyPDFFormRenderOptions.getCacheStrategy(), adobePDFFormRenderOptions.getCacheStrategy());
-		assertEquals(emptyPDFFormRenderOptions.getContentRoot(), adobePDFFormRenderOptions.getContentRoot());
+		assertEquals(contentRoot, adobePDFFormRenderOptions.getContentRoot());	// We modify the content root, so we expect it to be different than the empty version (which would be null).
 		assertEquals(emptyPDFFormRenderOptions.getDebugDir(), adobePDFFormRenderOptions.getDebugDir());
 		assertEquals(emptyPDFFormRenderOptions.getLocale(), adobePDFFormRenderOptions.getLocale());
 		assertEquals(emptyPDFFormRenderOptions.getSubmitUrls(), adobePDFFormRenderOptions.getSubmitUrls());
