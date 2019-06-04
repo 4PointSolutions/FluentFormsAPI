@@ -99,12 +99,12 @@ class RenderPdfFormTest {
 		// Validate that the correct parameters were passed in to renderPdf
 		RenderPDFFormArgs renderPDFFormArgs = renderPdfMock.getRenderPDFFormArgs();
 		assertNull(renderPDFFormArgs.getData());
-		assertEquals(templateData, renderPDFFormArgs.getUrlOrfilename());
+		assertEquals(TestUtils.SAMPLE_FORM.getFileName().toString(), renderPDFFormArgs.getUrlOrfilename());
 		PDFFormRenderOptions pdfFormRenderOptions = renderPDFFormArgs.getPdfFormRenderOptions();
 		assertAll(
 				()->assertEquals(AcrobatVersion.Acrobat_11, pdfFormRenderOptions.getAcrobatVersion()),	// AEM 6.5 Default
 				()->assertEquals(CacheStrategy.AGGRESSIVE, pdfFormRenderOptions.getCacheStrategy()),	// AEM 6.5 Default
-				()->assertNull(pdfFormRenderOptions.getContentRoot()),
+				()->assertEquals(TestUtils.SAMPLE_FORM.getParent().toString(), pdfFormRenderOptions.getContentRoot()),
 				()->assertNull(pdfFormRenderOptions.getDebugDir()),
 				()->assertNull(pdfFormRenderOptions.getLocale()),
 				()->assertNull(pdfFormRenderOptions.getSubmitUrls()),
@@ -142,12 +142,12 @@ class RenderPdfFormTest {
 		// Validate that the correct parameters were passed in to renderPdf
 		RenderPDFFormArgs renderPDFFormArgs = renderPdfMock.getRenderPDFFormArgs();
 		assertArrayEquals(formData.getBytes(), renderPDFFormArgs.getData().getInlineData());
-		assertEquals(templateData, renderPDFFormArgs.getUrlOrfilename());
+		assertEquals(TestUtils.SAMPLE_FORM.getFileName().toString(), renderPDFFormArgs.getUrlOrfilename());
 		PDFFormRenderOptions pdfFormRenderOptions = renderPDFFormArgs.getPdfFormRenderOptions();
 		assertAll(
 				()->assertEquals(AcrobatVersion.Acrobat_11, pdfFormRenderOptions.getAcrobatVersion()),	// AEM 6.5 Default
 				()->assertEquals(CacheStrategy.AGGRESSIVE, pdfFormRenderOptions.getCacheStrategy()),	// AEM 6.5 Default
-				()->assertNull(pdfFormRenderOptions.getContentRoot()),
+				()->assertEquals(TestUtils.SAMPLE_FORM.getParent().toString(), pdfFormRenderOptions.getContentRoot()),
 				()->assertNull(pdfFormRenderOptions.getDebugDir()),
 				()->assertNull(pdfFormRenderOptions.getLocale()),
 				()->assertNull(pdfFormRenderOptions.getSubmitUrls()),
@@ -160,10 +160,10 @@ class RenderPdfFormTest {
 	void testDoPost_HappyPath_MaxArgs() throws ServletException, IOException, NoSuchFieldException {
 		String formData = "formData";
 		String resultData = "testDoPost Happy Path Result";
-		String templateData = TestUtils.SAMPLE_FORM.toString();
+		String templateData = TestUtils.SAMPLE_FORM.getParent().getFileName().resolve(TestUtils.SAMPLE_FORM.getFileName()).toString();
 		String acrobatVersionData = "Acrobat_10";
 		String cacheStrategyData = "CONSERVATIVE";
-		String contentRootData = "/content/root";
+		String contentRootData = TestUtils.SAMPLE_FORM.getParent().getParent().toString();
 		String debugDirData = "/debug/dir";
 		String localeData = "en-CA";
 		String submitUrlsData = "/submit/url";
@@ -199,12 +199,12 @@ class RenderPdfFormTest {
 		// Validate that the correct parameters were passed in to renderPdf
 		RenderPDFFormArgs renderPDFFormArgs = renderPdfMock.getRenderPDFFormArgs();
 		assertArrayEquals(formData.getBytes(), renderPDFFormArgs.getData().getInlineData());
-		assertEquals(templateData, renderPDFFormArgs.getUrlOrfilename());
+		assertEquals(TestUtils.SAMPLE_FORM.getFileName().toString(), renderPDFFormArgs.getUrlOrfilename());
 		PDFFormRenderOptions pdfFormRenderOptions = renderPDFFormArgs.getPdfFormRenderOptions();
 		assertAll(
 				()->assertEquals(AcrobatVersion.Acrobat_10, pdfFormRenderOptions.getAcrobatVersion()),	// AEM 6.5 Default
 				()->assertEquals(CacheStrategy.CONSERVATIVE, pdfFormRenderOptions.getCacheStrategy()),	// AEM 6.5 Default
-				()->assertEquals(Paths.get(contentRootData), Paths.get(pdfFormRenderOptions.getContentRoot())),
+				()->assertEquals(TestUtils.SAMPLE_FORM.getParent(), Paths.get(pdfFormRenderOptions.getContentRoot())),
 				()->assertEquals(Paths.get(debugDirData), Paths.get(pdfFormRenderOptions.getDebugDir())),
 				()->assertEquals(localeData, pdfFormRenderOptions.getLocale()),
 				()->assertEquals(submitUrlsData, pdfFormRenderOptions.getSubmitUrls().get(0)),
