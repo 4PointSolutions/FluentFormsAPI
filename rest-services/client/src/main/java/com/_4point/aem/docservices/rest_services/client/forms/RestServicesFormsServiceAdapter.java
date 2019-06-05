@@ -4,7 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -21,9 +23,12 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
+import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.Transformable;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
+import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
@@ -31,7 +36,6 @@ import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
-import com.adobe.fd.forms.api.PDFFormRenderOptions;
 
 public class RestServicesFormsServiceAdapter implements TraditionalFormsService {
 
@@ -113,30 +117,36 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 		
 		AcrobatVersion acrobatVersion = pdfFormRenderOptions.getAcrobatVersion();
 		CacheStrategy cacheStrategy = pdfFormRenderOptions.getCacheStrategy();
-		String contentRoot = pdfFormRenderOptions.getContentRoot();
-		String debugDir = pdfFormRenderOptions.getDebugDir();
-		String locale = pdfFormRenderOptions.getLocale();
-		List<String> submitUrls = pdfFormRenderOptions.getSubmitUrls();
-		boolean taggedPDF = pdfFormRenderOptions.getTaggedPDF();
-		com.adobe.aemfd.docmanager.Document xci = pdfFormRenderOptions.getXci();
+		PathOrUrl contentRoot = pdfFormRenderOptions.getContentRoot();
+		Path debugDir = pdfFormRenderOptions.getDebugDir();
+		Locale locale = pdfFormRenderOptions.getLocale();
+		List<AbsoluteOrRelativeUrl> submitUrls = pdfFormRenderOptions.getSubmitUrls();
+		Boolean taggedPDF = pdfFormRenderOptions.getTaggedPDF();
+		Document xci = pdfFormRenderOptions.getXci();
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			if (data != null) {
 				multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE);
 			}
-			multipart.field(TEMPLATE_PARAM, urlOrfilename)
-					 .field(TAGGED_PDF_PARAM, Boolean.toString(taggedPDF))
-					 ;
+			multipart.field(TEMPLATE_PARAM, urlOrfilename);
 					 
 			// This code sets the individual fields if they are not null. 
 			MultipartTransformer.create(multipart)
 								.transform((t)->acrobatVersion == null ? t : t.field(ACROBAT_VERSION_PARAM, acrobatVersion.toString()))
 								.transform((t)->cacheStrategy == null  ? t : t.field(CACHE_STRATEGY_PARAM, cacheStrategy.toString()))
-								.transform((t)->contentRoot == null ? t : t.field(CONTENT_ROOT_PARAM, contentRoot))
-								.transform((t)->debugDir == null ? t : t.field(DEBUG_DIR_PARAM, debugDir))
-								.transform((t)->locale == null ? t : t.field(LOCALE_PARAM, locale))
+								.transform((t)->contentRoot == null ? t : t.field(CONTENT_ROOT_PARAM, contentRoot.toString()))
+								.transform((t)->debugDir == null ? t : t.field(DEBUG_DIR_PARAM, debugDir.toString()))
+								.transform((t)->locale == null ? t : t.field(LOCALE_PARAM, locale.toString()))
+								.transform((t)->taggedPDF == null ? t : t.field(TAGGED_PDF_PARAM, taggedPDF.toString()))
 //								.transform((t)->submitUrls == null ? t : t.field(SUBMIT_URL_PARAM, submitUrls))
-//								.transform((t)->xci == null ? t : t.field(XCI_PARAM, xci.getInputStream(), MediaType.APPLICATION_XML_TYPE))
+								.transform((t)->{
+									try {
+										return xci == null ? t : t.field(XCI_PARAM, xci.getInlineData(), MediaType.APPLICATION_XML_TYPE);
+									} catch (IOException e) {
+										// if we encounter an exception, then we just don't add this field.  This should of error shouldn't ever happen.
+										return t;
+									}
+								})
 								;
 
 			Response result = postToServer(renderPdfTarget, multipart);

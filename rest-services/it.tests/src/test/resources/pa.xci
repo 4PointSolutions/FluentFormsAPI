@@ -39,7 +39,7 @@
             <locale/>
          </common>
          <copies>1</copies>
-         <destination/> <!-- pdf|ps|pcl -->
+         <destination>pdf</destination> <!-- pdf|ps|pcl -->
          <driver> <!--  [0..n]  -->
             <fontInfo>
                <embed>0</embed> <!-- 0|1 -->
@@ -77,6 +77,21 @@
                <userPassword/>
             </encryption>
             <fontInfo>
+               <alwaysEmbed>FSAlbert</alwaysEmbed>
+               <alwaysEmbed>FSAlbert-Bold</alwaysEmbed>
+               <alwaysEmbed>Whitney-Black</alwaysEmbed>
+               <alwaysEmbed>Whitney-BlackItalic</alwaysEmbed>
+               <alwaysEmbed>Whitney-Bold</alwaysEmbed>
+               <alwaysEmbed>Whitney-BoldItalic</alwaysEmbed>
+               <alwaysEmbed>Whitney-Book</alwaysEmbed>
+               <alwaysEmbed>Whitney-BookItalic</alwaysEmbed>
+               <alwaysEmbed>Whitney-Light</alwaysEmbed>
+               <alwaysEmbed>Whitney-LightItalic</alwaysEmbed>
+               <alwaysEmbed>Whitney-Medium</alwaysEmbed>
+               <alwaysEmbed>Whitney-MediumItalic</alwaysEmbed>
+               <alwaysEmbed>Whitney-Semibold</alwaysEmbed>
+               <alwaysEmbed>Whitney-SemiboldItalic</alwaysEmbed>
+               <alwaysEmbed>MyriadPro-Regular</alwaysEmbed>
                <embed>0</embed> <!-- 0|1 -->
                <!--defaultTypeface>MyriadPro-Regular</defaultTypeface-->
 
@@ -141,9 +156,9 @@
             <scriptModel>XFA</scriptModel> <!-- XFA|none -->
             <submitFormat>pdf</submitFormat> <!-- html|fdf|xml|pdf -->
             <tagged>0</tagged> <!-- 0|1 -->
-            <xdc>
+            <!--xdc>
                <uri/>
-            </xdc>
+            </xdc-->
             <version>1.7</version> <!-- 1.2=acrobat 3|1.3=acrobat 4 -->
             <renderPolicy>server</renderPolicy>
          </pdf>

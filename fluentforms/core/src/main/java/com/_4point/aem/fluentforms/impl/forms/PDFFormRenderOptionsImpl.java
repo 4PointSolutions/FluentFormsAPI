@@ -1,21 +1,20 @@
 package com._4point.aem.fluentforms.impl.forms;
 
-import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptionsSetter;
+import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 
-public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
+public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter, PDFFormRenderOptions {
 
 	private AcrobatVersion acrobatVersion = null;
 	private CacheStrategy cacheStrategy = null;
@@ -26,6 +25,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 	private Boolean taggedPDF = null;
 	private Document xci = null;
 
+	@Override
 	public AcrobatVersion getAcrobatVersion() {
 		return acrobatVersion;
 	}
@@ -36,6 +36,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 		return this;
 	}
 
+	@Override
 	public CacheStrategy getCacheStrategy() {
 		return cacheStrategy;
 	}
@@ -46,6 +47,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 		return this;
 	}
 
+	@Override
 	public PathOrUrl getContentRoot() {
 		return contentRoot;
 	}
@@ -57,11 +59,12 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 	}
 
 	@Override
-	public PDFFormRenderOptionsSetter setContentRoot(URL contentRootUrl) {
+	public PDFFormRenderOptionsImpl setContentRoot(URL contentRootUrl) {
 		this.contentRoot = new PathOrUrl(contentRootUrl);
 		return this;
 	}
 
+	@Override
 	public Path getDebugDir() {
 		return debugDir;
 	}
@@ -72,6 +75,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 		return this;
 	}
 
+	@Override
 	public Locale getLocale() {
 		return locale;
 	}
@@ -82,6 +86,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 		return this;
 	}
 
+	@Override
 	public List<AbsoluteOrRelativeUrl> getSubmitUrls() {
 		return submitUrls;
 	}
@@ -92,7 +97,13 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 		return this;
 	}
 
+	@Override
 	public boolean isTaggedPDF() {
+		return taggedPDF;
+	}
+
+	@Override
+	public Boolean getTaggedPDF() {
 		return taggedPDF;
 	}
 
@@ -102,6 +113,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 		return this;
 	}
 
+	@Override
 	public Document getXci() {
 		return xci;
 	}
@@ -110,22 +122,5 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter {
 	public PDFFormRenderOptionsImpl setXci(Document xci) {
 		this.xci = xci;
 		return this;
-	}
-
-	public com.adobe.fd.forms.api.PDFFormRenderOptions toAdobePDFFormRenderOptions() {
-		com.adobe.fd.forms.api.PDFFormRenderOptions adobeOptions = new com.adobe.fd.forms.api.PDFFormRenderOptions();
-		setIfNotNull(adobeOptions::setAcrobatVersion,this.acrobatVersion);
-		setIfNotNull(adobeOptions::setCacheStrategy, this.cacheStrategy);
-		setIfNotNull((cr)->adobeOptions.setContentRoot(cr.toString()), this.contentRoot);
-		setIfNotNull((dd)->adobeOptions.setDebugDir(dd.toString()), this.debugDir);
-		setIfNotNull((l)->adobeOptions.setLocale(l.toLanguageTag()), this.locale);
-		setIfNotNull(adobeOptions::setSubmitUrls, mapToStrings(this.submitUrls));
-		setIfNotNull(adobeOptions::setTaggedPDF, this.taggedPDF);
-		setIfNotNull((ad)->adobeOptions.setXci(ad.getAdobeDocument()), this.xci);
-		return adobeOptions;
-	}
-
-	private static List<String> mapToStrings(List<AbsoluteOrRelativeUrl> urls) {
-		return urls == null ? null : urls.stream().map(AbsoluteOrRelativeUrl::toString).collect(Collectors.toList());
 	}
 }

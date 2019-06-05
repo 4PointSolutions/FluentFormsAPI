@@ -35,7 +35,7 @@ import com._4point.aem.fluentforms.impl.forms.ValidationOptionsImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
-import com.adobe.fd.forms.api.PDFFormRenderOptions;
+
 
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 
@@ -385,6 +385,32 @@ class FormsServiceImplTest {
 	}
 
 	@Test
+	void testRenderPDFFormPath_BadContentRoot() throws Exception {
+		MockPdfRenderService svc = new MockPdfRenderService();
+
+		Path filePath = SAMPLE_FORM.toAbsolutePath();
+		Document data = Mockito.mock(Document.class);
+		URL contentRootUrl = new URL("http://foo/bar");
+
+		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->{
+			underTest.renderPDFForm()
+									   .setAcrobatVersion(AcrobatVersion.Acrobat_10)
+									   .setCacheStrategy(CacheStrategy.CONSERVATIVE)
+									   .setContentRoot(contentRootUrl)
+									   .setDebugDir(Paths.get("bar", "foo"))
+									   .setLocale(Locale.JAPAN)
+									   .setSubmitUrl(new URL("http://example.com"))
+									   .setTaggedPDF(true)
+									   .setXci(data)
+									   .executeOn(filePath, data);
+		});
+		String message = ex.getMessage();
+		assertThat(message, Matchers.containsString("must be Path object"));
+		assertThat(message, Matchers.containsString(contentRootUrl.toString()));
+		assertThat(message, Matchers.containsString(filePath.toString()));
+	}
+
+	@Test
 	void testRenderPDFFormPath_NoArgs() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
@@ -632,7 +658,7 @@ class FormsServiceImplTest {
 		
 		protected MockPdfRenderService() throws FormsServiceException {
 			super();
-			Mockito.when(adobeFormsService.renderPDFForm(templateArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
+			Mockito.lenient().when(adobeFormsService.renderPDFForm(templateArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
 		}
 
 		protected Document getResult() {

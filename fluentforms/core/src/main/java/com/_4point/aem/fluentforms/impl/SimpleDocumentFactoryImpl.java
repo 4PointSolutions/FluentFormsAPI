@@ -214,7 +214,7 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 
 		@Override
 		public com.adobe.aemfd.docmanager.Document getAdobeDocument() {
-			return null;
+			throw new UnsupportedOperationException("getAdobeDocument not implemented for SimpleDocument");
 		}
 		
 		private static byte[] readToByteArray(InputStream is) {

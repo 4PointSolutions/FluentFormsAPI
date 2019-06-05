@@ -1,13 +1,18 @@
 package com._4point.aem.docservices.rest_services.server.forms;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -24,13 +29,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com._4point.aem.docservices.rest_services.server.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
+import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.RenderPDFFormArgs;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
-import com.adobe.fd.forms.api.PDFFormRenderOptions;
 
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -102,13 +107,13 @@ class RenderPdfFormTest {
 		assertEquals(TestUtils.SAMPLE_FORM.getFileName().toString(), renderPDFFormArgs.getUrlOrfilename());
 		PDFFormRenderOptions pdfFormRenderOptions = renderPDFFormArgs.getPdfFormRenderOptions();
 		assertAll(
-				()->assertEquals(AcrobatVersion.Acrobat_11, pdfFormRenderOptions.getAcrobatVersion()),	// AEM 6.5 Default
-				()->assertEquals(CacheStrategy.AGGRESSIVE, pdfFormRenderOptions.getCacheStrategy()),	// AEM 6.5 Default
-				()->assertEquals(TestUtils.SAMPLE_FORM.getParent().toString(), pdfFormRenderOptions.getContentRoot()),
+				()->assertNull(pdfFormRenderOptions.getAcrobatVersion()),
+				()->assertNull(pdfFormRenderOptions.getCacheStrategy()),
+				()->assertEquals(TestUtils.SAMPLE_FORM.getParent(), pdfFormRenderOptions.getContentRoot().getPath()),
 				()->assertNull(pdfFormRenderOptions.getDebugDir()),
 				()->assertNull(pdfFormRenderOptions.getLocale()),
 				()->assertNull(pdfFormRenderOptions.getSubmitUrls()),
-				()->assertFalse(pdfFormRenderOptions.getTaggedPDF()),
+				()->assertNull(pdfFormRenderOptions.getTaggedPDF()),
 				()->assertNull(pdfFormRenderOptions.getXci())
 			);
 	}
@@ -145,13 +150,13 @@ class RenderPdfFormTest {
 		assertEquals(TestUtils.SAMPLE_FORM.getFileName().toString(), renderPDFFormArgs.getUrlOrfilename());
 		PDFFormRenderOptions pdfFormRenderOptions = renderPDFFormArgs.getPdfFormRenderOptions();
 		assertAll(
-				()->assertEquals(AcrobatVersion.Acrobat_11, pdfFormRenderOptions.getAcrobatVersion()),	// AEM 6.5 Default
-				()->assertEquals(CacheStrategy.AGGRESSIVE, pdfFormRenderOptions.getCacheStrategy()),	// AEM 6.5 Default
-				()->assertEquals(TestUtils.SAMPLE_FORM.getParent().toString(), pdfFormRenderOptions.getContentRoot()),
+				()->assertNull(pdfFormRenderOptions.getAcrobatVersion()),
+				()->assertNull(pdfFormRenderOptions.getCacheStrategy()),
+				()->assertEquals(TestUtils.SAMPLE_FORM.getParent(), pdfFormRenderOptions.getContentRoot().getPath()),
 				()->assertNull(pdfFormRenderOptions.getDebugDir()),
 				()->assertNull(pdfFormRenderOptions.getLocale()),
 				()->assertNull(pdfFormRenderOptions.getSubmitUrls()),
-				()->assertFalse(pdfFormRenderOptions.getTaggedPDF()),
+				()->assertNull(pdfFormRenderOptions.getTaggedPDF()),
 				()->assertNull(pdfFormRenderOptions.getXci())
 			);
 	}
@@ -204,15 +209,12 @@ class RenderPdfFormTest {
 		assertAll(
 				()->assertEquals(AcrobatVersion.Acrobat_10, pdfFormRenderOptions.getAcrobatVersion()),	// AEM 6.5 Default
 				()->assertEquals(CacheStrategy.CONSERVATIVE, pdfFormRenderOptions.getCacheStrategy()),	// AEM 6.5 Default
-				()->assertEquals(TestUtils.SAMPLE_FORM.getParent(), Paths.get(pdfFormRenderOptions.getContentRoot())),
-				()->assertEquals(Paths.get(debugDirData), Paths.get(pdfFormRenderOptions.getDebugDir())),
-				()->assertEquals(localeData, pdfFormRenderOptions.getLocale()),
-				()->assertEquals(submitUrlsData, pdfFormRenderOptions.getSubmitUrls().get(0)),
-				()->assertTrue(pdfFormRenderOptions.getTaggedPDF())
-				// This can't be tested because the mock objects can't create Adobe Document objects.  That is
-				// what is required because we're using the Adobe pdfRenderFormOptions object.  In order to get
-				// around that, we would need to create our own pdfRenderFormOptions object.
-//				()->assertArrayEquals(xciData.getBytes(), pdfFormRenderOptions.getXci().getInlineData())
+				()->assertEquals(TestUtils.SAMPLE_FORM.getParent(), pdfFormRenderOptions.getContentRoot().getPath()),
+				()->assertEquals(Paths.get(debugDirData), pdfFormRenderOptions.getDebugDir()),
+				()->assertEquals(Locale.forLanguageTag(localeData), pdfFormRenderOptions.getLocale()),
+				()->assertEquals(submitUrlsData, pdfFormRenderOptions.getSubmitUrls().get(0).toString()),
+				()->assertTrue(pdfFormRenderOptions.getTaggedPDF()),
+				()->assertArrayEquals(xciData.getBytes(), pdfFormRenderOptions.getXci().getInlineData())
 		);
 	}
 

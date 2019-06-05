@@ -13,13 +13,13 @@ import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
+import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
-import com.adobe.fd.forms.api.PDFFormRenderOptions;
 
 public class FormsServiceImpl implements FormsService {
 	
@@ -48,11 +48,14 @@ public class FormsServiceImpl implements FormsService {
 		Objects.requireNonNull(filename, "template cannot be null.");
 
 		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
-		String contentRoot = Objects.requireNonNull(pdfFormRenderOptions, "pdfFormRenderOptions cannot be null!").getContentRoot();
-		TemplateValues tvs = TemplateValues.determineTemplateValues(filename, (contentRoot != null ? Paths.get(contentRoot) : null), this.usageContext);
+		PathOrUrl contentRoot = Objects.requireNonNull(pdfFormRenderOptions, "pdfFormRenderOptions cannot be null!").getContentRoot();
+		if (contentRoot != null && !contentRoot.isPath()) {
+			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
+		}
+		TemplateValues tvs = TemplateValues.determineTemplateValues(filename, (contentRoot != null ? Paths.get(contentRoot.toString()) : null), this.usageContext);
 		
 		Path finalContentRoot = tvs.getContentRoot();
-		pdfFormRenderOptions.setContentRoot(finalContentRoot != null ? finalContentRoot.toString() : null);
+		pdfFormRenderOptions.setContentRoot(finalContentRoot != null ? finalContentRoot : null);
 		return this.renderPDFForm(tvs.getTemplate().toString(), data, pdfFormRenderOptions);
 	}
 
@@ -193,9 +196,9 @@ public class FormsServiceImpl implements FormsService {
 		@Override
 		public Document executeOn(PathOrUrl template, Document data) throws FormsServiceException, FileNotFoundException {
 			if (template.isPath())
-				return renderPDFForm(template.getPath(), data, options.toAdobePDFFormRenderOptions());
+				return renderPDFForm(template.getPath(), data, options);
 			else if (template.isUrl()) {
-				return renderPDFForm(template.getUrl(), data, options.toAdobePDFFormRenderOptions());
+				return renderPDFForm(template.getUrl(), data, options);
 			} else {
 				// This should never be thrown.
 				throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
@@ -204,12 +207,12 @@ public class FormsServiceImpl implements FormsService {
 		
 		@Override
 		public Document executeOn(Path template, Document data) throws FormsServiceException, FileNotFoundException {
-			return renderPDFForm(template, data, options.toAdobePDFFormRenderOptions());
+			return renderPDFForm(template, data, options);
 		}
 		
 		@Override
 		public Document executeOn(URL template, Document data) throws FormsServiceException {
-			return renderPDFForm(template, data, options.toAdobePDFFormRenderOptions());
+			return renderPDFForm(template, data, options);
 		}
 	}
 

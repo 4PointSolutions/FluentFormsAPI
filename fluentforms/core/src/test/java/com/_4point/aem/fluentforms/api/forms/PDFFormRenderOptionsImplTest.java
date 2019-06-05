@@ -11,6 +11,7 @@ import java.util.Locale;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
 import com._4point.aem.fluentforms.impl.forms.PDFFormRenderOptionsImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
@@ -24,12 +25,11 @@ class PDFFormRenderOptionsImplTest {
 	@DisplayName("Make sure that if nothing was initialized, then the resulting options are the same as an empty options object.")
 	void testToAdobePDFFormRenderOptions_NoChanges() {
 		
-		com.adobe.fd.forms.api.PDFFormRenderOptions adobePDFFormRenderOptions = underTest.toAdobePDFFormRenderOptions();
-		
-		assertEmpty(adobePDFFormRenderOptions, null);
+		assertEmpty(underTest, null);
 	}
 
-	public static void assertEmpty(com.adobe.fd.forms.api.PDFFormRenderOptions adobePDFFormRenderOptions, String contentRoot) {
+	public static void assertEmpty(PDFFormRenderOptions pdfFormRenderOptions, String contentRoot) {
+		com.adobe.fd.forms.api.PDFFormRenderOptions adobePDFFormRenderOptions = AdobeFormsServiceAdapter.toAdobePDFFormRenderOptions(pdfFormRenderOptions);
 		assertEquals(emptyPDFFormRenderOptions.getAcrobatVersion(), adobePDFFormRenderOptions.getAcrobatVersion());
 		assertEquals(emptyPDFFormRenderOptions.getCacheStrategy(), adobePDFFormRenderOptions.getCacheStrategy());
 		assertEquals(contentRoot, adobePDFFormRenderOptions.getContentRoot());	// We modify the content root, so we expect it to be different than the empty version (which would be null).
@@ -54,13 +54,13 @@ class PDFFormRenderOptionsImplTest {
 		// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
 //		underTest.setXci(new MockDocumentFactory().create(new byte[0]));
 		
-		com.adobe.fd.forms.api.PDFFormRenderOptions adobePDFFormRenderOptions = underTest.toAdobePDFFormRenderOptions();
 		
-		assertNotEmpty(adobePDFFormRenderOptions);
+		assertNotEmpty(underTest);
 //		assertNotEquals(emptyPDFFormRenderOptions.getXci(), adobePDFFormRenderOptions.getXci());
 	}
 
-	public static void assertNotEmpty(com.adobe.fd.forms.api.PDFFormRenderOptions adobePDFFormRenderOptions) {
+	public static void assertNotEmpty(PDFFormRenderOptions pdfFormRenderOptions) {
+		com.adobe.fd.forms.api.PDFFormRenderOptions adobePDFFormRenderOptions = AdobeFormsServiceAdapter.toAdobePDFFormRenderOptions(pdfFormRenderOptions);
 		assertNotEquals(emptyPDFFormRenderOptions.getAcrobatVersion(), adobePDFFormRenderOptions.getAcrobatVersion());
 		assertNotEquals(emptyPDFFormRenderOptions.getCacheStrategy(), adobePDFFormRenderOptions.getCacheStrategy());
 		assertNotEquals(emptyPDFFormRenderOptions.getContentRoot(), adobePDFFormRenderOptions.getContentRoot());
