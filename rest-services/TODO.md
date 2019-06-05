@@ -16,3 +16,4 @@ This file contains a list of things that I would like to do to improve on the ex
 ## Longer Term Items
 1. Having an automated test of the PDFs returned from the integration tests would be nice.  This is probably a lot of work however, so it is on the back burner.
 
+1. Provide a configuration mechanism that allows someone to point to a "forms directory".  This would override the contentRoot provided (or work in convert with it).  The code would check to make sure that the resulting template location is in or below the "forms directory".  This is for security reasons (so someone can't specify a content root and/or form that accesses something on the local disk they shouldn't).
