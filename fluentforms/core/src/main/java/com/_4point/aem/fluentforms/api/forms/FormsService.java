@@ -64,16 +64,19 @@ public interface FormsService {
 		public RenderPDFFormArgumentBuilder setCacheStrategy(CacheStrategy strategy);
 
 		@Override
-		public RenderPDFFormArgumentBuilder setContentRoot(Path url);
-
-		@Override
-		public RenderPDFFormArgumentBuilder setContentRoot(URL url);
-
-		@Override
-		public default RenderPDFFormArgumentBuilder setContentRoot(PathOrUrl url) {
+		public default RenderPDFFormArgumentBuilder setContentRoot(Path url) {
 			PDFFormRenderOptionsSetter.super.setContentRoot(url);
 			return this;
 		}
+
+		@Override
+		public default RenderPDFFormArgumentBuilder setContentRoot(URL url) {
+			PDFFormRenderOptionsSetter.super.setContentRoot(url);
+			return this;
+		}
+
+		@Override
+		public RenderPDFFormArgumentBuilder setContentRoot(PathOrUrl url);
 
 		@Override
 		public RenderPDFFormArgumentBuilder setDebugDir(Path debugDir);

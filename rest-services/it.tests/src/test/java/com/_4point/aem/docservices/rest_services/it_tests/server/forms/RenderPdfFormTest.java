@@ -28,6 +28,7 @@ import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
 class RenderPdfFormTest {
 
+	private static final String CRX_CONTENT_ROOT = "crx:/content/dam/formsanddocuments/sample-forms";
 	private static final String TEMPLATE_PARAM = "template";
 	private static final String DATA_PARAM = "data";
 	private static final String ACROBAT_VERSION_PARAM = "renderOptions.acrobatVersion";
@@ -53,8 +54,16 @@ class RenderPdfFormTest {
 	// TODO: Debug/Fix Submit URL and Cache Strategy.  Both are currently causing failures.  I'm not sure why
 	//       however they are not required for the current client. so I am going to defer fixing them until
 	//       some future time (i.e. this is technical debt).
+	/**
+	 * Tests RenderForms passing in all possible arguments.
+	 * 
+	 * Assumes that the AEM server is on the same machine as the test runner since it uses files in the
+	 * local directories.
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	void testRenderFormsPDF_AllArgs() throws IOException {
+	void testRenderFormsPDF_AllArgs() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
 					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString())
@@ -78,13 +87,22 @@ class RenderPdfFormTest {
 			
 			// It would be nice if we used a PDF library to verify the attributes that were set earlier (things like
 			// tagging, locale, etc.)  For now, we are just going to write the results out and check manually.
-			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfFormsServer_HappyPathResult.pdf")));
+//			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfFormsServer_AllArgsResult.pdf")));
 		}
 
 	}
 
+	/**
+	 * Tests RenderForms passing in just form and data arguments.  It leaves the rest at defaults (to makes sure that
+	 * using the defaults works).
+	 * 
+	 * Assumes that the AEM server is on the same machine as the test runner since it uses files in the
+	 * local directories.
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	void testRenderFormsPDF_JustFormAndData() throws IOException {
+	void testRenderFormsPDF_JustFormAndData() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
 					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString());
@@ -102,6 +120,40 @@ class RenderPdfFormTest {
 
 	}
 
+	/**
+	 * Tests RenderForms passing in a CRX: URL.
+	 * 
+	 * Assumes that the AEM server has the Sample Form (Sample Form.xdp) installed in
+	 * /content/dam/formsanddocuments/sample-forms   
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void testRenderFormsPDF_CRXFormAndData() throws Exception {
+		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
+			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, SAMPLE_FORM_XDP.getFileName().toString())
+					 .field(CONTENT_ROOT_PARAM, CRX_CONTENT_ROOT);
+
+			Response result = target.request()
+									.accept(APPLICATION_PDF)
+									.post(Entity.entity(multipart, multipart.getMediaType()));
+
+			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
+			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
+			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
+			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
+//			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfFormsServer_JustFormAndData.pdf")));
+		}
+
+	}
+
+	/**
+	 * Passes in a bad XDP name with the expectation that we get a failure containing enough information to 
+	 * debug the problem.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	void testRenderFormsPDF_BadXDP() throws IOException {
 		String badFormName = "BadForm.xdp";

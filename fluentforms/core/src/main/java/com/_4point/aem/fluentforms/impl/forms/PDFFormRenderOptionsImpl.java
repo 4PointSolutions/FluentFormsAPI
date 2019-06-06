@@ -5,6 +5,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
@@ -53,14 +54,8 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter, PDF
 	}
 
 	@Override
-	public PDFFormRenderOptionsImpl setContentRoot(Path contentRootPath) {
-		this.contentRoot = new PathOrUrl(contentRootPath);
-		return this;
-	}
-
-	@Override
-	public PDFFormRenderOptionsImpl setContentRoot(URL contentRootUrl) {
-		this.contentRoot = new PathOrUrl(contentRootUrl);
+	public PDFFormRenderOptionsImpl setContentRoot(PathOrUrl contentRootPathOrUrl) {
+		this.contentRoot = Objects.requireNonNull(contentRootPathOrUrl, "contentRoot cannot be null.");
 		return this;
 	}
 

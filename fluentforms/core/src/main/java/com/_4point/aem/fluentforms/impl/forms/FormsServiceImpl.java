@@ -49,12 +49,12 @@ public class FormsServiceImpl implements FormsService {
 
 		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
 		PathOrUrl contentRoot = Objects.requireNonNull(pdfFormRenderOptions, "pdfFormRenderOptions cannot be null!").getContentRoot();
-		if (contentRoot != null && !contentRoot.isPath()) {
-			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
-		}
-		TemplateValues tvs = TemplateValues.determineTemplateValues(filename, (contentRoot != null ? Paths.get(contentRoot.toString()) : null), this.usageContext);
+//		if (contentRoot != null && !contentRoot.isPath()) {
+//			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
+//		}
+		TemplateValues tvs = TemplateValues.determineTemplateValues(filename, contentRoot, this.usageContext);
 		
-		Path finalContentRoot = tvs.getContentRoot();
+		PathOrUrl finalContentRoot = tvs.getContentRoot();
 		pdfFormRenderOptions.setContentRoot(finalContentRoot != null ? finalContentRoot : null);
 		return this.renderPDFForm(tvs.getTemplate().toString(), data, pdfFormRenderOptions);
 	}
@@ -69,10 +69,12 @@ public class FormsServiceImpl implements FormsService {
 	@Override
 	public Document renderPDFForm(PathOrUrl template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException, FileNotFoundException {
-		if (template.isPath())
+		if (template.isPath()) {
 			return renderPDFForm(template.getPath(), data, pdfFormRenderOptions);
-		else if (template.isUrl()) {
+		} else if (template.isUrl()) {
 			return renderPDFForm(template.getUrl(), data, pdfFormRenderOptions);
+		} else if (template.isCrxUrl()) {
+			return renderPDFForm(template.getCrxUrl(), data, pdfFormRenderOptions);
 		} else {
 			// This should never be thrown.
 			throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
@@ -152,17 +154,11 @@ public class FormsServiceImpl implements FormsService {
 		}
 
 		@Override
-		public RenderPDFFormArgumentBuilder setContentRoot(Path filePath) {
-			options.setContentRoot(filePath);
+		public RenderPDFFormArgumentBuilder setContentRoot(PathOrUrl pathOrUrl) {
+			options.setContentRoot(pathOrUrl);
 			return this;
 		}
 		
-		@Override
-		public RenderPDFFormArgumentBuilder setContentRoot(URL url) {
-			options.setContentRoot(url);
-			return this;
-		}
-
 		@Override
 		public RenderPDFFormArgumentBuilder setDebugDir(Path debugDir) {
 			options.setDebugDir(debugDir);
@@ -195,10 +191,12 @@ public class FormsServiceImpl implements FormsService {
 
 		@Override
 		public Document executeOn(PathOrUrl template, Document data) throws FormsServiceException, FileNotFoundException {
-			if (template.isPath())
+			if (template.isPath()) {
 				return renderPDFForm(template.getPath(), data, options);
-			else if (template.isUrl()) {
+			} else if (template.isUrl()) {
 				return renderPDFForm(template.getUrl(), data, options);
+			} else if (template.isCrxUrl()) {
+				return renderPDFForm(template.getCrxUrl(), data, options);
 			} else {
 				// This should never be thrown.
 				throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
@@ -222,46 +220,61 @@ public class FormsServiceImpl implements FormsService {
 	
 	// This class is public so that we can run unit tests against it directly.
 	public static class TemplateValues {
-		private final Path contentRoot;
+		private final PathOrUrl contentRoot;
 		private final Path template;
 		
-		private TemplateValues(String contentRoot, String template) {
+		private TemplateValues(PathOrUrl contentRoot, Path template) {
 			super();
-			this.contentRoot = contentRoot != null ? Paths.get(contentRoot) : null;
-			this.template = Paths.get(template);
+			this.contentRoot = contentRoot;
+			this.template = template;
 		}
 
 		// Move any parent on the template to the provided content root (i.e. templates dir).  This is because all fragments in a template
 		// are relative to that template in Designer but relative to the content root when rendering.  We need to make sure the content root
 		// points to the directory where the template resides so that fragments are found.
-		public static TemplateValues determineTemplateValues(Path template, Path templatesDir, UsageContext usageContext) throws FileNotFoundException {
+		public static TemplateValues determineTemplateValues(Path template, PathOrUrl templatesDir, UsageContext usageContext) throws FileNotFoundException {
 			Path templateParentDir = template.getParent();
-			String contentRoot;
+			PathOrUrl contentRoot;
 			if (templatesDir == null && templateParentDir != null) {
 				// No templatesDir but there's a parent dir on the template
 				// use the parent dir as the content root
-				contentRoot = templateParentDir.toString();
+				contentRoot = new PathOrUrl(templateParentDir);
 			} else if (templatesDir != null && templateParentDir == null) {
 				// There's a templatesDir but no parent dir on the template
 				// so just use the templatesDir as the content root
-				contentRoot = templatesDir.toString();
+				contentRoot = templatesDir;
 			} else if (templatesDir != null && templateParentDir != null) {
 				// There's a templatesDir and there's a parent dir on the template
 				// append the parent dir onto the templates dir to create the content root
-				contentRoot = templatesDir.resolve(templateParentDir).toString();
+				// unless the parent dir is an absolute path.
+				if (templateParentDir.isAbsolute()) {
+					contentRoot = new PathOrUrl(templateParentDir);
+				} else if (templatesDir.isPath()) {
+					contentRoot = new PathOrUrl(templatesDir.getPath().resolve(templateParentDir));
+				} else if (templatesDir.isUrl()) {
+					contentRoot = PathOrUrl.fromString(templatesDir.getUrl().toString() + "/" + templateParentDir.toString());
+				} else if (templatesDir.isCrxUrl()) {
+					contentRoot = PathOrUrl.fromString(templatesDir.getCrxUrl() + "/" + templateParentDir.toString());
+				} else {
+					// This should never happen
+					throw new IllegalStateException("Context Root is not a Path, Url, or CrxUrl.  This should never happen.");
+				}
 			} else {	// templatesDir == null && templateParentDir == null
 				// No templatesDir and no parent dir on the template, so no content root
 				contentRoot = null;
 			}
-			String templateFileName = template.getFileName().toString();
-			Path formsPath = contentRoot != null ? Paths.get(contentRoot, templateFileName) : Paths.get(templateFileName);
-			if (usageContext == UsageContext.SERVER_SIDE && (Files.notExists(formsPath) || !Files.isRegularFile(formsPath))) {
-				throw new FileNotFoundException("Unable to find template (" + formsPath.toString() + ").");
+			Path templateFilenamePath = template.getFileName();
+			if (contentRoot != null && contentRoot.isPath()) {
+				// Since both the content Root and the template are paths, we can check to make sure the file exists.
+				Path formsPath = contentRoot != null ? contentRoot.getPath().resolve(templateFilenamePath) : templateFilenamePath;
+				if (usageContext == UsageContext.SERVER_SIDE && (Files.notExists(formsPath) || !Files.isRegularFile(formsPath))) {
+					throw new FileNotFoundException("Unable to find template (" + formsPath.toString() + ").");
+				}
 			}
-			return new TemplateValues(contentRoot, templateFileName);
+			return new TemplateValues(contentRoot, templateFilenamePath);
 		}
 
-		public Path getContentRoot() {
+		public PathOrUrl getContentRoot() {
 			return contentRoot;
 		}
 

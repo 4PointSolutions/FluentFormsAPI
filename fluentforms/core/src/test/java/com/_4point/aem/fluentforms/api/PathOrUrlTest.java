@@ -7,13 +7,21 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com._4point.aem.fluentforms.impl.CrxUrlHandler;
+
 class PathOrUrlTest {
 
+	@BeforeAll
+	static void setUpAll() throws Exception {
+		CrxUrlHandler.enableCrxProtocol();
+	}
+	
 	@BeforeEach
 	void setUp() throws Exception {
 	}
@@ -24,25 +32,38 @@ class PathOrUrlTest {
 		PathOrUrl result = PathOrUrl.fromString(path);
 		assertTrue(result.isPath(), "Expected that isPath() would be true");
 		assertFalse(result.isUrl(), "Expected that isUrl() would be false");
+		assertFalse(result.isCrxUrl(), "Expected that isCrxUrl() would be false");
 		Path expected = Paths.get(path);
 		assertEquals(expected, result.getPath());
 		assertEquals(expected.toString(), result.toString());
 	}
 
-	// TODO: Need to add , "crx:///content/dam/formsanddocument" to the list of test URLs (and make it work too!)
 	@ParameterizedTest
 	@ValueSource(strings = { "http://example.com", "https://example.com", "file:///~/calendar" })
 	void testFromString_Url(String url) throws MalformedURLException {
 		PathOrUrl result = PathOrUrl.fromString(url);
 		assertFalse(result.isPath(), "Expected that isPath() would be false");
 		assertTrue(result.isUrl(), "Expected that isUrl() would be true");
+		assertFalse(result.isCrxUrl(), "Expected that isCrxUrl() would be false");
 		URL expected = new URL(url);
 		assertEquals(expected, result.getUrl());
 		assertEquals(expected.toString(), result.toString());
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "", " ", "crap://more/crap" })
+	@ValueSource(strings = { "crx:/content/dam/formsanddocument", "crx://content/dam/formsanddocument", "crx://foo./?foo?#?#%foo/bar?foo" })
+	void testFromString_CrxUrl(String url) throws MalformedURLException {
+		PathOrUrl result = PathOrUrl.fromString(url);
+		assertFalse(result.isPath(), "Expected that isPath() would be false");
+		assertFalse(result.isUrl(), "Expected that isUrl() would be false");
+		assertTrue(result.isCrxUrl(), "Expected that isCrxUrl() would be true");
+		String crxUrl = result.getCrxUrl();
+		assertEquals(url, crxUrl);
+		assertEquals(url, result.toString());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "", " ", "crap://more/crap" })	// I'd like to find a crx: example that causes an invalid URL, but have ben unable to find one.
 	void testFromString_Invalid(String str) {
 		IllegalArgumentException iaex = assertThrows(IllegalArgumentException.class, ()->PathOrUrl.fromString(str));
 	}

@@ -19,6 +19,7 @@ import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsS
 import com._4point.aem.docservices.rest_services.it_tests.ByteArrayString;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
@@ -27,6 +28,8 @@ import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 
 class RenderPdfFormTest {
+
+	private static final String CRX_CONTENT_ROOT = "crx:/content/dam/formsanddocuments/sample-forms";
 
 	private FormsService underTest; 
 
@@ -47,6 +50,18 @@ class RenderPdfFormTest {
 	void testRenderPdfForm_JustFormAndData() throws Exception {
 		Document pdfResult =  underTest.renderPDFForm()
 									.executeOn(SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
+		
+		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
+		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("RenderPdfFormClient_JustFormAndData.pdf")));
+		
+	}
+
+	@Test
+	@DisplayName("Test renderPdfForm() Just Form and Data.")
+	void testRenderPdfForm_CRXFormAndData() throws Exception {
+		Document pdfResult =  underTest.renderPDFForm()
+									.setContentRoot(PathOrUrl.fromString(CRX_CONTENT_ROOT))
+									.executeOn(SAMPLE_FORM_XDP.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
 		
 		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
 		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("RenderPdfFormClient_JustFormAndData.pdf")));

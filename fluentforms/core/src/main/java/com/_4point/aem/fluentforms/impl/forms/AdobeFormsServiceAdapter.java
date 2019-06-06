@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
@@ -16,7 +19,10 @@ import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com.adobe.fd.forms.api.DataFormat;
 
 public class AdobeFormsServiceAdapter implements TraditionalFormsService {
-	
+
+	private static final Logger log = LoggerFactory.getLogger(AdobeFormsServiceAdapter.class);
+
+
 	private final DocumentFactory documentFactory;
 
 	private final com.adobe.fd.forms.api.FormsService adobeFormsService;
@@ -54,6 +60,7 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 	@Override
 	public Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException {
 		try {
+			log.info("renderPdfForm form='" + urlOrfilename + "', contentRoot='" + pdfFormRenderOptions.getContentRoot() + "'");
 			return documentFactory.create(adobeFormsService.renderPDFForm(urlOrfilename, (data != null ? data.getAdobeDocument() : null), toAdobePDFFormRenderOptions(pdfFormRenderOptions)));
 		} catch (com.adobe.fd.forms.api.FormsServiceException e) {
 			throw new FormsServiceException(e);

@@ -21,21 +21,15 @@ public interface PDFFormRenderOptionsSetter {
 
 	PDFFormRenderOptionsSetter setCacheStrategy(CacheStrategy strategy);
 
-	PDFFormRenderOptionsSetter setContentRoot(Path path);
-
-	PDFFormRenderOptionsSetter setContentRoot(URL url);
-
-	default PDFFormRenderOptionsSetter setContentRoot(PathOrUrl pathOrUrl) {
-		Objects.requireNonNull(pathOrUrl, "contentRoot cannot be null.");
-		if (pathOrUrl.isPath()) {
-			this.setContentRoot(pathOrUrl.getPath());
-		} else if (pathOrUrl.isUrl()) {
-			this.setContentRoot(pathOrUrl.getUrl());
-		} else {
-			throw new IllegalStateException("contentRoot PathOrUrl object was neither Path nor URL.");
-		}
-		return this;
+	default PDFFormRenderOptionsSetter setContentRoot(Path path) {
+		return setContentRoot(new PathOrUrl(path));
 	}
+
+	default PDFFormRenderOptionsSetter setContentRoot(URL url) {
+		return setContentRoot(new PathOrUrl(url));
+	}
+
+	PDFFormRenderOptionsSetter setContentRoot(PathOrUrl pathOrUrl);
 
 	PDFFormRenderOptionsSetter setDebugDir(Path debugDir);
 

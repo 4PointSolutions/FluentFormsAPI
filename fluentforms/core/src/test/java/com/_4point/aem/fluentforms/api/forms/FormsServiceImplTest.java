@@ -385,15 +385,14 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	void testRenderPDFFormPath_BadContentRoot() throws Exception {
+	void testRenderPDFFormPath_UrlContentRoot() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
 		Path filePath = SAMPLE_FORM.toAbsolutePath();
 		Document data = Mockito.mock(Document.class);
 		URL contentRootUrl = new URL("http://foo/bar");
 
-		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->{
-			underTest.renderPDFForm()
+		Document pdfResult = underTest.renderPDFForm()
 									   .setAcrobatVersion(AcrobatVersion.Acrobat_10)
 									   .setCacheStrategy(CacheStrategy.CONSERVATIVE)
 									   .setContentRoot(contentRootUrl)
@@ -403,11 +402,38 @@ class FormsServiceImplTest {
 									   .setTaggedPDF(true)
 									   .setXci(data)
 									   .executeOn(filePath, data);
-		});
-		String message = ex.getMessage();
-		assertThat(message, Matchers.containsString("must be Path object"));
-		assertThat(message, Matchers.containsString(contentRootUrl.toString()));
-		assertThat(message, Matchers.containsString(filePath.toString()));
+
+		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+
+		PDFFormRenderOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
+	}
+
+	@Test
+	void testRenderPDFFormPath_CrxUrlContentRoot() throws Exception {
+		MockPdfRenderService svc = new MockPdfRenderService();
+
+		Path filePath = SAMPLE_FORM.toAbsolutePath();
+		Document data = Mockito.mock(Document.class);
+		PathOrUrl contentRootUrl = PathOrUrl.fromString("crx://foo/bar");
+
+		Document pdfResult = underTest.renderPDFForm()
+									   .setAcrobatVersion(AcrobatVersion.Acrobat_10)
+									   .setCacheStrategy(CacheStrategy.CONSERVATIVE)
+									   .setContentRoot(contentRootUrl)
+									   .setDebugDir(Paths.get("bar", "foo"))
+									   .setLocale(Locale.JAPAN)
+									   .setSubmitUrl(new URL("http://example.com"))
+									   .setTaggedPDF(true)
+									   .setXci(data)
+									   .executeOn(filePath, data);
+
+		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+
+		PDFFormRenderOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 
 	@Test
@@ -551,15 +577,15 @@ class FormsServiceImplTest {
 	private static final String BAD_TEMPLATE = "NonExistentForm.xdp";
 	
 	@Test
-	@DisplayName("TemplateValues Test: Absolute Path in form with content root")
+	@DisplayName("TemplateValues Test: Absolute Path in form with Path content root")
 	public void testTemplateValuesAbsPathwDir() throws Exception {
 		Path template = SAMPLE_FORM.toAbsolutePath();
-		Path templatesDir = SAMPLE_FORMS_DIR.getParent().toAbsolutePath();
+		PathOrUrl templatesDir = new PathOrUrl(SAMPLE_FORMS_DIR.getParent().toAbsolutePath());
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
 		// Content Root should be ignored.
-		assertEquals(template.getParent(), resultTv.getContentRoot(), "Content Root wasn't what was expected.");
+		assertEquals(template.getParent(), resultTv.getContentRoot().getPath(), "Content Root wasn't what was expected.");
 		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
 	}
 
@@ -567,11 +593,65 @@ class FormsServiceImplTest {
 	@DisplayName("TemplateValues Test: Relative Path in form with content root")
 	public void testTemplateValuesRelPathwDir() throws Exception {
 		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
-		Path templatesDir = SAMPLE_FORMS_DIR.getParent();
+		PathOrUrl templatesDir = new PathOrUrl(SAMPLE_FORMS_DIR.getParent());
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
-		assertEquals(SAMPLE_FORMS_DIR, resultTv.getContentRoot(), "Content Root wasn't what was expected.");
+		assertEquals(SAMPLE_FORMS_DIR, resultTv.getContentRoot().getPath(), "Content Root wasn't what was expected.");
+		assertEquals(SAMPLE_FORM.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
+	}
+
+	@Test
+	@DisplayName("TemplateValues Test: Absolute Path in form with Url content root")
+	public void testTemplateValuesAbsPathwUrl() throws Exception {
+		String urlString = "http://foo/bar";
+		Path template = SAMPLE_FORM.toAbsolutePath();
+		PathOrUrl templatesDir = new PathOrUrl(new URL(urlString));
+		
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		
+		// Content Root should be ignored. (i.e. it will be the parent dir of the template)
+		assertEquals(SAMPLE_FORMS_DIR.toAbsolutePath(), resultTv.getContentRoot().getPath(), "Content Root wasn't what was expected.");
+		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
+	}
+
+	@Test
+	@DisplayName("TemplateValues Test: Relative Path in form with Url content root")
+	public void testTemplateValuesRelPathwUrl() throws Exception {
+		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
+		String urlString = "http://foo/bar";
+		PathOrUrl templatesDir = new PathOrUrl(new URL(urlString));
+		
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		
+		assertEquals(urlString + "/" + SAMPLE_FORMS_DIR.getFileName().toString(), resultTv.getContentRoot().getUrl().toString(), "Content Root wasn't what was expected.");
+		assertEquals(SAMPLE_FORM.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
+	}
+
+	@Test
+	@DisplayName("TemplateValues Test: Absolute Path in form with CRX content root")
+	public void testTemplateValuesAbsPathwCrxUrl() throws Exception {
+		String urlString = "crx://foo/bar";
+		Path template = SAMPLE_FORM.toAbsolutePath();
+		PathOrUrl templatesDir = PathOrUrl.fromString(urlString);
+		
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		
+		// Content Root should be ignored. (i.e. it will be the parent dir of the template)
+		assertEquals(SAMPLE_FORMS_DIR.toAbsolutePath(), resultTv.getContentRoot().getPath(), "Content Root wasn't what was expected.");
+		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
+	}
+
+	@Test
+	@DisplayName("TemplateValues Test: Relative Path in form with CRX content root")
+	public void testTemplateValuesRelPathwCrxUrl() throws Exception {
+		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
+		String urlString = "crx://foo/bar";
+		PathOrUrl templatesDir = PathOrUrl.fromString(urlString);
+		
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		
+		assertEquals(urlString + "/" + SAMPLE_FORMS_DIR.getFileName().toString(), resultTv.getContentRoot().getCrxUrl(), "Content Root wasn't what was expected.");
 		assertEquals(SAMPLE_FORM.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
 	}
 
@@ -579,11 +659,11 @@ class FormsServiceImplTest {
 	@DisplayName("TemplateValues Test: Relative Path in form with no content root")
 	public void testTemplateValuesRelPathwNoDir() throws Exception {
 		Path template = SAMPLE_FORM;
-		Path templatesDir = null;
+		PathOrUrl templatesDir = null;
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
-		assertEquals(template.getParent(), resultTv.getContentRoot(), "Content Root wasn't what was expected.");
+		assertEquals(template.getParent(), resultTv.getContentRoot().getPath(), "Content Root wasn't what was expected.");
 		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
 	}
 
@@ -591,7 +671,7 @@ class FormsServiceImplTest {
 	@DisplayName("TemplateValues Test: Relative Path in form with no content root")
 	public void testTemplateValuesNoPathwNoDir() throws Exception {
 		Path template = SAMPLE_FORM.getFileName();
-		Path templatesDir = null;
+		PathOrUrl templatesDir = null;
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.CLIENT_SIDE);
 		
@@ -603,7 +683,7 @@ class FormsServiceImplTest {
 	@DisplayName("TemplateValues Test: Bad template with content root")
 	public void testBadTemplateValuesAbsPathwDir_Client() throws Exception {
 		Path template = Paths.get(BAD_TEMPLATE);
-		Path templatesDir = SAMPLE_FORMS_DIR.toAbsolutePath();
+		PathOrUrl templatesDir = new PathOrUrl(SAMPLE_FORMS_DIR.toAbsolutePath());
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.CLIENT_SIDE);
 		assertEquals(templatesDir, resultTv.getContentRoot(), "Content Root wasn't what was expected.");
@@ -614,7 +694,7 @@ class FormsServiceImplTest {
 	@DisplayName("TemplateValues Test: Bad template with content root")
 	public void testBadTemplateValuesAbsPathwDir_Server() {
 		Path template = Paths.get(BAD_TEMPLATE);
-		Path templatesDir = SAMPLE_FORMS_DIR.toAbsolutePath();
+		PathOrUrl templatesDir = new PathOrUrl(SAMPLE_FORMS_DIR.toAbsolutePath());
 
 		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
 		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
@@ -626,7 +706,7 @@ class FormsServiceImplTest {
 	@DisplayName("TemplateValues Test: Template with bad content root")
 	public void testBadTemplateValuesAbsPathwDir2() {
 		Path template = SAMPLE_FORM.getFileName();
-		Path templatesDir = Paths.get(BAD_CONTENT_ROOT);
+		PathOrUrl templatesDir = new PathOrUrl(Paths.get(BAD_CONTENT_ROOT));
 
 		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
 		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
@@ -638,7 +718,7 @@ class FormsServiceImplTest {
 	@DisplayName("TemplateValues Test: Non-existent relative template with content root")
 	public void testBadTemplateValuesRelPathwDir() {
 		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
-		Path templatesDir = Paths.get(BAD_CONTENT_ROOT);
+		PathOrUrl templatesDir = new PathOrUrl(Paths.get(BAD_CONTENT_ROOT));
 
 		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
 		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
