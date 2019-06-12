@@ -10,23 +10,23 @@ import com.adobe.fd.encryption.client.PasswordEncryptionOptionSpec;
 public interface EncryptionOptions {
 
 	CertificateEncryptionOptionSpec getCertOptionSpec();
-
+	
 	String getCredentialAlias();
-
+	
 	DocAssuranceServiceOperationTypes getEncryptionType();
-
+	
 	PasswordEncryptionOptionSpec getPasswordEncryptionOptionSpec();
-
+	
 	List<CertificateEncryptionIdentity> getPkiIdentities();
-
-	void setCertOptionSpec(CertificateEncryptionOptionSpec certOptionSpec);
-
-	void setCredentialAlias(String credentialAlias);
-
-	void setEncryptionType(DocAssuranceServiceOperationTypes encryptionType);
-
-	void setPasswordEncryptionOptionSpec(PasswordEncryptionOptionSpec passwordEncryptionOptionSpec);
-
-	void setPkiIdentities(List<CertificateEncryptionIdentity> pkiIdentities);
+	
+	EncryptionOptions setCertOptionSpec(CertificateEncryptionOptionSpec certOptionSpec);
+	
+	EncryptionOptions setCredentialAlias(String credentialAlias);
+	
+	EncryptionOptions setEncryptionType(DocAssuranceServiceOperationTypes encryptionType);
+	
+	EncryptionOptions setPasswordEncryptionOptionSpec(PasswordEncryptionOptionSpec passwordEncryptionOptionSpec);
+	
+	EncryptionOptions setPkiIdentities(List<CertificateEncryptionIdentity> pkiIdentities);
 
 }

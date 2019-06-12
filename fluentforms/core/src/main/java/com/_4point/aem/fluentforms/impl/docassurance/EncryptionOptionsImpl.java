@@ -1,5 +1,6 @@
 package com._4point.aem.fluentforms.impl.docassurance;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
@@ -9,60 +10,72 @@ import com.adobe.fd.encryption.client.CertificateEncryptionOptionSpec;
 import com.adobe.fd.encryption.client.PasswordEncryptionOptionSpec;
 
 public class EncryptionOptionsImpl implements EncryptionOptions {
+	private final com.adobe.fd.docassurance.client.api.EncryptionOptions options = com.adobe.fd.docassurance.client.api.EncryptionOptions.getInstance();
+	private List<CertificateEncryptionIdentity> pkiIdentities = new ArrayList<>();
 
 	@Override
 	public CertificateEncryptionOptionSpec getCertOptionSpec() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.options.getCertOptionSpec();
 	}
 
 	@Override
 	public String getCredentialAlias() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.options.getCredentialAlias();
 	}
 
 	@Override
 	public DocAssuranceServiceOperationTypes getEncryptionType() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.options.getEncryptionType();
 	}
 
 	@Override
 	public PasswordEncryptionOptionSpec getPasswordEncryptionOptionSpec() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.options.getPasswordEncryptionOptionSpec();
 	}
 
 	@Override
 	public List<CertificateEncryptionIdentity> getPkiIdentities() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.options.getPkiIdentities();
 	}
 
 	@Override
-	public void setCertOptionSpec(CertificateEncryptionOptionSpec certOptionSpec) {
-		// TODO Auto-generated method stub
+	public EncryptionOptions setCertOptionSpec(CertificateEncryptionOptionSpec certOptionSpec) {
+		this.options.setCertOptionSpec(certOptionSpec);
+		return this;
 	}
 
 	@Override
-	public void setCredentialAlias(String credentialAlias) {
-		// TODO Auto-generated method stub
+	public EncryptionOptions setCredentialAlias(String credentialAlias) {
+		this.options.setCredentialAlias(credentialAlias);
+		return this;
 	}
 
 	@Override
-	public void setEncryptionType(DocAssuranceServiceOperationTypes encryptionType) {
-		// TODO Auto-generated method stub
+	public EncryptionOptions setEncryptionType(DocAssuranceServiceOperationTypes encryptionType) {
+		this.options.setEncryptionType(encryptionType);
+		return this;
 	}
 
 	@Override
-	public void setPasswordEncryptionOptionSpec(PasswordEncryptionOptionSpec passwordEncryptionOptionSpec) {
-		// TODO Auto-generated method stub
+	public EncryptionOptions setPasswordEncryptionOptionSpec(PasswordEncryptionOptionSpec passwordEncryptionOptionSpec) {
+		this.options.setPasswordEncryptionOptionSpec(passwordEncryptionOptionSpec);
+		return this;
+	}
+	
+	public EncryptionOptions addPkiIdentities(List<CertificateEncryptionIdentity> pkiIdentities) {
+		this.pkiIdentities.addAll(pkiIdentities);
+		return this;
+	}
+
+	public EncryptionOptions addPkiIdentity(CertificateEncryptionIdentity pkiIdentity) {
+		this.pkiIdentities.add(pkiIdentity);
+		return this;
 	}
 
 	@Override
-	public void setPkiIdentities(List<CertificateEncryptionIdentity> pkiIdentities) {
-		// TODO Auto-generated method stub
+	public EncryptionOptions setPkiIdentities(List<CertificateEncryptionIdentity> pkiIdentities) {
+		this.options.setPkiIdentities(pkiIdentities);
+		return this;
 	}
 
 }

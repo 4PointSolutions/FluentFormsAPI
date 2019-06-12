@@ -5,26 +5,29 @@ import com.adobe.fd.readerextensions.client.ReaderExtensionsOptionSpec;
 
 public class ReaderExtensionOptionsImpl implements ReaderExtensionOptions {
 
+	private String credentialAlias = null;
+	private ReaderExtensionsOptionSpec reOptions = null;
+	
 	@Override
 	public String getCredentialAlias() {
-		// TODO Auto-generated method stub
-		return null;
+		return credentialAlias;
+	}
+
+	@Override
+	public ReaderExtensionOptionsImpl setCredentialAlias(String credentialAlias) {
+		this.credentialAlias = credentialAlias;
+		return this;
 	}
 
 	@Override
 	public ReaderExtensionsOptionSpec getReOptions() {
-		// TODO Auto-generated method stub
-		return null;
+		return reOptions;
 	}
 
 	@Override
-	public void setCredentialAlias(String credentialAlias) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void setReOptions(ReaderExtensionsOptionSpec reOptions) {
-		// TODO Auto-generated method stub
+	public ReaderExtensionOptions setReOptions(ReaderExtensionsOptionSpec reOptions) {
+		this.reOptions = reOptions;
+		return this;
 	}
 
 }

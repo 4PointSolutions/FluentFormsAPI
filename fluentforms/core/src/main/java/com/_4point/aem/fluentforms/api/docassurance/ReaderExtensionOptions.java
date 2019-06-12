@@ -8,8 +8,8 @@ public interface ReaderExtensionOptions {
 
 	ReaderExtensionsOptionSpec getReOptions();
 
-	void setCredentialAlias(String credentialAlias);
+	ReaderExtensionOptions setCredentialAlias(String credentialAlias);
 
-	void setReOptions(ReaderExtensionsOptionSpec reOptions);
+	ReaderExtensionOptions setReOptions(ReaderExtensionsOptionSpec reOptions);
 
 }
