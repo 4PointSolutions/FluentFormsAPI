@@ -235,6 +235,11 @@ public class DocAssuranceServiceImpl implements DocAssuranceService  {
 	}
 
 	@Override
+	public SecureDocumentArgumentBuilder secureDocument() {
+		return new SecureDocumentArgumentBuilder();
+	}
+
+	@Override
 	public PDFDocumentVerificationInfo verifyDocument(Document inDoc, RevocationCheckStyle revocationCheckStyle, VerificationTime verificationTime,
 			ValidationPreferences prefStore) throws DocAssuranceServiceException {
 		Objects.requireNonNull(inDoc, "input Document cannot be null.");
@@ -251,10 +256,6 @@ public class DocAssuranceServiceImpl implements DocAssuranceService  {
 		Objects.requireNonNull(verificationTime, "verification time cannot be null.");
 		Objects.requireNonNull(validationPreferences, "validation preferences cannot be null.");
 		return adobeDocAssuranceService.applyDocumentTimeStamp(inDoc, verificationTime, validationPreferences, unlockOptions);
-	}
-
-	public SecureDocumentArgumentBuilder secureDocument() {
-		return new SecureDocumentArgumentBuilder();
 	}
 	
 	public static class FieldMDPOptionSpecBuilder {

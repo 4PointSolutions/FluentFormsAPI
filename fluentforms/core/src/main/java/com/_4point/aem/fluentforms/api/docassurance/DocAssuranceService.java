@@ -3,6 +3,7 @@ package com._4point.aem.fluentforms.api.docassurance;
 import java.util.List;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl.SecureDocumentArgumentBuilder;
 import com.adobe.fd.docassurance.client.api.SignatureOptions;
 import com.adobe.fd.encryption.client.EncryptionTypeResult;
 import com.adobe.fd.encryption.client.PasswordEncryptionCompatability;
@@ -26,6 +27,8 @@ public interface DocAssuranceService {
 	Document secureDocument(Document inDoc, EncryptionOptions encryptionOptions, SignatureOptions signatureOptions, ReaderExtensionOptions readerExtensionOptions,
 			UnlockOptions unlockOptions) throws DocAssuranceServiceException;
 
+	SecureDocumentArgumentBuilder secureDocument();
+	
 	Document addInvisibleSignatureField(Document inDoc, String signatureFieldName, FieldMDPOptionSpec fieldMDPOptionsSpec, PDFSeedValueOptionSpec seedValueOptionsSpec,
 			UnlockOptions unlockOptions) throws DocAssuranceServiceException;
 
