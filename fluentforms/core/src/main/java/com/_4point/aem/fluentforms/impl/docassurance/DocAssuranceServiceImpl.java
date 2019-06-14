@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.Transformable;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
 import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
 import com._4point.aem.fluentforms.api.docassurance.ReaderExtensionOptions;
@@ -1136,7 +1137,7 @@ public class DocAssuranceServiceImpl implements DocAssuranceService  {
 			}
 		}
 		
-		public class ReaderExtensionsOptionsBuilder {
+		public class ReaderExtensionsOptionsBuilder implements Transformable<ReaderExtensionsOptionsBuilder> {
 			private final ReaderExtensionOptionsImpl options = new ReaderExtensionOptionsImpl();
 			
 			private ReaderExtensionsOptionsBuilder(String credentialAlias) {
@@ -1158,7 +1159,7 @@ public class DocAssuranceServiceImpl implements DocAssuranceService  {
 				return SecureDocumentArgumentBuilder.this;
 			}
 			
-			public class ReaderExtensionsOptionSpecBuilder {
+			public class ReaderExtensionsOptionSpecBuilder implements Transformable<ReaderExtensionsOptionSpecBuilder> {
 				private final ReaderExtensionsOptionSpec options = new ReaderExtensionsOptionSpec();
 
 				public ReaderExtensionsOptionSpecBuilder setMessage(String message) {
@@ -1184,7 +1185,7 @@ public class DocAssuranceServiceImpl implements DocAssuranceService  {
 					return ReaderExtensionsOptionsBuilder.this;
 				}
 
-				public class UsageRightsBuilder {
+				public class UsageRightsBuilder implements Transformable<UsageRightsBuilder> {
 					private final UsageRights rights = new UsageRights();
 
 					public UsageRightsBuilder setEnabledBarcodeDecoding(boolean enabledBarcodeDecoding) {
