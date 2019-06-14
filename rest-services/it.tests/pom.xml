@@ -11,13 +11,6 @@
 	<name>Integration Tests</name>
 	<description>Integration Tests to test the rest-services directly.</description>
 
-	<repositories>
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
@@ -39,12 +32,6 @@
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.github.hanleyt</groupId>
-			<artifactId>jersey-junit</artifactId>
-			<version>2.0.0</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
