@@ -7,7 +7,7 @@
 		<artifactId>rest-services</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>it.tests</artifactId>
+	<artifactId>rest-services.it.tests</artifactId>
 	<name>Integration Tests</name>
 	<description>Integration Tests to test the rest-services directly.</description>
 
