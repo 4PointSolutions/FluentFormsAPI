@@ -1,6 +1,5 @@
 package com._4point.aem.fluentforms.api.docassurance;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +22,6 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
 import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl;
 import com._4point.aem.fluentforms.impl.docassurance.TraditionalDocAssuranceService;
-import com.adobe.fd.docassurance.client.api.DocAssuranceException;
 import com.adobe.fd.docassurance.client.api.SignatureOptions;
 import com.adobe.fd.readerextensions.client.ReaderExtensionsOptionSpec;
 import com.adobe.fd.readerextensions.client.UsageRights;
@@ -106,7 +103,7 @@ public class DocAssuranceServiceTest {
 		assertFalse(usageRights.isEnabledComments(), "Expected enabledComments to be false.");
 		assertFalse(usageRights.isEnabledCommentsOnline(), "Expected enabledCommentsOnline to be false.");
 		assertFalse(usageRights.isEnabledDynamicFormPages(), "Expected enabledDynamicFormPages to be false.");
-		assertFalse(usageRights.isEnabledEmbeddedFiles(), "Expected enabledEmbeddedFile to be false.");
+		assertFalse(usageRights.isEnabledEmbeddedFiles(), "Expected enabledEmbeddedFiles to be false.");
 		assertFalse(usageRights.isEnabledSubmitStandalone(), "Expected enabledSubmitStandalone to be false.");
 	}
 
@@ -181,7 +178,7 @@ public class DocAssuranceServiceTest {
 		assertTrue(usageRights.isEnabledComments(), "Expected enabledComments to be true.");
 		assertTrue(usageRights.isEnabledCommentsOnline(), "Expected enabledCommentsOnline to be true.");
 		assertTrue(usageRights.isEnabledDynamicFormPages(), "Expected enabledDynamicFormPages to be true.");
-		assertTrue(usageRights.isEnabledEmbeddedFiles(), "Expected enabledEmbeddedFile to be true.");
+		assertTrue(usageRights.isEnabledEmbeddedFiles(), "Expected enabledEmbeddedFiles to be true.");
 		assertTrue(usageRights.isEnabledSubmitStandalone(), "Expected enabledSubmitStandalone to be true.");
 	}
 
@@ -240,7 +237,7 @@ public class DocAssuranceServiceTest {
 		assertFalse(usageRights.isEnabledComments(), "Expected enabledComments to be false.");
 		assertFalse(usageRights.isEnabledCommentsOnline(), "Expected enabledCommentsOnline to be false.");
 		assertTrue(usageRights.isEnabledDynamicFormPages(), "Expected enabledDynamicFormPages to be true.");
-		assertTrue(usageRights.isEnabledEmbeddedFiles(), "Expected enabledEmbeddedFile to be true.");
+		assertTrue(usageRights.isEnabledEmbeddedFiles(), "Expected enabledEmbeddedFiles to be true.");
 		assertTrue(usageRights.isEnabledSubmitStandalone(), "Expected enabledSubmitStandalone to be true.");
 	}
 
