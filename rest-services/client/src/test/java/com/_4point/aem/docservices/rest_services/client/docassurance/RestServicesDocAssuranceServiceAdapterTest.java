@@ -1,8 +1,14 @@
-package com._4point.aem.docservices.rest_services.client.forms;
+package com._4point.aem.docservices.rest_services.client.docassurance;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -29,18 +35,18 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.fluentforms.api.Document;
-import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
+import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
+import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
+import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
+import com._4point.aem.fluentforms.api.docassurance.ReaderExtensionOptions;
+import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl;
+import com._4point.aem.fluentforms.impl.docassurance.ReaderExtensionOptionsImpl;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
-
-import static org.mockito.Mockito.*;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
+import com.adobe.fd.docassurance.client.api.SignatureOptions;
+import com.adobe.fd.signatures.pdf.inputs.UnlockOptions;
 
 @ExtendWith(MockitoExtension.class)
-class RestServicesFormsServiceAdapterTest {
+public class RestServicesDocAssuranceServiceAdapterTest {
 
 	private static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	private static final String CORRELATION_ID = "correlationId";
@@ -57,10 +63,11 @@ class RestServicesFormsServiceAdapterTest {
 	
 	@Captor ArgumentCaptor<String> machineName;
 	@Captor ArgumentCaptor<String> path;
+	@SuppressWarnings("rawtypes")
 	@Captor ArgumentCaptor<Entity> entity;
 	@Captor ArgumentCaptor<String> correlationId;
 
-	RestServicesFormsServiceAdapter underTest;
+	RestServicesDocAssuranceServiceAdapter underTest;
 	
 	@BeforeEach
 	void setUp() throws Exception {
@@ -75,8 +82,7 @@ class RestServicesFormsServiceAdapterTest {
 	
 	@ParameterizedTest
 	@EnumSource(HappyPaths.class)
-	void testImportData_noSsl(HappyPaths codePath) throws Exception {
-
+	void testSecureDocument_noSsl(HappyPaths codePath) throws Exception {
 		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
 
 		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
@@ -106,7 +112,7 @@ class RestServicesFormsServiceAdapterTest {
 			throw new IllegalStateException("Found unexpected HappyPaths value (" + codePath.toString() + ").");
 		}
 		
-		com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter.FormsServiceBuilder adapterBuilder = RestServicesFormsServiceAdapter.builder()
+		com._4point.aem.docservices.rest_services.client.docassurance.RestServicesDocAssuranceServiceAdapter.DocAssuranceServiceBuilder adapterBuilder = RestServicesDocAssuranceServiceAdapter.builder()
 						.machineName(TEST_MACHINE_NAME)
 						.port(TEST_MACHINE_PORT)
 						.basicAuthentication("username", "password")
@@ -120,16 +126,18 @@ class RestServicesFormsServiceAdapterTest {
 						.build();
 				
 		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
-		Document data = MockDocumentFactory.GLOBAL_INSTANCE.create("data Document Data".getBytes());
-
-		Document pdfResult = underTest.importData(pdf, data);
+		EncryptionOptions eOptions = null;
+		SignatureOptions sOptions = null;
+		UnlockOptions uOptions = null;
+		ReaderExtensionOptions reOptions = Mockito.mock(ReaderExtensionOptions.class);
+		Document pdfResult = underTest.secureDocument(pdf, eOptions, sOptions, reOptions, uOptions);
 		
 		// Make sure the correct URL is called.
 		final String expectedPrefix = useSSL ? "https://" : "http://";
 		assertThat("Expected target url contains '" + expectedPrefix + "'", machineName.getValue(), containsString(expectedPrefix));
 		assertThat("Expected target url contains TEST_MACHINE_NAME", machineName.getValue(), containsString(TEST_MACHINE_NAME));
 		assertThat("Expected target url contains TEST_MACHINE_PORT", machineName.getValue(), containsString(Integer.toString(TEST_MACHINE_PORT)));
-		assertThat("Expected target url contains 'ImportData'", path.getValue(), containsString("ImportData"));
+		assertThat("Expected target url contains 'SecureDocument'", path.getValue(), containsString("SecureDocument"));
 
 		// Make sure that the arguments we passed in are transmitted correctly.
 		@SuppressWarnings("unchecked")
@@ -137,8 +145,7 @@ class RestServicesFormsServiceAdapterTest {
 		FormDataMultiPart postedData = postedEntity.getEntity();
 		
 		assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
-		validateDocumentFormField(postedData, "pdf", new MediaType("application", "pdf"), pdf.getInlineData());
-		validateDocumentFormField(postedData, "data", MediaType.APPLICATION_XML_TYPE, data.getInlineData());
+		validateDocumentFormField(postedData, "inDoc", new MediaType("application", "pdf"), pdf.getInlineData());
 		
 		if (useCorrelationId) {
 			assertEquals(CORRELATION_ID, correlationId.getValue());
@@ -146,6 +153,7 @@ class RestServicesFormsServiceAdapterTest {
 		
 		// Make sure the response is correct.
 		assertArrayEquals(responseData.getInlineData(), pdfResult.getInlineData());
+		
 	}
 	
 	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {
@@ -159,7 +167,7 @@ class RestServicesFormsServiceAdapterTest {
 	}
 
 	@Test
-	void testImportData_SuccessButNoEntity() throws Exception {
+	void testSecureDocument_SuccessButNoEntity() throws Exception {
 
 		when(client.target(machineName.capture())).thenReturn(target);
 		when(target.path(path.capture())).thenReturn(target);
@@ -169,7 +177,7 @@ class RestServicesFormsServiceAdapterTest {
 		when(response.getStatusInfo()).thenReturn(statusType);
 		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
 		
-		underTest = RestServicesFormsServiceAdapter.builder()
+		underTest = RestServicesDocAssuranceServiceAdapter.builder()
 				.machineName(TEST_MACHINE_NAME)
 				.port(TEST_MACHINE_PORT)
 				.basicAuthentication("username", "password")
@@ -179,22 +187,9 @@ class RestServicesFormsServiceAdapterTest {
 		
 		
 		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
-		Document data = MockDocumentFactory.GLOBAL_INSTANCE.create("data Document Data".getBytes());
 
-		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->underTest.importData(pdf, data));
+		Exception ex = assertThrows(Exception.class, ()->underTest.secureDocument(pdf, null, null, null, null));
 		assertThat(ex.getMessage(), containsString("should never happen"));
-	}
-	
-	// TODO:  Add more importData tests for exceptional case (i.e. those cases where exceptions are thrown.
-	
-	@Disabled
-	void testRenderPDFForm() {
-		fail("Not yet implemented");
-	}
-
-	@Disabled
-	void testValidate() {
-		fail("Not yet implemented");
 	}
 
 }

@@ -7,11 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -19,14 +17,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-
+import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
+import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
-import com._4point.aem.fluentforms.api.Transformable;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
@@ -185,101 +182,72 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 		Response result = invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType()));
 		return result;
 	}
-
-	/**
-	 * This class is to add a transform() method on the Multipart object so that we can make
-	 * the "set if not null" operations more succinct. 
-	 *
-	 */
-	private static class MultipartTransformer implements Transformable<MultipartTransformer> {
-		private final FormDataMultiPart m;
-
-		private MultipartTransformer(FormDataMultiPart m) {
-			super();
-			this.m = m;
-		}
-		
-		public static MultipartTransformer create(FormDataMultiPart fdm) { return new MultipartTransformer(fdm); }
-
-		public FormDataMultiPart get() {
-			return m;
-		}
-
-		public MultipartTransformer field(String name, String value) {
-			m.field(name, value);
-			return this;
-		}
-
-		public MultipartTransformer field(String name, Object entity, MediaType mediaType) {
-			m.field(name, entity, mediaType);
-			return this;
-		}
-		
-		
-	}
 	
 	/**
 	 * Creates a Builder object for building a RestServicesFormServiceAdapter object.
 	 * 
 	 * @return build object
 	 */
-	public static Builder builder() {
-		return new Builder();
+	public static FormsServiceBuilder builder() {
+		return new FormsServiceBuilder();
 	}
 	
-	public static class Builder {
-		private final static Supplier<Client> defaultClientFactory = ()->ClientBuilder.newClient();
+	public static class FormsServiceBuilder implements Builder {
+		private BuilderImpl builder = new BuilderImpl();
+//		private final static Supplier<Client> defaultClientFactory = ()->ClientBuilder.newClient();
 		
-		private String machineName = "localhost";
-		private int port = 4502;
-		private HttpAuthenticationFeature authFeature = null;
-		private boolean useSsl = false;
-		private Supplier<Client> clientFactory = defaultClientFactory;
-		private Supplier<String> correlationIdFn = null;
-		
-		// Only callable from the containing class.
-		private Builder() {
+		private FormsServiceBuilder() {
 			super();
 		}
 
-		public Builder machineName(String machineName) {
-			this.machineName = machineName;
+		@Override
+		public FormsServiceBuilder machineName(String machineName) {
+			builder.machineName(machineName);
 			return this;
 		}
 
-		public Builder port(int port) {
-			this.port = port;
+		@Override
+		public FormsServiceBuilder port(int port) {
+			builder.port(port);
 			return this;
 		}
 
-		public Builder useSsl(boolean useSsl) {
-			this.useSsl = useSsl;
+		@Override
+		public FormsServiceBuilder useSsl(boolean useSsl) {
+			builder.useSsl(useSsl);
 			return this;
 		}
 
-		public Builder clientFactory(Supplier<Client> clientFactory) {
-			this.clientFactory = clientFactory;
+		@Override
+		public FormsServiceBuilder clientFactory(Supplier<Client> clientFactory) {
+			builder.clientFactory(clientFactory);
 			return this;
 		}
 
-		public Builder basicAuthentication(String username, String password) {
-			this.authFeature = HttpAuthenticationFeature.basic(username, password);
+		@Override
+		public FormsServiceBuilder basicAuthentication(String username, String password) {
+			builder.basicAuthentication(username, password);
 			return this;
 		}
 		
-		public Builder correlationId(Supplier<String> correlationIdFn) {
-			this.correlationIdFn = correlationIdFn;
+		@Override
+		public FormsServiceBuilder correlationId(Supplier<String> correlationIdFn) {
+			builder.correlationId(correlationIdFn);
 			return this;
 		}
 
+		@Override
+		public Supplier<String> getCorrelationIdFn() {
+			return builder.getCorrelationIdFn();
+		}
+
+		@Override
+		public WebTarget createLocalTarget() {
+			return builder.createLocalTarget();
+		}
+
 		public RestServicesFormsServiceAdapter build() {
-			Client client = clientFactory.get();
-			client.register(MultiPartFeature.class);
-			if (this.authFeature != null) {
-				client.register(authFeature);
-			}
-			WebTarget localTarget = client.target("http" + (useSsl ? "s" : "") + "://" + machineName + ":" + Integer.toString(port));
-			return new RestServicesFormsServiceAdapter(localTarget, this.correlationIdFn);
+			return new RestServicesFormsServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
 		}
 	}
 	
