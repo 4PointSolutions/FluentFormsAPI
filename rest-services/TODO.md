@@ -9,7 +9,8 @@ This file contains a list of things that I would like to do to improve on the ex
 
 3. Improve tests in RestServicesFormsServiceAdapterTest.
    1. Add more importData tests for exceptional case (i.e. those cases where exceptions are thrown.
-   2. Improve mocking based on [https://maciejwalkowiak.com/mocking-fluent-interfaces/](https://maciejwalkowiak.com/mocking-fluent-interfaces/) 
+   2. Improve mocking based on [https://maciejwalkowiak.com/mocking-fluent-interfaces/](https://maciejwalkowiak.com/mocking-fluent-interfaces/)
+   3. Add tests for RenderPdfForm().  There are currently no tests here, it falls on the integration tests to find issues within the adapter code which is not ideal.
 
 1. Add support for a Correlation ID header field (write it out to the log).  This has already been added in the client code, but needs to be added to the server code.
 
