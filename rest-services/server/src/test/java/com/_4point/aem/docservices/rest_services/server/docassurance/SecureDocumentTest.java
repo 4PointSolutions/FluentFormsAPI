@@ -19,7 +19,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,14 +36,11 @@ import com.adobe.fd.readerextensions.client.UsageRights;
 
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
-import uk.org.lidalia.slf4jtest.TestLogger;
-import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
 @ExtendWith(AemContextExtension.class)
 @ExtendWith(MockitoExtension.class)
 public class SecureDocumentTest {
 	private static final String APPLICATION_PDF = "application/pdf";
-	private static final String APPLICATION_XML = "application/xml";
 
 	private static final String DOCUMENT_PARAM = "inDoc";
 	private static final String CREDENTIAL_ALIAS_PARAM = "credentialAlias";
@@ -65,8 +61,6 @@ public class SecureDocumentTest {
 	private final SecureDocument underTest = new SecureDocument();
 
 	private final AemContext aemContext = new AemContext();
-
-	private TestLogger loggerCapture = TestLoggerFactory.getTestLogger(SecureDocument.class);
 
 	private MockDocumentFactory mockDocumentFactory = new MockDocumentFactory();
 
@@ -203,21 +197,6 @@ public class SecureDocumentTest {
 				()->assertFalse(usageRights.isEnabledOnlineForms()),
 				()->assertTrue(usageRights.isEnabledSubmitStandalone())
 			);
-	}
-
-	@Disabled
-	void testDoPost_BadCredentialAlias() {
-		// TODO Auto-generated constructor stub
-	}
-
-	@Disabled
-	void testDoPost_InDocNotAPdf() {
-		// TODO Auto-generated constructor stub
-	}
-
-	@Disabled
-	void testDoPost_NoInDoc() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public MockTraditionalDocAssuranceService mockReaderExtendPdf(byte[] resultDataBytes) throws NoSuchFieldException {

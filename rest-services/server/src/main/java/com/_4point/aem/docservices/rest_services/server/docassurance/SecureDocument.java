@@ -44,7 +44,7 @@ public class SecureDocument extends SlingAllMethodsServlet {
 	private static final Logger log = LoggerFactory.getLogger(SecureDocument.class);
 
 	private final DocumentFactory docFactory = DocumentFactory.getDefault();
-	private Supplier<TraditionalDocAssuranceService> docAssuranceServiceFactory;
+	private Supplier<TraditionalDocAssuranceService> docAssuranceServiceFactory = this::getAdobeDocAssuranceService;
 	private ResourceResolver resourceResolver;
 
 	@Reference
@@ -54,15 +54,16 @@ public class SecureDocument extends SlingAllMethodsServlet {
 	protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
 			throws ServletException, IOException {
 		try {
+			this.resourceResolver = request.getResourceResolver();
 			this.processInput(request, response);
 		} catch (BadRequestException br) {
-			log.warn("Bad Request from the user", br);
+			log.warn("Bad Request from the user.", br);
 			response.sendError(SlingHttpServletResponse.SC_BAD_REQUEST, br.getMessage());
 		} catch (InternalServerErrorException ise) {
-			log.error("Internal server error", ise);
+			log.error("Internal server error.", ise);
 			response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, ise.getMessage());
 		} catch (NotAcceptableException nae) {
-			log.error("NotAcceptable error", nae);
+			log.error("NotAcceptable error.", nae);
 			response.sendError(SlingHttpServletResponse.SC_NOT_ACCEPTABLE, nae.getMessage());
 		} catch (Exception e) {  			// Some exception we haven't anticipated.
 			log.error(e.getMessage() != null ? e.getMessage() : e.getClass().getName() , e);	// Make sure this gets into our log.
@@ -72,9 +73,6 @@ public class SecureDocument extends SlingAllMethodsServlet {
 
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws BadRequestException, InternalServerErrorException, NotAcceptableException {
 		DocAssuranceService docAssuranceService = new DocAssuranceServiceImpl(docAssuranceServiceFactory.get());
-		
-		this.resourceResolver = request.getResourceResolver();
-		this.docAssuranceServiceFactory = this::getAdobeDocAssuranceService;
 
 		ReaderExtensionsParameters reqParameters = ReaderExtensionsParameters.readReaderExtensionsParameters(request);
 		String credentialAlias = reqParameters.getCredentialAlias();
@@ -123,17 +121,17 @@ public class SecureDocument extends SlingAllMethodsServlet {
 				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
 			}
 		} catch (FileNotFoundException | NullPointerException ex1) {
-			throw new BadRequestException("Bad request parameter while reader extending a PDF (" + ex1.getMessage() + ").", ex1);
+			throw new BadRequestException("Bad request parameter while reader extending a PDF. " + ex1.getMessage(), ex1);
 		} catch (DocAssuranceServiceException | IOException ex2) {
-			throw new InternalServerErrorException("Internal Error while reader extending a PDF.", ex2);
+			throw new InternalServerErrorException("Internal Error while reader extending a PDF. " + ex2.getMessage(), ex2);
 		} catch (IllegalArgumentException ex3) {
-			throw new BadRequestException("Bad arguments while reader extending a PDF", ex3);
+			throw new BadRequestException("Bad arguments while reader extending a PDF. " + ex3.getMessage(), ex3);
 		}
 				
 	}
 
 	private TraditionalDocAssuranceService getAdobeDocAssuranceService() {
-		return new AdobeDocAssuranceServiceAdapter(this.adobeDocAssuranceService, this.resourceResolver);
+		return new AdobeDocAssuranceServiceAdapter(adobeDocAssuranceService, resourceResolver);
 	}
 
 	private static class ReaderExtensionsParameters {
@@ -326,7 +324,7 @@ public class SecureDocument extends SlingAllMethodsServlet {
 				
 				return result;
 			} catch (IllegalArgumentException e) {
-				throw new BadRequestException("There was a problem with one of the incoming parameters.", e);
+				throw new BadRequestException("There was a problem with one of the incoming Reader Extensions parameters.", e);
 			}
 		}
 	}
