@@ -25,8 +25,8 @@ public class ReaderExtensionOptionsImpl implements ReaderExtensionOptions {
 	}
 
 	@Override
-	public ReaderExtensionOptions setReOptions(ReaderExtensionsOptionSpec reOptions) {
-		this.reOptions = reOptions;
+	public ReaderExtensionOptions setReOptions(ReaderExtensionsOptionSpec reOptionsSpec) {
+		this.reOptions = reOptionsSpec;
 		return this;
 	}
 

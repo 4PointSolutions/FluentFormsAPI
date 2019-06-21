@@ -10,55 +10,58 @@ import com.adobe.fd.encryption.client.CertificateEncryptionOptionSpec;
 import com.adobe.fd.encryption.client.PasswordEncryptionOptionSpec;
 
 public class EncryptionOptionsImpl implements EncryptionOptions {
-	private final com.adobe.fd.docassurance.client.api.EncryptionOptions options = com.adobe.fd.docassurance.client.api.EncryptionOptions.getInstance();
+	private CertificateEncryptionOptionSpec certificateEncryptionOptionSpec = null;
+	private String credentialAlias = null;
+	private DocAssuranceServiceOperationTypes encryptionType = null;
+	private PasswordEncryptionOptionSpec passwordEncryptionOptionSpec = null;
 	private List<CertificateEncryptionIdentity> pkiIdentities = new ArrayList<>();
 
 	@Override
 	public CertificateEncryptionOptionSpec getCertOptionSpec() {
-		return this.options.getCertOptionSpec();
+		return this.certificateEncryptionOptionSpec;
 	}
 
 	@Override
 	public String getCredentialAlias() {
-		return this.options.getCredentialAlias();
+		return this.credentialAlias;
 	}
 
 	@Override
 	public DocAssuranceServiceOperationTypes getEncryptionType() {
-		return this.options.getEncryptionType();
+		return this.encryptionType;
 	}
 
 	@Override
 	public PasswordEncryptionOptionSpec getPasswordEncryptionOptionSpec() {
-		return this.options.getPasswordEncryptionOptionSpec();
+		return this.passwordEncryptionOptionSpec;
 	}
 
 	@Override
 	public List<CertificateEncryptionIdentity> getPkiIdentities() {
-		return this.options.getPkiIdentities();
+		return this.pkiIdentities;
 	}
 
 	@Override
 	public EncryptionOptions setCertOptionSpec(CertificateEncryptionOptionSpec certOptionSpec) {
-		this.options.setCertOptionSpec(certOptionSpec);
+		this.certificateEncryptionOptionSpec = certOptionSpec;
 		return this;
 	}
 
 	@Override
 	public EncryptionOptions setCredentialAlias(String credentialAlias) {
-		this.options.setCredentialAlias(credentialAlias);
+		this.credentialAlias = credentialAlias;
 		return this;
 	}
 
 	@Override
 	public EncryptionOptions setEncryptionType(DocAssuranceServiceOperationTypes encryptionType) {
-		this.options.setEncryptionType(encryptionType);
+		this.encryptionType = encryptionType;
 		return this;
 	}
 
 	@Override
 	public EncryptionOptions setPasswordEncryptionOptionSpec(PasswordEncryptionOptionSpec passwordEncryptionOptionSpec) {
-		this.options.setPasswordEncryptionOptionSpec(passwordEncryptionOptionSpec);
+		this.passwordEncryptionOptionSpec = passwordEncryptionOptionSpec;
 		return this;
 	}
 	
@@ -74,7 +77,7 @@ public class EncryptionOptionsImpl implements EncryptionOptions {
 
 	@Override
 	public EncryptionOptions setPkiIdentities(List<CertificateEncryptionIdentity> pkiIdentities) {
-		this.options.setPkiIdentities(pkiIdentities);
+		this.pkiIdentities = pkiIdentities;
 		return this;
 	}
 

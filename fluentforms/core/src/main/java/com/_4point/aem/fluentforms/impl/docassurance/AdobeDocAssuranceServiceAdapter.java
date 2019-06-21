@@ -33,6 +33,7 @@ import com.adobe.fd.signatures.pdf.inputs.ValidationPreferences;
 import com.adobe.fd.signatures.pki.client.types.common.RevocationCheckStyle;
 
 public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceService {
+	private static final String APPLICATION_PDF = "application/pdf";
 
 	private static final Logger log = LoggerFactory.getLogger(AdobeDocAssuranceServiceAdapter.class);
 
@@ -60,8 +61,12 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	public Document secureDocument(Document inDoc, EncryptionOptions encryptionOptions, SignatureOptions signatureOptions, ReaderExtensionOptions readerExtensionOptions,
 			UnlockOptions unlockOptions) throws DocAssuranceServiceException {
 		try {
-			log.info("secureDocument called");
-			return documentFactory.create(adobeDocAssuranceService.secureDocument(inDoc.getAdobeDocument(), toAdobeEncryptionOptions(encryptionOptions), signatureOptions, toAdobeReaderExtensionOptions(readerExtensionOptions), unlockOptions));
+//			log.info("secureDocument called");
+//			com.adobe.fd.docassurance.client.api.EncryptionOptions eOptions = toAdobeEncryptionOptions(encryptionOptions);
+//			return documentFactory.create(adobeDocAssuranceService.secureDocument(inDoc.getAdobeDocument(), eOptions, signatureOptions, toAdobeReaderExtensionOptions(readerExtensionOptions), unlockOptions));
+			com.adobe.aemfd.docmanager.Document adobeDoc = adobeDocAssuranceService.secureDocument(inDoc.getAdobeDocument(), null, null, toAdobeReaderExtensionOptions(readerExtensionOptions), null);
+			adobeDoc.setContentType(APPLICATION_PDF);
+			return documentFactory.create(adobeDoc);
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -239,6 +244,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	
 	public com.adobe.fd.docassurance.client.api.EncryptionOptions toAdobeEncryptionOptions(EncryptionOptions options) {
 		com.adobe.fd.docassurance.client.api.EncryptionOptions adobeOptions = com.adobe.fd.docassurance.client.api.EncryptionOptions.getInstance();
+		// log.info("About to call options.getCertOptionSpec().  Currently generates a NullPointerException!!!");
 		setIfNotNull(adobeOptions::setCertOptionSpec, options.getCertOptionSpec());
 		setIfNotNull(adobeOptions::setEncryptionType, options.getEncryptionType());
 		setIfNotNull(adobeOptions::setPasswordEncryptionOptionSpec, options.getPasswordEncryptionOptionSpec());
