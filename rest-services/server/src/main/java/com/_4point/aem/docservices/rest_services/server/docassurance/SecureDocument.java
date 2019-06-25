@@ -92,7 +92,6 @@ public class SecureDocument extends SlingAllMethodsServlet {
 		Boolean enabledSubmitStandalone = reqParameters.getEnabledSubmitStandalone();
 		
 		try {
-			// All usage rights will be enabled by default except for Barcode Decoding, Comments and Online Comments.
 			try (Document result = docAssuranceService.secureDocument()
 									.readerExtensionsOptions(credentialAlias)
 									.setReOptions()
@@ -102,14 +101,14 @@ public class SecureDocument extends SlingAllMethodsServlet {
 											.transform(b->enabledBarcodeDecoding == null ? b : b.setEnabledBarcodeDecoding(enabledBarcodeDecoding.booleanValue()))
 											.transform(b->enabledComments == null ? b : b.setEnabledComments(enabledComments.booleanValue()))
 											.transform(b->enabledCommentsOnline == null ? b : b.setEnabledCommentsOnline(enabledBarcodeDecoding.booleanValue()))
-											.transform(b->enabledDigitalSignatures == null ? b.setEnabledDigitalSignatures(true) : b.setEnabledDigitalSignatures(enabledDigitalSignatures.booleanValue()))
-											.transform(b->enabledDynamicFormFields == null ? b.setEnabledDynamicFormFields(true) : b.setEnabledDynamicFormFields(enabledDynamicFormFields.booleanValue()))
-											.transform(b->enabledDynamicFormPages == null ? b.setEnabledDynamicFormPages(true) : b.setEnabledDynamicFormPages(enabledDynamicFormPages.booleanValue()))
-											.transform(b->enabledEmbeddedFiles == null ? b.setEnabledEmbeddedFiles(true) : b.setEnabledEmbeddedFiles(enabledEmbeddedFiles.booleanValue()))
-											.transform(b->enabledFormDataImportExport == null ? b.setEnabledFormDataImportExport(true) : b.setEnabledFormDataImportExport(enabledFormDataImportExport.booleanValue()))
-											.transform(b->enabledFormFillIn == null ? b.setEnabledFormFillIn(true) : b.setEnabledFormFillIn(enabledFormFillIn.booleanValue()))
-											.transform(b->enabledOnlineForms == null ? b.setEnabledOnlineForms(true) : b.setEnabledOnlineForms(enabledOnlineForms.booleanValue()))
-											.transform(b->enabledSubmitStandalone == null ? b.setEnabledSubmitStandalone(true) : b.setEnabledSubmitStandalone(enabledSubmitStandalone.booleanValue()))
+											.transform(b->enabledDigitalSignatures == null ? b : b.setEnabledDigitalSignatures(enabledDigitalSignatures.booleanValue()))
+											.transform(b->enabledDynamicFormFields == null ? b : b.setEnabledDynamicFormFields(enabledDynamicFormFields.booleanValue()))
+											.transform(b->enabledDynamicFormPages == null ? b : b.setEnabledDynamicFormPages(enabledDynamicFormPages.booleanValue()))
+											.transform(b->enabledEmbeddedFiles == null ? b : b.setEnabledEmbeddedFiles(enabledEmbeddedFiles.booleanValue()))
+											.transform(b->enabledFormDataImportExport == null ? b : b.setEnabledFormDataImportExport(enabledFormDataImportExport.booleanValue()))
+											.transform(b->enabledFormFillIn == null ? b : b.setEnabledFormFillIn(enabledFormFillIn.booleanValue()))
+											.transform(b->enabledOnlineForms == null ? b : b.setEnabledOnlineForms(enabledOnlineForms.booleanValue()))
+											.transform(b->enabledSubmitStandalone == null ? b : b.setEnabledSubmitStandalone(enabledSubmitStandalone.booleanValue()))
 											.done()
 										.done()
 									.done()

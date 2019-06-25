@@ -110,14 +110,14 @@ public class SecureDocumentTest {
 				()->assertFalse(usageRights.isEnabledBarcodeDecoding()),
 				()->assertFalse(usageRights.isEnabledComments()),
 				()->assertFalse(usageRights.isEnabledCommentsOnline()),
-				()->assertTrue(usageRights.isEnabledDigitalSignatures()),
-				()->assertTrue(usageRights.isEnabledDynamicFormFields()),
-				()->assertTrue(usageRights.isEnabledDynamicFormPages()),
-				()->assertTrue(usageRights.isEnabledEmbeddedFiles()),
-				()->assertTrue(usageRights.isEnabledFormDataImportExport()),
-				()->assertTrue(usageRights.isEnabledFormFillIn()),
-				()->assertTrue(usageRights.isEnabledOnlineForms()),
-				()->assertTrue(usageRights.isEnabledSubmitStandalone())
+				()->assertFalse(usageRights.isEnabledDigitalSignatures()),
+				()->assertFalse(usageRights.isEnabledDynamicFormFields()),
+				()->assertFalse(usageRights.isEnabledDynamicFormPages()),
+				()->assertFalse(usageRights.isEnabledEmbeddedFiles()),
+				()->assertFalse(usageRights.isEnabledFormDataImportExport()),
+				()->assertFalse(usageRights.isEnabledFormFillIn()),
+				()->assertFalse(usageRights.isEnabledOnlineForms()),
+				()->assertFalse(usageRights.isEnabledSubmitStandalone())
 			);
 	}
 
