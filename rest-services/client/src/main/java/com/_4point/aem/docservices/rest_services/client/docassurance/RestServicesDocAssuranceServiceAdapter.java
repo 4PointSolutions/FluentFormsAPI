@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
@@ -98,7 +99,7 @@ public class RestServicesDocAssuranceServiceAdapter implements TraditionalDocAss
 			if (readerExtensionOptions != null) {
 				String credentialAlias = readerExtensionOptions.getCredentialAlias();
 				ReaderExtensionsOptionSpec reOptionsSpec = readerExtensionOptions.getReOptions();
-			
+				
 				multipart.field(DOCUMENT_PARAM, inDocument.getInputStream(), APPLICATION_PDF);
 				multipart.field(CREDENTIAL_ALIAS_PARAM, credentialAlias);
 
@@ -117,7 +118,7 @@ public class RestServicesDocAssuranceServiceAdapter implements TraditionalDocAss
 					Boolean enabledOnlineForms = reOptionsSpec.getUsageRights().isEnabledOnlineForms();
 					Boolean enabledSubmitStandalone = reOptionsSpec.getUsageRights().isEnabledSubmitStandalone();
 
-					// This code sets the individual fields if they are not null. 
+					// Set fields for non-null values. 
 					MultipartTransformer.create(multipart)
 										.transform((t)->message == null ? t : t.field(MESSAGE_PARAM, message))
 										.transform((t)->isModeFinal == null ? t : t.field(IS_MODE_FINAL_PARAM, isModeFinal.toString()))

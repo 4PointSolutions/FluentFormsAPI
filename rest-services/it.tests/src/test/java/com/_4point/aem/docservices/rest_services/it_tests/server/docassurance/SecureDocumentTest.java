@@ -96,6 +96,41 @@ public class SecureDocumentTest {
 	}
 
 	@Test
+	void testReaderExtendPDF_AllArgsTrue() throws Exception {
+		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
+			multipart.field(DOCUMENT_PARAM, SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)
+					 .field(CREDENTIAL_ALIAS_PARAM, "recred")
+					 .field(MESSAGE_PARAM, "ReaderExtendPDF Test")
+					 .field(IS_MODE_FINAL_PARAM, "true")
+					 .field(ENABLED_BARCODED_DECODING_PARAM, "true")
+					 .field(ENABLED_COMMENTS_PARAM, "true")
+					 .field(ENABLED_COMMENTS_ONLINE_PARAM, "true")
+					 .field(ENABLED_DIGITAL_SIGNATURES_PARAM, "true")
+					 .field(ENABLED_DYNAMIC_FORM_FIELDS_PARAM, "true")
+					 .field(ENABLED_DYNAMIC_FORM_PAGES_PARAM, "true")
+					 .field(ENABLED_EMBEDDED_FILES_PARAM, "true")
+					 .field(ENABLED_FORM_DATA_IMPORT_EXPORT_PARAM, "true")
+					 .field(ENABLED_FORM_FILL_IN_PARAM, "true")
+					 .field(ENABLED_ONLINE_FORMS_PARAM, "true")
+					 .field(ENABLED_SUBMIT_STANDALONE_PARAM, "true")
+					 ;
+
+			Response result = target.request()
+									.accept(APPLICATION_PDF)
+									.post(Entity.entity(multipart, multipart.getMediaType()));
+
+			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
+			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
+			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
+			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
+			
+			// It would be nice if we used a PDF library to verify the attributes that were set earlier (things like
+			// tagging, locale, etc.)  For now, we are just going to write the results out and check manually.
+			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testReaderExtendPDF_AllArgsTrue.pdf")));
+		}
+	}
+
+	@Test
 	void testReaderExtendPDF_JustInDocAndCred() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DOCUMENT_PARAM, SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)
@@ -106,10 +141,15 @@ public class SecureDocumentTest {
 									.post(Entity.entity(multipart, multipart.getMediaType()));
 
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
-			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
-			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
-			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
-			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testReaderExtendPDF_InputAndCred.pdf")));
+//			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
+//			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
+//			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
+//			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testReaderExtendPDF_InputAndCred.pdf")));
+			assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), result.getStatus(), () -> "Expected response to be '500 Internal Error', entity='" + TestUtils.readEntityToString(result) + "'.");
+			String statusMsg = TestUtils.readEntityToString(result);
+			assertThat(statusMsg, containsStringIgnoringCase("Internal Error while reader extending a PDF."));
+			// At least one non-null usage right must be specified or will get a com.adobe.internal.pdftoolkit.core.exceptions.PDFInvalidParameterException, which will cause...
+			assertThat(statusMsg, containsStringIgnoringCase("AEM-REX-001-008: Unable to apply the requested usage rights to the given document."));
 		}
 	}
 
