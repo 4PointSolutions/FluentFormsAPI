@@ -12,12 +12,14 @@ import java.util.function.Supplier;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
@@ -100,7 +102,15 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 			if (!result.hasEntity()) {
 				throw new FormsServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
 			}
-			
+
+			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
+			if ( responseContentType == null || !APPLICATION_PDF.isCompatible(MediaType.valueOf(responseContentType))) {
+				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
+				InputStream entityStream = (InputStream) result.getEntity();
+				msg += "\n" + toString(entityStream);
+				throw new FormsServiceException(msg);
+			}
+
 			return SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
 			
 		} catch (IOException e) {
@@ -160,7 +170,15 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 			if (!result.hasEntity()) {
 				throw new FormsServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
 			}
-			
+
+			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
+			if ( responseContentType == null || !APPLICATION_PDF.isCompatible(MediaType.valueOf(responseContentType))) {
+				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
+				InputStream entityStream = (InputStream) result.getEntity();
+				msg += "\n" + toString(entityStream);
+				throw new FormsServiceException(msg);
+			}
+
 			return SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
 		} catch (IOException e) {
 			throw new FormsServiceException("I/O Error while rendering PDF. (" + baseTarget.getUri().toString() + ").", e);

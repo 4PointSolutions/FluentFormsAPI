@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
@@ -154,6 +155,14 @@ public class RestServicesDocAssuranceServiceAdapter implements TraditionalDocAss
 			
 			if (!result.hasEntity()) {
 				throw new DocAssuranceServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
+			}
+			
+			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
+			if ( responseContentType == null || !APPLICATION_PDF.isCompatible(MediaType.valueOf(responseContentType))) {
+				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
+				InputStream entityStream = (InputStream) result.getEntity();
+				msg += "\n" + toString(entityStream);
+				throw new DocAssuranceServiceException(msg);
 			}
 			
 			return SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());

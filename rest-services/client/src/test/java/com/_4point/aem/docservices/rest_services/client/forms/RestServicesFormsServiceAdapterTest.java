@@ -8,6 +8,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.StatusType;
@@ -89,7 +90,8 @@ class RestServicesFormsServiceAdapterTest {
 		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
 		when(response.hasEntity()).thenReturn(true);
 		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
-		
+		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn(APPLICATION_PDF.toString());
+	
 		boolean useSSL = false;
 		boolean useCorrelationId = false;
 		switch (codePath) {
@@ -183,6 +185,39 @@ class RestServicesFormsServiceAdapterTest {
 
 		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->underTest.importData(pdf, data));
 		assertThat(ex.getMessage(), containsString("should never happen"));
+	}
+	
+	@Test
+	void testImportData_FailureWithHTMLResponse() throws Exception {
+		final String SAMPLE_HTML_RESPONSE = "<html><head><title>Content modified /services/DocAssuranceService/SecureDocument</title></head><body><h1>Content modified /services/DocAssuranceService/SecureDocument</h1></body></html>";
+		final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
+		
+		when(client.target(machineName.capture())).thenReturn(target);
+		when(target.path(path.capture())).thenReturn(target);
+		when(target.request()).thenReturn(builder);
+		when(builder.accept(APPLICATION_PDF)).thenReturn(builder);
+		when(builder.post(entity.capture())).thenReturn(response);
+		when(response.getStatusInfo()).thenReturn(statusType);
+		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
+		when(response.hasEntity()).thenReturn(true);
+		when(response.getEntity()).thenReturn(new ByteArrayInputStream(SAMPLE_HTML_RESPONSE.getBytes()));
+		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn(HTML_CONTENT_TYPE);
+	
+		underTest = RestServicesFormsServiceAdapter.builder()
+				.machineName(TEST_MACHINE_NAME)
+				.port(TEST_MACHINE_PORT)
+				.basicAuthentication("username", "password")
+				.useSsl(false)
+				.clientFactory(()->client)
+				.build();
+		
+		
+		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
+		Document data = MockDocumentFactory.GLOBAL_INSTANCE.create("data Document Data".getBytes());
+
+		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->underTest.importData(pdf, data));
+		assertThat(ex.getMessage(), containsString("was not a PDF"));
+		assertThat(ex.getMessage(), containsString(HTML_CONTENT_TYPE));
 	}
 	
 	// TODO:  Add more importData tests for exceptional case (i.e. those cases where exceptions are thrown.
