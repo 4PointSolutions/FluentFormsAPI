@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -84,6 +85,7 @@ class RenderPdfFormTest {
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
 			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
+			assertEquals(APPLICATION_PDF, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
 			
 			// It would be nice if we used a PDF library to verify the attributes that were set earlier (things like
 			// tagging, locale, etc.)  For now, we are just going to write the results out and check manually.
