@@ -155,7 +155,7 @@ public class RestServicesDocAssuranceServiceAdapterTest {
 		
 		// Make sure the response is correct.
 		assertArrayEquals(responseData.getInlineData(), pdfResult.getInlineData());
-		
+		assertEquals(APPLICATION_PDF, MediaType.valueOf(pdfResult.getContentType()));
 	}
 	
 	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {

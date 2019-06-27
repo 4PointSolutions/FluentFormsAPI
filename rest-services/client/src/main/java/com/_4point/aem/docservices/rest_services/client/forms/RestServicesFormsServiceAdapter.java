@@ -111,7 +111,9 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 				throw new FormsServiceException(msg);
 			}
 
-			return SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+			resultDoc.setContentType(APPLICATION_PDF.toString());
+			return resultDoc;
 			
 		} catch (IOException e) {
 			throw new FormsServiceException("I/O Error while importing data. (" + baseTarget.getUri().toString() + ").", e);
@@ -179,7 +181,9 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 				throw new FormsServiceException(msg);
 			}
 
-			return SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+			resultDoc.setContentType(APPLICATION_PDF.toString());
+			return resultDoc;
 		} catch (IOException e) {
 			throw new FormsServiceException("I/O Error while rendering PDF. (" + baseTarget.getUri().toString() + ").", e);
 		}

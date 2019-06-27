@@ -165,7 +165,9 @@ public class RestServicesDocAssuranceServiceAdapter implements TraditionalDocAss
 				throw new DocAssuranceServiceException(msg);
 			}
 			
-			return SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+			resultDoc.setContentType(APPLICATION_PDF.toString());
+			return resultDoc;
 			
 		} catch (IOException e) {
 			throw new DocAssuranceServiceException("I/O Error while reader extending the document. (" + baseTarget.getUri().toString() + ").", e);
