@@ -11,3 +11,8 @@ This file contains a list of things that I would like to do to improve on the ex
 1. Add support for not specifying a data file in renderForm().  Use overloading to differentiate between when a data
 file is omitted and when a null is passed in by mistake. 
    
+1. Change PathOrUrl to use an enum for PathOrUrl type.  Then switch all the cascading if statements with isPath()/isUrl()/isCrxUrl() into switch statements.
+
+1. It would be nice if we checked for the existence of a form with a crx: URL before called AEM so that we could
+distinguish between the case where an XDP is missing and when something else bad happens (missing XDP should be a
+BAD REQUEST return instead of INTERNAL SERVER ERROR.
