@@ -36,6 +36,7 @@ import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.RenderPDFFormArgs;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
+import com.adobe.fd.forms.api.RenderAtClient;
 
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -58,6 +59,7 @@ class RenderPdfFormTest {
 	private static final String CONTENT_ROOT_PARAM = "renderOptions.contentRoot";
 	private static final String DEBUG_DIR_PARAM = "renderOptions.debugDir";
 	private static final String LOCALE_PARAM = "renderOptions.locale";
+	private static final String RENDER_AT_CLIENT_PARAM = "renderOptions.renderAtClient";
 	private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
 	private static final String TAGGED_PDF_PARAM = "renderOptions.taggedPdf";
 	private static final String XCI_PARAM = "renderOptions.xci";
@@ -112,6 +114,7 @@ class RenderPdfFormTest {
 				()->assertEquals(TestUtils.SAMPLE_FORM.getParent(), pdfFormRenderOptions.getContentRoot().getPath()),
 				()->assertNull(pdfFormRenderOptions.getDebugDir()),
 				()->assertNull(pdfFormRenderOptions.getLocale()),
+				()->assertNull(pdfFormRenderOptions.getRenderAtClient()),
 				()->assertNull(pdfFormRenderOptions.getSubmitUrls()),
 				()->assertNull(pdfFormRenderOptions.getTaggedPDF()),
 				()->assertNull(pdfFormRenderOptions.getXci())
@@ -155,6 +158,7 @@ class RenderPdfFormTest {
 				()->assertEquals(TestUtils.SAMPLE_FORM.getParent(), pdfFormRenderOptions.getContentRoot().getPath()),
 				()->assertNull(pdfFormRenderOptions.getDebugDir()),
 				()->assertNull(pdfFormRenderOptions.getLocale()),
+				()->assertNull(pdfFormRenderOptions.getRenderAtClient()),
 				()->assertNull(pdfFormRenderOptions.getSubmitUrls()),
 				()->assertNull(pdfFormRenderOptions.getTaggedPDF()),
 				()->assertNull(pdfFormRenderOptions.getXci())
@@ -171,6 +175,7 @@ class RenderPdfFormTest {
 		String contentRootData = TestUtils.SAMPLE_FORM.getParent().getParent().toString();
 		String debugDirData = "/debug/dir";
 		String localeData = "en-CA";
+		String renderAtClient = "NO";
 		String submitUrlsData = "/submit/url";
 		boolean taggedPdfData = true;
 		String xciData = "Xci Data";
@@ -189,6 +194,7 @@ class RenderPdfFormTest {
 		request.addRequestParameter(CONTENT_ROOT_PARAM, contentRootData);
 		request.addRequestParameter(DEBUG_DIR_PARAM, debugDirData);
 		request.addRequestParameter(LOCALE_PARAM, localeData);
+		request.addRequestParameter(RENDER_AT_CLIENT_PARAM, renderAtClient);
 		request.addRequestParameter(SUBMIT_URL_PARAM, submitUrlsData);
 		request.addRequestParameter(TAGGED_PDF_PARAM, Boolean.toString(taggedPdfData));
 		request.addRequestParameter(XCI_PARAM, xciData.getBytes(), APPLICATION_XML);
@@ -212,6 +218,7 @@ class RenderPdfFormTest {
 				()->assertEquals(TestUtils.SAMPLE_FORM.getParent(), pdfFormRenderOptions.getContentRoot().getPath()),
 				()->assertEquals(Paths.get(debugDirData), pdfFormRenderOptions.getDebugDir()),
 				()->assertEquals(Locale.forLanguageTag(localeData), pdfFormRenderOptions.getLocale()),
+				()->assertEquals(RenderAtClient.NO, pdfFormRenderOptions.getRenderAtClient()),
 				()->assertEquals(submitUrlsData, pdfFormRenderOptions.getSubmitUrls().get(0).toString()),
 				()->assertTrue(pdfFormRenderOptions.getTaggedPDF()),
 				()->assertArrayEquals(xciData.getBytes(), pdfFormRenderOptions.getXci().getInlineData())

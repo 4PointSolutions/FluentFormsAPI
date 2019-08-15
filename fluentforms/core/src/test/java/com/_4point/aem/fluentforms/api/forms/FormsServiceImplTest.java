@@ -35,7 +35,7 @@ import com._4point.aem.fluentforms.impl.forms.ValidationOptionsImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
-
+import com.adobe.fd.forms.api.RenderAtClient;
 
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 
@@ -366,12 +366,15 @@ class FormsServiceImplTest {
 		Path filePath = SAMPLE_FORM.toAbsolutePath();
 		Document data = Mockito.mock(Document.class);
 
+		// Double check that the PDFRenderOptions are working by setting all the values to not default values and then
+		// checking that they were set (by calling PDFFormRenderOptionsImplTest.assertNotEmpty(). 
 		Document pdfResult = underTest.renderPDFForm()
 								   .setAcrobatVersion(AcrobatVersion.Acrobat_10)
 								   .setCacheStrategy(CacheStrategy.CONSERVATIVE)
 								   .setContentRoot(Paths.get("foo", "bar"))
 								   .setDebugDir(Paths.get("bar", "foo"))
 								   .setLocale(Locale.JAPAN)
+								   .setRenderAtClient(RenderAtClient.NO)
 								   .setSubmitUrl(new URL("http://example.com"))
 								   .setTaggedPDF(true)
 								   .setXci(data)
@@ -392,12 +395,15 @@ class FormsServiceImplTest {
 		Document data = Mockito.mock(Document.class);
 		URL contentRootUrl = new URL("http://foo/bar");
 
+		// Double check that the PDFRenderOptions are working by setting all the values to not default values and then
+		// checking that they were set (by calling PDFFormRenderOptionsImplTest.assertNotEmpty(). 
 		Document pdfResult = underTest.renderPDFForm()
 									   .setAcrobatVersion(AcrobatVersion.Acrobat_10)
 									   .setCacheStrategy(CacheStrategy.CONSERVATIVE)
 									   .setContentRoot(contentRootUrl)
 									   .setDebugDir(Paths.get("bar", "foo"))
 									   .setLocale(Locale.JAPAN)
+									   .setRenderAtClient(RenderAtClient.NO)
 									   .setSubmitUrl(new URL("http://example.com"))
 									   .setTaggedPDF(true)
 									   .setXci(data)
@@ -418,11 +424,14 @@ class FormsServiceImplTest {
 		Document data = Mockito.mock(Document.class);
 		PathOrUrl contentRootUrl = PathOrUrl.fromString("crx://foo/bar");
 
+		// Double check that the PDFRenderOptions are working by setting all the values to not default values and then
+		// checking that they were set (by calling PDFFormRenderOptionsImplTest.assertNotEmpty(). 
 		Document pdfResult = underTest.renderPDFForm()
 									   .setAcrobatVersion(AcrobatVersion.Acrobat_10)
 									   .setCacheStrategy(CacheStrategy.CONSERVATIVE)
 									   .setContentRoot(contentRootUrl)
 									   .setDebugDir(Paths.get("bar", "foo"))
+									   .setRenderAtClient(RenderAtClient.NO)
 									   .setLocale(Locale.JAPAN)
 									   .setSubmitUrl(new URL("http://example.com"))
 									   .setTaggedPDF(true)
@@ -459,12 +468,15 @@ class FormsServiceImplTest {
 		URL fileUrl = new URL("http://example.com");
 		Document data = Mockito.mock(Document.class);
 
+		// Double check that the PDFRenderOptions are working by setting all the values to not default values and then
+		// checking that they were set (by calling PDFFormRenderOptionsImplTest.assertNotEmpty(). 
 		Document pdfResult = underTest.renderPDFForm()
 				   .setAcrobatVersion(AcrobatVersion.Acrobat_10)
 				   .setCacheStrategy(CacheStrategy.CONSERVATIVE)
 				   .setContentRoot(Paths.get("foo", "bar"))
 				   .setDebugDir(Paths.get("bar", "foo"))
 				   .setLocale(Locale.JAPAN)
+				   .setRenderAtClient(RenderAtClient.NO)
 				   .setSubmitUrl(new URL("http://example.com"))
 				   .setTaggedPDF(true)
 				   .setXci(data)

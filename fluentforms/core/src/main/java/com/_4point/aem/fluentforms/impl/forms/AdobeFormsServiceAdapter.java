@@ -83,9 +83,20 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 		setIfNotNull((cr)->adobeOptions.setContentRoot(cr.toString()), options.getContentRoot());
 		setIfNotNull((dd)->adobeOptions.setDebugDir(dd.toString()), options.getDebugDir());
 		setIfNotNull((l)->adobeOptions.setLocale(l.toLanguageTag()), options.getLocale());
+		setIfNotNull(adobeOptions::setRenderAtClient, options.getRenderAtClient());
 		setIfNotNull(adobeOptions::setSubmitUrls, mapToStrings(options.getSubmitUrls()));
 		setIfNotNull(adobeOptions::setTaggedPDF, options.getTaggedPDF());
 		setIfNotNull((ad)->adobeOptions.setXci(ad.getAdobeDocument()), options.getXci());
+		System.out.println("RenderAtClient=" + adobeOptions.getRenderAtClient().toString());
+		System.out.println("AcrobatVersion=" + adobeOptions.getAcrobatVersion().toString());
+		log.info("RenderAtClient=" + adobeOptions.getRenderAtClient().toString());
+		log.info("AcrobatVersion=" + adobeOptions.getAcrobatVersion().toString());
+		log.info("CacheStrategy=" + adobeOptions.getCacheStrategy().toString());
+		log.info("ContentRoot=" + adobeOptions.getContentRoot());
+		log.info("DebugDir=" + adobeOptions.getDebugDir());
+		log.info("Locale=" + adobeOptions.getRenderAtClient().toString());
+		log.info("TaggedPdf=" + adobeOptions.getTaggedPDF());
+		log.info("Xci is null=" + Boolean.toString(adobeOptions.getXci() == null));
 		return adobeOptions;
 	}
 

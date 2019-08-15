@@ -10,6 +10,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
+import com.adobe.fd.forms.api.RenderAtClient;
 
 public interface PDFFormRenderOptions extends PDFFormRenderOptionsSetter {
 
@@ -23,6 +24,8 @@ public interface PDFFormRenderOptions extends PDFFormRenderOptionsSetter {
 
 	Locale getLocale();
 
+	RenderAtClient getRenderAtClient();
+	
 	List<AbsoluteOrRelativeUrl> getSubmitUrls();
 
 	public Boolean getTaggedPDF();

@@ -51,6 +51,7 @@ import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
+import com.adobe.fd.forms.api.RenderAtClient;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.RenderPdfForm Service"})
@@ -97,6 +98,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		CacheStrategy cacheStrategy = reqParameters.getCacheStrategy();
 		Path debugDir = reqParameters.getDebugDir();
 		Locale locale = reqParameters.getLocale();
+		RenderAtClient renderAtClient= reqParameters.getRenderAtClient();
 		List<AbsoluteOrRelativeUrl> submitUrls = reqParameters.getSubmitUrls();
 		Boolean taggedPDF = reqParameters.getTaggedPDF();
 		byte[] xci = reqParameters.getXci();
@@ -109,6 +111,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 												.transform(b->cacheStrategy == null ? b : b.setCacheStrategy(cacheStrategy))
 												.transform(b->debugDir == null ? b : b.setDebugDir(debugDir))
 												.transform(b->locale == null ? b : b.setLocale(locale))
+												.transform(b->renderAtClient == null ? b : b.setRenderAtClient(renderAtClient))
 												.transform(b->submitUrls == null || submitUrls.isEmpty() ? b : b.setSubmitUrls(submitUrls))
 												.transform(b->taggedPDF == null ? b : b.setTaggedPDF(taggedPDF.booleanValue()))
 												.transform(b->xci == null ? b : b.setXci(docFactory.create(xci)))
@@ -143,6 +146,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		private static final String CONTENT_ROOT_PARAM = "renderOptions.contentRoot";
 		private static final String DEBUG_DIR_PARAM = "renderOptions.debugDir";
 		private static final String LOCALE_PARAM = "renderOptions.locale";
+		private static final String RENDER_AT_CLIENT_PARAM = "renderOptions.renderAtClient";
 		private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
 		private static final String TAGGED_PDF_PARAM = "renderOptions.taggedPdf";
 		private static final String XCI_PARAM = "renderOptions.xci";
@@ -152,6 +156,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		private PathOrUrl contentRoot = null;
 		private Path debugDir = null;
 		private Locale locale = null;
+		private RenderAtClient renderAtClient = null;
 		private List<AbsoluteOrRelativeUrl> submitUrls = null;
 		private Boolean taggedPDF = null;
 		private byte[] xci = null;
@@ -212,6 +217,15 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 
 		private RenderPdfFormParameters setLocale(String localeStr) {
 			this.locale = Locale.forLanguageTag(localeStr);
+			return this;
+		}
+
+		public RenderAtClient getRenderAtClient() {
+			return renderAtClient;
+		}
+
+		public RenderPdfFormParameters setRenderAtClient(String renderAtClient) {
+			this.renderAtClient = RenderAtClient.valueOf(renderAtClient);
 			return this;
 		}
 
@@ -283,6 +297,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 				getOptionalParameter(request, CONTENT_ROOT_PARAM).ifPresent(rp->result.setContentRoot(rp.getString()));
 				getOptionalParameter(request, DEBUG_DIR_PARAM).ifPresent(rp->result.setDebugDir(rp.getString()));
 				getOptionalParameter(request, LOCALE_PARAM).ifPresent(rp->result.setLocale(rp.getString()));
+				getOptionalParameter(request, RENDER_AT_CLIENT_PARAM).ifPresent(rp->result.setRenderAtClient(rp.getString()));
 				getOptionalParameter(request, TAGGED_PDF_PARAM).ifPresent(rp->result.setTaggedPDF(rp.getString()));
 				getOptionalParameter(request, XCI_PARAM).ifPresent(rp->result.setXci(rp.get()));
 				// Submit URLs parameter has to be handled differently because it throws exceptions.

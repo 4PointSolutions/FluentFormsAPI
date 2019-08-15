@@ -12,8 +12,10 @@ import java.util.Objects;
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
+import com._4point.aem.fluentforms.api.forms.FormsService.RenderPDFFormArgumentBuilder;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
+import com.adobe.fd.forms.api.RenderAtClient;
 
 public interface PDFFormRenderOptionsSetter {
 
@@ -34,6 +36,8 @@ public interface PDFFormRenderOptionsSetter {
 	PDFFormRenderOptionsSetter setDebugDir(Path debugDir);
 
 	PDFFormRenderOptionsSetter setLocale(Locale locale);
+
+	PDFFormRenderOptionsSetter setRenderAtClient(RenderAtClient renderAtClient);
 
 	PDFFormRenderOptionsSetter setSubmitUrls(List<AbsoluteOrRelativeUrl> urls);
 

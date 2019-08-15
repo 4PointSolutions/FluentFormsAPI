@@ -518,7 +518,7 @@
             <dependency>
                 <groupId>com.adobe.aem</groupId>
                 <artifactId>uber-jar</artifactId>
-                <version>6.3.3.3</version>
+                <version>6.5.1</version>
                 <classifier>apis</classifier>
                 <scope>provided</scope>
             </dependency>
@@ -616,7 +616,7 @@
             <dependency>
 			  <groupId>com.adobe.aemfd</groupId>
 			  <artifactId>aemfd-client-sdk</artifactId>
-			  <version>6.3.0</version>
+			  <version>6.0.88</version>
 			</dependency>
         </dependencies>
     </dependencyManagement>

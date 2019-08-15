@@ -14,12 +14,14 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
+import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptionsSetter;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
+import com.adobe.fd.forms.api.RenderAtClient;
 
 public class FormsServiceImpl implements FormsService {
 	
@@ -172,6 +174,12 @@ public class FormsServiceImpl implements FormsService {
 		}
 
 		@Override
+		public RenderPDFFormArgumentBuilder setRenderAtClient(RenderAtClient renderAtClient) {
+			options.setRenderAtClient(renderAtClient);
+			return this;
+		}
+		
+		@Override
 		public RenderPDFFormArgumentBuilder setSubmitUrls(List<AbsoluteOrRelativeUrl> urls) {
 			options.setSubmitUrls(urls);
 			return this;
@@ -212,6 +220,7 @@ public class FormsServiceImpl implements FormsService {
 		public Document executeOn(URL template, Document data) throws FormsServiceException {
 			return renderPDFForm(template, data, options);
 		}
+
 	}
 
 	protected TraditionalFormsService getAdobeFormsService() {

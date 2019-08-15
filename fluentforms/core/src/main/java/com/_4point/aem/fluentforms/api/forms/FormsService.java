@@ -14,6 +14,7 @@ import com._4point.aem.fluentforms.api.Transformable;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
+import com.adobe.fd.forms.api.RenderAtClient;
 
 
 public interface FormsService {
@@ -83,6 +84,9 @@ public interface FormsService {
 
 		@Override
 		public RenderPDFFormArgumentBuilder setLocale(Locale locale);
+
+		@Override
+		public RenderPDFFormArgumentBuilder setRenderAtClient(RenderAtClient renderAtClient);
 
 		@Override
 		public default RenderPDFFormArgumentBuilder setSubmitUrl(URL url) {

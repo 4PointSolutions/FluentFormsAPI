@@ -14,6 +14,7 @@ import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptionsSetter;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
+import com.adobe.fd.forms.api.RenderAtClient;
 
 public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter, PDFFormRenderOptions {
 
@@ -22,6 +23,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter, PDF
 	private PathOrUrl contentRoot = null;
 	private Path debugDir = null;
 	private Locale locale = null;
+	private RenderAtClient renderAtClient = null;
 	private List<AbsoluteOrRelativeUrl> submitUrls = null;
 	private Boolean taggedPDF = null;
 	private Document xci = null;
@@ -73,6 +75,17 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter, PDF
 	@Override
 	public Locale getLocale() {
 		return locale;
+	}
+
+	@Override
+	public RenderAtClient getRenderAtClient() {
+		return this.renderAtClient;
+	}
+
+	@Override
+	public PDFFormRenderOptionsImpl setRenderAtClient(RenderAtClient renderAtClient) {
+		this.renderAtClient = renderAtClient;
+		return this;
 	}
 
 	@Override

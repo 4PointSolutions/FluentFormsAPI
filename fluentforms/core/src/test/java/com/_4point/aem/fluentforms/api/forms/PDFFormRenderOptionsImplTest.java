@@ -15,6 +15,7 @@ import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
 import com._4point.aem.fluentforms.impl.forms.PDFFormRenderOptionsImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
+import com.adobe.fd.forms.api.RenderAtClient;
 
 class PDFFormRenderOptionsImplTest {
 	
@@ -35,6 +36,7 @@ class PDFFormRenderOptionsImplTest {
 		assertEquals(contentRoot, adobePDFFormRenderOptions.getContentRoot());	// We modify the content root, so we expect it to be different than the empty version (which would be null).
 		assertEquals(emptyPDFFormRenderOptions.getDebugDir(), adobePDFFormRenderOptions.getDebugDir());
 		assertEquals(emptyPDFFormRenderOptions.getLocale(), adobePDFFormRenderOptions.getLocale());
+		assertEquals(emptyPDFFormRenderOptions.getRenderAtClient(), adobePDFFormRenderOptions.getRenderAtClient());
 		assertEquals(emptyPDFFormRenderOptions.getSubmitUrls(), adobePDFFormRenderOptions.getSubmitUrls());
 		assertEquals(emptyPDFFormRenderOptions.getTaggedPDF(), adobePDFFormRenderOptions.getTaggedPDF());
 		assertEquals(emptyPDFFormRenderOptions.getXci(), adobePDFFormRenderOptions.getXci());
@@ -49,6 +51,7 @@ class PDFFormRenderOptionsImplTest {
 		underTest.setContentRoot(Paths.get("foo", "bar"));
 		underTest.setDebugDir(Paths.get("bar", "foo"));
 		underTest.setLocale(Locale.CANADA_FRENCH);
+		underTest.setRenderAtClient(RenderAtClient.NO);
 		underTest.setSubmitUrl(new URL("http://example.com"));
 		underTest.setTaggedPDF(true);
 		// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
@@ -66,6 +69,7 @@ class PDFFormRenderOptionsImplTest {
 		assertNotEquals(emptyPDFFormRenderOptions.getContentRoot(), adobePDFFormRenderOptions.getContentRoot());
 		assertNotEquals(emptyPDFFormRenderOptions.getDebugDir(), adobePDFFormRenderOptions.getDebugDir());
 		assertNotEquals(emptyPDFFormRenderOptions.getLocale(), adobePDFFormRenderOptions.getLocale());
+		assertNotEquals(emptyPDFFormRenderOptions.getRenderAtClient(), adobePDFFormRenderOptions.getRenderAtClient());
 		assertNotEquals(emptyPDFFormRenderOptions.getSubmitUrls(), adobePDFFormRenderOptions.getSubmitUrls());
 		assertNotEquals(emptyPDFFormRenderOptions.getTaggedPDF(), adobePDFFormRenderOptions.getTaggedPDF());
 	}
