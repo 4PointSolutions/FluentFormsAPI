@@ -90,10 +90,8 @@ class RenderPdfFormTest {
 		
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
-		
-		Map<String, Object> parameterMap = new HashMap<>();
-		parameterMap.put(TEMPLATE_PARAM, templateData);
-		request.setParameterMap(parameterMap );
+
+		request.addRequestParameter(TEMPLATE_PARAM, templateData);
 		
 		underTest.doPost(request, response);
 		
@@ -134,10 +132,9 @@ class RenderPdfFormTest {
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
-		Map<String, Object> parameterMap = new HashMap<>();
-		parameterMap.put(TEMPLATE_PARAM, templateData);
-		parameterMap.put(DATA_PARAM, formData);
-		request.setParameterMap(parameterMap );
+
+		request.addRequestParameter(TEMPLATE_PARAM, templateData);
+		request.addRequestParameter(DATA_PARAM, formData);
 		
 		underTest.doPost(request, response);
 		
