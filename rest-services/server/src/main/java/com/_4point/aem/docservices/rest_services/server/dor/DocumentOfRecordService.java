@@ -161,19 +161,19 @@ public interface DocumentOfRecordService {
 	@SuppressWarnings("serial")
 	public static class DocumentOfRecordException extends Exception {
 
-		private DocumentOfRecordException() {
+		public DocumentOfRecordException() {
 			super();
 		}
 
-		private DocumentOfRecordException(String arg0, Throwable arg1) {
+		public DocumentOfRecordException(String arg0, Throwable arg1) {
 			super(arg0, arg1);
 		}
 
-		private DocumentOfRecordException(String arg0) {
+		public DocumentOfRecordException(String arg0) {
 			super(arg0);
 		}
 
-		private DocumentOfRecordException(Throwable arg0) {
+		public DocumentOfRecordException(Throwable arg0) {
 			super(arg0);
 		}
 	}

@@ -1,5 +1,7 @@
 package com._4point.aem.docservices.rest_services.server.dor;
 
+import static com._4point.aem.docservices.rest_services.server.FormParameters.getMandatoryParameter;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -18,6 +20,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.poi.sl.draw.geom.Formula;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -83,7 +86,8 @@ public class DocumentOfRecord extends SlingAllMethodsServlet {
 
 		byte[] fileBytes = generateDoR(params.getDataXml(), params.getFormURI(), request.getResourceResolver());
 
-		response.setContentType(ContentType.APPLICATION_XML.toString());
+		response.setContentType(ContentType.APPLICATION_PDF.toString());
+		response.setContentLength(fileBytes.length);
 		try {
 			response.getOutputStream().write(fileBytes);
 		} catch (IOException e) {
@@ -127,6 +131,7 @@ public class DocumentOfRecord extends SlingAllMethodsServlet {
 		try {
 			InputSource is = new InputSource(new ByteArrayInputStream(xml));
 			Document parsedDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+			parsedDoc.setXmlStandalone(true);
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
 			StringWriter writer = new StringWriter();
 			transformer.transform(new DOMSource(parsedDoc), new StreamResult(writer));
@@ -146,6 +151,8 @@ public class DocumentOfRecord extends SlingAllMethodsServlet {
 	}
 	
 	private static class DorRenderFormParameters {
+		private static final String TEMPLATE_PARAM = "template";
+		private static final String DATA_PARAM = "data";
 		private final String dataXml;
 		private final String formURI;
 		
@@ -163,9 +170,12 @@ public class DocumentOfRecord extends SlingAllMethodsServlet {
 			return formURI;
 		}
 
-		public static DorRenderFormParameters readFormParameters(SlingHttpServletRequest request) {
-			// TODO: Parse the incoming form parameters.
-			return null;
+		public static DorRenderFormParameters readFormParameters(SlingHttpServletRequest request) throws BadRequestException {
+			String formURI = getMandatoryParameter(request, TEMPLATE_PARAM).getString();
+			byte[] xmlData = getMandatoryParameter(request, DATA_PARAM).get();
+			String xmlDataStr = convertXmlDataToString(xmlData);
+			
+			return new DorRenderFormParameters(xmlDataStr, formURI);
 		}
 		
 	}
