@@ -1,12 +1,17 @@
 package com._4point.aem.docservices.rest_services.server.dor;
 
-import static com._4point.aem.docservices.rest_services.server.FormParameters.getMandatoryParameter;
+import static com._4point.aem.docservices.rest_services.server.FormParameters.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -23,6 +28,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.poi.sl.draw.geom.Formula;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.HttpConstants;
@@ -47,6 +53,7 @@ import com._4point.aem.docservices.rest_services.server.dor.DocumentOfRecordServ
 import com._4point.aem.docservices.rest_services.server.dor.DocumentOfRecordService.DocumentOfRecordOptionsBuilder;
 import com._4point.aem.docservices.rest_services.server.dor.DocumentOfRecordService.DocumentOfRecordResult;
 import com._4point.aem.docservices.rest_services.server.forms.ImportData;
+import com.adobe.forms.common.service.FileAttachmentWrapper;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=DocumentOfRecord.Generate Service"})
@@ -84,7 +91,7 @@ public class DocumentOfRecord extends SlingAllMethodsServlet {
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws BadRequestException, InternalServerErrorException, NotAcceptableException {
 		DorRenderFormParameters params = DorRenderFormParameters.readFormParameters(request);
 
-		byte[] fileBytes = generateDoR(params.getDataXml(), params.getFormURI(), request.getResourceResolver());
+		byte[] fileBytes = generateDoR(params);
 
 		response.setContentType(ContentType.APPLICATION_PDF.toString());
 		response.setContentLength(fileBytes.length);
@@ -95,14 +102,8 @@ public class DocumentOfRecord extends SlingAllMethodsServlet {
 		}
 	}
 
-	private byte[] generateDoR(String dataXml, String formURI, ResourceResolver resourceResolver) throws InternalServerErrorException {
-		// Create a Document of Record 'Options' object.
-		DocumentOfRecordOptions dorOptions = DocumentOfRecordOptionsBuilder.create()
-									  .setData(dataXml)
-									  .setFormResource(resourceResolver.getResource(formURI))
-									  .setLocale(new java.util.Locale("en"))
-									  .build();
-
+	private byte[] generateDoR(DorRenderFormParameters params) throws InternalServerErrorException {
+		DocumentOfRecordOptions dorOptions = params.toDorOptions();
 		try {
 			// Render doc of record...
 			DocumentOfRecordResult dorResult = dorServiceFactory.get().render(dorOptions);
@@ -111,7 +112,7 @@ public class DocumentOfRecord extends SlingAllMethodsServlet {
 			return dorResult.getContent();
 
 		} catch (DocumentOfRecordException e) {
-			throw new InternalServerErrorException("Error while rendering form '" + formURI + "'", e);
+			throw new InternalServerErrorException("Error while rendering form '" + dorOptions.getFormResource().getPath() + "' caused by '" + e.getMessage() + "'.", e);
 		}
 	}
 	
@@ -153,30 +154,81 @@ public class DocumentOfRecord extends SlingAllMethodsServlet {
 	private static class DorRenderFormParameters {
 		private static final String TEMPLATE_PARAM = "template";
 		private static final String DATA_PARAM = "data";
+		private static final String LOCALE_PARAM = "locale";
+		private static final String ATTACHMENT_PARAM = "attachment";
 		private final String dataXml;
 		private final String formURI;
+		private final String locale;
+		private final List<FileAttachmentWrapper> attachments;
+		private final Resource formResource;
 		
-		private DorRenderFormParameters(String dataXml, String formURI) {
+		private DorRenderFormParameters(String dataXml, String formURI, String locale, List<FileAttachmentWrapper> attachments, Resource formResource) {
 			super();
 			this.dataXml = dataXml;
 			this.formURI = formURI;
+			this.locale = locale;
+			this.attachments = attachments;
+			this.formResource = formResource;
 		}
-		
+
 		public String getDataXml() {
-			return dataXml;
+			return this.dataXml;
 		}
 
 		public String getFormURI() {
-			return formURI;
+			return this.formURI;
 		}
 
+		public String getLocale() {
+			return this.locale;
+		}
+
+		public boolean hasAttachments() {
+			return !this.attachments.isEmpty();
+		}
+
+		public List<FileAttachmentWrapper> getAttachments() {
+			return this.attachments;
+		}
+
+		public Resource getFormResource() {
+			return formResource;
+		}
+
+		public DocumentOfRecordOptions toDorOptions() {
+			// Create a Document of Record 'Options' object.
+			DocumentOfRecordOptionsBuilder dorOptionsBldr = DocumentOfRecordOptionsBuilder.create()
+																	  .setData(this.dataXml)
+																	  .setFormResource(this.formResource)
+																	  .setLocale(new java.util.Locale(this.locale));
+			
+			if (this.hasAttachments()) {
+				dorOptionsBldr.setIncludeAttachments(true)
+							  .setFileAttachments(attachments);
+			}
+			
+			 return dorOptionsBldr.build();
+		}
+		
 		public static DorRenderFormParameters readFormParameters(SlingHttpServletRequest request) throws BadRequestException {
 			String formURI = getMandatoryParameter(request, TEMPLATE_PARAM).getString();
 			byte[] xmlData = getMandatoryParameter(request, DATA_PARAM).get();
 			String xmlDataStr = convertXmlDataToString(xmlData);
 			
-			return new DorRenderFormParameters(xmlDataStr, formURI);
+			String locale = getOptionalParameter(request, LOCALE_PARAM).map(RequestParameter::getString).orElse("en");
+			List<FileAttachmentWrapper> attachments = getOptionalParameters(request, ATTACHMENT_PARAM)
+												.map(Arrays::asList)				// Convert Optional<RequestParameter[]> to Optional<List<RequestParameter>> 
+												.orElse(Collections.emptyList())	// Convert to List<RequestParameter>
+												.stream()
+													.map(DorRenderFormParameters::fromRequestParameter)		// Convert List<RequestParameter> to List<byte[]>
+													.collect(Collectors.toList());
+			Resource formResource = request.getResourceResolver().getResource(formURI);
+
+			return new DorRenderFormParameters(xmlDataStr, formURI, locale, attachments, formResource);
 		}
 		
+		private static FileAttachmentWrapper fromRequestParameter(RequestParameter param) {
+			return new FileAttachmentWrapper(param.getFileName(), param.getContentType(), param.get());
+		}
 	}
 }
