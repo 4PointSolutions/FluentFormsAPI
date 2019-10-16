@@ -45,8 +45,8 @@ import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 
 @SuppressWarnings("serial")
-@Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.ImportData Service"})
-@SlingServletResourceTypes(methods=HttpConstants.METHOD_POST, resourceTypes = { "" })
+@Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.ImportData Service",
+											"sling.servlet.methods=" + HttpConstants.METHOD_POST})
 @SlingServletPaths("/services/FormsService/ImportData")
 public class ImportData extends SlingAllMethodsServlet {
 

@@ -36,8 +36,8 @@ import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl;
 import com._4point.aem.fluentforms.impl.docassurance.TraditionalDocAssuranceService;
 
 @SuppressWarnings("serial")
-@Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=DocAssuranceService.SecureDocument Service"})
-@SlingServletResourceTypes(methods=HttpConstants.METHOD_POST, resourceTypes = { "" })
+@Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=DocAssuranceService.SecureDocument Service",
+											"sling.servlet.methods=" + HttpConstants.METHOD_POST})
 @SlingServletPaths("/services/DocAssuranceService/SecureDocument")
 public class SecureDocument extends SlingAllMethodsServlet {
 

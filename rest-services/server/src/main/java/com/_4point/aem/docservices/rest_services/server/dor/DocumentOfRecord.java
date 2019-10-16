@@ -56,8 +56,8 @@ import com._4point.aem.docservices.rest_services.server.forms.ImportData;
 import com.adobe.forms.common.service.FileAttachmentWrapper;
 
 @SuppressWarnings("serial")
-@Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=DocumentOfRecord.Generate Service"})
-@SlingServletResourceTypes(methods=HttpConstants.METHOD_POST, resourceTypes = { "" })
+@Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=DocumentOfRecord.Generate Service",
+											"sling.servlet.methods=" + HttpConstants.METHOD_POST})
 @SlingServletPaths("/services/DorService/Generate")
 public class DocumentOfRecord extends SlingAllMethodsServlet {
 
