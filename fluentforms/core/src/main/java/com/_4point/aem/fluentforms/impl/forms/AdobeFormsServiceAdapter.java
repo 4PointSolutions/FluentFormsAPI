@@ -87,8 +87,6 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 		setIfNotNull(adobeOptions::setSubmitUrls, mapToStrings(options.getSubmitUrls()));
 		setIfNotNull(adobeOptions::setTaggedPDF, options.getTaggedPDF());
 		setIfNotNull((ad)->adobeOptions.setXci(ad.getAdobeDocument()), options.getXci());
-		System.out.println("RenderAtClient=" + adobeOptions.getRenderAtClient().toString());
-		System.out.println("AcrobatVersion=" + adobeOptions.getAcrobatVersion().toString());
 		log.info("RenderAtClient=" + adobeOptions.getRenderAtClient().toString());
 		log.info("AcrobatVersion=" + adobeOptions.getAcrobatVersion().toString());
 		log.info("CacheStrategy=" + adobeOptions.getCacheStrategy().toString());
