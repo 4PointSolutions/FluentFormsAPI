@@ -177,11 +177,5 @@ public class MockDocumentFactory implements DocumentFactory {
 			this.maxInlineSize = maxInlineSize;
 		}
 
-		@Override
-		public com.adobe.aemfd.docmanager.Document getAdobeDocument() {
-			// NO-OP
-			return null;
-		}
-		
 	}
 }

@@ -212,11 +212,6 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 			this.maxInlineSize = maxInlineSize;
 		}
 
-		@Override
-		public com.adobe.aemfd.docmanager.Document getAdobeDocument() {
-			throw new UnsupportedOperationException("getAdobeDocument not implemented for SimpleDocument");
-		}
-		
 		private static byte[] readToByteArray(InputStream is) {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			try {

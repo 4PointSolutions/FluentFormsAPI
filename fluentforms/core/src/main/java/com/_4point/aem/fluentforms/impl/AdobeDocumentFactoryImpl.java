@@ -257,98 +257,15 @@ public enum AdobeDocumentFactoryImpl implements DocumentFactory {
 			doc.setMaxInlineSize(maxInlineSize);
 		}
 
-		/* (non-Javadoc)
-		 * @see com._4point.aem.fluentforms.api.Document#getAdobeDocument()
-		 */
-		@Override
-		public com.adobe.aemfd.docmanager.Document getAdobeDocument() {
-			return doc;
-		}
 	}
 
-	// Simplistic implementation of Document interface.
-	private static class MyDocumentImpl implements Document {
-		int maxInlineSize;
-		byte[] inlineData;
-		String contentType;
-		Map<String, Object> attributes = new TreeMap<>();
-		
-		@Override
-		public void close() throws IOException {
-			this.dispose();
-		}
-
-		@Override
-		public void copyToFile(File arg0) throws IOException {
-			// TODO: Implement this at some future date.
-			throw new UnsupportedOperationException("copyToFile is not supported at this time.");
-		}
-
-		@Override
-		public void dispose() {
-			this.inlineData = new byte[0]; 
-		}
-
-		@Override
-		public Object getAttribute(String name) {
-			return attributes.get(name);
-		}
-
-		@Override
-		public String getContentType() throws IOException {
-			return this.contentType;
-		}
-
-		@Override
-		public byte[] getInlineData() throws IOException {
-			return Arrays.copyOf(this.inlineData, this.inlineData.length);
-		}
-
-		@Override
-		public InputStream getInputStream() throws IOException {
-			return new ByteArrayInputStream(getInlineData());
-		}
-
-		@Override
-		public int getMaxInlineSize() {
-			return maxInlineSize;
-		}
-
-		@Override
-		public long length() throws IOException {
-			return this.inlineData.length;
-		}
-
-		@Override
-		public void passivate() throws IOException {
-			// Do nothing.
-		}
-
-		@Override
-		public void removeAttribute(String name) {
-			this.attributes.remove(name);
-		}
-
-		@Override
-		public void setAttribute(String name, Object val) {
-			this.attributes.put(name, val);
-		}
-
-		@Override
-		public void setContentType(String contentType) {
-			this.contentType = contentType;
-		}
-
-		@Override
-		public void setMaxInlineSize(int maxInlineSize) {
-			this.maxInlineSize = maxInlineSize;
-		}
-
-		@Override
-		public com.adobe.aemfd.docmanager.Document getAdobeDocument() {
+	public static com.adobe.aemfd.docmanager.Document getAdobeDocument(Document doc) {
+		if (doc instanceof AdobeDocumentImpl) {
+			return ((AdobeDocumentImpl) doc).doc;
+		} else {
+			// return null, so that this can be called during unit testing.
 			return null;
 		}
-		
 	}
 
 }

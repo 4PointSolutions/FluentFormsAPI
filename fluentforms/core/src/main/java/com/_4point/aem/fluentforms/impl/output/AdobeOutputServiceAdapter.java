@@ -14,6 +14,7 @@ import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.api.output.BatchOptions;
 import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
@@ -87,7 +88,7 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 		setIfNotNull(adobeOptions::setRetainPDFFormState, options.getRetainPDFFormState());
 		setIfNotNull(adobeOptions::setRetainUnsignedSignatureFields, options.getRetainUnsignedSignatureFields());
 		setIfNotNull(adobeOptions::setTaggedPDF, options.getTaggedPDF());
-		setIfNotNull((ad)->adobeOptions.setXci(ad.getAdobeDocument()), options.getXci());
+		setIfNotNull((ad)->adobeOptions.setXci(AdobeDocumentFactoryImpl.getAdobeDocument(ad)), options.getXci());
 		log.info("AcrobatVersion=" + adobeOptions.getAcrobatVersion().toString());
 		log.info("ContentRoot=" + adobeOptions.getContentRoot());
 		log.info("DebugDir=" + adobeOptions.getDebugDir());

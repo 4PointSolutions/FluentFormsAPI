@@ -13,6 +13,7 @@ import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
@@ -42,7 +43,7 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 	@Override
 	public Document exportData(Document pdfOrXdp, DataFormat dataFormat) throws FormsServiceException {
 		try {
-			return documentFactory.create(adobeFormsService.exportData(pdfOrXdp.getAdobeDocument(), dataFormat));
+			return documentFactory.create(adobeFormsService.exportData(AdobeDocumentFactoryImpl.getAdobeDocument(pdfOrXdp), dataFormat));
 		} catch (com.adobe.fd.forms.api.FormsServiceException e) {
 			throw new FormsServiceException(e);
 		}
@@ -51,7 +52,7 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 	@Override
 	public Document importData(Document pdf, Document data) throws FormsServiceException {
 		try {
-			return documentFactory.create(adobeFormsService.importData(pdf.getAdobeDocument(), data.getAdobeDocument()));
+			return documentFactory.create(adobeFormsService.importData(AdobeDocumentFactoryImpl.getAdobeDocument(pdf), AdobeDocumentFactoryImpl.getAdobeDocument(data)));
 		} catch (com.adobe.fd.forms.api.FormsServiceException e) {
 			throw new FormsServiceException(e);
 		}
@@ -61,7 +62,7 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 	public Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException {
 		try {
 			log.info("renderPdfForm form='" + urlOrfilename + "', contentRoot='" + pdfFormRenderOptions.getContentRoot() + "'");
-			return documentFactory.create(adobeFormsService.renderPDFForm(urlOrfilename, (data != null ? data.getAdobeDocument() : null), toAdobePDFFormRenderOptions(pdfFormRenderOptions)));
+			return documentFactory.create(adobeFormsService.renderPDFForm(urlOrfilename, (data != null ? AdobeDocumentFactoryImpl.getAdobeDocument(data) : null), toAdobePDFFormRenderOptions(pdfFormRenderOptions)));
 		} catch (com.adobe.fd.forms.api.FormsServiceException e) {
 			throw new FormsServiceException(e);
 		}
@@ -70,7 +71,7 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 	@Override
 	public ValidationResult validate(String template, Document data, ValidationOptions validationOptions) throws FormsServiceException {
 		try {
-			return new ValidationResultImpl(adobeFormsService.validate(template, data.getAdobeDocument(), validationOptions.toAdobeValidationOptions()), documentFactory);
+			return new ValidationResultImpl(adobeFormsService.validate(template, AdobeDocumentFactoryImpl.getAdobeDocument(data), validationOptions.toAdobeValidationOptions()), documentFactory);
 		} catch (com.adobe.fd.forms.api.FormsServiceException e) {
 			throw new FormsServiceException(e);
 		}
@@ -86,7 +87,7 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 		setIfNotNull(adobeOptions::setRenderAtClient, options.getRenderAtClient());
 		setIfNotNull(adobeOptions::setSubmitUrls, mapToStrings(options.getSubmitUrls()));
 		setIfNotNull(adobeOptions::setTaggedPDF, options.getTaggedPDF());
-		setIfNotNull((ad)->adobeOptions.setXci(ad.getAdobeDocument()), options.getXci());
+		setIfNotNull((ad)->adobeOptions.setXci(AdobeDocumentFactoryImpl.getAdobeDocument(ad)), options.getXci());
 		log.info("RenderAtClient=" + adobeOptions.getRenderAtClient().toString());
 		log.info("AcrobatVersion=" + adobeOptions.getAcrobatVersion().toString());
 		log.info("CacheStrategy=" + adobeOptions.getCacheStrategy().toString());

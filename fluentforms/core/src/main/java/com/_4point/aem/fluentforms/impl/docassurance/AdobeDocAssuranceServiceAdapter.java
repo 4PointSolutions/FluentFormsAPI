@@ -15,7 +15,7 @@ import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
 import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
 import com._4point.aem.fluentforms.api.docassurance.ReaderExtensionOptions;
-
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com.adobe.fd.docassurance.client.api.SignatureOptions;
 import com.adobe.fd.encryption.client.EncryptionTypeResult;
 import com.adobe.fd.readerextensions.client.GetUsageRightsResult;
@@ -64,7 +64,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 //			log.info("secureDocument called");
 //			com.adobe.fd.docassurance.client.api.EncryptionOptions eOptions = toAdobeEncryptionOptions(encryptionOptions);
 //			return documentFactory.create(adobeDocAssuranceService.secureDocument(inDoc.getAdobeDocument(), eOptions, signatureOptions, toAdobeReaderExtensionOptions(readerExtensionOptions), unlockOptions));
-			com.adobe.aemfd.docmanager.Document adobeDoc = adobeDocAssuranceService.secureDocument(inDoc.getAdobeDocument(), null, null, toAdobeReaderExtensionOptions(readerExtensionOptions), null);
+			com.adobe.aemfd.docmanager.Document adobeDoc = adobeDocAssuranceService.secureDocument(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), null, null, toAdobeReaderExtensionOptions(readerExtensionOptions), null);
 			adobeDoc.setContentType(APPLICATION_PDF);
 			return documentFactory.create(adobeDoc);
 		} catch (Exception e) {
@@ -77,7 +77,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 			FieldMDPOptionSpec fieldMDPOptionsSpec, PDFSeedValueOptionSpec seedValueOptionsSpec,
 			UnlockOptions unlockOptions) throws DocAssuranceServiceException {
 		try {
-			return documentFactory.create(adobeDocAssuranceService.addInvisibleSignatureField(inDoc.getAdobeDocument(), signatureFieldName, fieldMDPOptionsSpec, seedValueOptionsSpec, unlockOptions));
+			return documentFactory.create(adobeDocAssuranceService.addInvisibleSignatureField(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), signatureFieldName, fieldMDPOptionsSpec, seedValueOptionsSpec, unlockOptions));
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -89,7 +89,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 			PDFSeedValueOptionSpec seedValueOptionsSpec, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		try {
-			return documentFactory.create(adobeDocAssuranceService.addSignatureField(inDoc.getAdobeDocument(), signatureFieldName, pageNo, positionRectangle, fieldMDPOptionsSpec,
+			return documentFactory.create(adobeDocAssuranceService.addSignatureField(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), signatureFieldName, pageNo, positionRectangle, fieldMDPOptionsSpec,
 					seedValueOptionsSpec, unlockOptions));
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
@@ -100,7 +100,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	public Document clearSignatureField(Document inDoc, String signatureFieldName, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		try {
-			return documentFactory.create(adobeDocAssuranceService.clearSignatureField(inDoc.getAdobeDocument(), signatureFieldName, unlockOptions));
+			return documentFactory.create(adobeDocAssuranceService.clearSignatureField(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), signatureFieldName, unlockOptions));
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -110,7 +110,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	public PDFSignatureField getCertifyingSignatureField(Document inDoc, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		try {
-			return adobeDocAssuranceService.getCertifyingSignatureField(inDoc.getAdobeDocument(), unlockOptions);
+			return adobeDocAssuranceService.getCertifyingSignatureField(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), unlockOptions);
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -120,7 +120,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	public PDFSignature getSignature(Document inDoc, String signatureFieldName, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		try {
-			return adobeDocAssuranceService.getSignature(inDoc.getAdobeDocument(), signatureFieldName, unlockOptions);
+			return adobeDocAssuranceService.getSignature(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), signatureFieldName, unlockOptions);
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -130,7 +130,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	public List<PDFSignatureField> getSignatureFieldList(Document inDoc, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		try {
-			return adobeDocAssuranceService.getSignatureFieldList(inDoc.getAdobeDocument(), unlockOptions);
+			return adobeDocAssuranceService.getSignatureFieldList(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), unlockOptions);
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -141,7 +141,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 			PDFSignatureFieldProperties pdfSignatureFieldProperties, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		try {
-			return documentFactory.create(adobeDocAssuranceService.modifySignatureField(inDoc.getAdobeDocument(), signatureFieldName, pdfSignatureFieldProperties, unlockOptions));
+			return documentFactory.create(adobeDocAssuranceService.modifySignatureField(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), signatureFieldName, pdfSignatureFieldProperties, unlockOptions));
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -151,7 +151,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	public Document removeSignatureField(Document inDoc, String signatureFieldName, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		try {
-			return documentFactory.create(adobeDocAssuranceService.removeSignatureField(inDoc.getAdobeDocument(), signatureFieldName, unlockOptions));
+			return documentFactory.create(adobeDocAssuranceService.removeSignatureField(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), signatureFieldName, unlockOptions));
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -161,7 +161,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	public PDFSignatureVerificationInfo verify(Document inDoc, String signatureFieldName, RevocationCheckStyle revocationCheckStyle, VerificationTime verificationTime,
 			ValidationPreferences dssPrefs) throws DocAssuranceServiceException {
 		try {
-			return adobeDocAssuranceService.verify(inDoc.getAdobeDocument(), signatureFieldName, revocationCheckStyle, verificationTime, dssPrefs, this.resourceResolver);
+			return adobeDocAssuranceService.verify(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), signatureFieldName, revocationCheckStyle, verificationTime, dssPrefs, this.resourceResolver);
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -170,7 +170,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	@Override
 	public EncryptionTypeResult getPDFEncryption(Document inDoc) throws DocAssuranceServiceException {
 		try {
-			return adobeDocAssuranceService.getPDFEncryption(inDoc.getAdobeDocument());
+			return adobeDocAssuranceService.getPDFEncryption(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc));
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -179,7 +179,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	@Override
 	public Document removePDFCertificateSecurity(Document inDoc, String alias) throws DocAssuranceServiceException {
 		try {
-			return documentFactory.create(adobeDocAssuranceService.removePDFCertificateSecurity(inDoc.getAdobeDocument(), alias, this.resourceResolver));
+			return documentFactory.create(adobeDocAssuranceService.removePDFCertificateSecurity(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), alias, this.resourceResolver));
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -188,7 +188,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	@Override
 	public Document removePDFPasswordSecurity(Document inDoc, String password) throws DocAssuranceServiceException {
 		try {
-			return documentFactory.create(adobeDocAssuranceService.removePDFPasswordSecurity(inDoc.getAdobeDocument(), password));
+			return documentFactory.create(adobeDocAssuranceService.removePDFPasswordSecurity(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), password));
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -198,7 +198,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	public PDFDocumentVerificationInfo verifyDocument(Document inDoc, RevocationCheckStyle revocationCheckStyle,
 			VerificationTime verificationTime, ValidationPreferences prefStore) throws DocAssuranceServiceException {
 		try {
-			return adobeDocAssuranceService.verifyDocument(inDoc.getAdobeDocument(), revocationCheckStyle, verificationTime, prefStore, this.resourceResolver);
+			return adobeDocAssuranceService.verifyDocument(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), revocationCheckStyle, verificationTime, prefStore, this.resourceResolver);
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -217,7 +217,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	public GetUsageRightsResult getDocumentUsageRights(Document inDocument, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		try {
-			return adobeDocAssuranceService.getDocumentUsageRights(inDocument.getAdobeDocument(), unlockOptions);
+			return adobeDocAssuranceService.getDocumentUsageRights(AdobeDocumentFactoryImpl.getAdobeDocument(inDocument), unlockOptions);
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -226,7 +226,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	@Override
 	public Document removeUsageRights(Document inDoc, UnlockOptions unlockOptions) throws DocAssuranceServiceException {
 		try {
-			return documentFactory.create(adobeDocAssuranceService.removeUsageRights(inDoc.getAdobeDocument(), unlockOptions));
+			return documentFactory.create(adobeDocAssuranceService.removeUsageRights(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), unlockOptions));
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}
@@ -236,7 +236,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 	public Document applyDocumentTimeStamp(Document inDoc, VerificationTime verificationTime, ValidationPreferences validationPreferences, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		try {
-			return documentFactory.create(adobeDocAssuranceService.applyDocumentTimeStamp(inDoc.getAdobeDocument(), verificationTime, validationPreferences, this.resourceResolver, unlockOptions));
+			return documentFactory.create(adobeDocAssuranceService.applyDocumentTimeStamp(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), verificationTime, validationPreferences, this.resourceResolver, unlockOptions));
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}

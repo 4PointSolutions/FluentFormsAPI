@@ -34,7 +34,4 @@ public interface Document extends AutoCloseable, Closeable {
 	void setContentType(String contentType);
 
 	void setMaxInlineSize(int maxInlineSize);
-
-	com.adobe.aemfd.docmanager.Document getAdobeDocument();
-	
 }
