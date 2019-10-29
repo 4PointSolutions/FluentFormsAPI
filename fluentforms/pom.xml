@@ -156,7 +156,7 @@
 											<value>COVEREDRATIO</value>
 											<!-- Ideally, the number below should be 0.9, but we have some code coverage issues.  -->
 											<!-- Over time, we should strive to improve code coverage and raise this value.       -->
-											<minimum>0.0</minimum>
+											<minimum>0.8</minimum>
 										</limit>
 									</limits>
 								</rule>
@@ -608,7 +608,7 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>5.4.2</version>
+                <version>5.5.2</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
