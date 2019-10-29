@@ -2,8 +2,10 @@ package com._4point.aem.fluentforms.impl.output;
 
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
 import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
+import com.adobe.fd.output.api.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 
@@ -102,4 +105,64 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 		return adobeOptions;
 
 	}
+
+	// Package visibility so that it can be used in unit testing.
+	/* package */ static com.adobe.fd.output.api.PrintedOutputOptions toAdobePrintedOutputOptions(PrintedOutputOptionsImpl options) {
+		com.adobe.fd.output.api.PrintedOutputOptions adobeOptions = new com.adobe.fd.output.api.PrintedOutputOptions();
+		setIfNotNull((cr)->adobeOptions.setContentRoot(cr.toString()), options.getContentRoot());
+		setIfNotNull(adobeOptions::setCopies, options.getCopies());
+		setIfNotNull((dd)->adobeOptions.setDebugDir(dd.toString()), options.getDebugDir());
+		setIfNotNull((l)->adobeOptions.setLocale(l.toLanguageTag()), options.getLocale());
+		setIfNotNull(adobeOptions::setPaginationOverride, options.getPaginationOverride());
+//		setIfNotNull(adobeOptions::setPrintConfig, options.getPrintConfig());
+		setIfNotNull((ad)->adobeOptions.setXci(AdobeDocumentFactoryImpl.getAdobeDocument(ad)), options.getXci());
+		log.info("ContentRoot=" + adobeOptions.getContentRoot());
+		log.info("Copies=" + adobeOptions.getCopies());
+		log.info("DebugDir=" + adobeOptions.getDebugDir());
+		log.info("Locale=" + adobeOptions.getLocale());
+		log.info("PaginationOverride=" + adobeOptions.getPaginationOverride().toString());
+//		log.info("PrintConfig=" + adobeOptions.getPrintConfig());
+		log.info("Xci is null=" + Boolean.toString(adobeOptions.getXci() == null));
+		
+		return adobeOptions;
+	}
+	
+	// Package visibility so that it can be unit tested.
+	/* package */ enum PrintConfigMapping {
+		DPL300(PrintConfigImpl.DPL300, com.adobe.fd.output.api.PrintConfig.DPL300),
+		DPL406(PrintConfigImpl.DPL406, com.adobe.fd.output.api.PrintConfig.DPL406),
+		DPL600(PrintConfigImpl.DPL600, com.adobe.fd.output.api.PrintConfig.DPL600),
+		Generic_PS_L3(PrintConfigImpl.Generic_PS_L3, com.adobe.fd.output.api.PrintConfig.Generic_PS_L3),
+		GenericColor_PCL_5c(PrintConfigImpl.GenericColor_PCL_5c, com.adobe.fd.output.api.PrintConfig.GenericColor_PCL_5c),
+		HP_PCL_5e(PrintConfigImpl.HP_PCL_5e, com.adobe.fd.output.api.PrintConfig.HP_PCL_5e),
+		IPL300(PrintConfigImpl.IPL300, com.adobe.fd.output.api.PrintConfig.IPL300),
+		IPL400(PrintConfigImpl.IPL400, com.adobe.fd.output.api.PrintConfig.IPL400),
+		PS_PLAIN(PrintConfigImpl.PS_PLAIN, com.adobe.fd.output.api.PrintConfig.PS_PLAIN),
+		TPCL305(PrintConfigImpl.TPCL305, com.adobe.fd.output.api.PrintConfig.TPCL305),
+		TPCL600(PrintConfigImpl.TPCL600, com.adobe.fd.output.api.PrintConfig.TPCL600),
+		ZPL300(PrintConfigImpl.ZPL300, com.adobe.fd.output.api.PrintConfig.ZPL300),
+		ZPL600(PrintConfigImpl.ZPL600, com.adobe.fd.output.api.PrintConfig.ZPL600);
+		
+		private final PrintConfigImpl fluentformsConfig;
+		private final com.adobe.fd.output.api.PrintConfig adobeConfig;
+		
+		private PrintConfigMapping(PrintConfigImpl fluentformsConfig, PrintConfig adobeConfig) {
+			this.fluentformsConfig = fluentformsConfig;
+			this.adobeConfig = adobeConfig;
+		}
+		
+		public static Optional<com.adobe.fd.output.api.PrintConfig> from(PrintConfigImpl config) {
+			for(PrintConfigMapping underTest : PrintConfigMapping.values()) {
+				if (underTest.fluentformsConfig == config) {
+					return Optional.of(underTest.adobeConfig);
+				}
+			}
+			return Optional.empty();
+		}
+	}
+	
+//	// Package visibility so that it can be used in unit testing.
+//	/* package */ static com.adobe.fd.output.api.PrintConfig toAdobePrintedOutputOptions(PrintConfigImpl config) {
+//		if ()
+//	}
 }
