@@ -8,8 +8,18 @@ import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
+import com._4point.aem.fluentforms.impl.UsageContext;
 
 public class OutputServiceImpl implements OutputService {
+
+	private final TraditionalOutputService adobeOutputService;
+	private final UsageContext usageContext;
+
+	public OutputServiceImpl(TraditionalOutputService adobeOutputService, UsageContext usageContext) {
+		super();
+		this.adobeOutputService = adobeOutputService;
+		this.usageContext = usageContext;
+	}
 
 	@Override
 	public Document generatePDFOutput(Document arg0, Document arg1, PDFOutputOptions arg2) throws OutputServiceException {
