@@ -11,7 +11,7 @@ public interface PrintedOutputOptions extends PrintedOutputOptionsSetter {
 
 	PathOrUrl getContentRoot();
 
-	int getCopies();
+	Integer getCopies();
 
 	Path getDebugDir();
 

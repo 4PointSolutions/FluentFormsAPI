@@ -18,8 +18,8 @@ import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
 import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
-import com.adobe.fd.output.api.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
+import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 
 public class AdobeOutputServiceAdapter implements TraditionalOutputService {
@@ -107,21 +107,21 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 	}
 
 	// Package visibility so that it can be used in unit testing.
-	/* package */ static com.adobe.fd.output.api.PrintedOutputOptions toAdobePrintedOutputOptions(PrintedOutputOptionsImpl options) {
+	/* package */ static com.adobe.fd.output.api.PrintedOutputOptions toAdobePrintedOutputOptions(PrintedOutputOptions options) {
 		com.adobe.fd.output.api.PrintedOutputOptions adobeOptions = new com.adobe.fd.output.api.PrintedOutputOptions();
 		setIfNotNull((cr)->adobeOptions.setContentRoot(cr.toString()), options.getContentRoot());
 		setIfNotNull(adobeOptions::setCopies, options.getCopies());
 		setIfNotNull((dd)->adobeOptions.setDebugDir(dd.toString()), options.getDebugDir());
 		setIfNotNull((l)->adobeOptions.setLocale(l.toLanguageTag()), options.getLocale());
 		setIfNotNull(adobeOptions::setPaginationOverride, options.getPaginationOverride());
-//		setIfNotNull(adobeOptions::setPrintConfig, options.getPrintConfig());
+		setIfNotNull(adobeOptions::setPrintConfig, toAdobePrintConfig(options.getPrintConfig()));
 		setIfNotNull((ad)->adobeOptions.setXci(AdobeDocumentFactoryImpl.getAdobeDocument(ad)), options.getXci());
 		log.info("ContentRoot=" + adobeOptions.getContentRoot());
 		log.info("Copies=" + adobeOptions.getCopies());
 		log.info("DebugDir=" + adobeOptions.getDebugDir());
 		log.info("Locale=" + adobeOptions.getLocale());
-		log.info("PaginationOverride=" + adobeOptions.getPaginationOverride().toString());
-//		log.info("PrintConfig=" + adobeOptions.getPrintConfig());
+		log.info("PaginationOverride=" + adobeOptions.getPaginationOverride());
+		log.info("PrintConfig=" + adobeOptions.getPrintConfig());
 		log.info("Xci is null=" + Boolean.toString(adobeOptions.getXci() == null));
 		
 		return adobeOptions;
@@ -143,15 +143,15 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 		ZPL300(PrintConfigImpl.ZPL300, com.adobe.fd.output.api.PrintConfig.ZPL300),
 		ZPL600(PrintConfigImpl.ZPL600, com.adobe.fd.output.api.PrintConfig.ZPL600);
 		
-		private final PrintConfigImpl fluentformsConfig;
+		private final PrintConfig fluentformsConfig;
 		private final com.adobe.fd.output.api.PrintConfig adobeConfig;
 		
-		private PrintConfigMapping(PrintConfigImpl fluentformsConfig, PrintConfig adobeConfig) {
+		private PrintConfigMapping(PrintConfig fluentformsConfig, com.adobe.fd.output.api.PrintConfig adobeConfig) {
 			this.fluentformsConfig = fluentformsConfig;
 			this.adobeConfig = adobeConfig;
 		}
 		
-		public static Optional<com.adobe.fd.output.api.PrintConfig> from(PrintConfigImpl config) {
+		public static Optional<com.adobe.fd.output.api.PrintConfig> from(PrintConfig config) {
 			for(PrintConfigMapping underTest : PrintConfigMapping.values()) {
 				if (underTest.fluentformsConfig == config) {
 					return Optional.of(underTest.adobeConfig);
@@ -161,8 +161,11 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 		}
 	}
 	
-//	// Package visibility so that it can be used in unit testing.
-//	/* package */ static com.adobe.fd.output.api.PrintConfig toAdobePrintedOutputOptions(PrintConfigImpl config) {
-//		if ()
-//	}
+	// Package visibility so that it can be used in unit testing.
+	/* package */ static com.adobe.fd.output.api.PrintConfig toAdobePrintConfig(PrintConfig config) {
+		if (config == null) {
+			return null;
+		}
+		return PrintConfigMapping.from(config).orElse(com.adobe.fd.output.api.PrintConfig.Custom(config.getXdcUri().toString(), config.getRenderType()));
+	}
 }

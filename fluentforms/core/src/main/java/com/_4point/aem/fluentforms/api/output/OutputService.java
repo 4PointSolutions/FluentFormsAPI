@@ -21,19 +21,19 @@ public interface OutputService {
 	@SuppressWarnings("serial")
 	public static class OutputServiceException extends Exception {
 
-		private OutputServiceException() {
+		public OutputServiceException() {
 			super();
 		}
 
-		private OutputServiceException(String message, Throwable cause) {
+		public OutputServiceException(String message, Throwable cause) {
 			super(message, cause);
 		}
 
-		private OutputServiceException(String message) {
+		public OutputServiceException(String message) {
 			super(message);
 		}
 
-		private OutputServiceException(Throwable cause) {
+		public OutputServiceException(Throwable cause) {
 			super(cause);
 		}
 	}

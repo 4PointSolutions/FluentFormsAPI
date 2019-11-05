@@ -10,14 +10,6 @@ import com.adobe.fd.output.api.AcrobatVersion;
 
 public interface PDFOutputOptionsSetter {
 
-	AcrobatVersion getAcrobatVersion();
-
-	PathOrUrl getContentRoot();
-
-	Path getDebugDir();
-
-	boolean getEmbedFonts();
-
 	PDFOutputOptions setAcrobatVersion(AcrobatVersion acrobatVersion);
 
 	PDFOutputOptions setContentRoot(PathOrUrl contentRoot);

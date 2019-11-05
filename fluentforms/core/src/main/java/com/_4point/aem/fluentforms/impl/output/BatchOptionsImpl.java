@@ -4,7 +4,7 @@ import com._4point.aem.fluentforms.api.output.BatchOptions;
 
 public class BatchOptionsImpl implements BatchOptions {
 
-	private final boolean generateManyFiles;
+	private final Boolean generateManyFiles;
 
 	public static BatchOptionsImpl create(boolean generateManyFiles) {
 		return new BatchOptionsImpl(generateManyFiles);
@@ -25,7 +25,7 @@ public class BatchOptionsImpl implements BatchOptions {
 	}
 
 	@Override
-	public boolean getGenerateManyFiles() {
+	public Boolean getGenerateManyFiles() {
 		return this.generateManyFiles;
 	}
 

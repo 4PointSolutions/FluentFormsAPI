@@ -13,12 +13,12 @@ public class PDFOutputOptionsImpl implements PDFOutputOptions {
 	private AcrobatVersion acrobatVersion;
 	private PathOrUrl contentRoot;
 	private Path debugDir;
-	private boolean embedFonts;
-	private boolean linearizedPDF;
+	private Boolean embedFonts;
+	private Boolean linearizedPDF;
 	private Locale locale;
-	private boolean retainPDFFormState;
-	private boolean retainUnsignedSignatureFields;
-	private boolean taggedPDF;
+	private Boolean retainPDFFormState;
+	private Boolean retainUnsignedSignatureFields;
+	private Boolean taggedPDF;
 	private Document xci;
 
 	@Override
@@ -37,12 +37,12 @@ public class PDFOutputOptionsImpl implements PDFOutputOptions {
 	}
 
 	@Override
-	public boolean getEmbedFonts() {
+	public Boolean getEmbedFonts() {
 		return embedFonts;
 	}
 
 	@Override
-	public boolean getLinearizedPDF() {
+	public Boolean getLinearizedPDF() {
 		return linearizedPDF;
 	}
 
@@ -52,17 +52,17 @@ public class PDFOutputOptionsImpl implements PDFOutputOptions {
 	}
 
 	@Override
-	public boolean getRetainPDFFormState() {
+	public Boolean getRetainPDFFormState() {
 		return retainPDFFormState;
 	}
 
 	@Override
-	public boolean getRetainUnsignedSignatureFields() {
+	public Boolean getRetainUnsignedSignatureFields() {
 		return retainUnsignedSignatureFields;
 	}
 
 	@Override
-	public boolean getTaggedPDF() {
+	public Boolean getTaggedPDF() {
 		return taggedPDF;
 	}
 

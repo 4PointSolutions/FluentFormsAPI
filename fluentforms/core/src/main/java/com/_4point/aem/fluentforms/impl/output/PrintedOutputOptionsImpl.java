@@ -12,7 +12,7 @@ import com.adobe.fd.output.api.PaginationOverride;
 public class PrintedOutputOptionsImpl implements PrintedOutputOptions  {
 	
 	private PathOrUrl contentRoot;
-	private int copies;
+	private Integer copies;
 	private Path debugDir;
 	private Locale locale;
 	private PaginationOverride paginationOverride;
@@ -25,7 +25,7 @@ public class PrintedOutputOptionsImpl implements PrintedOutputOptions  {
 	}
 
 	@Override
-	public int getCopies() {
+	public Integer getCopies() {
 		return copies;
 	}
 
