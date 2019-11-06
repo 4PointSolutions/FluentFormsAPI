@@ -10,26 +10,26 @@ import com.adobe.fd.output.api.PaginationOverride;
 
 public interface PrintedOutputOptionsSetter {
 
-	PrintedOutputOptions setContentRoot(PathOrUrl pathOrUrl);
+	PrintedOutputOptionsSetter setContentRoot(PathOrUrl pathOrUrl);
 
-	default PrintedOutputOptions setContentRoot(Path path) {
+	default PrintedOutputOptionsSetter setContentRoot(Path path) {
 		return setContentRoot(new PathOrUrl(path));
 	}
 
-	default PrintedOutputOptions setContentRoot(URL url) {
+	default PrintedOutputOptionsSetter setContentRoot(URL url) {
 		return setContentRoot(new PathOrUrl(url));
 	}
 
-	PrintedOutputOptions setCopies(int copies);
+	PrintedOutputOptionsSetter setCopies(int copies);
 
-	PrintedOutputOptions setDebugDir(Path debugDir);
+	PrintedOutputOptionsSetter setDebugDir(Path debugDir);
 
-	PrintedOutputOptions setLocale(Locale locale);
+	PrintedOutputOptionsSetter setLocale(Locale locale);
 
-	PrintedOutputOptions setPaginationOverride(PaginationOverride paginationOverride);
+	PrintedOutputOptionsSetter setPaginationOverride(PaginationOverride paginationOverride);
 
-	PrintedOutputOptions setPrintConfig(PrintConfig printConfig);
+	PrintedOutputOptionsSetter setPrintConfig(PrintConfig printConfig);
 
-	PrintedOutputOptions setXci(Document xci);
+	PrintedOutputOptionsSetter setXci(Document xci);
 
 }

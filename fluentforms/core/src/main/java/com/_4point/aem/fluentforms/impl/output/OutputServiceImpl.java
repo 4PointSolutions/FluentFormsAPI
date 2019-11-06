@@ -1,13 +1,19 @@
 package com._4point.aem.fluentforms.impl.output;
 
+import java.io.FileNotFoundException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.output.BatchOptions;
 import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
+import com._4point.aem.fluentforms.impl.TemplateValues;
 import com._4point.aem.fluentforms.impl.UsageContext;
 
 public class OutputServiceImpl implements OutputService {
@@ -22,38 +28,117 @@ public class OutputServiceImpl implements OutputService {
 	}
 
 	@Override
-	public Document generatePDFOutput(Document arg0, Document arg1, PDFOutputOptions arg2) throws OutputServiceException {
+	public Document generatePDFOutput(Document templateDoc, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
+		return adobeOutputService.generatePDFOutput(templateDoc, data, pdfOutputOptions);
+	}
+
+	@Override
+	public Document generatePDFOutput(Path filename, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException, FileNotFoundException {
+		Objects.requireNonNull(filename, "template cannot be null.");
+
+		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
+		PathOrUrl contentRoot = Objects.requireNonNull(pdfOutputOptions, "pdfOoutputOptions cannot be null!").getContentRoot();
+//		if (contentRoot != null && !contentRoot.isPath()) {
+//			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
+//		}
+		TemplateValues tvs = TemplateValues.determineTemplateValues(filename, contentRoot, this.usageContext);
+		
+		PathOrUrl finalContentRoot = tvs.getContentRoot();
+		pdfOutputOptions.setContentRoot(finalContentRoot != null ? finalContentRoot : null);
+		return this.generatePDFOutput(tvs.getTemplate().toString(), data, pdfOutputOptions);
+	}
+
+	@Override
+	public Document generatePDFOutput(URL url, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
+		Objects.requireNonNull(url, "url cannot be null.");
+		return this.generatePDFOutput(url.toString(), data, pdfOutputOptions);
+	}
+
+	@Override
+	public Document generatePDFOutput(PathOrUrl template, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException, FileNotFoundException {
+		if (template.isPath()) {
+			return generatePDFOutput(template.getPath(), data, pdfOutputOptions);
+		} else if (template.isUrl()) {
+			return generatePDFOutput(template.getUrl(), data, pdfOutputOptions);
+		} else if (template.isCrxUrl()) {
+			return generatePDFOutput(template.getCrxUrl(), data, pdfOutputOptions);
+		} else {
+			// This should never be thrown.
+			throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
+		}
+	}
+
+	private Document generatePDFOutput(String urlOrFileName, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
+		return adobeOutputService.generatePDFOutput(urlOrFileName, data, pdfOutputOptions);
+	}
+
+	@Override
+	public GeneratePdfOutputArgumentBuilder generatePDFOutput() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document generatePDFOutput(String arg0, Document arg1, PDFOutputOptions arg2) throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public BatchResult generatePDFOutputBatch(Map<String, String> arg0, Map<String, Document> arg1, PDFOutputOptions arg2, BatchOptions arg3) throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Document generatePrintedOutput(Document arg0, Document arg1, PrintedOutputOptions arg2) throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Document generatePrintedOutput(String arg0, Document arg1, PrintedOutputOptions arg2) throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public BatchResult generatePrintedOutputBatch(Map<String, String> arg0, Map<String, Document> arg1, PrintedOutputOptions arg2, BatchOptions arg3)
+	public BatchResult generatePDFOutputBatch(Map<String, PathOrUrl> templates, Map<String, Document> data, PDFOutputOptions pdfOutputOptions, BatchOptions batchOptions)
 			throws OutputServiceException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Document generatePrintedOutput(Document templateDoc, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
+		return this.adobeOutputService.generatePrintedOutput(templateDoc, data, printedOutputOptions);
+	}
+
+	@Override
+	public Document generatePrintedOutput(Path templateFilename, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException, FileNotFoundException {
+		Objects.requireNonNull(templateFilename, "template cannot be null.");
+
+		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
+		PathOrUrl contentRoot = Objects.requireNonNull(printedOutputOptions, "pdfOoutputOptions cannot be null!").getContentRoot();
+//		if (contentRoot != null && !contentRoot.isPath()) {
+//			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
+//		}
+		TemplateValues tvs = TemplateValues.determineTemplateValues(templateFilename, contentRoot, this.usageContext);
+		
+		PathOrUrl finalContentRoot = tvs.getContentRoot();
+		printedOutputOptions.setContentRoot(finalContentRoot != null ? finalContentRoot : null);
+		return this.generatePrintedOutput(tvs.getTemplate().toString(), data, printedOutputOptions);
+	}
+
+	@Override
+	public Document generatePrintedOutput(URL templateUrl, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
+		Objects.requireNonNull(templateUrl, "url cannot be null.");
+		return this.generatePrintedOutput(templateUrl.toString(), data, printedOutputOptions);
+	}
+
+	@Override
+	public Document generatePrintedOutput(PathOrUrl template, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException, FileNotFoundException {
+		if (template.isPath()) {
+			return generatePrintedOutput(template.getPath(), data, printedOutputOptions);
+		} else if (template.isUrl()) {
+			return generatePrintedOutput(template.getUrl(), data, printedOutputOptions);
+		} else if (template.isCrxUrl()) {
+			return generatePrintedOutput(template.getCrxUrl(), data, printedOutputOptions);
+		} else {
+			// This should never be thrown.
+			throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
+		}
+	}
+
+	private Document generatePrintedOutput(String urlOrFileName, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
+		return this.adobeOutputService.generatePrintedOutput(urlOrFileName, data, printedOutputOptions);
+	}
+
+	@Override
+	public GeneratePrintedOutputArgumentBuilder generatePrintedOutput() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public BatchResult generatePrintedOutputBatch(Map<String, PathOrUrl> templates, Map<String, Document> data, PrintedOutputOptions printedOutputOptions,
+			BatchOptions batchOptions) throws OutputServiceException {
 		// TODO Auto-generated method stub
 		return null;
 	}

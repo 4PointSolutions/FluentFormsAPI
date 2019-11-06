@@ -10,32 +10,32 @@ import com.adobe.fd.output.api.AcrobatVersion;
 
 public interface PDFOutputOptionsSetter {
 
-	PDFOutputOptions setAcrobatVersion(AcrobatVersion acrobatVersion);
+	PDFOutputOptionsSetter setAcrobatVersion(AcrobatVersion acrobatVersion);
 
-	PDFOutputOptions setContentRoot(PathOrUrl contentRoot);
+	PDFOutputOptionsSetter setContentRoot(PathOrUrl contentRoot);
 
-	default PDFOutputOptions setContentRoot(Path contentRoot) {
+	default PDFOutputOptionsSetter setContentRoot(Path contentRoot) {
 		return setContentRoot(new PathOrUrl(contentRoot));
 	}
 
-	default PDFOutputOptions setContentRoot(URL contentRoot) {
+	default PDFOutputOptionsSetter setContentRoot(URL contentRoot) {
 		return setContentRoot(new PathOrUrl(contentRoot));
 	}
 
-	PDFOutputOptions setDebugDir(Path debugDir);
+	PDFOutputOptionsSetter setDebugDir(Path debugDir);
 
-	PDFOutputOptions setEmbedFonts(boolean embedFonts);
+	PDFOutputOptionsSetter setEmbedFonts(boolean embedFonts);
 
-	PDFOutputOptions setLinearizedPDF(boolean linearizedPDF);
+	PDFOutputOptionsSetter setLinearizedPDF(boolean linearizedPDF);
 
-	PDFOutputOptions setLocale(Locale locale);
+	PDFOutputOptionsSetter setLocale(Locale locale);
 
-	PDFOutputOptions setRetainPDFFormState(boolean retainFormState);
+	PDFOutputOptionsSetter setRetainPDFFormState(boolean retainFormState);
 
-	PDFOutputOptions setRetainUnsignedSignatureFields(boolean retainUnsignedSignatureFields);
+	PDFOutputOptionsSetter setRetainUnsignedSignatureFields(boolean retainUnsignedSignatureFields);
 
-	PDFOutputOptions setTaggedPDF(boolean isTagged);
+	PDFOutputOptionsSetter setTaggedPDF(boolean isTagged);
 
-	PDFOutputOptions setXci(Document xci);
+	PDFOutputOptionsSetter setXci(Document xci);
 
 }
