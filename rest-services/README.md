@@ -1,3 +1,5 @@
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # AEM Forms REST Services
 
 This project provides REST services for the AEM Forms Document Services APIs.
