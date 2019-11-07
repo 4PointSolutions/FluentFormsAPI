@@ -14,9 +14,9 @@ The AEM Forms API consists of a series of smaller APIs that are targeted at spec
 
 | AEM Forms API | REST Service Implemented |
 | ------------- | ---------------------- |
-| Forms | Partial |
-| Output | No |
-| Document Assurance |
+| Forms | Mostly |
+| Output | In progress |
+| Document Assurance | Partial |
 | PDF Generator | No |
 | Assembler | No |
 | Barcoded Forms | No |
