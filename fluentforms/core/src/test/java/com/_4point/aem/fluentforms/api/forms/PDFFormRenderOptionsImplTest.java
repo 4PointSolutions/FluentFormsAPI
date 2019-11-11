@@ -62,7 +62,7 @@ class PDFFormRenderOptionsImplTest {
 //		assertNotEquals(emptyPDFFormRenderOptions.getXci(), adobePDFFormRenderOptions.getXci());
 	}
 
-	public static void assertNotEmpty(PDFFormRenderOptions pdfFormRenderOptions) {
+	/* package */ static void assertNotEmpty(PDFFormRenderOptions pdfFormRenderOptions) {
 		com.adobe.fd.forms.api.PDFFormRenderOptions adobePDFFormRenderOptions = AdobeFormsServiceAdapter.toAdobePDFFormRenderOptions(pdfFormRenderOptions);
 		assertNotEquals(emptyPDFFormRenderOptions.getAcrobatVersion(), adobePDFFormRenderOptions.getAcrobatVersion());
 		assertNotEquals(emptyPDFFormRenderOptions.getCacheStrategy(), adobePDFFormRenderOptions.getCacheStrategy());
