@@ -8,6 +8,7 @@ import java.util.Locale;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com.adobe.fd.output.api.AcrobatVersion;
 
 
@@ -56,7 +57,7 @@ class PDFOutputOptionsImplTest {
 		assertNotEmpty(underTest);
 	}
 
-	private static void assertNotEmpty(PDFOutputOptionsImpl pdfOutputOptions) {
+	/* package */ static void assertNotEmpty(PDFOutputOptions pdfOutputOptions) {
 		com.adobe.fd.output.api.PDFOutputOptions adobePDFOutputOptions = AdobeOutputServiceAdapter.toAdobePDFOutputOptions(pdfOutputOptions);
 		assertNotEquals(emptyPDFOutputOptions.getAcrobatVersion(), adobePDFOutputOptions.getAcrobatVersion());
 		assertNotEquals(emptyPDFOutputOptions.getContentRoot(), adobePDFOutputOptions.getContentRoot());

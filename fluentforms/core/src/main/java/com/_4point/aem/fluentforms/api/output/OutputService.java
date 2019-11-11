@@ -112,6 +112,8 @@ public interface OutputService {
 		public Document executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException;
 		
 		public Document executeOn(URL template, Document data) throws OutputServiceException;
+
+		public Document executeOn(Document template, Document data) throws OutputServiceException;
 	}
 
 	public static interface GeneratePrintedOutputArgumentBuilder extends PrintedOutputOptionsSetter, Transformable<GeneratePrintedOutputArgumentBuilder> {
@@ -252,31 +254,31 @@ public interface OutputService {
 	}
 
 	public static interface BatchArgumentBuilder {
-		public BatchArgumentBuilder addTemplate(PathOrUrl template);
+		public BatchArgumentBuilder addTemplate(PathOrUrl template);	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template) 
 
 		public default BatchArgumentBuilder addTemplate(Path template) {
-			return this.addTemplate(new PathOrUrl(template));
+			return this.addTemplate(template.getFileName().toString(), new PathOrUrl(template));
 		}
 
-		public default BatchArgumentBuilder addTemplate(URL template) {
+		public default BatchArgumentBuilder addTemplate(URL template) { 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
 			return this.addTemplate(new PathOrUrl(template));
 		}
 
 		public BatchArgumentBuilder addTemplate(String templateName, PathOrUrl template);
 
-		public BatchArgumentBuilder addTemplates(List<PathOrUrl> templates);
+		public BatchArgumentBuilder addTemplates(List<PathOrUrl> templates); 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
 
 		public default BatchArgumentBuilder addTemplatePaths(List<Path> templates) {
-			return this.addTemplates(templates.stream().map(PathOrUrl::new).collect(Collectors.toList()));
+			return this.addTemplates(templates.stream().map(PathOrUrl::new).collect(Collectors.toList())); 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
 		}
 
 		public default BatchArgumentBuilder addTemplateUrls(List<URL> templates) {
-			return this.addTemplates(templates.stream().map(PathOrUrl::new).collect(Collectors.toList()));
+			return this.addTemplates(templates.stream().map(PathOrUrl::new).collect(Collectors.toList())); 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
 		}
 
 		public BatchArgumentBuilder addTemplateEntries(List<Map.Entry<String, PathOrUrl>> entries);
 
-		public default BatchArgumentBuilder addTemplatePathEntries(List<Map.Entry<String, Path>> entries) {
+		public default BatchArgumentBuilder addTemplatePathEntries(List<Map.Entry<String, Path>> entries) { 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
 			// This is a good candidate for moving into a private interface method when we move to Java 11
 			return this.addTemplateEntries(
 					entries.stream().map(
@@ -285,7 +287,7 @@ public interface OutputService {
 					);
 		}
 
-		public default BatchArgumentBuilder addTemplateUrlEntries(List<Map.Entry<String, URL>> entries) {
+		public default BatchArgumentBuilder addTemplateUrlEntries(List<Map.Entry<String, URL>> entries) {		// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
 			// This is a duplicate of the previous method (except for arguments) so they can probably be consolidated
 			// into a single private interface method.
 			return this.addTemplateEntries(

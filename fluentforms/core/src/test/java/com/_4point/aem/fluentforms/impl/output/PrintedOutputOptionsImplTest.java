@@ -52,7 +52,7 @@ class PrintedOutputOptionsImplTest {
 		assertNotEmpty(underTest);
 	}
 
-	private static void assertNotEmpty(PrintedOutputOptionsImpl printedOutputOptions) {
+	/* package */ static void assertNotEmpty(PrintedOutputOptionsImpl printedOutputOptions) {
 		com.adobe.fd.output.api.PrintedOutputOptions adobePrintedOutputOptions = AdobeOutputServiceAdapter.toAdobePrintedOutputOptions(printedOutputOptions);
 		assertNotEquals(emptyPrintedOutputOptions.getContentRoot(), adobePrintedOutputOptions.getContentRoot());
 		assertNotEquals(emptyPrintedOutputOptions.getCopies(), adobePrintedOutputOptions.getCopies());

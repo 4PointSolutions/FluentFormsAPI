@@ -3,7 +3,11 @@ package com._4point.aem.fluentforms.impl.output;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import com._4point.aem.fluentforms.api.Document;
@@ -15,7 +19,14 @@ import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.TemplateValues;
 import com._4point.aem.fluentforms.impl.UsageContext;
+import com.adobe.fd.output.api.AcrobatVersion;
 
+/**
+ * Output Service implementation.
+ * 
+ * Batch methods are not implemented at this time.
+ *
+ */
 public class OutputServiceImpl implements OutputService {
 
 	private final TraditionalOutputService adobeOutputService;
@@ -23,7 +34,7 @@ public class OutputServiceImpl implements OutputService {
 
 	public OutputServiceImpl(TraditionalOutputService adobeOutputService, UsageContext usageContext) {
 		super();
-		this.adobeOutputService = adobeOutputService;
+		this.adobeOutputService = new SafeOutputServiceAdapterWrapper(adobeOutputService);
 		this.usageContext = usageContext;
 	}
 
@@ -37,7 +48,7 @@ public class OutputServiceImpl implements OutputService {
 		Objects.requireNonNull(filename, "template cannot be null.");
 
 		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
-		PathOrUrl contentRoot = Objects.requireNonNull(pdfOutputOptions, "pdfOoutputOptions cannot be null!").getContentRoot();
+		PathOrUrl contentRoot = Objects.requireNonNull(pdfOutputOptions, "pdfOutputOptions cannot be null!").getContentRoot();
 //		if (contentRoot != null && !contentRoot.isPath()) {
 //			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
 //		}
@@ -74,8 +85,7 @@ public class OutputServiceImpl implements OutputService {
 
 	@Override
 	public GeneratePdfOutputArgumentBuilder generatePDFOutput() {
-		// TODO Auto-generated method stub
-		return null;
+		return new GeneratePdfOutputArgumentBuilderImpl();
 	}
 
 	@Override
@@ -95,7 +105,7 @@ public class OutputServiceImpl implements OutputService {
 		Objects.requireNonNull(templateFilename, "template cannot be null.");
 
 		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
-		PathOrUrl contentRoot = Objects.requireNonNull(printedOutputOptions, "pdfOoutputOptions cannot be null!").getContentRoot();
+		PathOrUrl contentRoot = Objects.requireNonNull(printedOutputOptions, "pdfOutputOptions cannot be null!").getContentRoot();
 //		if (contentRoot != null && !contentRoot.isPath()) {
 //			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
 //		}
@@ -143,4 +153,163 @@ public class OutputServiceImpl implements OutputService {
 		return null;
 	}
 
+	private class GeneratePdfOutputArgumentBuilderImpl implements GeneratePdfOutputArgumentBuilder {
+
+		PDFOutputOptions pdfOutputOptions = new PDFOutputOptionsImpl();
+
+		@Override
+		public GeneratePdfOutputArgumentBuilder setAcrobatVersion(AcrobatVersion acrobatVersion) {
+			this.pdfOutputOptions.setAcrobatVersion(acrobatVersion);
+			return this;
+		}
+
+		@Override
+		public GeneratePdfOutputArgumentBuilder setContentRoot(PathOrUrl contentRoot) {
+			this.pdfOutputOptions.setContentRoot(contentRoot);
+			return this;
+		}
+
+		@Override
+		public GeneratePdfOutputArgumentBuilder setDebugDir(Path debugDir) {
+			this.pdfOutputOptions.setDebugDir(debugDir);
+			return this;
+		}
+
+		@Override
+		public GeneratePdfOutputArgumentBuilder setEmbedFonts(boolean embedFonts) {
+			this.pdfOutputOptions.setEmbedFonts(embedFonts);
+			return this;
+		}
+
+		@Override
+		public GeneratePdfOutputArgumentBuilder setLinearizedPDF(boolean linearizedPDF) {
+			this.pdfOutputOptions.setLinearizedPDF(linearizedPDF);
+			return this;
+		}
+
+		@Override
+		public GeneratePdfOutputArgumentBuilder setLocale(Locale locale) {
+			this.pdfOutputOptions.setLocale(locale);
+			return this;
+		}
+
+		@Override
+		public GeneratePdfOutputArgumentBuilder setRetainPDFFormState(boolean retainFormState) {
+			this.pdfOutputOptions.setRetainPDFFormState(retainFormState);
+			return this;
+		}
+
+		@Override
+		public GeneratePdfOutputArgumentBuilder setRetainUnsignedSignatureFields(boolean retainUnsignedSignatureFields) {
+			this.pdfOutputOptions.setRetainUnsignedSignatureFields(retainUnsignedSignatureFields);
+			return this;
+		}
+
+		@Override
+		public GeneratePdfOutputArgumentBuilder setTaggedPDF(boolean isTagged) {
+			this.pdfOutputOptions.setTaggedPDF(isTagged);
+			return this;
+		}
+
+		@Override
+		public GeneratePdfOutputArgumentBuilder setXci(Document xci) {
+			this.pdfOutputOptions.setXci(xci);
+			return this;
+		}
+
+		@Override
+		public Document executeOn(PathOrUrl template, Document data) throws OutputServiceException, FileNotFoundException {
+			return generatePDFOutput(template, data, this.pdfOutputOptions);
+		}
+
+		@Override
+		public Document executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException {
+			return generatePDFOutput(template, data, this.pdfOutputOptions);
+		}
+
+		@Override
+		public Document executeOn(URL template, Document data) throws OutputServiceException {
+			return generatePDFOutput(template, data, this.pdfOutputOptions);
+		}
+		
+		@Override
+		public Document executeOn(Document template, Document data) throws OutputServiceException {
+			return generatePDFOutput(template, data, this.pdfOutputOptions);
+		}
+	}
+	
+	/**
+	 * This class could (and should) be replaced by private methods in the OutputService.BatchArgumentBuilder interface
+	 * however that would require Java 11 and for now we're stuck in Java 8 land.  Hopefully someone will move this class'
+	 * code into that interface after the project has dropped Java 8 support.
+	 */
+	private static abstract class AbstractBatchArgumentBuilder implements OutputService.BatchArgumentBuilder {
+		List<Entry<String, PathOrUrl>> templates = new ArrayList<>();
+		List<Entry<String, Document>> dataDocs = new ArrayList<>();
+		
+		@Override
+		public BatchArgumentBuilder addTemplate(PathOrUrl template) {
+			// TODO Auto-generated method stub
+			// Call getName(template) to get name and then add both to the list of templates
+			return null;
+		}
+
+		@Override
+		public BatchArgumentBuilder addTemplate(String templateName, PathOrUrl template) {
+			// TODO Auto-generated method stub
+			// Call getName(template) to get name and then add both to the list of templates
+			return null;
+		}
+
+		@Override
+		public BatchArgumentBuilder addTemplates(List<PathOrUrl> templates) {
+			// TODO Auto-generated method stub
+			// Call getName(template) to get name and then add both to the list of templates
+			return null;
+		}
+
+		@Override
+		public BatchArgumentBuilder addTemplateEntries(List<Entry<String, PathOrUrl>> entries) {
+			templates.addAll(Objects.requireNonNull(entries, "List of Entries parameter cannot be null."));
+			return this;
+		}
+
+		@Override
+		public BatchArgumentBuilder addData(Document data) {
+			// TODO Auto-generated method stub
+			// Call getName(template) to get name and then add both to the list of dataDocs
+			return null;
+		}
+
+		@Override
+		public BatchArgumentBuilder addData(String dataName, Document data) {
+			// TODO Auto-generated method stub
+			// Call getName(template) to get name and then add both to the list of dataDocs
+			return null;
+		}
+
+		@Override
+		public BatchArgumentBuilder addDataDocuments(List<Document> data) {
+			// TODO Auto-generated method stub
+			// Call getName(template) to get name and then add both to the list of dataDocs
+			return null;
+		}
+
+		@Override
+		public BatchArgumentBuilder addData(List<Entry<String, Document>> entries) {
+			dataDocs.addAll(Objects.requireNonNull(entries, "List of Entries parameter cannot be null."));
+			return this;
+		}
+		
+		private static String getName(PathOrUrl location) {
+			// TODO: Implement getName() for PathOrUrl
+			return null;		
+		}
+		
+		private static String getName(Document doc) {
+			// TODO: Implement getName() for Document objects
+			return null;		
+		}
+
+	}
 }
