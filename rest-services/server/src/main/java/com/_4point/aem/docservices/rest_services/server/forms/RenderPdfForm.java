@@ -60,7 +60,7 @@ import com.adobe.fd.forms.api.RenderAtClient;
 
 public class RenderPdfForm extends SlingAllMethodsServlet {
 
-	private static final Logger log = LoggerFactory.getLogger(ImportData.class);
+	private static final Logger log = LoggerFactory.getLogger(RenderPdfForm.class);
 	private final DocumentFactory docFactory = DocumentFactory.getDefault();
 	private final Supplier<TraditionalFormsService> formServiceFactory = this::getAdobeFormsService;
 
