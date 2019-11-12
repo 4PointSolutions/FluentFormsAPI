@@ -324,10 +324,5 @@ class ImportDataTest {
 			this.importDataResult.setMaxInlineSize(maxInlineSize);
 		}
 
-		@Override
-		public com.adobe.aemfd.docmanager.Document getAdobeDocument() {
-			return this.importDataResult.getAdobeDocument();
-		}
-		
 	}
 }
