@@ -29,13 +29,13 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 	private final DocumentFactory documentFactory;
 	private final com.adobe.fd.output.api.OutputService adobeOutputService;
 
-	private AdobeOutputServiceAdapter(com.adobe.fd.output.api.OutputService adobeOutputService) {
+	public AdobeOutputServiceAdapter(com.adobe.fd.output.api.OutputService adobeOutputService) {
 		super();
 		this.documentFactory = DocumentFactory.getDefault();
 		this.adobeOutputService = Objects.requireNonNull(adobeOutputService, "Adobe Output Service cannot be null.");
 	}
 
-	private AdobeOutputServiceAdapter(com.adobe.fd.output.api.OutputService adobeOutputService, DocumentFactory documentFactory) {
+	public AdobeOutputServiceAdapter(com.adobe.fd.output.api.OutputService adobeOutputService, DocumentFactory documentFactory) {
 		super();
 		this.documentFactory = Objects.requireNonNull(documentFactory, "Document Factory cannot be null.");
 		this.adobeOutputService = Objects.requireNonNull(adobeOutputService, "Adobe Output Service cannot be null.");
