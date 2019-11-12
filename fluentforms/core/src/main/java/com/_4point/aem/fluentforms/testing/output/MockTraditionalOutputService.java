@@ -42,6 +42,22 @@ public class MockTraditionalOutputService implements TraditionalOutputService {
 		this.DUMMY_BATCH_RESULT = new DummyBatchResult();
 	}
 
+	public static MockTraditionalOutputService createDocumentMock(Document renderPDFFormResult) {
+		return new MockTraditionalOutputService().setResult(renderPDFFormResult);
+	}
+
+	public static MockTraditionalOutputService createDocumentMock(DocumentFactory documentFactory, Document renderPDFFormResult) {
+		return new MockTraditionalOutputService(documentFactory).setResult(renderPDFFormResult);
+	}
+
+	public static MockTraditionalOutputService createBatchMock(BatchResult renderPDFFormResult) {
+		return new MockTraditionalOutputService().setBatchResult(renderPDFFormResult);
+	}
+
+	public static MockTraditionalOutputService createBatchMock(DocumentFactory documentFactory, BatchResult renderPDFFormResult) {
+		return new MockTraditionalOutputService(documentFactory).setBatchResult(renderPDFFormResult);
+	}
+
 	@Override
 	public Document generatePDFOutput(Document template, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
 		this.generatePdfArgs = new GeneratePdfArgs(template, data, pdfOutputOptions);
@@ -97,12 +113,14 @@ public class MockTraditionalOutputService implements TraditionalOutputService {
 		return generatePrintedOutputBatchArgs;
 	}
 
-	public void setResult(Document result) {
+	public MockTraditionalOutputService setResult(Document result) {
 		this.result = result;
+		return this;
 	}
 
-	public void setBatchResult(BatchResult batchResult) {
+	public MockTraditionalOutputService setBatchResult(BatchResult batchResult) {
 		this.batchResult = batchResult;
+		return this;
 	}
 
 	
