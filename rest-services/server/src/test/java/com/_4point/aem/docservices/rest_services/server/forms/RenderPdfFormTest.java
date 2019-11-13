@@ -32,6 +32,7 @@ import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
+import com._4point.aem.fluentforms.testing.forms.ExceptionalMockTraditionalFormsService;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.RenderPDFFormArgs;
 import com.adobe.fd.forms.api.AcrobatVersion;
@@ -347,6 +348,62 @@ class RenderPdfFormTest {
 		assertThat(statusMsg, containsStringIgnoringCase("unable to find template"));
 		assertThat(statusMsg, containsString(badFormName));
 	}
+
+	@Test
+	void testDoPost_Exception() throws ServletException, IOException, NoSuchFieldException {
+		String formData = "formData";
+		String resultData = "testDoPost Happy Path Result";
+		String templateData = TestUtils.SAMPLE_FORM.toString();
+		
+		byte[] resultDataBytes = resultData.getBytes();
+		String exceptionMessage = "Exception Message";
+		junitx.util.PrivateAccessor.setField(underTest, "formServiceFactory", (Supplier<TraditionalFormsService>)()->(TraditionalFormsService)ExceptionalMockTraditionalFormsService.create(exceptionMessage));
+
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+		
+
+		request.addRequestParameter(TEMPLATE_PARAM, templateData);
+		request.addRequestParameter(DATA_PARAM, formData);
+		
+		underTest.doPost(request, response);
+		
+		// Validate the result
+		assertEquals(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR, response.getStatus());
+		String statusMsg = response.getStatusMessage();
+		assertThat(statusMsg, containsStringIgnoringCase("Internal Error while rendering PDF"));
+		assertThat(statusMsg, containsStringIgnoringCase(exceptionMessage));
+	}
+	
+	@Test
+	void testDoPost_BadAccept() throws ServletException, IOException, NoSuchFieldException {
+		String formData = "formData";
+		String resultData = "testDoPost Happy Path Result";
+		String templateData = TestUtils.SAMPLE_FORM.toString();
+		
+		byte[] resultDataBytes = resultData.getBytes();
+		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
+
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+		
+
+		request.addRequestParameter(TEMPLATE_PARAM, templateData);
+		request.addRequestParameter(DATA_PARAM, formData);
+		request.addHeader("Accept", TEXT_HTML);
+		
+		underTest.doPost(request, response);
+		
+		// Validate the result
+		assertEquals(SlingHttpServletResponse.SC_NOT_ACCEPTABLE, response.getStatus());
+		String statusMsg = response.getStatusMessage();
+		assertThat(statusMsg, containsStringIgnoringCase(TEXT_HTML));
+		assertThat(statusMsg, containsStringIgnoringCase(APPLICATION_PDF));
+	}
+
+
 
 	public MockTraditionalFormsService mockRenderForm(byte[] resultDataBytes) throws NoSuchFieldException {
 		Document renderPdfResult = mockDocumentFactory.create(resultDataBytes);

@@ -29,7 +29,7 @@ import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.impl.output.TraditionalOutputService;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
-import com._4point.aem.fluentforms.testing.output.ExceptionalTraditionalOutputService;
+import com._4point.aem.fluentforms.testing.output.ExceptionalMockTraditionalOutputService;
 import com._4point.aem.fluentforms.testing.output.MockTraditionalOutputService;
 import com._4point.aem.fluentforms.testing.output.MockTraditionalOutputService.GeneratePdfArgs;
 import com.adobe.fd.output.api.AcrobatVersion;
@@ -332,7 +332,7 @@ class GeneratePdfOutputTest {
 		String templateData = TestUtils.SAMPLE_FORM.toString();
 		byte[] resultDataBytes = resultData.getBytes();
 		String exceptionMessage = "Exception Message";
-		junitx.util.PrivateAccessor.setField(underTest, "outputServiceFactory", (Supplier<TraditionalOutputService>)()->(TraditionalOutputService)ExceptionalTraditionalOutputService.create(exceptionMessage));
+		junitx.util.PrivateAccessor.setField(underTest, "outputServiceFactory", (Supplier<TraditionalOutputService>)()->(TraditionalOutputService)ExceptionalMockTraditionalOutputService.create(exceptionMessage));
 
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();

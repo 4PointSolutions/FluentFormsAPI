@@ -119,7 +119,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		} catch (FileNotFoundException fnfex) {
 			throw new BadRequestException("Bad request parameter while rendering PDF (" + fnfex.getMessage() + ").", fnfex);
 		} catch (FormsServiceException | IOException ex1) {
-			throw new InternalServerErrorException("Internal Error while rendering PDF.", ex1);
+			throw new InternalServerErrorException("Internal Error while rendering PDF. (" + ex1.getMessage() + ").", ex1);
 		} catch (IllegalArgumentException ex2) {
 			throw new BadRequestException("Bad arguments while rendering PDF", ex2);
 		}
