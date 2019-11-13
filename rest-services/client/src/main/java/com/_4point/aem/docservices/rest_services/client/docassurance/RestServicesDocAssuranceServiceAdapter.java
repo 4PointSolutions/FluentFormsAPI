@@ -21,6 +21,7 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
+import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
 import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
@@ -44,11 +45,9 @@ import com.adobe.fd.signatures.pdf.inputs.UnlockOptions;
 import com.adobe.fd.signatures.pdf.inputs.ValidationPreferences;
 import com.adobe.fd.signatures.pki.client.types.common.RevocationCheckStyle;
 
-public class RestServicesDocAssuranceServiceAdapter implements TraditionalDocAssuranceService {
+public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceAdapter implements TraditionalDocAssuranceService {
 
 	private static final String SECURE_DOCUMENT_PATH = "/services/DocAssuranceService/SecureDocument";
-	private static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
-	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 
 	private static final String CREDENTIAL_ALIAS_PARAM = "credentialAlias";
 	private static final String DOCUMENT_PARAM = "inDoc";
@@ -66,21 +65,14 @@ public class RestServicesDocAssuranceServiceAdapter implements TraditionalDocAss
 	private static final String ENABLED_ONLINE_FORMS_PARAM = "usageRights.enabledOnlineForms";
 	private static final String ENABLED_SUBMIT_STANDALONE_PARAM = "usageRights.enabledSubmitStandalone";
 
-	private final WebTarget baseTarget;
-	private final Supplier<String> correlationIdFn;
-
 	// Only callable from Builder
 	private RestServicesDocAssuranceServiceAdapter(WebTarget target) {
-		super();
-		this.baseTarget = target;
-		this.correlationIdFn = null;
+		super(target);
 	}
 
 	// Only callable from Builder
 	private RestServicesDocAssuranceServiceAdapter(WebTarget target, Supplier<String> correlationId) {
-		super();
-		this.baseTarget = target;
-		this.correlationIdFn = correlationId;
+		super(target, correlationId);
 	}
 
 	@Override
@@ -141,7 +133,7 @@ public class RestServicesDocAssuranceServiceAdapter implements TraditionalDocAss
 				// TODO Auto-generated method stub
 			}
 
-			Response result = postToServer(secureDocTarget, multipart);
+			Response result = postToServer(secureDocTarget, multipart, APPLICATION_PDF);
 			
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
@@ -294,16 +286,6 @@ public class RestServicesDocAssuranceServiceAdapter implements TraditionalDocAss
 		return null;
 	}
 
-	private Response postToServer(WebTarget localTarget, final FormDataMultiPart multipart) {
-		javax.ws.rs.client.Invocation.Builder invokeBuilder = localTarget.request().accept(APPLICATION_PDF);
-		if (this.correlationIdFn != null) {
-			invokeBuilder.header(CORRELATION_ID_HTTP_HDR, this.correlationIdFn.get());
-		}
-		Response result = invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType()));
-		return result;
-	}
-	
-	
 	/**
 	 * Creates a Builder object for building a RestServicesFormServiceAdapter object.
 	 * 

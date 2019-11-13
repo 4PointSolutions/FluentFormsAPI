@@ -23,6 +23,7 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
+import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -37,7 +38,7 @@ import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
 import com.adobe.fd.forms.api.RenderAtClient;
 
-public class RestServicesFormsServiceAdapter implements TraditionalFormsService {
+public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter implements TraditionalFormsService {
 
 	private static final String PDF_PARAM = "pdf";
 	private static final String DATA_PARAM = "data";
@@ -57,23 +58,14 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 	private static final String RENDER_PDF_FORM_PATH = "/services/FormsService/RenderPdfForm";
 	private static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	
-	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
-	
-	private final WebTarget baseTarget;
-	private final Supplier<String> correlationIdFn;
-
 	// Only callable from Builder
 	private RestServicesFormsServiceAdapter(WebTarget target) {
-		super();
-		this.baseTarget = target;
-		this.correlationIdFn = null;
+		super(target);
 	}
 
 	// Only callable from Builder
 	private RestServicesFormsServiceAdapter(WebTarget target, Supplier<String> correlationId) {
-		super();
-		this.baseTarget = target;
-		this.correlationIdFn = correlationId;
+		super(target, correlationId);
 	}
 
 	@Override
@@ -89,7 +81,7 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 			multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE)
 					 .field(PDF_PARAM, pdf.getInputStream(), APPLICATION_PDF);
 
-			Response result = postToServer(importDataTarget, multipart);
+			Response result = postToServer(importDataTarget, multipart, APPLICATION_PDF);
 			
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
@@ -162,7 +154,7 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 								})
 								;
 
-			Response result = postToServer(renderPdfTarget, multipart);
+			Response result = postToServer(renderPdfTarget, multipart, APPLICATION_PDF);
 			
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
@@ -200,15 +192,6 @@ public class RestServicesFormsServiceAdapter implements TraditionalFormsService 
 		throw new UnsupportedOperationException("validate has not been implemented yet.");
 	}
 
-	private Response postToServer(WebTarget localTarget, final FormDataMultiPart multipart) {
-		javax.ws.rs.client.Invocation.Builder invokeBuilder = localTarget.request().accept(APPLICATION_PDF);
-		if (this.correlationIdFn != null) {
-			invokeBuilder.header(CORRELATION_ID_HTTP_HDR, this.correlationIdFn.get());
-		}
-		Response result = invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType()));
-		return result;
-	}
-	
 	/**
 	 * Creates a Builder object for building a RestServicesFormServiceAdapter object.
 	 * 
