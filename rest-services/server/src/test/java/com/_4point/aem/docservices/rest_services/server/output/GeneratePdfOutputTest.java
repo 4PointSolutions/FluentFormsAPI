@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
@@ -106,6 +108,47 @@ class GeneratePdfOutputTest {
 		assertAll(
 				()->assertNull(pdfOutputOptions.getAcrobatVersion()),
 				()->assertEquals(TestUtils.SAMPLE_FORM.getParent(), pdfOutputOptions.getContentRoot().getPath()),
+				()->assertNull(pdfOutputOptions.getDebugDir()),
+				()->assertNull(pdfOutputOptions.getEmbedFonts()),
+				()->assertNull(pdfOutputOptions.getLinearizedPDF()),
+				()->assertNull(pdfOutputOptions.getLocale()),
+				()->assertNull(pdfOutputOptions.getRetainPDFFormState()),
+				()->assertNull(pdfOutputOptions.getRetainUnsignedSignatureFields()),
+				()->assertNull(pdfOutputOptions.getTaggedPDF()),
+				()->assertNull(pdfOutputOptions.getXci())
+			);
+	}
+
+	@Test
+	void testDoPost_HappyPath_JustForm_Doc() throws ServletException, IOException, NoSuchFieldException {
+		String resultData = "testDoPost Happy Path Result";
+		byte[] templateData = Files.readAllBytes(TestUtils.SAMPLE_FORM);
+		
+		byte[] resultDataBytes = resultData.getBytes();
+		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
+
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+
+		request.addRequestParameter(TEMPLATE_PARAM, templateData, ContentType.APPLICATION_XDP.toString());
+		
+		underTest.doPost(request, response);
+		
+		// Validate the result
+		assertEquals(SlingHttpServletResponse.SC_OK, response.getStatus());
+		assertEquals(APPLICATION_PDF, response.getContentType());
+		assertEquals(resultData, response.getOutputAsString());
+		assertEquals(resultDataBytes.length, response.getContentLength());
+	
+		// Validate that the correct parameters were passed in to renderPdf
+		GeneratePdfArgs generatePdfArgs = generatePdfMock.getGeneratePdfArgs();
+		assertNull(generatePdfArgs.getData());
+		assertEquals(templateData, generatePdfArgs.getTemplate().getInlineData());
+		PDFOutputOptions pdfOutputOptions = generatePdfArgs.getPdfOutputOptions();
+		assertAll(
+				()->assertNull(pdfOutputOptions.getAcrobatVersion()),
+				()->assertNull(pdfOutputOptions.getContentRoot()),
 				()->assertNull(pdfOutputOptions.getDebugDir()),
 				()->assertNull(pdfOutputOptions.getEmbedFonts()),
 				()->assertNull(pdfOutputOptions.getLinearizedPDF()),
