@@ -8,10 +8,10 @@ import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com.adobe.fd.forms.api.DataFormat;
 
-public class ExceptionalTraditionalMockFormsService implements TraditionalFormsService {
+public class ExceptionalMockTraditionalFormsService implements TraditionalFormsService {
 	private final String message;
 	
-	public ExceptionalTraditionalMockFormsService(String message) {
+	private ExceptionalMockTraditionalFormsService(String message) {
 		super();
 		this.message = message;
 	}
@@ -38,4 +38,7 @@ public class ExceptionalTraditionalMockFormsService implements TraditionalFormsS
 		throw new FormsServiceException(this.message);
 	}
 
+	public static ExceptionalMockTraditionalFormsService create(String message) {
+		return new ExceptionalMockTraditionalFormsService(message);
+	}
 }

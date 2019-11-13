@@ -10,10 +10,10 @@ import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.output.TraditionalOutputService;
 
-public class ExceptionalTraditionalOutputService implements TraditionalOutputService {
+public class ExceptionalMockTraditionalOutputService implements TraditionalOutputService {
 	private final String message;
 	
-	private ExceptionalTraditionalOutputService(String message) {
+	private ExceptionalMockTraditionalOutputService(String message) {
 		super();
 		this.message = message;
 	}
@@ -50,8 +50,8 @@ public class ExceptionalTraditionalOutputService implements TraditionalOutputSer
 		throw new OutputServiceException(this.message);
 	}
 
-	public static ExceptionalTraditionalOutputService create(String message) {
-		return new ExceptionalTraditionalOutputService(message);
+	public static ExceptionalMockTraditionalOutputService create(String message) {
+		return new ExceptionalMockTraditionalOutputService(message);
 	}
 
 }
