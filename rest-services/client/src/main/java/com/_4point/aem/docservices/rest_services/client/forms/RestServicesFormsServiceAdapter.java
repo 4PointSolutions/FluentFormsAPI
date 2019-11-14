@@ -40,6 +40,9 @@ import com.adobe.fd.forms.api.RenderAtClient;
 
 public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter implements TraditionalFormsService {
 
+	private static final String IMPORT_DATA_PATH = "/services/FormsService/ImportData";
+	private static final String RENDER_PDF_FORM_PATH = "/services/FormsService/RenderPdfForm";
+	
 	private static final String PDF_PARAM = "pdf";
 	private static final String DATA_PARAM = "data";
 	private static final String TEMPLATE_PARAM = "template";
@@ -52,11 +55,6 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 	private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
 	private static final String TAGGED_PDF_PARAM = "renderOptions.taggedPdf";
 	private static final String XCI_PARAM = "renderOptions.xci";
-	
-	
-	private static final String IMPORT_DATA_PATH = "/services/FormsService/ImportData";
-	private static final String RENDER_PDF_FORM_PATH = "/services/FormsService/RenderPdfForm";
-	private static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	
 	// Only callable from Builder
 	private RestServicesFormsServiceAdapter(WebTarget target) {
