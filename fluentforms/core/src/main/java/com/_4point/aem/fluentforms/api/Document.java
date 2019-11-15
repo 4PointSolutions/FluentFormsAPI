@@ -34,4 +34,13 @@ public interface Document extends AutoCloseable, Closeable {
 	void setContentType(String contentType);
 
 	void setMaxInlineSize(int maxInlineSize);
+	
+	public default Document setContentTypeIfEmpty(String contentType) throws IOException {
+		if (this.getContentType() == null || this.getContentType().isEmpty()) {
+			this.setContentType(contentType);
+		}
+		return this;
+	}
+	
+	public static String CONTENT_TYPE_PDF = "application/pdf";
 }

@@ -2,6 +2,7 @@ package com._4point.aem.fluentforms.impl.forms;
 
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -62,8 +63,8 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 	public Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException {
 		try {
 			log.info("renderPdfForm form='" + urlOrfilename + "', contentRoot='" + pdfFormRenderOptions.getContentRoot() + "'");
-			return documentFactory.create(adobeFormsService.renderPDFForm(urlOrfilename, (data != null ? AdobeDocumentFactoryImpl.getAdobeDocument(data) : null), toAdobePDFFormRenderOptions(pdfFormRenderOptions)));
-		} catch (com.adobe.fd.forms.api.FormsServiceException e) {
+			return documentFactory.create(adobeFormsService.renderPDFForm(urlOrfilename, (data != null ? AdobeDocumentFactoryImpl.getAdobeDocument(data) : null), toAdobePDFFormRenderOptions(pdfFormRenderOptions))).setContentTypeIfEmpty(Document.CONTENT_TYPE_PDF);
+		} catch (com.adobe.fd.forms.api.FormsServiceException | IOException e) {
 			throw new FormsServiceException(e);
 		}
 	}

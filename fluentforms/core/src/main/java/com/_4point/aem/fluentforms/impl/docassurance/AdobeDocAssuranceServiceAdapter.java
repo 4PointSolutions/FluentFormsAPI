@@ -33,8 +33,6 @@ import com.adobe.fd.signatures.pdf.inputs.ValidationPreferences;
 import com.adobe.fd.signatures.pki.client.types.common.RevocationCheckStyle;
 
 public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceService {
-	private static final String APPLICATION_PDF = "application/pdf";
-
 	private static final Logger log = LoggerFactory.getLogger(AdobeDocAssuranceServiceAdapter.class);
 
 	private final DocumentFactory documentFactory;
@@ -65,8 +63,7 @@ public class AdobeDocAssuranceServiceAdapter implements TraditionalDocAssuranceS
 //			com.adobe.fd.docassurance.client.api.EncryptionOptions eOptions = toAdobeEncryptionOptions(encryptionOptions);
 //			return documentFactory.create(adobeDocAssuranceService.secureDocument(inDoc.getAdobeDocument(), eOptions, signatureOptions, toAdobeReaderExtensionOptions(readerExtensionOptions), unlockOptions));
 			com.adobe.aemfd.docmanager.Document adobeDoc = adobeDocAssuranceService.secureDocument(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), null, null, toAdobeReaderExtensionOptions(readerExtensionOptions), null);
-			adobeDoc.setContentType(APPLICATION_PDF);
-			return documentFactory.create(adobeDoc);
+			return documentFactory.create(adobeDoc).setContentTypeIfEmpty(Document.CONTENT_TYPE_PDF);
 		} catch (Exception e) {
 			throw new DocAssuranceServiceException(e);
 		}

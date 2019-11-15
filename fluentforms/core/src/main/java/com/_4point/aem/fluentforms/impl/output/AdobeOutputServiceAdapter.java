@@ -2,6 +2,7 @@ package com._4point.aem.fluentforms.impl.output;
 
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -43,14 +44,20 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 
 	@Override
 	public Document generatePDFOutput(Document template, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return documentFactory.create(adobeOutputService.generatePDFOutput(AdobeDocumentFactoryImpl.getAdobeDocument(template), AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePDFOutputOptions(pdfOutputOptions))).setContentTypeIfEmpty(Document.CONTENT_TYPE_PDF);
+		} catch (com.adobe.fd.output.api.OutputServiceException | IOException e) {
+			throw new OutputServiceException(e);
+		}
 	}
 
 	@Override
 	public Document generatePDFOutput(String urlOrFileName, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return documentFactory.create(adobeOutputService.generatePDFOutput(urlOrFileName, AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePDFOutputOptions(pdfOutputOptions))).setContentTypeIfEmpty(Document.CONTENT_TYPE_PDF);
+		} catch (com.adobe.fd.output.api.OutputServiceException | IOException e) {
+			throw new OutputServiceException(e);
+		}
 	}
 
 	@Override
@@ -62,14 +69,20 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 
 	@Override
 	public Document generatePrintedOutput(Document template, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return documentFactory.create(adobeOutputService.generatePrintedOutput(AdobeDocumentFactoryImpl.getAdobeDocument(template), AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePrintedOutputOptions(printedOutputOptions)));
+		} catch (com.adobe.fd.output.api.OutputServiceException e) {
+			throw new OutputServiceException(e);
+		}
 	}
 
 	@Override
 	public Document generatePrintedOutput(String urlOrFileName, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return documentFactory.create(adobeOutputService.generatePrintedOutput(urlOrFileName, AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePrintedOutputOptions(printedOutputOptions)));
+		} catch (com.adobe.fd.output.api.OutputServiceException e) {
+			throw new OutputServiceException(e);
+		}
 	}
 
 	@Override
