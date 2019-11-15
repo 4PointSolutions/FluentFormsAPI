@@ -52,6 +52,8 @@ public class SecureDocumentTest {
 	private static final String ENABLED_ONLINE_FORMS_PARAM = "usageRights.enabledOnlineForms";
 	private static final String ENABLED_SUBMIT_STANDALONE_PARAM = "usageRights.enabledSubmitStandalone";
 
+	private static final boolean SAVE_OUTPUT = false;
+	
 	private WebTarget target;
 
 	@BeforeEach
@@ -93,7 +95,9 @@ public class SecureDocumentTest {
 		
 			// It would be nice if we used a PDF library to verify the attributes that were set earlier (things like
 			// tagging, locale, etc.)  For now, we are just going to write the results out and check manually.
-			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testReaderExtendPDF_AllArgs.pdf")));
+			if (SAVE_OUTPUT) {
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testReaderExtendPDF_AllArgs.pdf")));
+			}
 		}
 	}
 
@@ -129,7 +133,9 @@ public class SecureDocumentTest {
 			
 			// It would be nice if we used a PDF library to verify the attributes that were set earlier (things like
 			// tagging, locale, etc.)  For now, we are just going to write the results out and check manually.
-			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testReaderExtendPDF_AllArgsTrue.pdf")));
+			if (SAVE_OUTPUT) {
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testReaderExtendPDF_AllArgsTrue.pdf")));
+			}
 		}
 	}
 

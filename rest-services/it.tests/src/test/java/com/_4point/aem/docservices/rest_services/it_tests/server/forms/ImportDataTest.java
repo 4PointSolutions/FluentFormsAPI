@@ -38,6 +38,8 @@ class ImportDataTest {
 	private static final String IMPORT_DATA_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/FormsService/ImportData";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	
+	private static final boolean SAVE_OUTPUT = false;
+	
 	private WebTarget target;
 
 	@BeforeEach
@@ -64,7 +66,9 @@ class ImportDataTest {
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
 			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
-			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ImportDataServer_BytesResult.pdf")));
+			if (SAVE_OUTPUT) {
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ImportDataServer_BytesResult.pdf")));
+			}
 			assertEquals(APPLICATION_PDF, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
 		}
 	}
