@@ -86,7 +86,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
 				if (result.hasEntity()) {
 					InputStream entityStream = (InputStream) result.getEntity();
-					message += "\n" + toString(entityStream);
+					message += "\n" + inputStreamtoString(entityStream);
 				}
 				throw new FormsServiceException(message);
 			}
@@ -99,7 +99,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			if ( responseContentType == null || !APPLICATION_PDF.isCompatible(MediaType.valueOf(responseContentType))) {
 				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
 				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + toString(entityStream);
+				msg += "\n" + inputStreamtoString(entityStream);
 				throw new FormsServiceException(msg);
 			}
 
@@ -159,7 +159,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
 				if (result.hasEntity()) {
 					InputStream entityStream = (InputStream) result.getEntity();
-					message += "\n" + toString(entityStream);
+					message += "\n" + inputStreamtoString(entityStream);
 				}
 				throw new FormsServiceException(message);
 			}
@@ -171,7 +171,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			if ( responseContentType == null || !APPLICATION_PDF.isCompatible(MediaType.valueOf(responseContentType))) {
 				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
 				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + toString(entityStream);
+				msg += "\n" + inputStreamtoString(entityStream);
 				throw new FormsServiceException(msg);
 			}
 
@@ -256,15 +256,5 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 		public RestServicesFormsServiceAdapter build() {
 			return new RestServicesFormsServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
 		}
-	}
-	
-	private static String toString(InputStream inputStream) throws IOException {
-		ByteArrayOutputStream result = new ByteArrayOutputStream();
-		byte[] buffer = new byte[1024];
-		int length;
-		while ((length = inputStream.read(buffer)) != -1) {
-		    result.write(buffer, 0, length);
-		}
-		return result.toString(StandardCharsets.UTF_8.name());
 	}
 }

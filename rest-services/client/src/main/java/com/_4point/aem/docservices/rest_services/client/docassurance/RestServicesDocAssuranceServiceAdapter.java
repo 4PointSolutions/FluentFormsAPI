@@ -140,7 +140,7 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 				String msg = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
 				if (result.hasEntity()) {
 					InputStream entityStream = (InputStream) result.getEntity();
-					msg += "\n" + toString(entityStream);
+					msg += "\n" + inputStreamtoString(entityStream);
 				}
 				throw new DocAssuranceServiceException(msg);
 			}
@@ -153,7 +153,7 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 			if ( responseContentType == null || !APPLICATION_PDF.isCompatible(MediaType.valueOf(responseContentType))) {
 				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
 				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + toString(entityStream);
+				msg += "\n" + inputStreamtoString(entityStream);
 				throw new DocAssuranceServiceException(msg);
 			}
 			
@@ -353,15 +353,4 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 			return new RestServicesDocAssuranceServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
 		}
 	}
-	
-	private static String toString(InputStream inputStream) throws IOException {
-		ByteArrayOutputStream result = new ByteArrayOutputStream();
-		byte[] buffer = new byte[1024];
-		int length;
-		while ((length = inputStream.read(buffer)) != -1) {
-		    result.write(buffer, 0, length);
-		}
-		return result.toString(StandardCharsets.UTF_8.name());
-	}
-
 }
