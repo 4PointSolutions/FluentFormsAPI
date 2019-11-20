@@ -95,7 +95,7 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 				multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE);
 			}
 			if (template != null) {
-				multipart.field(TEMPLATE_PARAM, template.getInputStream(), new MediaType("application", "vnd.adobe.xdp+xml"));
+				multipart.field(TEMPLATE_PARAM, template.getInputStream(), APPLICATION_XDP);
 			}
 			if (templateStr != null) {
 				multipart.field(TEMPLATE_PARAM, templateStr);
