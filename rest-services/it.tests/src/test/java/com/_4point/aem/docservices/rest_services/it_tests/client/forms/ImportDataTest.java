@@ -36,7 +36,7 @@ class ImportDataTest {
 														.useSsl(false)
 														.build();
 
-		underTest = new FormsServiceImpl(adapter, UsageContext.SERVER_SIDE);
+		underTest = new FormsServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 	}
 
 	@Test

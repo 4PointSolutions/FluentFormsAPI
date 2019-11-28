@@ -40,7 +40,7 @@ class GeneratePdfOutputTest {
 				.useSsl(false)
 				.build();
 
-		underTest = new OutputServiceImpl(adapter, UsageContext.SERVER_SIDE);
+		underTest = new OutputServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 	}
 
 	@Test
