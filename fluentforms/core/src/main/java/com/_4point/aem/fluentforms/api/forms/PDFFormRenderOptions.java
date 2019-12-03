@@ -22,13 +22,15 @@ public interface PDFFormRenderOptions extends PDFFormRenderOptionsSetter {
 
 	Path getDebugDir();
 
+	Boolean getEmbedFonts();
+	
 	Locale getLocale();
 
 	RenderAtClient getRenderAtClient();
 	
 	List<AbsoluteOrRelativeUrl> getSubmitUrls();
 
-	public Boolean getTaggedPDF();
+	Boolean getTaggedPDF();
 
 	boolean isTaggedPDF();
 

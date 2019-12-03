@@ -84,6 +84,7 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 		setIfNotNull(adobeOptions::setCacheStrategy, options.getCacheStrategy());
 		setIfNotNull((cr)->adobeOptions.setContentRoot(cr.toString()), options.getContentRoot());
 		setIfNotNull((dd)->adobeOptions.setDebugDir(dd.toString()), options.getDebugDir());
+		setIfNotNull(adobeOptions::setEmbedFonts, options.getEmbedFonts());
 		setIfNotNull((l)->adobeOptions.setLocale(l.toLanguageTag()), options.getLocale());
 		setIfNotNull(adobeOptions::setRenderAtClient, options.getRenderAtClient());
 		setIfNotNull(adobeOptions::setSubmitUrls, mapToStrings(options.getSubmitUrls()));

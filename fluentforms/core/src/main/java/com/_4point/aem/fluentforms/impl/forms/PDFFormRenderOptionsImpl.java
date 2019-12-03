@@ -22,6 +22,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter, PDF
 	private CacheStrategy cacheStrategy = null;
 	private PathOrUrl contentRoot = null;
 	private Path debugDir = null;
+	private Boolean embedFonts = null;
 	private Locale locale = null;
 	private RenderAtClient renderAtClient = null;
 	private List<AbsoluteOrRelativeUrl> submitUrls = null;
@@ -69,6 +70,17 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter, PDF
 	@Override
 	public PDFFormRenderOptionsImpl setDebugDir(Path debugDir) {
 		this.debugDir = debugDir;
+		return this;
+	}
+
+	@Override
+	public Boolean getEmbedFonts() {
+		return embedFonts;
+	}
+
+	@Override
+	public PDFFormRenderOptionsImpl setEmbedFonts(boolean embedFonts) {
+		this.embedFonts = embedFonts;
 		return this;
 	}
 

@@ -83,6 +83,9 @@ public interface FormsService {
 		public RenderPDFFormArgumentBuilder setDebugDir(Path debugDir);
 
 		@Override
+		public RenderPDFFormArgumentBuilder setEmbedFonts(boolean embedFonts);
+
+		@Override
 		public RenderPDFFormArgumentBuilder setLocale(Locale locale);
 
 		@Override

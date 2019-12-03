@@ -35,6 +35,7 @@ class PDFFormRenderOptionsImplTest {
 		assertEquals(emptyPDFFormRenderOptions.getCacheStrategy(), adobePDFFormRenderOptions.getCacheStrategy());
 		assertEquals(contentRoot, adobePDFFormRenderOptions.getContentRoot());	// We modify the content root, so we expect it to be different than the empty version (which would be null).
 		assertEquals(emptyPDFFormRenderOptions.getDebugDir(), adobePDFFormRenderOptions.getDebugDir());
+		assertEquals(emptyPDFFormRenderOptions.getEmbedFonts(), adobePDFFormRenderOptions.getEmbedFonts());
 		assertEquals(emptyPDFFormRenderOptions.getLocale(), adobePDFFormRenderOptions.getLocale());
 		assertEquals(emptyPDFFormRenderOptions.getRenderAtClient(), adobePDFFormRenderOptions.getRenderAtClient());
 		assertEquals(emptyPDFFormRenderOptions.getSubmitUrls(), adobePDFFormRenderOptions.getSubmitUrls());
@@ -50,6 +51,7 @@ class PDFFormRenderOptionsImplTest {
 		underTest.setCacheStrategy(CacheStrategy.NONE);
 		underTest.setContentRoot(Paths.get("foo", "bar"));
 		underTest.setDebugDir(Paths.get("bar", "foo"));
+		underTest.setEmbedFonts(true);
 		underTest.setLocale(Locale.CANADA_FRENCH);
 		underTest.setRenderAtClient(RenderAtClient.NO);
 		underTest.setSubmitUrl(new URL("http://example.com"));
@@ -68,6 +70,7 @@ class PDFFormRenderOptionsImplTest {
 		assertNotEquals(emptyPDFFormRenderOptions.getCacheStrategy(), adobePDFFormRenderOptions.getCacheStrategy());
 		assertNotEquals(emptyPDFFormRenderOptions.getContentRoot(), adobePDFFormRenderOptions.getContentRoot());
 		assertNotEquals(emptyPDFFormRenderOptions.getDebugDir(), adobePDFFormRenderOptions.getDebugDir());
+		assertNotEquals(emptyPDFFormRenderOptions.getEmbedFonts(), adobePDFFormRenderOptions.getEmbedFonts());
 		assertNotEquals(emptyPDFFormRenderOptions.getLocale(), adobePDFFormRenderOptions.getLocale());
 		assertNotEquals(emptyPDFFormRenderOptions.getRenderAtClient(), adobePDFFormRenderOptions.getRenderAtClient());
 		assertNotEquals(emptyPDFFormRenderOptions.getSubmitUrls(), adobePDFFormRenderOptions.getSubmitUrls());

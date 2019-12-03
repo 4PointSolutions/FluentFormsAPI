@@ -169,6 +169,12 @@ public class FormsServiceImpl implements FormsService {
 		}
 
 		@Override
+		public RenderPDFFormArgumentBuilder setEmbedFonts(boolean embedFonts) {
+			options.setEmbedFonts(embedFonts);
+			return this;
+		}
+
+		@Override
 		public RenderPDFFormArgumentBuilder setLocale(Locale locale) {
 			options.setLocale(locale);
 			return this;
@@ -221,7 +227,6 @@ public class FormsServiceImpl implements FormsService {
 		public Document executeOn(URL template, Document data) throws FormsServiceException {
 			return renderPDFForm(template, data, options);
 		}
-
 	}
 
 	protected TraditionalFormsService getAdobeFormsService() {
