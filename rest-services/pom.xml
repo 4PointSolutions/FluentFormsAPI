@@ -35,6 +35,8 @@
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<jersey.version>2.29.1</jersey.version>
+		<mockito.version>3.2.0</mockito.version>
 	</properties>
 
 	<build>
@@ -623,7 +625,7 @@
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest-library</artifactId>
-				<version>2.1</version>
+				<version>2.2</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -635,13 +637,13 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>2.27.0</version>
+				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-junit-jupiter</artifactId>
-				<version>2.27.0</version>
+				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -687,17 +689,17 @@
 			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
 				<artifactId>jersey-client</artifactId>
-				<version>2.28</version>
+				<version>${jersey.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jersey.media</groupId>
 				<artifactId>jersey-media-multipart</artifactId>
-				<version>2.28</version>
+				<version>${jersey.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jersey.inject</groupId>
 				<artifactId>jersey-hk2</artifactId>
-				<version>2.28</version>
+				<version>${jersey.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
