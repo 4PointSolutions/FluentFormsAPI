@@ -84,6 +84,7 @@ class RenderPdfFormTest {
 									.setCacheStrategy(strategy)
 									.setContentRoot(contentRoot)
 //									.setDebugDir(debugDir)
+									.setEmbedFonts(true)
 									.setLocale(locale)
 //									.setSubmitUrlString(submitUrl)
 									.setTaggedPDF(true)

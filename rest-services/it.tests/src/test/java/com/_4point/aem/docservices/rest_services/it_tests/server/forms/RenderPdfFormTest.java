@@ -36,6 +36,7 @@ class RenderPdfFormTest {
 	private static final String CACHE_STRATEGY_PARAM = "renderOptions.cacheStrategy";
 	private static final String CONTENT_ROOT_PARAM = "renderOptions.contentRoot";
 	private static final String DEBUG_DIR_PARAM = "renderOptions.debugDir";
+	private static final String EMBED_FONTS_PARAM = "renderOptions.embedFonts";
 	private static final String LOCALE_PARAM = "renderOptions.locale";
 	private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
 	private static final String TAGGED_PDF_PARAM = "renderOptions.taggedPdf";
@@ -72,6 +73,7 @@ class RenderPdfFormTest {
 					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString())
 					 .field(ACROBAT_VERSION_PARAM, "Acrobat_10")
 //					 .field(CACHE_STRATEGY_PARAM, "CONSERVATIVE")
+					 .field(EMBED_FONTS_PARAM, "true")
 					 .field(LOCALE_PARAM, "en-CA")
 					 .field(TAGGED_PDF_PARAM, "true")
 					 .field(CONTENT_ROOT_PARAM, SERVER_FORMS_DIR.toString())

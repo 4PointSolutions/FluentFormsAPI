@@ -31,14 +31,24 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
+import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
+import com._4point.aem.fluentforms.impl.forms.PDFFormRenderOptionsImpl;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
+import com.adobe.fd.forms.api.AcrobatVersion;
+import com.adobe.fd.forms.api.CacheStrategy;
+import com.adobe.fd.forms.api.RenderAtClient;
 
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 
 @ExtendWith(MockitoExtension.class)
 class RestServicesFormsServiceAdapterTest {
@@ -72,49 +82,33 @@ class RestServicesFormsServiceAdapterTest {
 		fail("Not yet implemented");
 	}
 
-	private enum HappyPaths { SSL, NO_SSL };
+	private enum HappyPaths {
+		SSL_AND_CORRELATION_ID(true, true), NO_SSL_OR_CORRLATION_ID(false, false);
+		
+		final boolean useSsl;
+		final boolean useCorrelationId;
+		
+		private HappyPaths(boolean useSsl, boolean useCorrelationId) {
+			this.useSsl = useSsl;
+			this.useCorrelationId = useCorrelationId;
+		}
+	};
 	
 	@ParameterizedTest
 	@EnumSource(HappyPaths.class)
-	void testImportData_noSsl(HappyPaths codePath) throws Exception {
+	void testImportData_HappyPaths(HappyPaths codePath) throws Exception {
 
 		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
 
-		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
-		when(client.target(machineName.capture())).thenReturn(target);
-		when(target.path(path.capture())).thenReturn(target);
-		when(target.request()).thenReturn(builder);
-		when(builder.accept(APPLICATION_PDF)).thenReturn(builder);
-		when(builder.post(entity.capture())).thenReturn(response);
-		when(response.getStatusInfo()).thenReturn(statusType);
-		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
-		when(response.hasEntity()).thenReturn(true);
-		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
-		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn(APPLICATION_PDF.toString());
-	
-		boolean useSSL = false;
-		boolean useCorrelationId = false;
-		switch (codePath) {
-		case SSL:
-			useSSL = true;
-			useCorrelationId = true;
-			when(builder.header(eq(CORRELATION_ID_HTTP_HDR), correlationId.capture())).thenReturn(builder);
-			break;
-		case NO_SSL:
-			useSSL = false;
-			useCorrelationId = false;
-			break;
-		default:
-			throw new IllegalStateException("Found unexpected HappyPaths value (" + codePath.toString() + ").");
-		}
+		this.setupRestClientMocks(codePath.useCorrelationId, responseData);
 		
 		com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter.FormsServiceBuilder adapterBuilder = RestServicesFormsServiceAdapter.builder()
 						.machineName(TEST_MACHINE_NAME)
 						.port(TEST_MACHINE_PORT)
 						.basicAuthentication("username", "password")
-						.useSsl(useSSL)
+						.useSsl(codePath.useSsl)
 						.clientFactory(()->client);
-		if (useCorrelationId) {
+		if (codePath.useCorrelationId) {
 			adapterBuilder.correlationId(()->CORRELATION_ID);
 		}
 		
@@ -127,11 +121,7 @@ class RestServicesFormsServiceAdapterTest {
 		Document pdfResult = underTest.importData(pdf, data);
 		
 		// Make sure the correct URL is called.
-		final String expectedPrefix = useSSL ? "https://" : "http://";
-		assertThat("Expected target url contains '" + expectedPrefix + "'", machineName.getValue(), containsString(expectedPrefix));
-		assertThat("Expected target url contains TEST_MACHINE_NAME", machineName.getValue(), containsString(TEST_MACHINE_NAME));
-		assertThat("Expected target url contains TEST_MACHINE_PORT", machineName.getValue(), containsString(Integer.toString(TEST_MACHINE_PORT)));
-		assertThat("Expected target url contains 'ImportData'", path.getValue(), containsString("ImportData"));
+		this.performCommonValidations("ImportData", codePath.useSsl, codePath.useCorrelationId);
 
 		// Make sure that the arguments we passed in are transmitted correctly.
 		@SuppressWarnings("unchecked")
@@ -142,23 +132,50 @@ class RestServicesFormsServiceAdapterTest {
 		validateDocumentFormField(postedData, "pdf", new MediaType("application", "pdf"), pdf.getInlineData());
 		validateDocumentFormField(postedData, "data", MediaType.APPLICATION_XML_TYPE, data.getInlineData());
 		
-		if (useCorrelationId) {
-			assertEquals(CORRELATION_ID, correlationId.getValue());
-		}
-		
 		// Make sure the response is correct.
 		assertArrayEquals(responseData.getInlineData(), pdfResult.getInlineData());
 		assertEquals(APPLICATION_PDF, MediaType.valueOf(pdfResult.getContentType()));
 	}
+
+	private void performCommonValidations(String expectedUrlLocation, boolean expectSsl, boolean expectCorrelationId) {
+		final String expectedPrefix = expectSsl ? "https://" : "http://";
+		assertThat("Expected target url contains '" + expectedPrefix + "'", machineName.getValue(), containsString(expectedPrefix));
+		assertThat("Expected target url contains TEST_MACHINE_NAME", machineName.getValue(), containsString(TEST_MACHINE_NAME));
+		assertThat("Expected target url contains TEST_MACHINE_PORT", machineName.getValue(), containsString(Integer.toString(TEST_MACHINE_PORT)));
+		assertThat("Expected target url contains 'ImportData'", path.getValue(), containsString(expectedUrlLocation));
+		if (expectCorrelationId) {
+			assertEquals(CORRELATION_ID, correlationId.getValue());
+		}
+	}
+
+	private void setupRestClientMocks(boolean setupCorrelationId, Document responseData) throws IOException {
+		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
+		when(client.target(machineName.capture())).thenReturn(target);
+		when(target.path(path.capture())).thenReturn(target);
+		when(target.request()).thenReturn(builder);
+		when(builder.accept(APPLICATION_PDF)).thenReturn(builder);
+		when(builder.post(entity.capture())).thenReturn(response);
+		when(response.getStatusInfo()).thenReturn(statusType);
+		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
+		when(response.hasEntity()).thenReturn(true);
+		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
+		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn(APPLICATION_PDF.toString());
+
+		if (setupCorrelationId) {
+			when(builder.header(eq(CORRELATION_ID_HTTP_HDR), correlationId.capture())).thenReturn(builder);
+		}
+	}
 	
 	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {
-		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
-		assertEquals(1, pdfFields.size());
+		List<FormDataBodyPart> fieldValues = postedData.getFields(fieldName);
+		assertEquals(1, fieldValues.size());
 		
-		FormDataBodyPart pdfPart = pdfFields.get(0);
+		FormDataBodyPart pdfPart = fieldValues.get(0);
 		assertEquals(expectedMediaType, pdfPart.getMediaType());
-		byte[] pdfBytes = IOUtils.toByteArray((InputStream) pdfPart.getEntity());
-		assertArrayEquals(expectedData, pdfBytes);  // TODO: Need to figure out how to test for entity.
+		byte[] fieldBytes = expectedMediaType.isCompatible(MediaType.TEXT_PLAIN_TYPE) 
+				? ((String)pdfPart.getEntity()).getBytes()					// If the field is text, then treat the entity as a String. 
+				: IOUtils.toByteArray((InputStream) pdfPart.getEntity());	// Otherwise, treat as InputStream.
+		assertArrayEquals(expectedData, fieldBytes);  // TODO: Need to figure out how to test for entity.
 	}
 
 	@Test
@@ -223,9 +240,84 @@ class RestServicesFormsServiceAdapterTest {
 	
 	// TODO:  Add more importData tests for exceptional case (i.e. those cases where exceptions are thrown.
 	
-	@Disabled
-	void testRenderPDFForm() {
-		fail("Not yet implemented");
+	@ParameterizedTest
+	@EnumSource(HappyPaths.class)
+	void testRenderPDFForm_HappyPaths(HappyPaths codePath) throws Exception {
+
+		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
+
+		this.setupRestClientMocks(codePath.useCorrelationId, responseData);
+		
+		com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter.FormsServiceBuilder adapterBuilder = RestServicesFormsServiceAdapter.builder()
+						.machineName(TEST_MACHINE_NAME)
+						.port(TEST_MACHINE_PORT)
+						.basicAuthentication("username", "password")
+						.useSsl(codePath.useSsl)
+						.clientFactory(()->client);
+		if (codePath.useCorrelationId) {
+			adapterBuilder.correlationId(()->CORRELATION_ID);
+		}
+		
+		underTest = adapterBuilder
+						.build();
+				
+		String pdfFilename = "pdf FileName";
+		Document data = MockDocumentFactory.GLOBAL_INSTANCE.create("data Document Data".getBytes());
+
+		Document pdfResult = underTest.renderPDFForm(pdfFilename, data, getNonDefaultPdfRenderOptions());
+		
+		// Make sure the correct URL is called.
+		this.performCommonValidations("RenderPdfForm", codePath.useSsl, codePath.useCorrelationId);
+
+		// Make sure that the arguments we passed in are transmitted correctly.
+		@SuppressWarnings("unchecked")
+		Entity<FormDataMultiPart> postedEntity = (Entity<FormDataMultiPart>)entity.getValue();
+		FormDataMultiPart postedData = postedEntity.getEntity();
+		
+		assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
+		validateDocumentFormField(postedData, "template", MediaType.TEXT_PLAIN_TYPE, pdfFilename.getBytes());
+		validateDocumentFormField(postedData, "data", MediaType.APPLICATION_XML_TYPE, data.getInlineData());
+		validateDocumentFormField(postedData, "renderOptions.acrobatVersion", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_ACROBAT_VERSION.toString().getBytes());
+		validateDocumentFormField(postedData, "renderOptions.cacheStrategy", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_CACHE_STRATEGY.toString().getBytes());
+		validateDocumentFormField(postedData, "renderOptions.contentRoot", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_CONTENT_ROOT.toString().getBytes());
+		validateDocumentFormField(postedData, "renderOptions.debugDir", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_DEBUG_DIR.toString().getBytes());
+		validateDocumentFormField(postedData, "renderOptions.embedFonts", MediaType.TEXT_PLAIN_TYPE, Boolean.valueOf(NON_DEFAULT_EMBED_FONTS).toString().getBytes());
+		validateDocumentFormField(postedData, "renderOptions.locale", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_LOCALE.toString().getBytes());
+		validateDocumentFormField(postedData, "renderOptions.renderAtClient", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_RENDER_AT_CLIENT.toString().getBytes());
+		// The submitUrl parameter is currently commented out in the class under test, so it is commented out here as well.
+//		validateDocumentFormField(postedData, "renderOptions.submitUrl", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_SUBMIT_URL.getBytes());
+		validateDocumentFormField(postedData, "renderOptions.taggedPdf", MediaType.TEXT_PLAIN_TYPE, Boolean.valueOf(NON_DEFAULT_TAGGED_PDF).toString().getBytes());
+
+		// Make sure the response is correct.
+		assertArrayEquals(responseData.getInlineData(), pdfResult.getInlineData());
+		assertEquals(APPLICATION_PDF, MediaType.valueOf(pdfResult.getContentType()));
+	}
+
+	private static final AcrobatVersion NON_DEFAULT_ACROBAT_VERSION = AcrobatVersion.Acrobat_10_1;
+	private static final CacheStrategy NON_DEFAULT_CACHE_STRATEGY = CacheStrategy.NONE;
+	private static final Path NON_DEFAULT_CONTENT_ROOT = Paths.get("foo", "bar");
+	private static final Path NON_DEFAULT_DEBUG_DIR = Paths.get("bar", "foo");
+	private static final boolean NON_DEFAULT_EMBED_FONTS = true;
+	private static final Locale NON_DEFAULT_LOCALE = Locale.CANADA_FRENCH;
+	private static final RenderAtClient NON_DEFAULT_RENDER_AT_CLIENT = RenderAtClient.NO;
+	private static final String NON_DEFAULT_SUBMIT_URL = "http://example.com";
+	private static final boolean NON_DEFAULT_TAGGED_PDF = true;
+
+	
+	private PDFFormRenderOptions getNonDefaultPdfRenderOptions() throws MalformedURLException {
+		PDFFormRenderOptions options = new PDFFormRenderOptionsImpl();
+		options.setAcrobatVersion(NON_DEFAULT_ACROBAT_VERSION);
+		options.setCacheStrategy(NON_DEFAULT_CACHE_STRATEGY);
+		options.setContentRoot(NON_DEFAULT_CONTENT_ROOT);
+		options.setDebugDir(NON_DEFAULT_DEBUG_DIR);
+		options.setEmbedFonts(NON_DEFAULT_EMBED_FONTS);
+		options.setLocale(NON_DEFAULT_LOCALE);
+		options.setRenderAtClient(NON_DEFAULT_RENDER_AT_CLIENT);
+		options.setSubmitUrl(new URL(NON_DEFAULT_SUBMIT_URL));
+		options.setTaggedPDF(NON_DEFAULT_TAGGED_PDF);
+		// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
+//		options.setXci(new MockDocumentFactory().create(new byte[0]));
+		return options;
 	}
 
 	@Disabled

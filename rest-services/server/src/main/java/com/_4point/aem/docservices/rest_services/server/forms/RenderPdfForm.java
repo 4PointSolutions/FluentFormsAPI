@@ -90,6 +90,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		AcrobatVersion acrobatVersion = reqParameters.getAcrobatVersion();
 		CacheStrategy cacheStrategy = reqParameters.getCacheStrategy();
 		Path debugDir = reqParameters.getDebugDir();
+		Boolean embedFonts = reqParameters.getEmbedFonts();
 		Locale locale = reqParameters.getLocale();
 		RenderAtClient renderAtClient= reqParameters.getRenderAtClient();
 		List<AbsoluteOrRelativeUrl> submitUrls = reqParameters.getSubmitUrls();
@@ -103,6 +104,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 												.transform(b->acrobatVersion == null ? b : b.setAcrobatVersion(acrobatVersion))
 												.transform(b->cacheStrategy == null ? b : b.setCacheStrategy(cacheStrategy))
 												.transform(b->debugDir == null ? b : b.setDebugDir(debugDir))
+												.transform(b->embedFonts == null ? b : b.setEmbedFonts(embedFonts.booleanValue()))
 												.transform(b->locale == null ? b : b.setLocale(locale))
 												.transform(b->renderAtClient == null ? b : b.setRenderAtClient(renderAtClient))
 												.transform(b->submitUrls == null || submitUrls.isEmpty() ? b : b.setSubmitUrls(submitUrls))
@@ -138,6 +140,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		private static final String CACHE_STRATEGY_PARAM = "renderOptions.cacheStrategy";
 		private static final String CONTENT_ROOT_PARAM = "renderOptions.contentRoot";
 		private static final String DEBUG_DIR_PARAM = "renderOptions.debugDir";
+		private static final String EMBED_FONTS_PARAM = "renderOptions.embedFonts";
 		private static final String LOCALE_PARAM = "renderOptions.locale";
 		private static final String RENDER_AT_CLIENT_PARAM = "renderOptions.renderAtClient";
 		private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
@@ -148,6 +151,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		private CacheStrategy cacheStrategy = null;
 		private PathOrUrl contentRoot = null;
 		private Path debugDir = null;
+		private Boolean embedFonts = null;
 		private Locale locale = null;
 		private RenderAtClient renderAtClient = null;
 		private List<AbsoluteOrRelativeUrl> submitUrls = null;
@@ -201,6 +205,15 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 
 		private RenderPdfFormParameters setDebugDir(String debugDirStr) {
 			this.debugDir = Paths.get(debugDirStr);
+			return this;
+		}
+
+		public Boolean getEmbedFonts() {
+			return embedFonts;
+		}
+
+		private RenderPdfFormParameters setEmbedFonts(String embedFontsStr) {
+			this.embedFonts = Boolean.valueOf(embedFontsStr);
 			return this;
 		}
 
@@ -289,6 +302,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 				getOptionalParameter(request, CACHE_STRATEGY_PARAM).ifPresent(rp->result.setCacheStrategy(rp.getString()));
 				getOptionalParameter(request, CONTENT_ROOT_PARAM).ifPresent(rp->result.setContentRoot(rp.getString()));
 				getOptionalParameter(request, DEBUG_DIR_PARAM).ifPresent(rp->result.setDebugDir(rp.getString()));
+				getOptionalParameter(request, EMBED_FONTS_PARAM).ifPresent(rp->result.setEmbedFonts(rp.getString()));
 				getOptionalParameter(request, LOCALE_PARAM).ifPresent(rp->result.setLocale(rp.getString()));
 				getOptionalParameter(request, RENDER_AT_CLIENT_PARAM).ifPresent(rp->result.setRenderAtClient(rp.getString()));
 				getOptionalParameter(request, TAGGED_PDF_PARAM).ifPresent(rp->result.setTaggedPDF(rp.getString()));
