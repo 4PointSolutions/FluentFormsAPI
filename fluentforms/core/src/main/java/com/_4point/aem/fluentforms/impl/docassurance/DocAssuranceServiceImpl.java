@@ -227,12 +227,11 @@ public class DocAssuranceServiceImpl implements DocAssuranceService  {
 	public Document secureDocument(Document inDoc, EncryptionOptions encryptionOptions, SignatureOptions signatureOptions,
 			ReaderExtensionOptions readerExtensionOptions, UnlockOptions unlockOptions) throws DocAssuranceServiceException {
 		Objects.requireNonNull(inDoc, "input Document cannot be null.");
-//		Objects.requireNonNull(encryptionOptions, "encryption options cannot be null.");
-//		Objects.requireNonNull(signatureOptions, "signature options cannot be null.");
-//		Objects.requireNonNull(readerExtensionOptions, "reader extension options cannot be null.");
-//		Objects.requireNonNull(unlockOptions, "unlock options cannot be null.");
-//		return new Document(adobeDocAssuranceService.secureDocument(inDoc.getDocument(), encryptionOptions, signatureOptions, readerExtensionOptions, unlockOptions));
-		return adobeDocAssuranceService.secureDocument(inDoc, null, null, readerExtensionOptions, null);
+		// All other options can be null individually, but not all together
+		if (encryptionOptions == null && signatureOptions == null && readerExtensionOptions == null && unlockOptions == null) {
+			throw new IllegalArgumentException("Must supply at least one set of options in SecureDocument call (all options arguments were null).");
+		}
+		return adobeDocAssuranceService.secureDocument(inDoc, encryptionOptions, signatureOptions, readerExtensionOptions, unlockOptions);
 	}
 
 	@Override

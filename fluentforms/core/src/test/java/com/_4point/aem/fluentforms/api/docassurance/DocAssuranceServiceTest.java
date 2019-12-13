@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,29 +45,59 @@ public class DocAssuranceServiceTest {
 	}
 
 	@Test
-	@DisplayName("Test secureDocument RE direct call.")
-	void testRESecureDocument() throws DocAssuranceServiceException, FileNotFoundException {
+	@DisplayName("Test secureDocument direct call.")
+	void testSecureDocument() throws DocAssuranceServiceException, FileNotFoundException {
+		MockSecureDocumentMethod svc = new MockSecureDocumentMethod();
+		
+		Document inDoc = Mockito.mock(Document.class);
+		EncryptionOptions encryptionOptions = Mockito.mock(EncryptionOptions.class);
+		SignatureOptions signatureOptions = Mockito.mock(SignatureOptions.class);
+		ReaderExtensionOptions readerExtensionOptions = Mockito.mock(ReaderExtensionOptions.class);
+		UnlockOptions unlockOptions = Mockito.mock(UnlockOptions.class);
+		Document pdfResult = underTest.secureDocument(inDoc, encryptionOptions, signatureOptions, readerExtensionOptions, unlockOptions);
+		
+		// Verify that all the results are correct.
+		assertSame(inDoc, svc.getInDocArg(), "Expected the Document passed to AEM to match the input Document.");
+		assertSame(encryptionOptions, svc.getEncryptionOptionsArg(), "Expected the encryptionOptions passed to AEM to match the encryptionOptions used.");
+		assertSame(signatureOptions, svc.getSignatureOptionsArg(), "Expected the signatureOptions passed to AEM to match the signatureOptions used.");
+		assertSame(readerExtensionOptions, svc.getReaderExtensionOptionsArg(), "Expected the readerExtensionOptions passed to AEM to match the readerExtensionOptions used.");
+		assertSame(unlockOptions, svc.getUnlockOptionsArg(), "Expected the unlockOptions passed to AEM to match the unlockOptions used.");
+		assertSame(svc.getResult(), pdfResult, "Expected the Document returned by AEM to match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test secureDocument direct call with all null arguments.")
+	void testSecureDocumentNullArguments() throws DocAssuranceServiceException, FileNotFoundException {
 		MockSecureDocumentMethod svc = new MockSecureDocumentMethod();
 		
 		Document inDoc = Mockito.mock(Document.class);
 		EncryptionOptions encryptionOptions = null;
 		SignatureOptions signatureOptions = null;
-		ReaderExtensionOptions readerExtensionOptions = Mockito.mock(ReaderExtensionOptions.class);
+		ReaderExtensionOptions readerExtensionOptions = null;
 		UnlockOptions unlockOptions = null;
-		Document pdfResult = underTest.secureDocument(inDoc, encryptionOptions, signatureOptions, readerExtensionOptions, unlockOptions);
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, ()->underTest.secureDocument(inDoc, encryptionOptions, signatureOptions, readerExtensionOptions, unlockOptions));
 		
 		// Verify that all the results are correct.
-		assertTrue(svc.getInDocArg() == inDoc, "Expected the Document passed to AEM to match the input Document.");
-		assertTrue(svc.getEncryptionOptionsArg() == encryptionOptions, "Expected the encryptionOptions passed to AEM to match the encryptionOptions used.");
-		assertTrue(svc.getSignatureOptionsArg() == signatureOptions, "Expected the signatureOptions passed to AEM to match the signatureOptions used.");
-		assertTrue(svc.getReaderExtensionOptionsArg() == readerExtensionOptions, "Expected the readerExtensionOptions passed to AEM to match the readerExtensionOptions used.");
-		assertTrue(svc.getUnlockOptionsArg() == unlockOptions, "Expected the unlockOptions passed to AEM to match the unlockOptions used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM to match the Document result.");
+		assertTrue(ex.getMessage().contains("all options arguments were null"));
+	}
+
+	@Test
+	@DisplayName("Test secureDocument fluent call with no options.")
+	void testSecureDocumentFluentDefault() throws DocAssuranceServiceException {
+		MockSecureDocumentMethod svc = new MockSecureDocumentMethod();
+		
+		Document inDoc = Mockito.mock(Document.class);
+		
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, ()->underTest.secureDocument().executeOn(inDoc));
+		
+		// Verify that all the results are correct.
+		assertTrue(ex.getMessage().contains("all options arguments were null"));
+
 	}
 
 	@Test
 	@DisplayName("Test secureDocument RE fluent call with only the credential alias.")
-	void testSecureDocumentREFluentDefaults() throws DocAssuranceServiceException {
+	void testSecureDocumentFluentREDefaults() throws DocAssuranceServiceException {
 		MockSecureDocumentMethod svc = new MockSecureDocumentMethod();
 		
 		Document inDoc = Mockito.mock(Document.class);
@@ -109,7 +140,7 @@ public class DocAssuranceServiceTest {
 
 	@Test
 	@DisplayName("Test secureDocument RE fluent call with no credential alias.")
-	void testSecureDocumentREFluentNoCred() throws DocAssuranceServiceException {
+	void testSecureDocumentFluentRENoCred() throws DocAssuranceServiceException {
 		Document inDoc = Mockito.mock(Document.class);
 		
 		NullPointerException e = assertThrows(NullPointerException.class, ()->underTest.secureDocument().readerExtensionsOptions(null).done().executeOn(inDoc));
@@ -118,14 +149,14 @@ public class DocAssuranceServiceTest {
 
 	@Test
 	@DisplayName("Test secureDocument RE fluent call with no document.")
-	void testSecureDocumentREFluentNoDoc() throws DocAssuranceServiceException {
+	void testSecureDocumentFluentRENoDoc() throws DocAssuranceServiceException {
 		NullPointerException e = assertThrows(NullPointerException.class, ()->underTest.secureDocument().executeOn(null));
 		assertTrue(e.getMessage().contains("input Document cannot be null"), "input Document cannot be null.");
 	}
 
 	@Test
 	@DisplayName("Test secureDocument RE fluent call with usage rights all set to true.")
-	void testSecureDocumentREFluentURAllTrue() throws DocAssuranceServiceException {
+	void testSecureDocumentFluentREURAllTrue() throws DocAssuranceServiceException {
 		MockSecureDocumentMethod svc = new MockSecureDocumentMethod();
 		
 		Document inDoc = Mockito.mock(Document.class);
@@ -184,7 +215,7 @@ public class DocAssuranceServiceTest {
 
 	@Test
 	@DisplayName("Test secureDocument RE fluent call with usage rights half/half.")
-	void testSecureDocumentREFluentURHalfHalf() throws DocAssuranceServiceException {
+	void testSecureDocumentFluentREURHalfHalf() throws DocAssuranceServiceException {
 		MockSecureDocumentMethod svc = new MockSecureDocumentMethod();
 		
 		Document inDoc = Mockito.mock(Document.class);
@@ -240,6 +271,37 @@ public class DocAssuranceServiceTest {
 		assertTrue(usageRights.isEnabledEmbeddedFiles(), "Expected enabledEmbeddedFiles to be true.");
 		assertTrue(usageRights.isEnabledSubmitStandalone(), "Expected enabledSubmitStandalone to be true.");
 	}
+
+	/*
+	 * This test is probably not exactly right.  We probably need our own UnlockOptions object that ensures that a alias and password
+	 * are supplied if an unlock options object is supplied.  We may also be able to provide a reasonable default resource resolver.
+	 */
+	@Test
+	@DisplayName("Test secureDocument Unlock fluent call with only the credential alias.")
+	void testSecureDocumentFluentUnlockDefaults() throws DocAssuranceServiceException {
+		MockSecureDocumentMethod svc = new MockSecureDocumentMethod();
+		
+		Document inDoc = Mockito.mock(Document.class);
+		String credentialAlias = "recred";
+		
+		Document pdfResult = underTest.secureDocument()
+								.unlockOptions()
+							.done()
+							.executeOn(inDoc);
+		
+		assertTrue(svc.getInDocArg() == inDoc, "Expected the Document passed to AEM to match the input Document.");
+		assertNull(svc.getEncryptionOptionsArg(), "Expected EncryptionOptions passed to AEM to be null.");
+		assertNull(svc.getSignatureOptionsArg(), "Expected SignatureOptions passed to AEM to be null.");
+		assertNull(svc.getReaderExtensionOptionsArg(), "Expected ReaderExtensionOptions passed to AEM to be null.");
+		assertNotNull(svc.getUnlockOptionsArg(), "Expected UnlockOptions passed to AEM to be not null.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM to match the Document result.");
+
+		UnlockOptions unlockOptionsArg = svc.getUnlockOptionsArg();
+		assertNull(unlockOptionsArg.getAlias());
+		assertNull(unlockOptionsArg.getPassword());
+		assertNull(unlockOptionsArg.getResourceResolver());
+	}
+
 
 	private class MockSecureDocumentMethod {
 		private final Document result = Mockito.mock(Document.class);
