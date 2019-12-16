@@ -17,6 +17,15 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<description>AEM Document Services REST Services</description>
 
+	<!--
+	|   This project can be built with the following command line:
+	|   mvn clean install -P adobe-public
+	| 
+	|   In order to automatically install the resulting rest-services.server bundle, add the autoInstallBundle profile:
+	|   mvn clean install -P adobe-public,autoInstallBundle
+	|
+	 -->
+
 	<modules>
 		<module>server</module>
 		<module>client</module>
