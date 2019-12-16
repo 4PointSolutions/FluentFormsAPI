@@ -1,7 +1,10 @@
-name: Java CI
+name: Fluent Forms CI
 
-on: [push]
-
+on: 
+  push:
+    paths:
+    - 'rest-services/**'
+    
 jobs:
   build:
 
@@ -14,4 +17,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package --file rest-services
