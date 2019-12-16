@@ -3,7 +3,7 @@ name: Fluent Forms CI
 on: 
   push:
     paths:
-    - 'fluentforms/**'
+    - 'rest-services/**'
     
 jobs:
   build:
@@ -17,4 +17,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn -B package --file fluentforms -P adobe-public
+      run: mvn -B package --file rest-services -P adobe-public
