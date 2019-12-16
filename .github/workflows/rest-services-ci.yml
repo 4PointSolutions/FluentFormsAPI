@@ -1,4 +1,4 @@
-name: Fluent Forms CI
+name: REST Services CI
 
 on: 
   push:
