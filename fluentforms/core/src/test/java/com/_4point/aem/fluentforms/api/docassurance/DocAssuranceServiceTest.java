@@ -282,7 +282,6 @@ public class DocAssuranceServiceTest {
 		MockSecureDocumentMethod svc = new MockSecureDocumentMethod();
 		
 		Document inDoc = Mockito.mock(Document.class);
-		String credentialAlias = "recred";
 		
 		Document pdfResult = underTest.secureDocument()
 								.unlockOptions()
