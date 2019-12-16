@@ -27,6 +27,16 @@
     <packaging>bundle</packaging>
     <name>fluent-forms-api - Core</name>
     <description>Core bundle for fluent-forms-api</description>
+
+	<!--
+	|   This project can be built with the following command line:
+	|   mvn clean install -P adobe-public
+	| 
+	|   In order to automatically install the resulting bundle, add the autoInstallBundle profile:
+	|   mvn clean install -P adobe-public,autoInstallBundle
+	|
+	 -->
+
     <build>
         <plugins>
             <plugin>

@@ -27,6 +27,13 @@
     <packaging>bundle</packaging>
     <name>AEM Document Services REST Services - Client</name>
     <description>Client bundle for AEM Document Services REST Services</description>
+
+	<!--
+	|   This project can be built with the following command line:
+	|   mvn clean install
+	| 
+	 -->
+
     <build>
         <plugins>
             <plugin>
