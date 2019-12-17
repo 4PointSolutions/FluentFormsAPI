@@ -5,6 +5,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
+/**
+ * This class is required to enable the use if "crx:" as a protocol with the java.net.URL object.  It instantiates and
+ * registers an URLStreamHandler for the "crx:" protocol.  Once that is done, we can turn url strings that contain crx:// into
+ * URL objects. 
+ *
+ */
 public class CrxUrlHandler {
 	
 	private static boolean crxProtocolInstalled = false;
