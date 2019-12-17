@@ -5,11 +5,11 @@ The FluentFormsAPI project will eventually consist of three interrelated sub-pro
 Maven as a build tool.
 
 # fluentforms
-[This project](tree/master/fluentforms) is a fluent API wrapper around the Adobe AEM Forms Java APIs.  It provides a bunch of small
+[This project](https://github.com/4PointSolutions/FluentFormsAPI/tree/master/fluentforms) is a fluent API wrapper around the Adobe AEM Forms Java APIs.  It provides a bunch of small
 improvements over the Adobe API (stronger typing, stronger validation, enhanced readability for starters).
 
 # rest-services
-[This project](tree/master/rest-services) is an AEM bundle and client library that provides a REST services wrapper 
+[This project](https://github.com/4PointSolutions/FluentFormsAPI/tree/master/rest-services) is an AEM bundle and client library that provides a REST services wrapper 
 on top of the Adobe AEM Forms Java APIs (via the fluentforms API).  It provides both a server-side bundle for receiving
 API calls and a Java client library (.jar) that makes it easy to call the rest-services server API.
 
