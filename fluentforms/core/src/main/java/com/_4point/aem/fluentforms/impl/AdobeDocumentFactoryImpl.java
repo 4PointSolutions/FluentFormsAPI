@@ -1,14 +1,10 @@
 package com._4point.aem.fluentforms.impl;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -16,6 +12,10 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 
 
+/**
+ * This class provides a DocumentFactory and Document implementations that wrap the Adobe Document objects.  It is uses on the
+ * server side where the Adobe APIs are available.  It is not used by client-side code.
+ */
 public enum AdobeDocumentFactoryImpl implements DocumentFactory {
 	
 	INSTANCE;
