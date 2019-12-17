@@ -69,12 +69,13 @@ public class PathOrUrl {
 			}
 		}
 		try {
-			Path resultPath = Paths.get(trimmedPathOrUrl);
-			return new PathOrUrl(resultPath);
-		} catch (InvalidPathException e) {
+			// Unix allows colons in file paths, this means that on Unix URLs can be valid file Paths but not vice versa.
+			// So we try creating the URL first, if that fails then try the path. 
+			return new PathOrUrl(new URL(trimmedPathOrUrl));
+		} catch (MalformedURLException e) {
 			try {
-				return new PathOrUrl(new URL(trimmedPathOrUrl));
-			} catch (MalformedURLException e2) {
+				return new PathOrUrl(Paths.get(trimmedPathOrUrl));
+			} catch (InvalidPathException e2) {
 				throw new IllegalArgumentException("Bad Path or URL provided. '" + pathOrUrl + "'.", e2);
 			}
 		}

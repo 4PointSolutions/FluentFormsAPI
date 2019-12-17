@@ -10,6 +10,8 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -63,8 +65,15 @@ class PathOrUrlTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "", " ", "crap://more/crap" })	// I'd like to find a crx: example that causes an invalid URL, but have ben unable to find one.
+	@ValueSource(strings = { "", " " })	// I'd like to find a crx: example that causes an invalid URL, but have been unable to find one.
 	void testFromString_Invalid(String str) {
+		IllegalArgumentException iaex = assertThrows(IllegalArgumentException.class, ()->PathOrUrl.fromString(str));
+	}
+
+	@EnabledOnOs(OS.WINDOWS)	// Only execute on Windows, because crap://more/crap is a valid unix path.
+	@ParameterizedTest
+	@ValueSource(strings = { "crap://more/crap" })
+	void testFromString_InvalidWindows(String str) {
 		IllegalArgumentException iaex = assertThrows(IllegalArgumentException.class, ()->PathOrUrl.fromString(str));
 	}
 
