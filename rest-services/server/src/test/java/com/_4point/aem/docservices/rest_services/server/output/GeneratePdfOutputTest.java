@@ -21,6 +21,8 @@ import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -292,6 +294,7 @@ class GeneratePdfOutputTest {
 		assertThat(response.getStatusMessage(), containsStringIgnoringCase("incoming parameters"));
 	}
 
+	@EnabledOnOs(OS.WINDOWS)	// Only enabled on Windows because Linux is so permissive with respect to filenames.
 	@Test
 	void testDoPost_HappyPath_BadContentRoot() throws ServletException, IOException, NoSuchFieldException {
 		String formData = "formData";
@@ -317,6 +320,7 @@ class GeneratePdfOutputTest {
 		assertThat(response.getStatusMessage(), containsStringIgnoringCase("incoming parameters"));
 	}
 
+	@EnabledOnOs(OS.WINDOWS)	// Only enabled on Windows because Linux is so permissive with respect to filenames.
 	@Test
 	void testDoPost_HappyPath_BadDebugDir() throws ServletException, IOException, NoSuchFieldException {
 		String formData = "formData";
