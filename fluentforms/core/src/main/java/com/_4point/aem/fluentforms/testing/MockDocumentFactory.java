@@ -16,6 +16,10 @@ import java.util.TreeMap;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 
+/**
+ * Document Factory Mock that is useful for unit tests that require a DocumentFactory.
+ *
+ */
 public class MockDocumentFactory implements DocumentFactory {
 
 	public final static Document GLOBAL_DUMMY_DOCUMENT = new MockDocumentImpl();
