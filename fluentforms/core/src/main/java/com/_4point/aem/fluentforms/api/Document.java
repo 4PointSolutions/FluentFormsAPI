@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-public interface Document extends AutoCloseable, Closeable {
+public interface Document extends AutoCloseable, Closeable, HasAttributes {
 
 	void close() throws IOException;
 
@@ -13,7 +13,7 @@ public interface Document extends AutoCloseable, Closeable {
 
 	void dispose();
 
-	Object getAttribute(String name);
+//	Object getAttribute(String name);		// moved to HasAttributes interface
 
 	String getContentType() throws IOException;
 
@@ -29,7 +29,7 @@ public interface Document extends AutoCloseable, Closeable {
 
 	void removeAttribute(String name);
 
-	void setAttribute(String name, Object val);
+//	void setAttribute(String name, Object val); 		// moved to HasAttributes interface
 
 	void setContentType(String contentType);
 
