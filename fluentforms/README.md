@@ -20,9 +20,9 @@ The AEM Forms API consists of a series of smaller APIs that are targetted at spe
 
 | AEM Forms API | Fluent API Implemented | Servlet Implemented | Client side adapter implemented |
 | ------------- | ---------------------- | ------------------- | ------------------------------- |
-| Forms | Yes | In Progress | No |
-| Output | No | No | No |
-| Document Assurance | No | No | No |
+| Forms | Yes | Yes | Yes |
+| Output | Partial | Partial | Partial |
+| Document Assurance | Partial | Partial | Partial |
 | PDF Generator | No | No | No |
 | Assembler | No | No | No |
 | Barcoded Forms | No | No | No |
