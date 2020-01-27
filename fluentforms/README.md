@@ -35,32 +35,32 @@ There are samples of how to invoke the fluentforms APIs in the examples subproje
 
 ```java
 import org.osgi.service.component.annotations.Reference;
-
+ 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.factory.ServerFactory;
-
+ 
 class OutputServiceExample {
-
-	@Reference
-	private com.adobe.fd.output.api.OutputService adobeOutputService;
-	
-	InputStream demoGeneratePdfOutputTypical() throws Exception {
-		OutputService outputService = ServerFactory.createOutputService(adobeOutputService);
-		
-		// 
-		Document data = ServerFactory.getDefaultDocumentFactory().create(sampleData.getBytes());
-		
-		Document result = outputService.generatePDFOutput()
-								.setContentRoot(PathOrUrl.fromString("crx:/content/dam/formsanddocuments/"))
-								.setTaggedPDF(true)
-								.executeOn(Paths.get("foo/bar.xdp"), data );
-		
-		// byte[] pdfBytes = result.getInlineData();	// you can do either of these but not both.
-		InputStream pdfStream = result.getInputStream();
-		
-		return pdfStream;
-	}
+ 
+   @Reference
+   private com.adobe.fd.output.api.OutputService adobeOutputService;
+ 
+   InputStream demoGeneratePdfOutputTypical() throws Exception {
+      OutputService outputService = ServerFactory.createOutputService(adobeOutputService);
+ 
+      // 
+      Document data = ServerFactory.getDefaultDocumentFactory().create(sampleData.getBytes());
+ 
+      Document result = outputService.generatePDFOutput()
+                                     .setContentRoot(PathOrUrl.fromString("crx:/content/dam/formsanddocuments/"))
+                                     .setTaggedPDF(true)
+                                     .executeOn(Paths.get("foo/bar.xdp"), data );
+ 
+      // byte[] pdfBytes = result.getInlineData();	// you can do either of these but not both.
+      InputStream pdfStream = result.getInputStream();
+ 
+      return pdfStream;
+   }
 }
 ```
 
