@@ -118,6 +118,7 @@ class OutputServiceImplTest {
 		Path nullFilename = null;
 		
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput(nullFilename, data, pdfFormRenderOptions));
+		assertNotNull(ex1.getMessage());	// Exception should contain a message.
 		assertTrue(ex1.getMessage().contains("template"), ()->"'" + ex1.getMessage() + "' does not contain 'template'");
 
 		// Null Data is allowed.
@@ -125,6 +126,7 @@ class OutputServiceImplTest {
 //		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
 		
 		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput(filename, data, null));
+		assertNotNull(ex1.getMessage());	// Exception should contain a message.
 		assertTrue(ex3.getMessage().contains("pdfOutputOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'pdfOutputOptions'");
 	}
 
@@ -180,13 +182,15 @@ class OutputServiceImplTest {
 		Path nullFilename = null;
 		
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput(nullFilename, data, pdfFormRenderOptions));
+		assertNotNull(ex1.getMessage());	// Exception should contain a message.
 		assertTrue(ex1.getMessage().contains("template"), ()->"'" + ex1.getMessage() + "' does not contain 'template'");
 
 		// Null Data is allowed.
-//		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
+//		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput(filename, null, pdfFormRenderOptions));
 //		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
 		
 		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput(filename, data, null));
+		assertNotNull(ex1.getMessage());	// Exception should contain a message.
 		assertTrue(ex3.getMessage().contains("PDFOutputOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'PDFOutputOptions'");
 	}
 
@@ -234,6 +238,30 @@ class OutputServiceImplTest {
 		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
 		assertTrue(svc.getOptionsArg() == options, "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
 		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test GeneratePDFOutput(PathOrUrl,...) with null arguments.")
+	void testGeneratePDFOutputPathOrUrl_nullArguments() throws Exception {
+		MockPdfOutputService svc = new MockPdfOutputService();
+		
+		PathOrUrl filename = PathOrUrl.fromString("file:foo/bar.xdp");
+		Document data = Mockito.mock(Document.class);
+		PDFOutputOptions options = Mockito.mock(PDFOutputOptions.class);
+		PathOrUrl nullFilename = null;
+		
+		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput(nullFilename, data, options));
+		assertNotNull(ex1.getMessage());	// Exception should contain a message.
+		assertTrue(ex1.getMessage().contains("template"), ()->"'" + ex1.getMessage() + "' does not contain 'template'");
+		
+		// Null Data is allowed.
+//		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput(filename, data, options));
+//		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
+		
+		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput(filename, data, null));
+		assertNotNull(ex1.getMessage());	// Exception should contain a message.
+		assertTrue(ex3.getMessage().contains("PDFOutputOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'PDFOutputOptions'");
+
 	}
 
 	@Test

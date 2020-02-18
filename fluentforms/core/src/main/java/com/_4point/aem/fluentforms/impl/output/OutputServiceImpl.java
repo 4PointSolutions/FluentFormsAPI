@@ -67,6 +67,7 @@ public class OutputServiceImpl implements OutputService {
 
 	@Override
 	public Document generatePDFOutput(PathOrUrl template, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException, FileNotFoundException {
+		Objects.requireNonNull(template, "template cannot be null.");
 		if (template.isPath()) {
 			return generatePDFOutput(template.getPath(), data, pdfOutputOptions);
 		} else if (template.isUrl()) {
