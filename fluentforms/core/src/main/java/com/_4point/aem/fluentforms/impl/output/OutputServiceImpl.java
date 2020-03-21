@@ -154,6 +154,10 @@ public class OutputServiceImpl implements OutputService {
 		return null;
 	}
 
+	protected TraditionalOutputService getAdobeOutputService() {
+		return adobeOutputService;
+	}
+
 	private class GeneratePdfOutputArgumentBuilderImpl implements GeneratePdfOutputArgumentBuilder {
 
 		PDFOutputOptions pdfOutputOptions = new PDFOutputOptionsImpl();

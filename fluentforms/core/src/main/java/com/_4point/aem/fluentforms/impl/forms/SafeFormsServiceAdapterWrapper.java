@@ -50,4 +50,8 @@ public class SafeFormsServiceAdapterWrapper implements TraditionalFormsService {
 		return formsService.validate(template, data, validationOptions);
 	}
 
+	// This is required by the mock services.
+	public TraditionalFormsService getFormsService() {
+		return formsService;
+	}
 }

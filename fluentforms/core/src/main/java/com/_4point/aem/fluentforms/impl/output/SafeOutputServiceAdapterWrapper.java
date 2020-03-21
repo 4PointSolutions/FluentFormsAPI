@@ -65,4 +65,8 @@ public class SafeOutputServiceAdapterWrapper implements TraditionalOutputService
 		return outputService.generatePrintedOutputBatch(templates, data, printedOutputOptions, batchOptions);
 	}
 
+	// This is required by the mock services.
+	public TraditionalOutputService getOutputService() {
+		return outputService;
+	}
 }

@@ -28,14 +28,14 @@ public class MockTraditionalOutputService implements TraditionalOutputService {
 	GeneratePrintedOutputArgs generatePrintedOutputArgs;
 	GeneratePrintedOutputBatchArgs generatePrintedOutputBatchArgs;
 	
-	private MockTraditionalOutputService() {
+	/* package */ MockTraditionalOutputService() {
 		super();
 		this.documentFactory = new MockDocumentFactory();
 		this.DUMMY_DOCUMENT = documentFactory.create(new byte[0]);
 		this.DUMMY_BATCH_RESULT = new DummyBatchResult();
 	}
 
-	private MockTraditionalOutputService(DocumentFactory documentFactory) {
+	/* package */ MockTraditionalOutputService(DocumentFactory documentFactory) {
 		super();
 		this.documentFactory = documentFactory;
 		this.DUMMY_DOCUMENT = documentFactory.create(new byte[0]);
