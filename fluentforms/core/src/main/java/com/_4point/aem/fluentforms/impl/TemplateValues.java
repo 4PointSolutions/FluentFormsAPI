@@ -15,6 +15,7 @@ import com._4point.aem.fluentforms.api.PathOrUrl;
  *
  */
 public class TemplateValues {
+	private static final String URL_SEPARATOR = "/";
 	private final PathOrUrl contentRoot;
 	private final Path template;
 	
@@ -47,9 +48,9 @@ public class TemplateValues {
 			} else if (templatesDir.isPath()) {
 				contentRoot = new PathOrUrl(templatesDir.getPath().resolve(templateParentDir));
 			} else if (templatesDir.isUrl()) {
-				contentRoot = PathOrUrl.fromString(templatesDir.getUrl().toString() + "/" + templateParentDir.toString());
+				contentRoot = PathOrUrl.fromString(stripTrailingSlash(templatesDir.getUrl().toString()) + URL_SEPARATOR + templateParentDir.toString());
 			} else if (templatesDir.isCrxUrl()) {
-				contentRoot = PathOrUrl.fromString(templatesDir.getCrxUrl() + "/" + templateParentDir.toString());
+				contentRoot = PathOrUrl.fromString(stripTrailingSlash(templatesDir.getCrxUrl()) + URL_SEPARATOR + templateParentDir.toString());
 			} else {
 				// This should never happen
 				throw new IllegalStateException("Context Root is not a Path, Url, or CrxUrl.  This should never happen.");
@@ -75,5 +76,17 @@ public class TemplateValues {
 
 	public Path getTemplate() {
 		return template;
+	}
+	
+	// Exposed for testing.
+	/* package */ static String stripTrailingSlash(String pathOrUrl) {
+		int length = pathOrUrl.length();
+		if (length > 0) {
+			String lastChar = pathOrUrl.substring(length - 1, length);
+			if (URL_SEPARATOR.equals(lastChar)) {
+				return pathOrUrl.substring(0, length - 1);
+			}
+		}
+		return pathOrUrl;
 	}
 }

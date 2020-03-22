@@ -110,7 +110,7 @@ public class MockTraditionalDocAssuranceService implements TraditionalDocAssuran
 			FieldMDPOptionSpec fieldMDPOptionsSpec, PDFSeedValueOptionSpec seedValueOptionsSpec,
 			UnlockOptions unlockOptions) throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
@@ -119,35 +119,35 @@ public class MockTraditionalDocAssuranceService implements TraditionalDocAssuran
 			PDFSeedValueOptionSpec seedValueOptionsSpec, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public Document clearSignatureField(Document inDoc, String signatureFieldName, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public PDFSignatureField getCertifyingSignatureField(Document inDoc, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public PDFSignature getSignature(Document inDoc, String signatureFieldName, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public List<PDFSignatureField> getSignatureFieldList(Document inDoc, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
@@ -155,14 +155,14 @@ public class MockTraditionalDocAssuranceService implements TraditionalDocAssuran
 			PDFSignatureFieldProperties pdfSignatureFieldProperties, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public Document removeSignatureField(Document inDoc, String signatureFieldName, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
@@ -170,51 +170,51 @@ public class MockTraditionalDocAssuranceService implements TraditionalDocAssuran
 			RevocationCheckStyle revocationCheckStyle, VerificationTime verificationTime,
 			ValidationPreferences dssPrefs) throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public EncryptionTypeResult getPDFEncryption(Document inDoc) throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public Document removePDFCertificateSecurity(Document inDoc, String alias) throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public Document removePDFPasswordSecurity(Document inDoc, String password) throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public PDFDocumentVerificationInfo verifyDocument(Document inDoc, RevocationCheckStyle revocationCheckStyle,
 			VerificationTime verificationTime, ValidationPreferences prefStore) throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public GetUsageRightsResult getCredentialUsageRights(String credentialAlias) throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public GetUsageRightsResult getDocumentUsageRights(Document inDoc, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
 	public Document removeUsageRights(Document inDoc, UnlockOptions unlockOptions) throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 
 	@Override
@@ -222,6 +222,6 @@ public class MockTraditionalDocAssuranceService implements TraditionalDocAssuran
 			ValidationPreferences validationPreferences, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField has not been implemented yet.");
 	}
 }

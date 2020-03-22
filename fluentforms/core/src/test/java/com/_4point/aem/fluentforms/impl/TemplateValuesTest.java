@@ -12,14 +12,32 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com._4point.aem.fluentforms.api.PathOrUrl;
 
 class TemplateValuesTest {
 
+	private static final String URL_SEPARATOR = "/";
 	private static final String BAD_CONTENT_ROOT = "D:\\foobar";
 	private static final String BAD_TEMPLATE = "NonExistentForm.xdp";
-	
+
+	private enum ScenarioVariation {
+		WITH_SLASH("/"), WITHOUT_SLASH("");
+		
+		private final String endCharacter;
+
+		private ScenarioVariation(String endCharacter) {
+			this.endCharacter = endCharacter;
+		}
+
+		public String getEndCharacter() {
+			return endCharacter;
+		}
+	}
+
 	@Test
 	@DisplayName("TemplateValues Test: Absolute Path in form with Path content root")
 	public void testTemplateValuesAbsPathwDir() throws Exception {
@@ -59,16 +77,17 @@ class TemplateValuesTest {
 		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
 	}
 
-	@Test
+	@ParameterizedTest
+	@EnumSource
 	@DisplayName("TemplateValues Test: Relative Path in form with Url content root")
-	public void testTemplateValuesRelPathwUrl() throws Exception {
+	public void testTemplateValuesRelPathwUrl(ScenarioVariation scenario) throws Exception {
 		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
 		String urlString = "http://foo/bar";
-		PathOrUrl templatesDir = new PathOrUrl(new URL(urlString));
+		PathOrUrl templatesDir = new PathOrUrl(new URL(urlString + scenario.getEndCharacter()));
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
-		assertEquals(urlString + "/" + SAMPLE_FORMS_DIR.getFileName().toString(), resultTv.getContentRoot().getUrl().toString(), "Content Root wasn't what was expected.");
+		assertEquals(urlString + URL_SEPARATOR + SAMPLE_FORMS_DIR.getFileName().toString(), resultTv.getContentRoot().getUrl().toString(), "Content Root wasn't what was expected.");
 		assertEquals(SAMPLE_FORM.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
 	}
 
@@ -86,16 +105,17 @@ class TemplateValuesTest {
 		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
 	}
 
-	@Test
+	@ParameterizedTest
+	@EnumSource
 	@DisplayName("TemplateValues Test: Relative Path in form with CRX content root")
-	public void testTemplateValuesRelPathwCrxUrl() throws Exception {
+	public void testTemplateValuesRelPathwCrxUrl(ScenarioVariation scenario) throws Exception {
 		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
 		String urlString = "crx://foo/bar";
-		PathOrUrl templatesDir = PathOrUrl.fromString(urlString);
+		PathOrUrl templatesDir = PathOrUrl.fromString(urlString + scenario.getEndCharacter());
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
-		assertEquals(urlString + "/" + SAMPLE_FORMS_DIR.getFileName().toString(), resultTv.getContentRoot().getCrxUrl(), "Content Root wasn't what was expected.");
+		assertEquals(urlString + URL_SEPARATOR + SAMPLE_FORMS_DIR.getFileName().toString(), resultTv.getContentRoot().getCrxUrl(), "Content Root wasn't what was expected.");
 		assertEquals(SAMPLE_FORM.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
 	}
 
@@ -168,6 +188,32 @@ class TemplateValuesTest {
 		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
 		assertTrue(e.getMessage().contains(template.toString()), "Expected template name to be in the message.");
 		assertTrue(e.getMessage().contains(BAD_CONTENT_ROOT), "Expected content root to be in the message.");
+	}
+
+	private enum StringScenarios {
+		foo("foo", "foo"),
+		bar("bar/", "bar"),
+		empty("", ""), 
+		slash(URL_SEPARATOR, ""),
+		foobar("foo/bar", "foo/bar");
+		
+		private final String src;
+		private final String expectedResult;
+		private StringScenarios(String src, String expectedResult) {
+			this.src = src;
+			this.expectedResult = expectedResult;
+		}
+		public String getSrc() {
+			return src;
+		}
+		public String getExpectedResult() {
+			return expectedResult;
+		}
+	}
+	@ParameterizedTest
+	@EnumSource()	// I'd like to find a crx: example that causes an invalid URL, but have been unable to find one.
+	void testFromString_Invalid(StringScenarios scenario) {
+		assertEquals(scenario.getExpectedResult(), TemplateValues.stripTrailingSlash(scenario.getSrc()));
 	}
 
 }

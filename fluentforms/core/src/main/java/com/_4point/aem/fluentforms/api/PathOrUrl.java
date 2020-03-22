@@ -55,8 +55,8 @@ public class PathOrUrl {
 	public boolean isCrxUrl() { return this.isCrxUrl && this.url != null; }
 	
 	public static PathOrUrl fromString(final String pathOrUrl) {
-		String trimmedPathOrUrl = pathOrUrl.trim();
-		if (Objects.requireNonNull(trimmedPathOrUrl).isEmpty()) {
+		String trimmedPathOrUrl = Objects.requireNonNull(pathOrUrl, "Null Path or Url provided.").trim();
+		if (trimmedPathOrUrl.isEmpty()) {
 			throw new IllegalArgumentException("Empty Path or Url provided.");
 		}
 		if (trimmedPathOrUrl.length() > CRX_URL_PROTOCOL_LENGTH && CRX_URL_PROTOCOL.equalsIgnoreCase(trimmedPathOrUrl.substring(0, CRX_URL_PROTOCOL_LENGTH))) {

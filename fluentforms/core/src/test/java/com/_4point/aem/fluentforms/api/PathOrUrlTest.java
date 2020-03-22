@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com._4point.aem.fluentforms.impl.CrxUrlHandler;
@@ -68,6 +69,12 @@ class PathOrUrlTest {
 	@ValueSource(strings = { "", " " })	// I'd like to find a crx: example that causes an invalid URL, but have been unable to find one.
 	void testFromString_Invalid(String str) {
 		IllegalArgumentException iaex = assertThrows(IllegalArgumentException.class, ()->PathOrUrl.fromString(str));
+	}
+
+	@ParameterizedTest
+	@NullSource
+	void testFromString_Null(String str) {
+		NullPointerException iaex = assertThrows(NullPointerException.class, ()->PathOrUrl.fromString(str));
 	}
 
 	@EnabledOnOs(OS.WINDOWS)	// Only execute on Windows, because crap://more/crap is a valid unix path.
