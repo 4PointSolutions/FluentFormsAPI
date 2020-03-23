@@ -15,6 +15,14 @@
 	|   This project can be built with the following command line:
 	|   mvn clean test
 	| 
+	|   These are integration tests so, in order for these tests to run, there needs to be a running AEM instance locally on 
+	|   port 4502  (or non-locally if you're willing to modify the TEST_MACHINE and TEST_MACHINE_PORT values in TestUtils.java).
+	|
+	|   The testing instance must have the SampleForm.xdp uploaded into a directory named sample-forms that resides directly under the
+	|   FormsAndDocuments within the CRX repository.  Without this, all the crx-related tests will fail.
+	|
+	|   Also, the testing instance must have a ReaderExtensions credential installed under admin using an alias of "recred" in order for
+	|   all the SecureDocument/testReaderExtendPDF tests to pass.
 	 -->
 
 	<dependencies>
