@@ -673,6 +673,12 @@
 				<version>1.0.1</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>	<!-- PDF Library for examining PDFs we generate -->
+				<groupId>org.apache.pdfbox</groupId>
+				<artifactId>pdfbox</artifactId>
+				<version>2.0.18</version>
+				<scope>test</scope>
+			</dependency>
 			<!-- Other dependencies -->
 			<dependency>
 				<groupId>com._4point.aem</groupId>
