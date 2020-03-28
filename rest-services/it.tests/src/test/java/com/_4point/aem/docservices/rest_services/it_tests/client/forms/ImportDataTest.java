@@ -24,6 +24,7 @@ import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 
 class ImportDataTest {
 
+	private static final boolean SAVE_RESULTS = false;
 	
 	private FormsService underTest; 
 
@@ -49,7 +50,9 @@ class ImportDataTest {
 
 		// Verify that all the results are correct.
 		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
-		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("ImportDataClient_BytesResult.pdf")));
+		if (SAVE_RESULTS) {
+			IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("ImportDataClient_BytesResult.pdf")));
+		}
 	}
 
 }

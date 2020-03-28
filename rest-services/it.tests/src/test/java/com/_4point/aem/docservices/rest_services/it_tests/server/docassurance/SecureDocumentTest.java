@@ -89,15 +89,9 @@ public class SecureDocumentTest {
 
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
-			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
-			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
 			assertEquals(APPLICATION_PDF, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
-		
-			// It would be nice if we used a PDF library to verify the attributes that were set earlier (things like
-			// tagging, locale, etc.)  For now, we are just going to write the results out and check manually.
-			if (SAVE_OUTPUT) {
-				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testReaderExtendPDF_AllArgs.pdf")));
-			}
+			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
+			TestUtils.validatePdfResult(resultBytes, "testReaderExtendPDF_AllArgs.pdf", true, true, true);
 		}
 	}
 
@@ -127,15 +121,9 @@ public class SecureDocumentTest {
 
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
-			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
-			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
 			assertEquals(APPLICATION_PDF, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
-			
-			// It would be nice if we used a PDF library to verify the attributes that were set earlier (things like
-			// tagging, locale, etc.)  For now, we are just going to write the results out and check manually.
-			if (SAVE_OUTPUT) {
-				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testReaderExtendPDF_AllArgsTrue.pdf")));
-			}
+			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
+			TestUtils.validatePdfResult(resultBytes, "testReaderExtendPDF_AllArgsTrue.pdf", true, true, true);
 		}
 	}
 

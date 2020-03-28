@@ -87,15 +87,12 @@ class RenderPdfFormTest {
 
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
-			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
-			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
 			assertEquals(APPLICATION_PDF, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
-			
-			// It would be nice if we used a PDF library to verify the attributes that were set earlier (things like
-			// tagging, locale, etc.)  For now, we are just going to write the results out and check manually.
-			if (SAVE_OUTPUT) {
-				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfFormsServer_AllArgsResult.pdf")));
-			}
+
+			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
+			// Not sure why the PDF being generated is dynamic instead of static because the pa.xci says that <dynamicRender>Forbidden</dynamicRender>
+			// TODO:  Look at this and reconcile the difference between this behaviour and the client version's behaviour.
+			TestUtils.validatePdfResult(resultBytes, "RenderPdfFormsServer_AllArgsResult.pdf", true, true, false);
 		}
 
 	}
@@ -121,11 +118,10 @@ class RenderPdfFormTest {
 
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
+			assertEquals(APPLICATION_PDF, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
+
 			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
-			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
-			if (SAVE_OUTPUT) {
-				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfFormsServer_JustFormAndData.pdf")));
-			}
+			TestUtils.validatePdfResult(resultBytes, "RenderPdfFormsServer_JustFormAndData.pdf", true, true, false);
 		}
 
 	}
@@ -151,11 +147,10 @@ class RenderPdfFormTest {
 
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
+			assertEquals(APPLICATION_PDF, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
+
 			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
-			assertThat("Expected a PDF to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
-			if (SAVE_OUTPUT) {
-				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("RenderPdfFormsServer_JustFormAndData.pdf")));
-			}
+			TestUtils.validatePdfResult(resultBytes, "RenderPdfFormsServer_JustFormAndData.pdf", true, true, false);
 		}
 
 	}

@@ -51,9 +51,7 @@ class RenderPdfFormTest {
 		Document pdfResult =  underTest.renderPDFForm()
 									.executeOn(SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
 		
-		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
-		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("RenderPdfFormClient_JustFormAndData.pdf")));
-		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "RenderPdfFormClient_JustFormAndData.pdf", true, true, false);
 	}
 
 	@Test
@@ -63,9 +61,7 @@ class RenderPdfFormTest {
 									.setContentRoot(PathOrUrl.fromString(CRX_CONTENT_ROOT))
 									.executeOn(SAMPLE_FORM_XDP.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
 		
-		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
-		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("RenderPdfFormClient_CRXFormAndData.pdf")));
-		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "RenderPdfFormClient_CRXFormAndData.pdf", true, true, false);
 	}
 
 	@Test
@@ -91,9 +87,7 @@ class RenderPdfFormTest {
 									.setXci(xci)
 									.executeOn(SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
 		
-		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
-		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("RenderPdfFormClient_AllArgs.pdf")));
-		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "RenderPdfFormClient_AllArgs.pdf", false, true, false);
 	}
 
 

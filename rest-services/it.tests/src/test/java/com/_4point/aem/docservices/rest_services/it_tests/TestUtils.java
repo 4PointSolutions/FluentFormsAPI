@@ -1,15 +1,26 @@
 package com._4point.aem.docservices.rest_services.it_tests;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.BiConsumer;
 
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.function.Executable;
+
+import com._4point.aem.docservices.rest_services.it_tests.Pdf.PdfException;
 
 public class TestUtils {
 
@@ -33,6 +44,8 @@ public class TestUtils {
 	public static final Path ACTUAL_RESULTS_DIR = RESOURCES_DIR.resolve("actualResults");
 	public static final Path SERVER_FORMS_DIR = Paths.get("D:", "FluentForms", "Forms");
 
+	private static final boolean SAVE_RESULTS = false;
+
 	private static Path getPath(String name) {
 		try {
 			return Paths.get(classLoader.getResource(name).toURI());
@@ -46,6 +59,20 @@ public class TestUtils {
 			return IOUtils.toString((InputStream)result.getEntity(), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new IllegalStateException("Exception while reading response stream.", e);
+		}
+	}
+	
+	public static void validatePdfResult(byte[] pdfBytes, String testResultFilename, boolean dynamic, boolean interactive, boolean hasRights)
+			throws IOException, Exception, PdfException {
+		if (SAVE_RESULTS == true) {
+			IOUtils.write(pdfBytes, Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve(testResultFilename)));
+		}
+		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
+		try (Pdf pdf = Pdf.from(pdfBytes)) {
+			Executable dynamicTest = dynamic ? ()->assertTrue(pdf.isDynamic(), "Expected Pdf to be dynamic.") : ()->assertFalse(pdf.isDynamic(), "Expected Pdf to be static.");
+			Executable interactiveTest = interactive ? ()->assertTrue(pdf.isInteractive(), "Expected Pdf to be interactive.") : ()->assertFalse(pdf.isInteractive(), "Expected Pdf to be non-interactive.");
+			Executable rightsTest = hasRights ? ()->assertTrue(pdf.hasRights(), "Expected Pdf to have Usage Rights.") : ()->assertFalse(pdf.hasRights(), "Expected Pdf to have no Usage Rights.");
+			assertAll(dynamicTest, interactiveTest, rightsTest);
 		}
 	}
 }

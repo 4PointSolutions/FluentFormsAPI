@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
@@ -15,6 +16,9 @@ import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
 import com._4point.aem.docservices.rest_services.it_tests.ByteArrayString;
+import com._4point.aem.docservices.rest_services.it_tests.Pdf;
+import com._4point.aem.docservices.rest_services.it_tests.Pdf.PdfException;
+import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.output.OutputService;
@@ -49,9 +53,7 @@ class GeneratePdfOutputTest {
 		Document pdfResult =  underTest.generatePDFOutput()
 									.executeOn(SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
 		
-		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
-		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("GeneratePdfOutput_JustFormAndData.pdf")));
-		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormAndData.pdf", false, false, false);
 	}
 
 	@Test
@@ -61,9 +63,7 @@ class GeneratePdfOutputTest {
 									.setContentRoot(PathOrUrl.fromString(CRX_CONTENT_ROOT))
 									.executeOn(SAMPLE_FORM_XDP.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
 		
-		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
-		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("GeneratePdfOutput_CRXFormAndData.pdf")));
-		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_CRXFormAndData.pdf", false, false, false);		
 	}
 
 	@Test
@@ -85,8 +85,6 @@ class GeneratePdfOutputTest {
 									.setTaggedPDF(true)
 									.executeOn(SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
 		
-		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
-		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("GeneratePdfOutput_AllArgs.pdf")));
-		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_AllArgs.pdf", false, false, false);		
 	}
 }

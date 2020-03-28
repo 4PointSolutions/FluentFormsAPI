@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.docassurance.RestServicesDocAssuranceServiceAdapter;
 import com._4point.aem.docservices.rest_services.it_tests.ByteArrayString;
+import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
@@ -66,8 +67,7 @@ public class SecureDocumentTest {
 		                          .done()
 		                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF.toFile()));
 		
-		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
-		IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("testReaderExtendPDF_AllArgs_Client.pdf")));
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "testReaderExtendPDF_AllArgs_Client.pdf", true, true, true);
 	}
 
 	@Test

@@ -60,6 +60,11 @@
             <groupId>com._4point.aem.docservices</groupId>
             <artifactId>rest-services.client</artifactId>
         </dependency>
+		<dependency>	<!-- PDF Library for examining PDFs we generate -->
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>
