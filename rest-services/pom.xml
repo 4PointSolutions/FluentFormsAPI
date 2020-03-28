@@ -29,7 +29,6 @@
 	<modules>
 		<module>server</module>
 		<module>client</module>
-		<module>it.tests</module>
 	</modules>
 
 	<properties>
@@ -363,6 +362,13 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<!-- Include Integration Tests -->
+			<id>include-it</id>
+			<modules>
+				<module>it.tests</module>
+			</modules>
+		</profile>
 		<!-- ====================================================== -->
 		<!-- A D O B E P U B L I C P R O F I L E -->
 		<!-- ====================================================== -->
