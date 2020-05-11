@@ -14,17 +14,17 @@ There are three parts to any implementation of a service:
 
 The steps involved in implementing a new service in the REST Services codebase is as follows:
 
-###1. Create the servlet code in the rest-services.server project
+### 1. Create the servlet code in the rest-services.server project
 1. Create a new package for this service (with the same name the service uses in fluentforms)
 1. Create a servlet for each method in the service.  The servlet accepts the method's parameters and makes a call to AEM via the fluentforms library.  it
      returns the result from AEM in the response.
 
-###2. Create the ServiceAdapter in the rest-services.client project
+### 2. Create the ServiceAdapter in the rest-services.client project
 1. Create a new package for this service (with the same name the service uses in fluentforms)
 1. Create a `RestServicesWhateverServiceAdapter` class that implements `TraditionalWhateverService` interface.  This piece used JAX-RS HTTP client
      to create a multipart/forms-data POST to the servlet created in step 1.
 
-###3. Create integration tests in the rest-services.it.tests project
+### 3. Create integration tests in the rest-services.it.tests project
 1. Create two new packages for this service (with the same name the service uses in fluentforms) under the src/test/java.
      One package should be under client.whatever and the other under server.whatever
 1. Create tests under `server.whatever` that test the service on the AEM server by calling the servlet directly.  This ensures that a client
