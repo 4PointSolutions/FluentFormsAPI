@@ -1,10 +1,10 @@
 package com._4point.aem.fluentforms.impl.forms;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -14,7 +14,6 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
-import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptionsSetter;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com._4point.aem.fluentforms.impl.TemplateValues;
@@ -59,14 +58,14 @@ public class FormsServiceImpl implements FormsService {
 		
 		PathOrUrl finalContentRoot = tvs.getContentRoot();
 		pdfFormRenderOptions.setContentRoot(finalContentRoot != null ? finalContentRoot : null);
-		return this.renderPDFForm(tvs.getTemplate().toString(), data, pdfFormRenderOptions);
+		return this.internalRenderPDFForm(tvs.getTemplate().toString(), data, pdfFormRenderOptions);
 	}
 
 	@Override
 	public Document renderPDFForm(URL url, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException {
 		Objects.requireNonNull(url, "url cannot be null.");
-		return this.renderPDFForm(url.toString(), data, pdfFormRenderOptions);
+		return this.internalRenderPDFForm(url.toString(), data, pdfFormRenderOptions);
 	}
 
 	@Override
@@ -77,16 +76,28 @@ public class FormsServiceImpl implements FormsService {
 		} else if (template.isUrl()) {
 			return renderPDFForm(template.getUrl(), data, pdfFormRenderOptions);
 		} else if (template.isCrxUrl()) {
-			return renderPDFForm(template.getCrxUrl(), data, pdfFormRenderOptions);
+			return internalRenderPDFForm(template.getCrxUrl(), data, pdfFormRenderOptions);
 		} else {
 			// This should never be thrown.
 			throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
 		}
 	}
 
-	private Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+	@Override
+	public Document renderPDFForm(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+			throws FormsServiceException {
+		Objects.requireNonNull(template, "template Document cannot be null.");
+		return this.internalRenderPDFForm(template, data, pdfFormRenderOptions);
+	}
+
+	private Document internalRenderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException {
 		return adobeFormsService.renderPDFForm(urlOrfilename, data, pdfFormRenderOptions);
+	}
+
+	private Document internalRenderPDFForm(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+			throws FormsServiceException {
+		return adobeFormsService.renderPDFForm(template, data, pdfFormRenderOptions);
 	}
 
 	@Override
@@ -211,7 +222,7 @@ public class FormsServiceImpl implements FormsService {
 			} else if (template.isUrl()) {
 				return renderPDFForm(template.getUrl(), data, options);
 			} else if (template.isCrxUrl()) {
-				return renderPDFForm(template.getCrxUrl(), data, options);
+				return internalRenderPDFForm(template.getCrxUrl(), data, options);
 			} else {
 				// This should never be thrown.
 				throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
@@ -225,6 +236,11 @@ public class FormsServiceImpl implements FormsService {
 		
 		@Override
 		public Document executeOn(URL template, Document data) throws FormsServiceException {
+			return renderPDFForm(template, data, options);
+		}
+		
+		@Override
+		public Document executeOn(Document template, Document data) throws FormsServiceException {
 			return renderPDFForm(template, data, options);
 		}
 	}

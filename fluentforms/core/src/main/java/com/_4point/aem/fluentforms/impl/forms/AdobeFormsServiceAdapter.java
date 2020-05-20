@@ -3,6 +3,8 @@ package com._4point.aem.fluentforms.impl.forms;
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -69,6 +71,24 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 		}
 	}
 
+	@Override
+	public Document renderPDFForm(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+			throws FormsServiceException {
+		// Since the Adobe's FormsService api doesn't accept documents, only filenames, we save this to a temp file and
+		// pass in then call AEM with that name.
+		try {
+			Path tmpFile = Files.createTempFile("fluentforms", ".xdp");
+			try {
+				template.copyToFile(tmpFile.toFile());
+				return this.renderPDFForm(tmpFile.toString(), data, pdfFormRenderOptions);
+			}  finally {
+				Files.delete(tmpFile);
+			}
+		} catch (IOException e) {
+			throw new FormsServiceException("Error during rendering of template Document object.", e);
+		}
+	}
+	
 	@Override
 	public ValidationResult validate(String template, Document data, ValidationOptions validationOptions) throws FormsServiceException {
 		try {

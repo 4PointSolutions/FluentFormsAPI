@@ -29,6 +29,8 @@ public interface FormsService {
 
 	Document renderPDFForm(PathOrUrl pathOrUrl, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException, FileNotFoundException;
 
+	Document renderPDFForm(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException, FileNotFoundException;
+
 	RenderPDFFormArgumentBuilder renderPDFForm();
 
 	ValidationResult validate(Path template, Document data, ValidationOptions validationOptions) throws FormsServiceException, FileNotFoundException;
@@ -135,6 +137,8 @@ public interface FormsService {
 		public Document executeOn(Path template, Document data) throws FormsServiceException, FileNotFoundException;
 		
 		public Document executeOn(URL template, Document data) throws FormsServiceException;
+
+		public Document executeOn(Document template, Document data) throws FormsServiceException;
 
 	}
 	

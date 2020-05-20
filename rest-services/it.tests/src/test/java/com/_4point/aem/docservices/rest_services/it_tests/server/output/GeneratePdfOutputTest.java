@@ -32,6 +32,7 @@ class GeneratePdfOutputTest {
 	private static final String GENERATE_PDF_OUTPUT_PATH = "/services/OutputService/GeneratePdfOutput";
 	private static final String GENERATE_PDF_OUTPUT_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + GENERATE_PDF_OUTPUT_PATH;
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
+	private static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	private static final String CRX_CONTENT_ROOT = "crx:/content/dam/formsanddocuments/sample-forms";
 
 	private static final String TEMPLATE_PARAM = "template";
@@ -106,6 +107,25 @@ class GeneratePdfOutputTest {
 
 			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
 			TestUtils.validatePdfResult(resultBytes, "GeneratePdfOutput_JustFormAndData.pdf", false, false, false);
+		}
+	}
+		
+	@Test
+	void testGeneratePdfOutput_JustFormDocAndData() throws Exception {
+		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
+			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, SAMPLE_FORM_XDP.toFile(), APPLICATION_XDP);
+
+			Response result = target.request()
+									.accept(APPLICATION_PDF)
+									.post(Entity.entity(multipart, multipart.getMediaType()));
+
+			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
+			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
+			assertEquals(APPLICATION_PDF, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
+
+			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
+			TestUtils.validatePdfResult(resultBytes, "GeneratePdfOutput_JustFormDocAndData.pdf", false, false, false);
 		}
 	}
 		

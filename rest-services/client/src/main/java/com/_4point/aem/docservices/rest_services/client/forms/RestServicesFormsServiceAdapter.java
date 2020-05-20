@@ -113,8 +113,14 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 		}
 	}
 
-	@Override
-	public Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException {
+	
+	private Document internalRenderPDFForm(String urlOrfilename, Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException {
+		if (urlOrfilename != null && template != null) {
+			throw new FormsServiceException("Internal Error, must provide one or the other of template String or Document but not both.");
+		}
+		if ((urlOrfilename == null && template == null) || (urlOrfilename != null && template != null)) {
+			throw new FormsServiceException("Internal Error, must provide one or the other of template String or Document.");
+		}
 		WebTarget renderPdfTarget = baseTarget.path(RENDER_PDF_FORM_PATH);
 		
 		AcrobatVersion acrobatVersion = pdfFormRenderOptions.getAcrobatVersion();
@@ -132,7 +138,12 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			if (data != null) {
 				multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE);
 			}
-			multipart.field(TEMPLATE_PARAM, urlOrfilename);
+			if (urlOrfilename != null) {
+				multipart.field(TEMPLATE_PARAM, urlOrfilename);
+			}
+			if (template != null) {
+				multipart.field(TEMPLATE_PARAM, template.getInputStream(), APPLICATION_XDP);
+			}
 					 
 			// This code sets the individual fields if they are not null. 
 			MultipartTransformer.create(multipart)
@@ -185,6 +196,17 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			throw new FormsServiceException("I/O Error while rendering PDF. (" + baseTarget.getUri().toString() + ").", e);
 		}
 		
+	}
+
+	@Override
+	public Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+			throws FormsServiceException {
+		return internalRenderPDFForm(urlOrfilename, null, data, pdfFormRenderOptions);
+	}
+	@Override
+	public Document renderPDFForm(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+			throws FormsServiceException {
+		return internalRenderPDFForm(null, template, data, pdfFormRenderOptions);
 	}
 
 	@Override

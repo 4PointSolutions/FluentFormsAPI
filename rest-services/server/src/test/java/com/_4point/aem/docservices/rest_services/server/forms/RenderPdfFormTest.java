@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
@@ -37,6 +39,7 @@ import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com._4point.aem.fluentforms.testing.forms.ExceptionalMockTraditionalFormsService;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.RenderPDFFormArgs;
+import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.RenderPDFFormArgs2;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.RenderAtClient;
@@ -114,6 +117,47 @@ class RenderPdfFormTest {
 				()->assertNull(pdfFormRenderOptions.getAcrobatVersion()),
 				()->assertNull(pdfFormRenderOptions.getCacheStrategy()),
 				()->assertEquals(TestUtils.SAMPLE_FORM.getParent(), pdfFormRenderOptions.getContentRoot().getPath()),
+				()->assertNull(pdfFormRenderOptions.getDebugDir()),
+				()->assertNull(pdfFormRenderOptions.getEmbedFonts()),
+				()->assertNull(pdfFormRenderOptions.getLocale()),
+				()->assertNull(pdfFormRenderOptions.getRenderAtClient()),
+				()->assertNull(pdfFormRenderOptions.getSubmitUrls()),
+				()->assertNull(pdfFormRenderOptions.getTaggedPDF()),
+				()->assertNull(pdfFormRenderOptions.getXci())
+			);
+	}
+
+	@Test
+	void testDoPost_HappyPath_JustFormDoc() throws ServletException, IOException, NoSuchFieldException {
+		String resultData = "testDoPost Happy Path Result";
+		byte[] templateData = Files.readAllBytes(TestUtils.SAMPLE_FORM);
+		
+		byte[] resultDataBytes = resultData.getBytes();
+		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
+
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+
+		request.addRequestParameter(TEMPLATE_PARAM, templateData, ContentType.APPLICATION_XDP.toString());
+		
+		underTest.doPost(request, response);
+		
+		// Validate the result
+		assertEquals(SlingHttpServletResponse.SC_OK, response.getStatus());
+		assertEquals(APPLICATION_PDF, response.getContentType());
+		assertEquals(resultData, response.getOutputAsString());
+		assertEquals(resultDataBytes.length, response.getContentLength());
+	
+		// Validate that the correct parameters were passed in to renderPdf
+		RenderPDFFormArgs2 renderPDFFormArgs = renderPdfMock.getRenderPDFFormArgs2();
+		assertNull(renderPDFFormArgs.getData());
+		assertEquals(templateData, renderPDFFormArgs.getTemplate().getInlineData());
+		PDFFormRenderOptions pdfFormRenderOptions = renderPDFFormArgs.getPdfFormRenderOptions();
+		assertAll(
+				()->assertNull(pdfFormRenderOptions.getAcrobatVersion()),
+				()->assertNull(pdfFormRenderOptions.getCacheStrategy()),
+				()->assertNull(pdfFormRenderOptions.getContentRoot()),
 				()->assertNull(pdfFormRenderOptions.getDebugDir()),
 				()->assertNull(pdfFormRenderOptions.getEmbedFonts()),
 				()->assertNull(pdfFormRenderOptions.getLocale()),

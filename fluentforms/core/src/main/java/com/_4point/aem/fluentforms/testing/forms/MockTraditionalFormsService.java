@@ -20,6 +20,7 @@ public class MockTraditionalFormsService implements TraditionalFormsService {
 	private ExportDataArgs exportDataArgs = null;
 	private ImportDataArgs importDataArgs = null;
 	private RenderPDFFormArgs renderPDFFormArgs = null;
+	private RenderPDFFormArgs2 renderPDFFormArgs2 = null;
 	private ValidateArgs validateArgs = null;
 	
 	public MockTraditionalFormsService() {
@@ -86,6 +87,13 @@ public class MockTraditionalFormsService implements TraditionalFormsService {
 	}
 
 	@Override
+	public Document renderPDFForm(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+			throws FormsServiceException {
+		this.renderPDFFormArgs2 = new RenderPDFFormArgs2(template, data, pdfFormRenderOptions);
+		return renderPDFFormResult == null ? DUMMY_DOCUMENT : renderPDFFormResult;
+	}
+
+	@Override
 	public ValidationResult validate(String template, Document data, ValidationOptions validationOptions)
 			throws FormsServiceException {
 		this.validateArgs = new ValidateArgs(template, data, validationOptions);
@@ -133,6 +141,10 @@ public class MockTraditionalFormsService implements TraditionalFormsService {
 
 	public RenderPDFFormArgs getRenderPDFFormArgs() {
 		return renderPDFFormArgs;
+	}
+
+	public RenderPDFFormArgs2 getRenderPDFFormArgs2() {
+		return renderPDFFormArgs2;
 	}
 
 	public ValidateArgs getValidateArgs() {
@@ -183,6 +195,28 @@ public class MockTraditionalFormsService implements TraditionalFormsService {
 		}
 		public String getUrlOrfilename() {
 			return urlOrfilename;
+		}
+		public Document getData() {
+			return data;
+		}
+		public PDFFormRenderOptions getPdfFormRenderOptions() {
+			return pdfFormRenderOptions;
+		}
+		
+	}
+	
+	public static class RenderPDFFormArgs2 {
+		private final Document template;
+		private final Document data;
+		private final PDFFormRenderOptions pdfFormRenderOptions;
+		public RenderPDFFormArgs2(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions) {
+			super();
+			this.template = template;
+			this.data = data;
+			this.pdfFormRenderOptions = pdfFormRenderOptions;
+		}
+		public Document getTemplate() {
+			return template;
 		}
 		public Document getData() {
 			return data;

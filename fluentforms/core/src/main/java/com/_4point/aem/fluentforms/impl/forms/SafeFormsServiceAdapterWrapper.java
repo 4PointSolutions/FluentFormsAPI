@@ -42,6 +42,15 @@ public class SafeFormsServiceAdapterWrapper implements TraditionalFormsService {
 	}
 
 	@Override
+	public Document renderPDFForm(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+			throws FormsServiceException {
+		Objects.requireNonNull(template, "template Document cannot be null.");  // Already handled above.
+//		Objects.requireNonNull(data, "data cannot be null.");	// Data can be null to produce empty form.
+		Objects.requireNonNull(pdfFormRenderOptions, "pdfFormRenderOptions cannot be null.");
+		return formsService.renderPDFForm(template, data, pdfFormRenderOptions);
+	}
+
+	@Override
 	public ValidationResult validate(String template, Document data, ValidationOptions validationOptions)
 			throws FormsServiceException {
 		Objects.requireNonNull(template, "template cannot be null.");

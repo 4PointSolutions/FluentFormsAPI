@@ -16,6 +16,9 @@ public interface TraditionalFormsService {
 	Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException;
 
+	Document renderPDFForm(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+			throws FormsServiceException;
+	
 	ValidationResult validate(String template, Document data, ValidationOptions validationOptions)
 			throws FormsServiceException;
 

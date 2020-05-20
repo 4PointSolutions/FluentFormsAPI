@@ -10,6 +10,7 @@ import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.ExportDataArgs;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.ImportDataArgs;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.RenderPDFFormArgs;
+import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.RenderPDFFormArgs2;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.ValidateArgs;
 
 /**
@@ -144,6 +145,10 @@ public class MockFormsService extends FormsServiceImpl {
 	 */
 	public RenderPDFFormArgs getRenderPDFFormArgs() {
 		return getMockService().getRenderPDFFormArgs();
+	}
+
+	public RenderPDFFormArgs2 getRenderPDFFormArgs2() {
+		return getMockService().getRenderPDFFormArgs2();
 	}
 
 	public ValidateArgs getValidateArgs() {

@@ -57,6 +57,15 @@ class GeneratePdfOutputTest {
 	}
 
 	@Test
+	@DisplayName("Test generatePdfOutput() Just Form Document and Data.")
+	void testGeneratePdfOutput_JustFormDocAndData() throws Exception {
+		Document pdfResult =  underTest.generatePDFOutput()
+									.executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_XDP.toFile()), SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
+		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormAndData.pdf", false, false, false);
+	}
+
+	@Test
 	@DisplayName("Test generatePdfOutput() CRX Form and Data.")
 	void testGeneratePdfOutput_CRXFormAndData() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()

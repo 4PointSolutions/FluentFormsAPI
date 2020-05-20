@@ -33,6 +33,12 @@ public class ExceptionalMockTraditionalFormsService implements TraditionalFormsS
 	}
 
 	@Override
+	public Document renderPDFForm(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
+			throws FormsServiceException {
+		throw new FormsServiceException(this.message);
+	}
+
+	@Override
 	public ValidationResult validate(String template, Document data, ValidationOptions validationOptions)
 			throws FormsServiceException {
 		throw new FormsServiceException(this.message);

@@ -55,6 +55,15 @@ class RenderPdfFormTest {
 	}
 
 	@Test
+	@DisplayName("Test renderPdfForm() Just Form Document and Data.")
+	void testRenderPdfForm_JustFormDocAndData() throws Exception {
+		Document pdfResult =  underTest.renderPDFForm()
+									.executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_XDP.toFile()), SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
+		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "RenderPdfFormClient_JustFormAndData.pdf", true, true, false);
+	}
+
+	@Test
 	@DisplayName("Test renderPdfForm() CRX Form and Data.")
 	void testRenderPdfForm_CRXFormAndData() throws Exception {
 		Document pdfResult =  underTest.renderPDFForm()

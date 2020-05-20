@@ -1,6 +1,9 @@
 package com._4point.aem.docservices.rest_services.server.forms;
 
-import static com._4point.aem.docservices.rest_services.server.FormParameters.*;
+import static com._4point.aem.docservices.rest_services.server.FormParameters.getMandatoryParameter;
+import static com._4point.aem.docservices.rest_services.server.FormParameters.getOptionalParameter;
+import static com._4point.aem.docservices.rest_services.server.FormParameters.getOptionalParameters;
+import static com._4point.aem.docservices.rest_services.server.FormParameters.validateXmlData;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
+import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
@@ -38,6 +42,7 @@ import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
+import com._4point.aem.fluentforms.api.forms.FormsService.RenderPDFFormArgumentBuilder;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
@@ -84,7 +89,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		FormsService formsService = new FormsServiceImpl(formServiceFactory.get(), UsageContext.SERVER_SIDE);
 
 		RenderPdfFormParameters reqParameters = RenderPdfFormParameters.readFormParameters(request, false);	// TODO: Make the validation of XML a config parameter.
-		PathOrUrl template = reqParameters.getTemplate();
+		RenderPdfFormParameters.TemplateParameter template = reqParameters.getTemplate();
 		Document data = reqParameters.getData() != null ? docFactory.create(reqParameters.getData()) : null;
 		PathOrUrl contentRoot = reqParameters.getContentRoot();
 		AcrobatVersion acrobatVersion = reqParameters.getAcrobatVersion();
@@ -99,7 +104,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		
 		try {
 			// In the following call to the formsService, we only set the parameters if they are not null.
-			try (Document result = formsService.renderPDFForm()
+			RenderPDFFormArgumentBuilder argBuilder = formsService.renderPDFForm()
 												.transform(b->contentRoot == null ? b : b.setContentRoot(contentRoot))
 												.transform(b->acrobatVersion == null ? b : b.setAcrobatVersion(acrobatVersion))
 												.transform(b->cacheStrategy == null ? b : b.setCacheStrategy(cacheStrategy))
@@ -109,8 +114,8 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 												.transform(b->renderAtClient == null ? b : b.setRenderAtClient(renderAtClient))
 												.transform(b->submitUrls == null || submitUrls.isEmpty() ? b : b.setSubmitUrls(submitUrls))
 												.transform(b->taggedPDF == null ? b : b.setTaggedPDF(taggedPDF.booleanValue()))
-												.transform(b->xci == null ? b : b.setXci(docFactory.create(xci)))
-												.executeOn(template, data)) {
+												.transform(b->xci == null ? b : b.setXci(docFactory.create(xci)));
+			try (Document result = executeOn(template, data, argBuilder)) {
 				
 				String contentType = result.getContentType();
 				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
@@ -125,8 +130,24 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		} catch (IllegalArgumentException ex2) {
 			throw new BadRequestException("Bad arguments while rendering PDF", ex2);
 		}
+	}
 
-
+	private Document executeOn(RenderPdfFormParameters.TemplateParameter template, Document data, RenderPDFFormArgumentBuilder argBuilder) throws FormsServiceException, FileNotFoundException {
+		switch(template.getType()) {
+		case ByteArray:
+		{
+			byte[] templateParam = template.getArray();
+			return argBuilder.executeOn(docFactory.create(templateParam), data);
+		}
+		case PathOrUrl:
+		{
+			PathOrUrl templateParam = template.getPathOrUrl();
+			return argBuilder.executeOn(templateParam, data);
+		}
+		default:
+			// this should never be executed.
+			throw new IllegalStateException("Found unexpected template parameter type (" + template.getType().toString() + ").");
+		}
 	}
 
 	private TraditionalFormsService getAdobeFormsService() {
@@ -157,16 +178,16 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		private List<AbsoluteOrRelativeUrl> submitUrls = null;
 		private Boolean taggedPDF = null;
 		private byte[] xci = null;
-		private final PathOrUrl template;
+		private final TemplateParameter template;
 		private final byte[] data;
 		
-		public RenderPdfFormParameters(PathOrUrl template, byte[] data) {
+		public RenderPdfFormParameters(TemplateParameter template, byte[] data) {
 			super();
 			this.template = template;
 			this.data = data;
 		}
 
-		public RenderPdfFormParameters(PathOrUrl template) {
+		public RenderPdfFormParameters(TemplateParameter template) {
 			super();
 			this.template = template;
 			this.data = null;
@@ -269,7 +290,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			return this;
 		}
 
-		public PathOrUrl getTemplate() {
+		public TemplateParameter getTemplate() {
 			return template;
 		}
 
@@ -288,7 +309,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		public static RenderPdfFormParameters readFormParameters(SlingHttpServletRequest request, boolean validateXml) throws BadRequestException {
 			try {
 				
-				PathOrUrl template = PathOrUrl.fromString(getMandatoryParameter(request, TEMPLATE_PARAM).getString());
+				TemplateParameter template = TemplateParameter.readParameter(getMandatoryParameter(request, TEMPLATE_PARAM));
 
 				// Data parameter is optional.  If Data is not supplied, then an empty form is produced.
 				byte[] inputData = getOptionalParameter(request, DATA_PARAM).map(RequestParameter::get).orElse(null);
@@ -316,6 +337,51 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 				return result;
 			} catch (IllegalArgumentException e) {
 				throw new BadRequestException("There was a problem with one of the incoming parameters.", e);
+			}
+		}
+		
+		public static class TemplateParameter {
+			public enum ParameterType { ByteArray, PathOrUrl };
+			
+			private final byte[] array;
+			private final PathOrUrl pathOrUrl;
+			private final ParameterType type;
+			
+			private TemplateParameter(byte[] array) {
+				super();
+				this.array = array;
+				this.pathOrUrl = null;
+				this.type = ParameterType.ByteArray;
+			}
+			
+			private TemplateParameter(PathOrUrl pathOrUrl) {
+				super();
+				this.array = null;
+				this.pathOrUrl = pathOrUrl;
+				this.type = ParameterType.PathOrUrl;
+			}
+
+			public byte[] getArray() {
+				return array;
+			}
+
+			public PathOrUrl getPathOrUrl() {
+				return pathOrUrl;
+			}
+
+			public ParameterType getType() {
+				return type;
+			}
+			
+			public static TemplateParameter readParameter(RequestParameter templateParameter) {
+				ContentType templateContentType = ContentType.valueOf(templateParameter.getContentType());
+				if (templateContentType.isCompatibleWith(ContentType.TEXT_PLAIN)) {
+					return new TemplateParameter(PathOrUrl.fromString(templateParameter.getString()));
+				} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_XDP)) {
+					return new TemplateParameter(templateParameter.get());
+				} else {
+					throw new IllegalArgumentException("Template parmameter has invalid content type. (" + templateContentType.getContentTypeStr() + ").");
+				}
 			}
 		}
 	}

@@ -43,6 +43,7 @@ class RenderPdfFormTest {
 	private static final String XCI_PARAM = "renderOptions.xci";
 	private static final String RENDER_PDF_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/FormsService/RenderPdfForm";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
+	private static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 
 	private static final boolean SAVE_OUTPUT = false;
 	
@@ -111,6 +112,35 @@ class RenderPdfFormTest {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
 					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString());
+
+			Response result = target.request()
+									.accept(APPLICATION_PDF)
+									.post(Entity.entity(multipart, multipart.getMediaType()));
+
+			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
+			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
+			assertEquals(APPLICATION_PDF, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
+
+			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
+			TestUtils.validatePdfResult(resultBytes, "RenderPdfFormsServer_JustFormAndData.pdf", true, true, false);
+		}
+
+	}
+
+	/**
+	 * Tests RenderForms passing in just form (as a Document) and data arguments.  It leaves the rest at defaults
+	 * (to makes sure that using the defaults works).
+	 * 
+	 * Assumes that the AEM server is on the same machine as the test runner since it uses files in the
+	 * local directories.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void testRenderFormsPDF_JustFormDocAndData() throws Exception {
+		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
+			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, SAMPLE_FORM_XDP.toFile(), APPLICATION_XDP);
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)

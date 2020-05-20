@@ -4,12 +4,14 @@ import static com._4point.aem.fluentforms.api.TestUtils.SAMPLE_FORM;
 import static com._4point.aem.fluentforms.api.TestUtils.SAMPLE_FORMS_DIR;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -173,7 +175,7 @@ class FormsServiceImplTest {
 	@Test
 	@DisplayName("Test RenderPDFForm(Path,...) throws FormsServiceException.")
 	void testRenderPDFFormPath__FormsServiceExceptionThrown() throws Exception {
-		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
+		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(String.class), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
 
 		Path filename = SAMPLE_FORM;
 		Document data = Mockito.mock(Document.class);
@@ -236,7 +238,7 @@ class FormsServiceImplTest {
 	@Test
 	@DisplayName("Test RenderPDFForm(URL,...) throws FormsServiceException.")
 	void testRenderPDFFormURL___FormsServiceExceptionThrown() throws Exception {
-		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
+		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(String.class), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
 
 		URL filename = new URL("http://www.example.com/docs/resource1.html");
 		Document data = Mockito.mock(Document.class);
@@ -301,13 +303,60 @@ class FormsServiceImplTest {
 	@Test
 	@DisplayName("Test RenderPDFForm(PathOrUrl,...) throws FormsServiceException.")
 	void testRenderPDFFormPathOrUrl___FormsServiceExceptionThrown() throws Exception {
-		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
+		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(String.class), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
 
 		PathOrUrl filename = PathOrUrl.fromString("http://www.example.com/docs/resource1.html");
 		Document data = Mockito.mock(Document.class);
 		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
 		
 		assertThrows(FormsServiceException.class, ()->underTest.renderPDFForm(filename, data, pdfFormRenderOptions));
+	}
+
+	@Test
+	@DisplayName("Test RenderPDFForm(Document,...) Happy Path.")
+	void testRenderPDFFormDocumentDocumentPDFFormRenderOptions() throws Exception {
+		MockPdfRenderService2 svc = new MockPdfRenderService2();
+
+		Document template = Mockito.mock(Document.class);
+		Document data = Mockito.mock(Document.class);
+		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
+		Document pdfResult = underTest.renderPDFForm(template, data, pdfFormRenderOptions);
+		
+		assertEquals(template, svc.getTemplateArg(), "Expected the template passed to AEM would match the template used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test RenderPDFForm(Document,...) null arguments.")
+	void testRenderPDFFormD_nullArguments() throws Exception {
+		Document template = Mockito.mock(Document.class);
+		Document data = Mockito.mock(Document.class);
+		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
+		Document nullDocument = null;
+		
+		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(nullDocument, data, pdfFormRenderOptions));
+		assertTrue(ex1.getMessage().contains("Document"), ()->"'" + ex1.getMessage() + "' does not contain 'Document'");
+		
+		// Null Data is allowed.
+//		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
+//		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
+		
+		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(template, data, null));
+		assertTrue(ex3.getMessage().contains("pdfFormRenderOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'pdfFormRenderOptions'");
+	}
+	
+	@Test
+	@DisplayName("Test RenderPDFForm(Document,...) throws FormsServiceException.")
+	void testRenderPDFFormDocument___FormsServiceExceptionThrown() throws Exception {
+		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(Document.class), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
+
+		Document template = Mockito.mock(Document.class);
+		Document data = Mockito.mock(Document.class);
+		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
+		
+		assertThrows(FormsServiceException.class, ()->underTest.renderPDFForm(template, data, pdfFormRenderOptions));
 	}
 
 	@Test
@@ -608,6 +657,33 @@ class FormsServiceImplTest {
 		}
 
 		protected String getTemplateArg() {
+			return templateArg.getValue();
+		}
+
+		protected Document getDataArg() {
+			return dataArg.getValue();
+		}
+
+		protected PDFFormRenderOptions getOptionsArg() {
+			return optionsArg.getValue();
+		}
+	}
+	private class MockPdfRenderService2 {
+		private final Document result = Mockito.mock(Document.class);
+		private final ArgumentCaptor<Document> templateArg = ArgumentCaptor.forClass(Document.class);
+		private final ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
+		private final ArgumentCaptor<PDFFormRenderOptions> optionsArg = ArgumentCaptor.forClass(PDFFormRenderOptions.class);
+		
+		protected MockPdfRenderService2() throws FormsServiceException {
+			super();
+			Mockito.lenient().when(adobeFormsService.renderPDFForm(templateArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
+		}
+
+		protected Document getResult() {
+			return result;
+		}
+
+		protected Document getTemplateArg() {
 			return templateArg.getValue();
 		}
 
