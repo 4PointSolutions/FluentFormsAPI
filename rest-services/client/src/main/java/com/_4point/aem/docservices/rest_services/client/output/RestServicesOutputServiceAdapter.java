@@ -24,7 +24,6 @@ import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransfo
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
-import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.api.output.BatchOptions;
 import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
@@ -150,6 +149,8 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 			return resultDoc;
 		} catch (IOException e) {
 			throw new OutputServiceException("I/O Error while generating PDF. (" + baseTarget.getUri().toString() + ").", e);
+		} catch (RestServicesServiceException e) {
+			throw new OutputServiceException("Error while POSTing to server", e);
 		}
 	}
 

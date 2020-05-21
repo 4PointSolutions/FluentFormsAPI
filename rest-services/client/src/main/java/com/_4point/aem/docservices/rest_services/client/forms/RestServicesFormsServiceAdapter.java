@@ -1,16 +1,13 @@
 package com._4point.aem.docservices.rest_services.client.forms;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -110,6 +107,8 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			
 		} catch (IOException e) {
 			throw new FormsServiceException("I/O Error while importing data. (" + baseTarget.getUri().toString() + ").", e);
+		} catch (RestServicesServiceException e) {
+			throw new FormsServiceException("Error while POSTing to server", e);
 		}
 	}
 
@@ -194,6 +193,8 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			return resultDoc;
 		} catch (IOException e) {
 			throw new FormsServiceException("I/O Error while rendering PDF. (" + baseTarget.getUri().toString() + ").", e);
+		} catch (RestServicesServiceException e) {
+			throw new FormsServiceException("Error while POSTing to server", e);
 		}
 		
 	}

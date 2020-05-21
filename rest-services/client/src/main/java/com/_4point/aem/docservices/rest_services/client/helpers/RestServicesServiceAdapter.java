@@ -13,12 +13,14 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
+import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter.RestServicesServiceException;
+
 public abstract class RestServicesServiceAdapter {
 	protected static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	protected static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	protected static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 
-	protected final WebTarget baseTarget;
+	protected final WebTarget baseTarget;				// used by subclasses
 	protected final Supplier<String> correlationIdFn;
 
 	protected RestServicesServiceAdapter(WebTarget baseTarget) {
@@ -33,12 +35,18 @@ public abstract class RestServicesServiceAdapter {
 		this.correlationIdFn = correlationIdFn;
 	}
 
-	protected Response postToServer(WebTarget localTarget, final FormDataMultiPart multipart, final MediaType acceptType) {
+	protected Response postToServer(WebTarget localTarget, final FormDataMultiPart multipart, final MediaType acceptType) throws RestServicesServiceException  {
 		javax.ws.rs.client.Invocation.Builder invokeBuilder = localTarget.request().accept(acceptType);
 		if (this.correlationIdFn != null) {
 			invokeBuilder.header(CORRELATION_ID_HTTP_HDR, this.correlationIdFn.get());
 		}
-		Response result = invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType()));
+		Response result;
+		try {
+			result = invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType()));
+		} catch (javax.ws.rs.ProcessingException e) {
+			String msg = e.getMessage();
+			throw new RestServicesServiceException("Error when posting to '" + localTarget.getUri().toString() + "'" + (msg != null ? " (" + msg + ")" : "") + ".", e); 
+		}
 		return result;
 	}
 	
@@ -52,4 +60,23 @@ public abstract class RestServicesServiceAdapter {
 		return result.toString(StandardCharsets.UTF_8.name());
 	}
 
+	@SuppressWarnings("serial")
+	protected static class RestServicesServiceException extends Exception {
+
+		private RestServicesServiceException() {
+			super();
+		}
+
+		private RestServicesServiceException(String arg0, Throwable arg1) {
+			super(arg0, arg1);
+		}
+
+		private RestServicesServiceException(String arg0) {
+			super(arg0);
+		}
+
+		private RestServicesServiceException(Throwable arg0) {
+			super(arg0);
+		}
+	}
 }

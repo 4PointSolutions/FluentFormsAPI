@@ -1,14 +1,11 @@
 package com._4point.aem.docservices.rest_services.client.docassurance;
 
-import java.util.List;
-import java.util.function.Supplier;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.function.Supplier;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -26,8 +23,8 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
 import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
 import com._4point.aem.fluentforms.api.docassurance.ReaderExtensionOptions;
-import com._4point.aem.fluentforms.impl.docassurance.TraditionalDocAssuranceService;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
+import com._4point.aem.fluentforms.impl.docassurance.TraditionalDocAssuranceService;
 import com.adobe.fd.docassurance.client.api.SignatureOptions;
 import com.adobe.fd.encryption.client.EncryptionTypeResult;
 import com.adobe.fd.readerextensions.client.GetUsageRightsResult;
@@ -163,6 +160,8 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 			
 		} catch (IOException e) {
 			throw new DocAssuranceServiceException("I/O Error while reader extending the document. (" + baseTarget.getUri().toString() + ").", e);
+		} catch (RestServicesServiceException e) {
+			throw new DocAssuranceServiceException("Error while POSTing to server", e);
 		}
 	}
 
