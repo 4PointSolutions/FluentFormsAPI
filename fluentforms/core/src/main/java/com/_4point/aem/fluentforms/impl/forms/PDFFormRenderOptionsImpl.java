@@ -58,7 +58,7 @@ public class PDFFormRenderOptionsImpl implements PDFFormRenderOptionsSetter, PDF
 
 	@Override
 	public PDFFormRenderOptionsImpl setContentRoot(PathOrUrl contentRootPathOrUrl) {
-		this.contentRoot = Objects.requireNonNull(contentRootPathOrUrl, "contentRoot cannot be null.");
+		this.contentRoot = contentRootPathOrUrl;
 		return this;
 	}
 
