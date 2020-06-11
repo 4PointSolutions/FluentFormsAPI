@@ -24,7 +24,10 @@ the Adobe methods.
 * I then remove the extend/implement keywords and remove all the Adobe imports.
 * I then go through and import all the appropriate Fluent Forms classes. 
 * I may need to perform the extend/implement approach on other classes in order to complete the `AdobeWhateverService` implementation.
-* Each parameter object that I create implements a similarly named interface (as we try and make sure that, other than the top level implementation) clients only ever program against interfaces.
+* Each parameter object (a parameter object is one used to pass options into a method - their names usually end in "Options") that I create implements a similarly named interface (as we try and make sure that, other than the top level implementation, clients only ever program against interfaces).  This allows for the following additional changes to be made to the Adobe parameter objects.
+    * Replace dependencies on `com.adobe.aemfd.docmanager.Document` with `com._4point.aem.fluentforms.api`
+    * Implement "Setter" interfaces that keep the object and the corresponding “fluent builder” object synchronized
+    * Make improvements to the interface.  This includes things like stronger typing and adding null checking into the code.
 * Once the `AdobeWhateverService` is implemented, you can Extract the `TraditionalWhateverService` interface from that Adapter class.
 
 ### 3.  Create a `SafeWhateverServiceAdapterWrapper`.
