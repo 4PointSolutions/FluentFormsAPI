@@ -15,11 +15,11 @@ public interface PDFOutputOptionsSetter {
 	PDFOutputOptionsSetter setContentRoot(PathOrUrl contentRoot);
 
 	default PDFOutputOptionsSetter setContentRoot(Path contentRoot) {
-		return setContentRoot(new PathOrUrl(contentRoot));
+		return setContentRoot(PathOrUrl.from(contentRoot));
 	}
 
 	default PDFOutputOptionsSetter setContentRoot(URL contentRoot) {
-		return setContentRoot(new PathOrUrl(contentRoot));
+		return setContentRoot(PathOrUrl.from(contentRoot));
 	}
 
 	PDFOutputOptionsSetter setDebugDir(Path debugDir);

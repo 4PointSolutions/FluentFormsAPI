@@ -30,7 +30,7 @@ public class PrintConfigImpl implements PrintConfig {
 	}
 
 	protected PrintConfigImpl(String xdcUri, RenderType renderType) {
-		this.xdc = PathOrUrl.fromString(xdcUri);
+		this.xdc = PathOrUrl.from(xdcUri);
 		this.renderType = renderType;
 	}
 

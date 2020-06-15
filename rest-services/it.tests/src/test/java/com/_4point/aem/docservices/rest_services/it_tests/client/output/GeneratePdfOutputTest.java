@@ -1,23 +1,20 @@
 package com._4point.aem.docservices.rest_services.it_tests.client.output;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_DATA_XML;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_XDP;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
-import com._4point.aem.docservices.rest_services.it_tests.ByteArrayString;
-import com._4point.aem.docservices.rest_services.it_tests.Pdf;
-import com._4point.aem.docservices.rest_services.it_tests.Pdf.PdfException;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -26,8 +23,6 @@ import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.output.OutputServiceImpl;
 import com.adobe.fd.output.api.AcrobatVersion;
-
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 
 class GeneratePdfOutputTest {
 
@@ -69,7 +64,7 @@ class GeneratePdfOutputTest {
 	@DisplayName("Test generatePdfOutput() CRX Form and Data.")
 	void testGeneratePdfOutput_CRXFormAndData() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()
-									.setContentRoot(PathOrUrl.fromString(CRX_CONTENT_ROOT))
+									.setContentRoot(PathOrUrl.from(CRX_CONTENT_ROOT))
 									.executeOn(SAMPLE_FORM_XDP.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_CRXFormAndData.pdf", false, false, false);		

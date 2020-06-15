@@ -90,7 +90,7 @@ class OutputServiceExamples {
 		Document data = ServerFactory.getDefaultDocumentFactory().create(sampleData.getBytes());
 		
 		Document result = outputService.generatePDFOutput()
-								.setContentRoot(PathOrUrl.fromString("crx:/content/dam/formsanddocuments/"))
+								.setContentRoot(PathOrUrl.from("crx:/content/dam/formsanddocuments/"))
 								.setTaggedPDF(true)
 								.executeOn(Paths.get("foo/bar.xdp"), data );
 		

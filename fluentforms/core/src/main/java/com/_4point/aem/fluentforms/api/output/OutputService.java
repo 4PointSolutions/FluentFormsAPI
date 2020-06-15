@@ -257,11 +257,11 @@ public interface OutputService {
 		public BatchArgumentBuilder addTemplate(PathOrUrl template);	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template) 
 
 		public default BatchArgumentBuilder addTemplate(Path template) {
-			return this.addTemplate(template.getFileName().toString(), new PathOrUrl(template));
+			return this.addTemplate(template.getFileName().toString(), PathOrUrl.from(template));
 		}
 
 		public default BatchArgumentBuilder addTemplate(URL template) { 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
-			return this.addTemplate(new PathOrUrl(template));
+			return this.addTemplate(PathOrUrl.from(template));
 		}
 
 		public BatchArgumentBuilder addTemplate(String templateName, PathOrUrl template);
@@ -269,11 +269,11 @@ public interface OutputService {
 		public BatchArgumentBuilder addTemplates(List<PathOrUrl> templates); 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
 
 		public default BatchArgumentBuilder addTemplatePaths(List<Path> templates) {
-			return this.addTemplates(templates.stream().map(PathOrUrl::new).collect(Collectors.toList())); 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
+			return this.addTemplates(templates.stream().map(PathOrUrl::from).collect(Collectors.toList())); 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
 		}
 
 		public default BatchArgumentBuilder addTemplateUrls(List<URL> templates) {
-			return this.addTemplates(templates.stream().map(PathOrUrl::new).collect(Collectors.toList())); 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
+			return this.addTemplates(templates.stream().map(PathOrUrl::from).collect(Collectors.toList())); 	// TODO: Add code to call addTemplate(String templateName, PathOrUrl template)
 		}
 
 		public BatchArgumentBuilder addTemplateEntries(List<Map.Entry<String, PathOrUrl>> entries);
@@ -282,7 +282,7 @@ public interface OutputService {
 			// This is a good candidate for moving into a private interface method when we move to Java 11
 			return this.addTemplateEntries(
 					entries.stream().map(
-							(e)->new AbstractMap.SimpleEntry<String, PathOrUrl>(e.getKey(), new PathOrUrl(e.getValue()))
+							(e)->new AbstractMap.SimpleEntry<String, PathOrUrl>(e.getKey(), PathOrUrl.from(e.getValue()))
 						).collect(Collectors.toList())
 					);
 		}
@@ -292,7 +292,7 @@ public interface OutputService {
 			// into a single private interface method.
 			return this.addTemplateEntries(
 					entries.stream().map(
-							(e)->new AbstractMap.SimpleEntry<String, PathOrUrl>(e.getKey(), new PathOrUrl(e.getValue()))
+							(e)->new AbstractMap.SimpleEntry<String, PathOrUrl>(e.getKey(), PathOrUrl.from(e.getValue()))
 						).collect(Collectors.toList())
 					);
 		}

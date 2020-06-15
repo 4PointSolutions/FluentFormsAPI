@@ -45,6 +45,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<jersey.version>2.29.1</jersey.version>
 		<mockito.version>3.2.4</mockito.version>
+		<jaxb.version>2.3.3</jaxb.version>
 	</properties>
 
 	<build>
@@ -721,6 +722,12 @@
 				<groupId>org.glassfish.jersey.inject</groupId>
 				<artifactId>jersey-hk2</artifactId>
 				<version>${jersey.version}</version>
+			</dependency>
+			<!-- XML Bind is required to mock jax.rs.core.Response -->
+			<dependency>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>${jaxb.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

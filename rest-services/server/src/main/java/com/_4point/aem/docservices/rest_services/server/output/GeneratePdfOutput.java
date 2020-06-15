@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.servlet.Servlet;
@@ -198,7 +197,7 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 		}
 
 		private GeneratePdfOutputParameters setContentRoot(String contentRootStr) {
-			this.contentRoot = PathOrUrl.fromString(contentRootStr);
+			this.contentRoot = PathOrUrl.from(contentRootStr);
 			return this;
 		}
 
@@ -370,7 +369,7 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 			public static TemplateParameter readParameter(RequestParameter templateParameter) {
 				ContentType templateContentType = ContentType.valueOf(templateParameter.getContentType());
 				if (templateContentType.isCompatibleWith(ContentType.TEXT_PLAIN)) {
-					return new TemplateParameter(PathOrUrl.fromString(templateParameter.getString()));
+					return new TemplateParameter(PathOrUrl.from(templateParameter.getString()));
 				} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_XDP)) {
 					return new TemplateParameter(templateParameter.get());
 				} else {

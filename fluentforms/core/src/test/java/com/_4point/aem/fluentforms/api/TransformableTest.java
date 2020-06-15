@@ -2,7 +2,6 @@ package com._4point.aem.fluentforms.api;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class TransformableTest {

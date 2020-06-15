@@ -2,9 +2,6 @@ package com._4point.aem.fluentforms.api;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 public class AbsoluteOrRelativeUrl {
@@ -44,6 +41,7 @@ public class AbsoluteOrRelativeUrl {
 			} catch (MalformedURLException e) {
 				try {
 					URL dummyMachineUrl = new URL("http://example.com/");
+					@SuppressWarnings("unused")
 					URL dummyUrl = new URL(dummyMachineUrl, url);	// throws an exception if url is not relative.
 					return new AbsoluteOrRelativeUrl(url);	// If we get this far, it is a relative Url.
 				} catch (MalformedURLException e2) {

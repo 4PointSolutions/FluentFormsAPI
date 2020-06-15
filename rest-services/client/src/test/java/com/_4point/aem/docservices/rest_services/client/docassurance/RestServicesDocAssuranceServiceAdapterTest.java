@@ -36,12 +36,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.fluentforms.api.Document;
-import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
-import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
 import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
 import com._4point.aem.fluentforms.api.docassurance.ReaderExtensionOptions;
-import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl;
-import com._4point.aem.fluentforms.impl.docassurance.ReaderExtensionOptionsImpl;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.docassurance.client.api.SignatureOptions;
 import com.adobe.fd.signatures.pdf.inputs.UnlockOptions;

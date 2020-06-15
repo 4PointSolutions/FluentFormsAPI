@@ -1,6 +1,5 @@
 package com._4point.aem.fluentforms.api.forms;
 
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;

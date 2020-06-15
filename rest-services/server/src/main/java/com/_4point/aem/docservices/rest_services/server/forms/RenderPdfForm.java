@@ -216,7 +216,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		}
 
 		private RenderPdfFormParameters setContentRoot(String contentRootStr) {
-			this.contentRoot = PathOrUrl.fromString(contentRootStr);
+			this.contentRoot = PathOrUrl.from(contentRootStr);
 			return this;
 		}
 
@@ -376,7 +376,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 			public static TemplateParameter readParameter(RequestParameter templateParameter) {
 				ContentType templateContentType = ContentType.valueOf(templateParameter.getContentType());
 				if (templateContentType.isCompatibleWith(ContentType.TEXT_PLAIN)) {
-					return new TemplateParameter(PathOrUrl.fromString(templateParameter.getString()));
+					return new TemplateParameter(PathOrUrl.from(templateParameter.getString()));
 				} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_XDP)) {
 					return new TemplateParameter(templateParameter.get());
 				} else {

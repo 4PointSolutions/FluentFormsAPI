@@ -34,7 +34,7 @@ public class TemplateValues {
 		if (templatesDir == null && templateParentDir != null) {
 			// No templatesDir but there's a parent dir on the template
 			// use the parent dir as the content root
-			contentRoot = new PathOrUrl(templateParentDir);
+			contentRoot = PathOrUrl.from(templateParentDir);
 		} else if (templatesDir != null && templateParentDir == null) {
 			// There's a templatesDir but no parent dir on the template
 			// so just use the templatesDir as the content root
@@ -44,13 +44,13 @@ public class TemplateValues {
 			// append the parent dir onto the templates dir to create the content root
 			// unless the parent dir is an absolute path.
 			if (templateParentDir.isAbsolute()) {
-				contentRoot = new PathOrUrl(templateParentDir);
+				contentRoot = PathOrUrl.from(templateParentDir);
 			} else if (templatesDir.isPath()) {
-				contentRoot = new PathOrUrl(templatesDir.getPath().resolve(templateParentDir));
+				contentRoot = PathOrUrl.from(templatesDir.getPath().resolve(templateParentDir));
 			} else if (templatesDir.isUrl()) {
-				contentRoot = PathOrUrl.fromString(stripTrailingSlash(templatesDir.getUrl().toString()) + URL_SEPARATOR + templateParentDir.toString());
+				contentRoot = PathOrUrl.from(stripTrailingSlash(templatesDir.getUrl().toString()) + URL_SEPARATOR + templateParentDir.toString());
 			} else if (templatesDir.isCrxUrl()) {
-				contentRoot = PathOrUrl.fromString(stripTrailingSlash(templatesDir.getCrxUrl()) + URL_SEPARATOR + templateParentDir.toString());
+				contentRoot = PathOrUrl.from(stripTrailingSlash(templatesDir.getCrxUrl()) + URL_SEPARATOR + templateParentDir.toString());
 			} else {
 				// This should never happen
 				throw new IllegalStateException("Context Root is not a Path, Url, or CrxUrl.  This should never happen.");

@@ -4,14 +4,12 @@ import static com._4point.aem.fluentforms.api.TestUtils.SAMPLE_FORM;
 import static com._4point.aem.fluentforms.api.TestUtils.SAMPLE_FORMS_DIR;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -252,7 +250,7 @@ class FormsServiceImplTest {
 	void testRenderPDFFormPathOrUrlDocumentPDFFormRenderOptions() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
-		PathOrUrl filename = PathOrUrl.fromString("file:foo/bar.xdp");
+		PathOrUrl filename = PathOrUrl.from("file:foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
 		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
 		Document pdfResult = underTest.renderPDFForm(filename, data, pdfFormRenderOptions);
@@ -269,7 +267,7 @@ class FormsServiceImplTest {
 	void testRenderPDFFormPathOrUrlPathDocumentPDFFormRenderOptions() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 		
-		PathOrUrl filePath = PathOrUrl.fromString(SAMPLE_FORM.toString());
+		PathOrUrl filePath = PathOrUrl.from(SAMPLE_FORM.toString());
 		Document data = Mockito.mock(Document.class);
 		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
 		Document pdfResult = underTest.renderPDFForm(filePath, data, pdfFormRenderOptions);
@@ -284,7 +282,7 @@ class FormsServiceImplTest {
 	@Test
 	@DisplayName("Test RenderPDFForm(PathOrUrl,...) null arguments.")
 	void testRenderPDFFormPathOrUrl_nullArguments() throws Exception {
-		PathOrUrl filename = PathOrUrl.fromString("http://www.example.com/docs/resource1.html");
+		PathOrUrl filename = PathOrUrl.from("http://www.example.com/docs/resource1.html");
 		Document data = Mockito.mock(Document.class);
 		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
 		URL nullFilename = null;
@@ -305,7 +303,7 @@ class FormsServiceImplTest {
 	void testRenderPDFFormPathOrUrl___FormsServiceExceptionThrown() throws Exception {
 		Mockito.when(adobeFormsService.renderPDFForm(Mockito.any(String.class), Mockito.any(), Mockito.any())).thenThrow(FormsServiceException.class);
 
-		PathOrUrl filename = PathOrUrl.fromString("http://www.example.com/docs/resource1.html");
+		PathOrUrl filename = PathOrUrl.from("http://www.example.com/docs/resource1.html");
 		Document data = Mockito.mock(Document.class);
 		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
 		
@@ -472,7 +470,7 @@ class FormsServiceImplTest {
 
 		Path filePath = SAMPLE_FORM.toAbsolutePath();
 		Document data = Mockito.mock(Document.class);
-		PathOrUrl contentRootUrl = PathOrUrl.fromString("crx://foo/bar");
+		PathOrUrl contentRootUrl = PathOrUrl.from("crx://foo/bar");
 
 		// Double check that the PDFRenderOptions are working by setting all the values to not default values and then
 		// checking that they were set (by calling PDFFormRenderOptionsImplTest.assertNotEmpty(). 

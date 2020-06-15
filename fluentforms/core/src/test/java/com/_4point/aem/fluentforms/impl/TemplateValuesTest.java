@@ -9,12 +9,10 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import com._4point.aem.fluentforms.api.PathOrUrl;
 
@@ -42,7 +40,7 @@ class TemplateValuesTest {
 	@DisplayName("TemplateValues Test: Absolute Path in form with Path content root")
 	public void testTemplateValuesAbsPathwDir() throws Exception {
 		Path template = SAMPLE_FORM.toAbsolutePath();
-		PathOrUrl templatesDir = new PathOrUrl(SAMPLE_FORMS_DIR.getParent().toAbsolutePath());
+		PathOrUrl templatesDir = PathOrUrl.from(SAMPLE_FORMS_DIR.getParent().toAbsolutePath());
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
@@ -55,7 +53,7 @@ class TemplateValuesTest {
 	@DisplayName("TemplateValues Test: Relative Path in form with content root")
 	public void testTemplateValuesRelPathwDir() throws Exception {
 		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
-		PathOrUrl templatesDir = new PathOrUrl(SAMPLE_FORMS_DIR.getParent());
+		PathOrUrl templatesDir = PathOrUrl.from(SAMPLE_FORMS_DIR.getParent());
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
@@ -68,7 +66,7 @@ class TemplateValuesTest {
 	public void testTemplateValuesAbsPathwUrl() throws Exception {
 		String urlString = "http://foo/bar";
 		Path template = SAMPLE_FORM.toAbsolutePath();
-		PathOrUrl templatesDir = new PathOrUrl(new URL(urlString));
+		PathOrUrl templatesDir = PathOrUrl.from(new URL(urlString));
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
@@ -83,7 +81,7 @@ class TemplateValuesTest {
 	public void testTemplateValuesRelPathwUrl(ScenarioVariation scenario) throws Exception {
 		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
 		String urlString = "http://foo/bar";
-		PathOrUrl templatesDir = new PathOrUrl(new URL(urlString + scenario.getEndCharacter()));
+		PathOrUrl templatesDir = PathOrUrl.from(new URL(urlString + scenario.getEndCharacter()));
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
@@ -96,7 +94,7 @@ class TemplateValuesTest {
 	public void testTemplateValuesAbsPathwCrxUrl() throws Exception {
 		String urlString = "crx://foo/bar";
 		Path template = SAMPLE_FORM.toAbsolutePath();
-		PathOrUrl templatesDir = PathOrUrl.fromString(urlString);
+		PathOrUrl templatesDir = PathOrUrl.from(urlString);
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
@@ -111,7 +109,7 @@ class TemplateValuesTest {
 	public void testTemplateValuesRelPathwCrxUrl(ScenarioVariation scenario) throws Exception {
 		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
 		String urlString = "crx://foo/bar";
-		PathOrUrl templatesDir = PathOrUrl.fromString(urlString + scenario.getEndCharacter());
+		PathOrUrl templatesDir = PathOrUrl.from(urlString + scenario.getEndCharacter());
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
 		
@@ -147,7 +145,7 @@ class TemplateValuesTest {
 	@DisplayName("TemplateValues Test: Bad template with content root")
 	public void testBadTemplateValuesAbsPathwDir_Client() throws Exception {
 		Path template = Paths.get(BAD_TEMPLATE);
-		PathOrUrl templatesDir = new PathOrUrl(SAMPLE_FORMS_DIR.toAbsolutePath());
+		PathOrUrl templatesDir = PathOrUrl.from(SAMPLE_FORMS_DIR.toAbsolutePath());
 		
 		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.CLIENT_SIDE);
 		assertEquals(templatesDir, resultTv.getContentRoot(), "Content Root wasn't what was expected.");
@@ -158,7 +156,7 @@ class TemplateValuesTest {
 	@DisplayName("TemplateValues Test: Bad template with content root")
 	public void testBadTemplateValuesAbsPathwDir_Server() {
 		Path template = Paths.get(BAD_TEMPLATE);
-		PathOrUrl templatesDir = new PathOrUrl(SAMPLE_FORMS_DIR.toAbsolutePath());
+		PathOrUrl templatesDir = PathOrUrl.from(SAMPLE_FORMS_DIR.toAbsolutePath());
 
 		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
 		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
@@ -170,7 +168,7 @@ class TemplateValuesTest {
 	@DisplayName("TemplateValues Test: Template with bad content root")
 	public void testBadTemplateValuesAbsPathwDir2() {
 		Path template = SAMPLE_FORM.getFileName();
-		PathOrUrl templatesDir = new PathOrUrl(Paths.get(BAD_CONTENT_ROOT));
+		PathOrUrl templatesDir = PathOrUrl.from(Paths.get(BAD_CONTENT_ROOT));
 
 		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
 		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
@@ -182,7 +180,7 @@ class TemplateValuesTest {
 	@DisplayName("TemplateValues Test: Non-existent relative template with content root")
 	public void testBadTemplateValuesRelPathwDir() {
 		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
-		PathOrUrl templatesDir = new PathOrUrl(Paths.get(BAD_CONTENT_ROOT));
+		PathOrUrl templatesDir = PathOrUrl.from(Paths.get(BAD_CONTENT_ROOT));
 
 		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
 		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
