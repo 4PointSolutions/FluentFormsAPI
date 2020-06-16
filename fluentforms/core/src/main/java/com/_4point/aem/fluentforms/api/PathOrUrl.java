@@ -6,6 +6,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * This class is used to house a location (typically a XDP template location) that is one of the following things:
@@ -115,6 +116,31 @@ public class PathOrUrl {
 	 */
 	public boolean isCrxUrl() { return this.isCrxUrl && this.url != null; }
 
+	public Optional<String> getFilename() {
+		if (isPath()) {
+			return Optional.ofNullable(getPath().getFileName()).map(Path::toString);
+		} else if (isUrl()) {
+			String urlPath = getUrl().getPath();
+			int lastSlashIndex = urlPath.lastIndexOf('/');
+			if (lastSlashIndex > -1 && lastSlashIndex < urlPath.length() - 1) {
+				return Optional.of(urlPath.substring(lastSlashIndex + 1));   
+			} else {
+				return Optional.empty();
+			}
+		} else if (isCrxUrl()) {
+			String urlPath = getCrxUrl();
+			int lastSlashIndex = urlPath.lastIndexOf('/');
+			if (lastSlashIndex > -1 && lastSlashIndex < urlPath.length() - 1) {
+				return Optional.of(urlPath.substring(lastSlashIndex + 1));   
+			} else {
+				return Optional.empty();
+			}
+		} else {
+			// This should never happen.
+			throw new IllegalStateException("Encountered a PathOrUrl that was not a Path, URL or CRX Url!");
+		}
+	}
+
 	/**
 	 * Static constructor
 	 * 
@@ -210,4 +236,5 @@ public class PathOrUrl {
 	private static String urlToCrx(URL url) {
 		return  CRX_URL_PROTOCOL + url.toString().substring(CRX_URL_SUBSTITUTE_LENGTH);
 	}
+
 }
