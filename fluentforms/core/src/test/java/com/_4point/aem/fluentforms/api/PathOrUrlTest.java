@@ -156,14 +156,14 @@ class PathOrUrlTest {
 	@EnumSource
 	void test_EmptyFilename(EmptyFilenameScenario scenario) throws Exception {
 		PathOrUrl underTest = PathOrUrl.from(scenario.input);
-		assertTrue(underTest.getFilename().isEmpty(), "Expected to be empty, but was '" + underTest.getFilename() + "'.");
+		assertFalse(underTest.getFilename().isPresent(), ()->"Expected to be empty, but was '" + underTest.getFilename().get() + "'.");
 		if (scenario.testType == EmptyFilenameScenario.TestType.PATH) {
 			PathOrUrl underTestOtherTest = PathOrUrl.from(Paths.get(scenario.input));
-			assertTrue(underTestOtherTest.getFilename().isEmpty(), "Expected to be empty, but was '" + underTest.getFilename() + "'.");
+			assertFalse(underTestOtherTest.getFilename().isPresent(), ()->"Expected to be empty, but was '" + underTest.getFilename().get() + "'.");
 		}
 		if (scenario.testType == EmptyFilenameScenario.TestType.URL) {
 			PathOrUrl underTestOtherTest = PathOrUrl.from(new URL(scenario.input));
-			assertTrue(underTestOtherTest.getFilename().isEmpty(), "Expected to be empty, but was '" + underTest.getFilename() + "'.");
+			assertFalse(underTestOtherTest.getFilename().isPresent(), ()->"Expected to be empty, but was '" + underTest.getFilename().get() + "'.");
 		}
 	}
 
