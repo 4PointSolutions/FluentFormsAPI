@@ -1,11 +1,8 @@
 package com._4point.aem.docservices.rest_services.server;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Arrays;
 import java.util.Collections;

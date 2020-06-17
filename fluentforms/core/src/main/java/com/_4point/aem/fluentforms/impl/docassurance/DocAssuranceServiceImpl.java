@@ -10,8 +10,6 @@ import com._4point.aem.fluentforms.api.Transformable;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
 import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
 import com._4point.aem.fluentforms.api.docassurance.ReaderExtensionOptions;
-import com._4point.aem.fluentforms.impl.docassurance.SafeDocAssuranceServiceAdapterWrapper;
-import com._4point.aem.fluentforms.impl.docassurance.TraditionalDocAssuranceService;
 import com.adobe.fd.docassurance.client.api.DocAssuranceServiceOperationTypes;
 import com.adobe.fd.docassurance.client.api.SignatureOptions;
 import com.adobe.fd.encryption.client.CertificateEncryptionIdentity;

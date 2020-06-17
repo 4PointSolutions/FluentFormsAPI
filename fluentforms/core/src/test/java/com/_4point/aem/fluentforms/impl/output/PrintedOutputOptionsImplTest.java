@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.nio.file.Paths;
 import java.util.Locale;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.fluentforms.api.output.PrintConfig;
-import com.adobe.fd.output.api.AcrobatVersion;
 import com.adobe.fd.output.api.PaginationOverride;
 
 class PrintedOutputOptionsImplTest {

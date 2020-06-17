@@ -18,7 +18,7 @@ class MockOutputServiceTest {
 		Document expectedResultDoc = mockDocumentFactory.create(expectedResultString.getBytes());
 		MockOutputService underTest = MockOutputService.createGeneratePdfOutputMock(expectedResultDoc);
 		
-		PathOrUrl template = PathOrUrl.fromString("crx:/test/form");
+		PathOrUrl template = PathOrUrl.from("crx:/test/form");
 		Document data = mockDocumentFactory.create(expectedResultString.getBytes());
 		
 		Document result = underTest.generatePDFOutput()
@@ -56,7 +56,7 @@ class MockOutputServiceTest {
 //		};
 //		MockOutputService underTest = MockOutputService.createGeneratePdfOutputBatchMock(expectedResults);
 //		
-//		PathOrUrl template = PathOrUrl.fromString("crx:/test/form");
+//		PathOrUrl template = PathOrUrl.from("crx:/test/form");
 //		Document data = mockDocumentFactory.create(expectedResultString.getBytes());
 //		
 //		Document result = underTest.generatePDFOutputBatch(templates, data, pdfOutputOptions, batchOptions)
@@ -75,7 +75,7 @@ class MockOutputServiceTest {
 //		Document expectedResultDoc = mockDocumentFactory.create(expectedResultString.getBytes());
 //		MockOutputService underTest = MockOutputService.createGeneratePrintedOutputMock(expectedResultDoc);
 //		
-//		PathOrUrl template = PathOrUrl.fromString("crx:/test/form");
+//		PathOrUrl template = PathOrUrl.from("crx:/test/form");
 //		Document data = mockDocumentFactory.create(expectedResultString.getBytes());
 //		
 //		Document result = underTest.generatePrintedOutput()

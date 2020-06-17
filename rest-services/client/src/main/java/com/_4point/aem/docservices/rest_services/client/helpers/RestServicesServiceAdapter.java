@@ -13,8 +13,6 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
-import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter.RestServicesServiceException;
-
 public abstract class RestServicesServiceAdapter {
 	protected static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	protected static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");

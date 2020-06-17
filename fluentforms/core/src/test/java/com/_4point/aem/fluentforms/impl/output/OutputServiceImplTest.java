@@ -211,7 +211,7 @@ class OutputServiceImplTest {
 	void testGeneratePDFOutputPathOrUrlDocumentPDFOutputOptions() throws Exception {
 		MockPdfOutputService svc = new MockPdfOutputService();
 		
-		PathOrUrl filename = PathOrUrl.fromString("file:foo/bar.xdp");
+		PathOrUrl filename = PathOrUrl.from("file:foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
 		PDFOutputOptions options = Mockito.mock(PDFOutputOptions.class);
 		Document result = underTest.generatePDFOutput(filename, data, options);
@@ -228,7 +228,7 @@ class OutputServiceImplTest {
 	void testGeneratePDFOutputCrxUrlDocumentPDFOutputOptions() throws Exception {
 		MockPdfOutputService svc = new MockPdfOutputService();
 		
-		PathOrUrl filename = PathOrUrl.fromString("crx:/content/dam/formsanddocuments/foo/bar.xdp");
+		PathOrUrl filename = PathOrUrl.from("crx:/content/dam/formsanddocuments/foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
 		PDFOutputOptions options = Mockito.mock(PDFOutputOptions.class);
 		Document result = underTest.generatePDFOutput(filename, data, options);
@@ -245,7 +245,7 @@ class OutputServiceImplTest {
 	void testGeneratePDFOutputPathOrUrl_nullArguments() throws Exception {
 		MockPdfOutputService svc = new MockPdfOutputService();
 		
-		PathOrUrl filename = PathOrUrl.fromString("file:foo/bar.xdp");
+		PathOrUrl filename = PathOrUrl.from("file:foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
 		PDFOutputOptions options = Mockito.mock(PDFOutputOptions.class);
 		PathOrUrl nullFilename = null;
@@ -324,7 +324,7 @@ class OutputServiceImplTest {
 	void testGeneratePDFOutputUrl() throws Exception {
 		MockPdfOutputService svc = new MockPdfOutputService();
 		
-		PathOrUrl filename = PathOrUrl.fromString("file:foo/bar.xdp");
+		PathOrUrl filename = PathOrUrl.from("file:foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
 		Document result = underTest.generatePDFOutput()
 									.setAcrobatVersion(AcrobatVersion.Acrobat_10_1)
@@ -351,7 +351,7 @@ class OutputServiceImplTest {
 	void testGeneratePDFOutputPathOrUrl() throws Exception {
 		MockPdfOutputService svc = new MockPdfOutputService();
 		
-		PathOrUrl filename = PathOrUrl.fromString("file:foo/bar.xdp");
+		PathOrUrl filename = PathOrUrl.from("file:foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
 		Document result = underTest.generatePDFOutput()
 									.setAcrobatVersion(AcrobatVersion.Acrobat_10_1)
@@ -378,7 +378,7 @@ class OutputServiceImplTest {
 	void testGeneratePDFOutputCrxUrl() throws Exception {
 		MockPdfOutputService svc = new MockPdfOutputService();
 		
-		PathOrUrl filename = PathOrUrl.fromString("crx:/content/dam/formsanddocuments/foo/bar.xdp");
+		PathOrUrl filename = PathOrUrl.from("crx:/content/dam/formsanddocuments/foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
 		Document result = underTest.generatePDFOutput()
 									.setAcrobatVersion(AcrobatVersion.Acrobat_10_1)

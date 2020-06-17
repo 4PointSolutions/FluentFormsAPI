@@ -1,8 +1,20 @@
 package com._4point.aem.docservices.rest_services.client.forms;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Locale;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -26,11 +38,9 @@ import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.fluentforms.api.Document;
-import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.impl.forms.PDFFormRenderOptionsImpl;
@@ -38,18 +48,6 @@ import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.RenderAtClient;
-
-import static org.mockito.Mockito.*;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Locale;
 
 @ExtendWith(MockitoExtension.class)
 class RestServicesFormsServiceAdapterTest {

@@ -8,7 +8,6 @@ import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -24,7 +23,6 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com._4point.aem.docservices.rest_services.it_tests.ByteArrayString;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
 class RenderPdfFormTest {

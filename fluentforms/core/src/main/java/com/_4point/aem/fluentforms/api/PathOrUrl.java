@@ -6,7 +6,19 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
 
+/**
+ * This class is used to house a location (typically a XDP template location) that is one of the following things:
+ * 
+ *   1) A <code>Path</code> on the local file system.
+ *   2) An <code>URL</code>.
+ *   3) A <code>URL</code> that points to a location in the crx repository.
+ *   
+ *   This class will handle all three types.  You typically construct it from a String using from(String) however it can also
+ *   be constructed directly from <code>java.nio.file.Path</code> or <code>java.net.URL</code> objects.
+ *
+ */
 public class PathOrUrl {
 	private static final String CRX_URL_PROTOCOL = "crx:";
 	private static final int CRX_URL_PROTOCOL_LENGTH = CRX_URL_PROTOCOL.length();
@@ -17,6 +29,15 @@ public class PathOrUrl {
 	private final URL url;
 	private final boolean isCrxUrl;
 	
+	/**
+	 * Constructor
+	 * 
+	 * @deprecated
+	 * This constructor is slated to become private.  Use <code>PathOrUrl.from(Path path)</code> instead.
+	 * 
+	 * @param path
+	 */
+	@Deprecated
 	public PathOrUrl(Path path) {
 		super();
 		this.path = path;
@@ -24,6 +45,15 @@ public class PathOrUrl {
 		this.isCrxUrl = false;
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @deprecated
+	 * This constructor is slated to become private.  Use <code>PathOrUrl.from(URL url)</code> instead.
+	 * 
+	 * @param url
+	 */
+	@Deprecated
 	public PathOrUrl(URL url) {
 		super();
 		this.path = null;
@@ -38,23 +68,100 @@ public class PathOrUrl {
 		this.isCrxUrl = isCrxUrl;
 	}
 
+	/**
+	 * Return the value as a <code>Path</code> object if <code>isPath()</code> is true, otherwise return null.
+	 * 
+	 * @return
+	 */
 	public Path getPath() {
 		return this.path;
 	}
 
+	/**
+	 * Return the value as an <code>URL</code> object if <code>isUrl()</code> is true, otherwise return null.
+	 * 
+	 * @return
+	 */
 	public URL getUrl() {
 		return this.isCrxUrl ? null : this.url;
 	}
 
+	/**
+	 * Return the value as a <code>String</code> object if <code>isCrxUrl()</code> is true, otherwise return null.
+	 * 
+	 * @return
+	 */
 	public String getCrxUrl() {
 		return this.isCrxUrl ? urlToCrx(this.url) : null;
 	}
 
+	/**
+	 * Does this object house a <code>Path</code> object?
+	 * 
+	 * @return true if it houses a <code>Path</code> object, otherwise false.
+	 */
 	public boolean isPath() { return this.path != null; }
+
+	/**
+	 * Does this object house a <code>URL</code> object?
+	 * 
+	 * @return true if it houses a <code>URL</code> object, otherwise false.
+	 */
 	public boolean isUrl() { return !this.isCrxUrl && this.url != null; }
+
+	/**
+	 * Does this object house a crx <code>URL</code> object?
+	 * 
+	 * @return true if it houses a crx <code>URL</code> object, otherwise false.
+	 */
 	public boolean isCrxUrl() { return this.isCrxUrl && this.url != null; }
-	
+
+	public Optional<String> getFilename() {
+		if (isPath()) {
+			return Optional.ofNullable(getPath().getFileName()).map(Path::toString);
+		} else if (isUrl()) {
+			String urlPath = getUrl().getPath();
+			int lastSlashIndex = urlPath.lastIndexOf('/');
+			if (lastSlashIndex > -1 && lastSlashIndex < urlPath.length() - 1) {
+				return Optional.of(urlPath.substring(lastSlashIndex + 1));   
+			} else {
+				return Optional.empty();
+			}
+		} else if (isCrxUrl()) {
+			String urlPath = getCrxUrl();
+			int lastSlashIndex = urlPath.lastIndexOf('/');
+			if (lastSlashIndex > -1 && lastSlashIndex < urlPath.length() - 1) {
+				return Optional.of(urlPath.substring(lastSlashIndex + 1));   
+			} else {
+				return Optional.empty();
+			}
+		} else {
+			// This should never happen.
+			throw new IllegalStateException("Encountered a PathOrUrl that was not a Path, URL or CRX Url!");
+		}
+	}
+
+	/**
+	 * Static constructor
+	 * 
+	 * @deprecated
+	 * Use <code>PathOrUrl.from(String string)</code> instead.
+	 * 
+	 * @param pathOrUrl
+	 * @return
+	 */
+	@Deprecated
 	public static PathOrUrl fromString(final String pathOrUrl) {
+		return from(pathOrUrl);
+	}
+	
+	/**
+	 * Static constructor
+	 * 
+	 * @param pathOrUrl
+	 * @return
+	 */
+	public static PathOrUrl from(final String pathOrUrl) {
 		String trimmedPathOrUrl = Objects.requireNonNull(pathOrUrl, "Null Path or Url provided.").trim();
 		if (trimmedPathOrUrl.isEmpty()) {
 			throw new IllegalArgumentException("Empty Path or Url provided.");
@@ -81,6 +188,26 @@ public class PathOrUrl {
 		}
 	}
 
+	/**
+	 * Static constructor
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public static PathOrUrl from(final Path path) {
+		return new PathOrUrl(path);
+	}
+	
+	/**
+	 * Static constructor
+	 * 
+	 * @param url
+	 * @return
+	 */
+	public static PathOrUrl from(final URL url) {
+		return new PathOrUrl(url);
+	}
+	
 	@Override
 	public String toString() {
 		if (this.isPath()) {
@@ -94,11 +221,20 @@ public class PathOrUrl {
 		}
 	}
 	
-	public static URL crxToUrl(String crxUrl) throws MalformedURLException {
+	/**
+	 * Convert a crx Url into a file: URL for storage. 
+	 * 
+	 */
+	private static URL crxToUrl(String crxUrl) throws MalformedURLException {
 		return new URL( CRX_URL_SUBSTITUTE + crxUrl.substring(CRX_URL_PROTOCOL_LENGTH));
 	}
 	
-	public static String urlToCrx(URL url) {
+	/**
+	 * Convert a file: URL back into a crx Url for usage by a client. 
+	 * 
+	 */
+	private static String urlToCrx(URL url) {
 		return  CRX_URL_PROTOCOL + url.toString().substring(CRX_URL_SUBSTITUTE_LENGTH);
 	}
+
 }

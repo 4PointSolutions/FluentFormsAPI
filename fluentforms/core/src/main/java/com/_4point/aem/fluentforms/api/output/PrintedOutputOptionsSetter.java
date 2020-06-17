@@ -13,11 +13,11 @@ public interface PrintedOutputOptionsSetter {
 	PrintedOutputOptionsSetter setContentRoot(PathOrUrl pathOrUrl);
 
 	default PrintedOutputOptionsSetter setContentRoot(Path path) {
-		return setContentRoot(new PathOrUrl(path));
+		return setContentRoot(PathOrUrl.from(path));
 	}
 
 	default PrintedOutputOptionsSetter setContentRoot(URL url) {
-		return setContentRoot(new PathOrUrl(url));
+		return setContentRoot(PathOrUrl.from(url));
 	}
 
 	PrintedOutputOptionsSetter setCopies(int copies);

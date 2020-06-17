@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import org.apache.sling.api.resource.Resource;
 
-import com._4point.aem.docservices.rest_services.server.dor.DocumentOfRecordService.DocumentOfRecordOptions;
 import com.adobe.aemds.guide.addon.dor.DoRGenerationException;
 import com.adobe.aemds.guide.addon.dor.DoROptions;
 import com.adobe.aemds.guide.addon.dor.DoRResult;

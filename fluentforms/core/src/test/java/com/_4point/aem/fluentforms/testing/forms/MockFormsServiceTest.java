@@ -20,7 +20,7 @@ class MockFormsServiceTest {
 		MockFormsService underTest = MockFormsService.createRenderFormMock(expectedResultDoc);
 		
 		Document data = mockDocumentFactory.create(expectedResultString.getBytes());
-		PathOrUrl template = PathOrUrl.fromString("crx:/test/form");
+		PathOrUrl template = PathOrUrl.from("crx:/test/form");
 		Document result = underTest.renderPDFForm()
 								   .executeOn(template, data);
 		
@@ -38,7 +38,7 @@ class MockFormsServiceTest {
 		MockFormsService underTest = MockFormsService.createRenderFormMock(mockDocumentFactory, expectedResultDoc);
 		
 		Document data = mockDocumentFactory.create(expectedResultString.getBytes());
-		PathOrUrl template = PathOrUrl.fromString("crx:/test/form");
+		PathOrUrl template = PathOrUrl.from("crx:/test/form");
 		Document result = underTest.renderPDFForm()
 								   .executeOn(template, data);
 		

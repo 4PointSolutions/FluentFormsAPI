@@ -2,7 +2,6 @@ package com._4point.aem.docservices.rest_services.server;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ByteArrayStringTest {

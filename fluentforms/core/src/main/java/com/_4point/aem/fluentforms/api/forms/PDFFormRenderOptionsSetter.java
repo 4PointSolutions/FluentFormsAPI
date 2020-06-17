@@ -12,7 +12,6 @@ import java.util.Objects;
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
-import com._4point.aem.fluentforms.impl.forms.PDFFormRenderOptionsImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.RenderAtClient;
@@ -24,11 +23,11 @@ public interface PDFFormRenderOptionsSetter {
 	PDFFormRenderOptionsSetter setCacheStrategy(CacheStrategy strategy);
 
 	default PDFFormRenderOptionsSetter setContentRoot(Path path) {
-		return setContentRoot(new PathOrUrl(path));
+		return setContentRoot(PathOrUrl.from(path));
 	}
 
 	default PDFFormRenderOptionsSetter setContentRoot(URL url) {
-		return setContentRoot(new PathOrUrl(url));
+		return setContentRoot(PathOrUrl.from(url));
 	}
 
 	PDFFormRenderOptionsSetter setContentRoot(PathOrUrl pathOrUrl);
