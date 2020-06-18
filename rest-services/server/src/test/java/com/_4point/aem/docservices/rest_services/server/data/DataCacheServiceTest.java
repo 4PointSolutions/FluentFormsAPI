@@ -26,7 +26,7 @@ class DataCacheServiceTest {
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
-		request.addRequestParameter(DATA_KEY_PARAM, DataCacheService.addDataToCache(resultDataBytes, expectedContentType));
+		request.addRequestParameter(DATA_KEY_PARAM, DataCache.addDataToCache(resultDataBytes, expectedContentType));
 		
 		underTest.doGet(request, response);
 

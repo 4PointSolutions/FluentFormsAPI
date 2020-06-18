@@ -1,9 +1,6 @@
 package com._4point.aem.docservices.rest_services.server.data;
 
 import java.io.IOException;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -54,7 +51,7 @@ public class DataCacheService extends SlingSafeMethodsServlet {
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws BadRequestException, InternalServerErrorException, NotAcceptableException {
 		DataCacheParameters dataCacheParameters = DataCacheParameters.from(request);
 		
-		DataCacheEntry dataFromCache = DataCache.getDataFromCache(dataCacheParameters.dataKey());
+		DataCache.Entry dataFromCache = DataCache.getDataFromCache(dataCacheParameters.dataKey());
 		try {
 			response.setContentType(dataFromCache.contentType());
 			response.setContentLength(dataFromCache.data().length);
@@ -85,41 +82,5 @@ public class DataCacheService extends SlingSafeMethodsServlet {
 			RequestParameter dataKeyParam = FormParameters.getMandatoryParameter(request, DATA_KEY_PARAM);
 			return new DataCacheParameters(dataKeyParam.getString());
 		}
-	}
-	
-	private static class DataCacheEntry {
-		private final byte[] data;
-		private final String contentType;
-		public DataCacheEntry(byte[] data, String contentType) {
-			super();
-			this.data = data;
-			this.contentType = contentType;
-		}
-		public byte[] data() {
-			return data;
-		}
-		public String contentType() {
-			return contentType;
-		}
-	}
-	
-	private enum DataCache {
-		INSTANCE;
-
-		private final ConcurrentMap<String, DataCacheEntry> dataMap = new ConcurrentHashMap<>();
-		
-		public static String addDataToCache(byte[] data, String contentType) {
-			String key = UUID.randomUUID().toString();
-			INSTANCE.dataMap.put(key, new DataCacheEntry(data, contentType));
-			return key;
-		}
-		
-		public static DataCacheEntry getDataFromCache(String key) {
-			return INSTANCE.dataMap.remove(key);
-		}
-	}
-	
-	public static String addDataToCache(byte[] data, String contentType) {
-		return DataCache.addDataToCache(data, contentType);
 	}
 }
