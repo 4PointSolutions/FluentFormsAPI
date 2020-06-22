@@ -17,7 +17,7 @@ public abstract class RestServicesServiceAdapter {
 	protected static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	protected static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	protected static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
-
+	protected static final MediaType APPLICATION_XML= new MediaType("application", "xml");
 	protected final WebTarget baseTarget;				// used by subclasses
 	protected final Supplier<String> correlationIdFn;
 
