@@ -73,7 +73,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			multipart.field("pdforxdp", pdfOrXdp.getInputStream(),APPLICATION_PDF)
 					 .field("dataformat", MediaType.APPLICATION_XML);
 			
-		Response result = postToServer(exportDataTarget, multipart, APPLICATION_XML);//xml
+		Response result = postToServer(exportDataTarget, multipart, MediaType.APPLICATION_XML_TYPE);//xml
 		StatusType resultStatus = result.getStatusInfo();
 		
 		if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
@@ -97,7 +97,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 		}
 
 		Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-		resultDoc.setContentType(APPLICATION_XML.toString());
+		resultDoc.setContentType(MediaType.APPLICATION_XML_TYPE.toString());
 		return resultDoc;
 		
 	} catch (IOException e) {

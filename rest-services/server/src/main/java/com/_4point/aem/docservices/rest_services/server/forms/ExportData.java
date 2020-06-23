@@ -80,16 +80,16 @@ public class ExportData extends SlingAllMethodsServlet {
 		FormsService formsService = new FormsServiceImpl(formServiceFactory.get(), UsageContext.SERVER_SIDE);
 		
 			// In the following call to the formsService, we only set the parameters if they are not null.
-		//ExportDataParameters reqParameters = ExportDataParameters.readFormParameters(request, false);	
+			
 			RequestParameter pdforxdpParameter = FormParameters.getMandatoryParameter(request, "pdforxdp");
-		
+			DataFormat dataformat	=DataFormat.valueOf(FormParameters.getMandatoryParameter(request,"dataformat").getString());
 			byte[] pdfBytes = getPdforxdpBytes(pdforxdpParameter);
 			
 			Document pdforxdp = docFactory.create(pdfBytes);
 			
 		
 			try {
-				try (Document result = formsService.exportData(pdforxdp, (DataFormat)request.getAttribute("dataformat"))) {
+				try (Document result = formsService.exportData(pdforxdp, dataformat)) {
 				
 					String contentType = ContentType.APPLICATION_XML.toString();	// We know the result is always PDF.
 					ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
@@ -110,14 +110,10 @@ public class ExportData extends SlingAllMethodsServlet {
 	private byte[] getPdforxdpBytes(RequestParameter pdforxdpParameter) throws BadRequestException {
 		byte[] pdforxdpBytes;
 		ContentType pdforxdpParamContentType =ContentType.valueOf(Objects.requireNonNull(pdforxdpParameter.getContentType(), "PDForxdp Parameter content-type must be provided."));
-		if (pdforxdpParamContentType.equals(ContentType.APPLICATION_XML)) {
+		if (pdforxdpParamContentType.equals(ContentType.APPLICATION_PDF)) {
 			pdforxdpBytes = pdforxdpParameter.get();
-			
-		} else if (pdforxdpParamContentType.equals(ContentType.APPLICATION_PDF)) {
-			// Template bytes were provided.
-			pdforxdpBytes = pdforxdpParameter.get();
-			log.info("pdfBytes={}");
-		} else {
+		}	
+		 else {
 			// Throw bad request error.
 			throw new BadRequestException("Invalid content-type on pdf param '" + pdforxdpParamContentType.getContentTypeStr() + "'.");
 		}
