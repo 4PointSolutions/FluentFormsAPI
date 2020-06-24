@@ -48,7 +48,7 @@ class ExportDataTest {
 		Document pdfResult = underTest.exportData(pdforxdp, dataformat);
 
 		// Verify that all the results are correct.
-		assertThat("Expected a xml to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, P, D, F, -, 1, ., 7"));
+		assertThat("Expected a xml to be returned.", ByteArrayString.toString(pdfResult.getInlineData(), 8), containsString("%, X, M, L, -, 1, ., 7"));
 		if (SAVE_RESULTS) {
 			IOUtils.write(pdfResult.getInlineData(), Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("ImportDataClient_BytesResult.xml")));
 		}
