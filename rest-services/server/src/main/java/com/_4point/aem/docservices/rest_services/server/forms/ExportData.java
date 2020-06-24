@@ -122,14 +122,7 @@ public class ExportData extends SlingAllMethodsServlet {
 		
 		
 	}
-	
 
-	/*
-	 * private Document executeOn(Document pdfOrXdp, DataFormat dataFormat) throws
-	 * FormsServiceException, FileNotFoundException { return pdfOrXdp;
-	 * 
-	 * }
-	 */
 	private TraditionalFormsService getAdobeFormsService() {
 		return new AdobeFormsServiceAdapter(adobeFormsService);
 	}
