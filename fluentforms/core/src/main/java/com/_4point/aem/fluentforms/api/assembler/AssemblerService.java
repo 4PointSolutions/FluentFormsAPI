@@ -39,10 +39,7 @@ public interface AssemblerService {
 		AssemblerArgumentBuilder setFailOnError(boolean isFailOnError);
 		
 		@Override
-		AssemblerOptionsSetter setContentRoot(PathOrUrl contentRoot);
-		
-		public AssemblerResult executeOn(Document ddx, Map<String,Object>sourceDocuments) throws AssemblerServiceException;
-		
+		AssemblerArgumentBuilder setContentRoot(PathOrUrl contentRoot);
 
 		@Override
 		default AssemblerArgumentBuilder setContentRoot(Path contentRoot) {
@@ -55,7 +52,8 @@ public interface AssemblerService {
 			AssemblerOptionsSetter.super.setContentRoot(contentRoot);
 			return this;
 		}
-
+       
+		public AssemblerResult executeOn(Document ddx, Map<String,Object>sourceDocuments) throws AssemblerServiceException;
         	
 	}
 

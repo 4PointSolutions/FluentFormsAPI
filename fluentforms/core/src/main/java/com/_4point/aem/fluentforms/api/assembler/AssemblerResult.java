@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com._4point.aem.fluentforms.api.Document;
 
-public interface AssemblerResult {
+public interface AssemblerResult extends AutoCloseable{
 	
 	 Map<String,Document> getDocuments();
 	

@@ -87,4 +87,9 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 		return documents;
 	}
 
+	@Override
+	public void close() throws Exception {
+		
+	}
+
 }

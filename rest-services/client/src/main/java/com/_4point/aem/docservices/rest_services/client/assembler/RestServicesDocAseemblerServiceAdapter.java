@@ -50,7 +50,7 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			
 			if (ddx != null) {
-				multipart.field(TEMPLATE_PARAM, ddx.getInputStream(), APPLICATION_XDP);
+				multipart.field(TEMPLATE_PARAM, ddx.getInputStream(), APPLICATION_PDF);
 			} else {
 				throw new NullPointerException("ddx can not be null");
 			}

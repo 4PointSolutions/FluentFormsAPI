@@ -15,4 +15,10 @@ public class AssemblerResultImpl implements AssemblerResult {
 			return getDocuments;
 	}
 
+
+	@Override
+	public void close() throws Exception {
+		
+	}
+
 }

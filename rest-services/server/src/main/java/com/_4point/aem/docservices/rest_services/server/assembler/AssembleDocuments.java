@@ -93,15 +93,27 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 				UsageContext.SERVER_SIDE);
 		log.debug("In Assemble Uploaded Files");
 		try {
-			Map<String, Object> mapOfDocuments = new HashMap<String, Object>();
-			InputStream dDXFile = createDdxFile(request, mapOfDocuments);
+			Map<String, Object> sourceDocuments = new HashMap<String, Object>();
+			InputStream dDXFile = createDdxFile(request, sourceDocuments);
 			Document ddx = docFactory.create(dDXFile);
-			try (Document result = executeOn(ddx, mapOfDocuments, assemblerService)) {
-				String contentType = result.getContentType();
+		
+			try (AssemblerResult assemblerResult  = executeOn(ddx, sourceDocuments, assemblerService)) {
+				Map<String, Document> allDocsReturned = assemblerResult.getDocuments();
+
+				Document concatenatedDoc = null;
+				for (Entry<String, Document> docsMap : allDocsReturned.entrySet()) {
+					String concatenatedPDFName = (String) docsMap.getKey();
+					if (concatenatedPDFName.equalsIgnoreCase("concatenatedPDF.pdf")) {
+						Object pdf = docsMap.getValue();
+						concatenatedDoc = (Document) pdf;
+						break;
+					}
+				}
+				String contentType = concatenatedDoc.getContentType();
 				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
 				response.setContentType(contentType);
-				response.setContentLength((int) result.length());
-				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+				response.setContentLength((int) concatenatedDoc.length());
+				ServletUtils.transfer(concatenatedDoc.getInputStream(), response.getOutputStream());
 			}
 		} catch (AssemblerServiceException | IOException e) {
 			throw new InternalServerErrorException("Internal Error while merging PDF. (" + e.getMessage() + ").", e);
@@ -172,26 +184,15 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		return pdfResult;
 	}
 	
-	//
-	private Document executeOn(Document ddx, Map<String, Object> sourceDocuments, AssemblerService assemblerService)
+	
+	private AssemblerResult executeOn(Document ddx, Map<String, Object> sourceDocuments, AssemblerService assemblerService)
 			throws AssemblerServiceException, IOException {
         AssemblerOptionsSpec assemblerOptionSpec = new AssemblerOptionsSpecImpl();
 		log.info("FailonError=" + assemblerOptionSpec.isFailOnError());
 
 		AssemblerResult assemblerResult = assemblerService.invoke(ddx, sourceDocuments, assemblerOptionSpec);
 		
-		Map<String, Document> allDocsReturned = assemblerResult.getDocuments();
-
-		Document concatenatedDoc = null;
-		for (Entry<String, Document> docsMap : allDocsReturned.entrySet()) {
-			String concatenatedPDFName = (String) docsMap.getKey();
-			if (concatenatedPDFName.equalsIgnoreCase("concatenatedPDF.pdf")) {
-				Object pdf = docsMap.getValue();
-				concatenatedDoc = (Document) pdf;
-				break;
-			}
-		}
-		return concatenatedDoc;
+		return assemblerResult;
 	}
 
 

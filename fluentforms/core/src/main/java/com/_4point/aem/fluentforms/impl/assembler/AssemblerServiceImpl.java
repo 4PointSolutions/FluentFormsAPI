@@ -1,5 +1,6 @@
 package com._4point.aem.fluentforms.impl.assembler;
 
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 
@@ -9,6 +10,7 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSetter;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
+import com._4point.aem.fluentforms.api.output.OutputService.GeneratePdfOutputArgumentBuilder;
 import com._4point.aem.fluentforms.impl.UsageContext;
 
 public class AssemblerServiceImpl implements AssemblerService {
@@ -24,7 +26,6 @@ public class AssemblerServiceImpl implements AssemblerService {
 	@Override
 	public AssemblerResult invoke(Document ddx, Map<String, Object> sourceDocuments,
 			AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException {
-		// TODO Auto-generated method stub
 		Objects.requireNonNull(ddx, "ddx Document cannot be null.");
 		Objects.requireNonNull(sourceDocuments, "sourceDocuments cannot be null.");
 		try {
@@ -51,10 +52,11 @@ public class AssemblerServiceImpl implements AssemblerService {
 		}
 
 		@Override
-		public AssemblerOptionsSetter setContentRoot(PathOrUrl contentRoot) {
+		public AssemblerArgumentBuilder setContentRoot(PathOrUrl contentRoot) {
 			this.assemblerOptionsSpec.setContentRoot(contentRoot);
 			return this;
 		}
+        
 
 	}
 
