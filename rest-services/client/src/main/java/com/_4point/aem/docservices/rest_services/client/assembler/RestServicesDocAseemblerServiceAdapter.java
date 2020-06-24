@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -14,6 +15,8 @@ import javax.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
+import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
@@ -21,12 +24,13 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
+import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 import com.adobe.fd.assembler.client.OperationException;
 
 public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceAdapter implements TraditionalDocAssemblerService {
 
-	private static final String ASSEMBLE_DOCUMENT_PATH = "/services/AssemblerService/invoke";
+	private static final String ASSEMBLE_DOCUMENT_PATH = "/services/AssemblerService/AssembleDocuments";
 	private static final String TEMPLATE_PARAM = "template";
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
 	// Only callable from Builder
@@ -47,12 +51,14 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 			
 			if (ddx != null) {
 				multipart.field(TEMPLATE_PARAM, ddx.getInputStream(), APPLICATION_XDP);
+			} else {
+				throw new NullPointerException("ddx can not be null");
 			}
 			if(adobAssemblerOptionSpec != null) {
 		        Boolean isFailOnError= adobAssemblerOptionSpec.isFailOnError();
 		        MultipartTransformer.create(multipart).transform((t) -> isFailOnError == null?t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()));
 			}
-           Response result = postToServer(assembleDocTarget, multipart, APPLICATION_PDF);
+            Response result = postToServer(assembleDocTarget, multipart, APPLICATION_PDF);
 			
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
@@ -78,15 +84,78 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 			
 			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
 			resultDoc.setContentType(APPLICATION_PDF.toString());
+			
+		   AssemblerResult assemblerResult = new AssemblerResultImpl();
+	
+		   return null;
 		
 		}catch (IOException e) {
 			throw new AssemblerServiceException("I/O Error while reader merging document. (" + baseTarget.getUri().toString() + ").", e);
 		} catch (RestServicesServiceException e) {
 			throw new AssemblerServiceException("Error while POSTing to server", e);
 		}
-		return null;
+		//return null;
+		
 	}
 
+	public static AssemblerServiceBuilder builder() {
+		return new AssemblerServiceBuilder();
+	}
+    
+	
+	public static class AssemblerServiceBuilder implements Builder {
+		private BuilderImpl builder = new BuilderImpl();
+		
+		@Override
+		public AssemblerServiceBuilder machineName(String machineName) {
+			builder.machineName(machineName);
+			return this;
+		}
+
+		@Override
+		public AssemblerServiceBuilder port(int port) {
+			builder.port(port);
+			return this;
+		}
+
+		@Override
+		public AssemblerServiceBuilder useSsl(boolean useSsl) {
+			builder.useSsl(useSsl);
+			return this;
+		}
+
+		@Override
+		public AssemblerServiceBuilder clientFactory(Supplier<Client> clientFactory) {
+			builder.clientFactory(clientFactory);
+			return this;
+		}
+
+		@Override
+		public AssemblerServiceBuilder basicAuthentication(String username, String password) {
+			builder.basicAuthentication(username, password);
+			return this;
+		}
+
+		@Override
+		public AssemblerServiceBuilder correlationId(Supplier<String> correlationIdFn) {
+			builder.correlationId(correlationIdFn);
+			return this;
+		}
+
+		@Override
+		public Supplier<String> getCorrelationIdFn() {
+			return builder.getCorrelationIdFn();
+		}
+
+		@Override
+		public WebTarget createLocalTarget() {
+			return builder.createLocalTarget();
+		}
+		
+		public RestServicesDocAseemblerServiceAdapter build() {
+			return new RestServicesDocAseemblerServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
+		}
+	}
 
 
 	

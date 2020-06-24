@@ -1,22 +1,18 @@
 package com._4point.aem.fluentforms.api.assembler;
 
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Map;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.Transformable;
-import com._4point.aem.fluentforms.api.output.PDFOutputOptionsSetter;
-import com._4point.aem.fluentforms.api.output.OutputService.GeneratePdfOutputArgumentBuilder;
-import com.adobe.fd.assembler.client.ConversionException;
-import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
-import com.adobe.fd.assembler.client.PDFAConversionResult;
-import com.adobe.fd.assembler.client.PDFAValidationOptionSpec;
-import com.adobe.fd.assembler.client.PDFAValidationResult;
-import com.adobe.fd.assembler.client.ValidationException;
-
 public interface AssemblerService {
-	AssemblerResult invoke(Document ddx, Map<String,Object> inputs, AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException; 
+	
+	AssemblerResult invoke(Document ddx, Map<String,Object> sourceDocuments, AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException; 
 
-
+	AssemblerArgumentBuilder invoke();
+	
 	@SuppressWarnings("serial")
 	public static class AssemblerServiceException extends Exception {
 
@@ -38,9 +34,29 @@ public interface AssemblerService {
 	}
    
 	
-	public static interface pdfAssemblerArgumentBuilder extends AssemblerOptionsSetter, Transformable<pdfAssemblerArgumentBuilder> {
-			
+	public static interface AssemblerArgumentBuilder extends AssemblerOptionsSetter, Transformable<AssemblerArgumentBuilder> {
 		@Override
-		pdfAssemblerArgumentBuilder setFailOnError(boolean isFailOnError);
+		AssemblerArgumentBuilder setFailOnError(boolean isFailOnError);
+		
+		@Override
+		AssemblerOptionsSetter setContentRoot(PathOrUrl contentRoot);
+		
+		public AssemblerResult executeOn(Document ddx, Map<String,Object>sourceDocuments) throws AssemblerServiceException;
+		
+
+		@Override
+		default AssemblerArgumentBuilder setContentRoot(Path contentRoot) {
+			AssemblerOptionsSetter.super.setContentRoot(contentRoot);
+			return this;
+		}
+
+		@Override
+		default AssemblerArgumentBuilder setContentRoot(URL contentRoot) {
+			AssemblerOptionsSetter.super.setContentRoot(contentRoot);
+			return this;
+		}
+
+        	
 	}
+
 }

@@ -89,8 +89,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response)
 			throws BadRequestException, InternalServerErrorException, NotAcceptableException {
-		// TODO Auto-generated method stub
-		AssemblerService assemblerService = new AssemblerServiceImpl(assemblerServiceFactory.get(),
+			AssemblerService assemblerService = new AssemblerServiceImpl(assemblerServiceFactory.get(),
 				UsageContext.SERVER_SIDE);
 		log.debug("In Assemble Uploaded Files");
 		try {
@@ -105,7 +104,6 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
 			}
 		} catch (AssemblerServiceException | IOException e) {
-			// TODO Auto-generated catch block
 			throw new InternalServerErrorException("Internal Error while merging PDF. (" + e.getMessage() + ").", e);
 		} catch (Exception e) {
 			log.error("Error while Merging pdfs " + e.getMessage());
@@ -113,33 +111,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
 	}
 
-	private Document executeOn(Document ddx, Map<String, Object> mapOfDocuments, AssemblerService assemblerService)
-			throws AssemblerServiceException, IOException {
-		// TODO Auto-generated method stub
-        AssemblerOptionsSpec assemblerOptionSpec = new AssemblerOptionsSpecImpl();
-		log.info("FailonError=" + assemblerOptionSpec.isFailOnError());
-
-		AssemblerResult assemblerResult = assemblerService.invoke(ddx, mapOfDocuments, assemblerOptionSpec);
-		
-		Map<String, Document> allDocsReturned = assemblerResult.getDocuments();
-
-		Document concatenatedDoc = null;
-		// byte[] concatenatedPDF = null;
-
-		for (Entry<String, Document> docsMap : allDocsReturned.entrySet()) {
-			String concatenatedPDFName = (String) docsMap.getKey();
-			if (concatenatedPDFName.equalsIgnoreCase("concatenatedPDF.pdf")) {
-				Object pdf = docsMap.getValue();
-				concatenatedDoc = (Document) pdf;
-				// concatenatedPDF =
-				// org.apache.commons.io.IOUtils.toByteArray(concatenatedDoc.getInputStream());
-				break;
-			}
-		}
-		return concatenatedDoc;
-	}
-
-	private InputStream createDdxFile(SlingHttpServletRequest request, Map<String, Object> mapOfDocuments)
+	private InputStream createDdxFile(SlingHttpServletRequest request, Map<String, Object> sourceDocuments)
 			throws Exception {
 		InputStream xmlInputStream = null;
 
@@ -151,7 +123,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			org.w3c.dom.Document ddx = docBuilder.newDocument();
 			Element mainRootElement = ddx.createElementNS("http://ns.adobe.com/DDX/1.0/", "DDX");
 			ddx.appendChild(mainRootElement);
-			mainRootElement.appendChild(getPDFNodes(ddx, isMultipart, mapOfDocuments, request));
+			mainRootElement.appendChild(getPDFNodes(ddx, isMultipart, sourceDocuments, request));
 
 			DOMSource domSource = new DOMSource(ddx);
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -168,7 +140,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 	}
 
 	private Node getPDFNodes(org.w3c.dom.Document ddx, boolean isMultipart, Map<String, Object> mapOfDocuments,
-			SlingHttpServletRequest request) {
+			SlingHttpServletRequest request) throws InternalServerErrorException {
 		Element pdfResult = ddx.createElement("PDF");
 		pdfResult.setAttribute("result", "concatenatedPDF.pdf");
 		if (isMultipart) {
@@ -193,17 +165,38 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
 					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					throw new InternalServerErrorException("Internal Error while merging PDF. (" + e.getMessage() + ").", e);			}
 
 			}
 		}
 		return pdfResult;
 	}
+	
+	//
+	private Document executeOn(Document ddx, Map<String, Object> sourceDocuments, AssemblerService assemblerService)
+			throws AssemblerServiceException, IOException {
+        AssemblerOptionsSpec assemblerOptionSpec = new AssemblerOptionsSpecImpl();
+		log.info("FailonError=" + assemblerOptionSpec.isFailOnError());
+
+		AssemblerResult assemblerResult = assemblerService.invoke(ddx, sourceDocuments, assemblerOptionSpec);
+		
+		Map<String, Document> allDocsReturned = assemblerResult.getDocuments();
+
+		Document concatenatedDoc = null;
+		for (Entry<String, Document> docsMap : allDocsReturned.entrySet()) {
+			String concatenatedPDFName = (String) docsMap.getKey();
+			if (concatenatedPDFName.equalsIgnoreCase("concatenatedPDF.pdf")) {
+				Object pdf = docsMap.getValue();
+				concatenatedDoc = (Document) pdf;
+				break;
+			}
+		}
+		return concatenatedDoc;
+	}
+
 
 	private TraditionalDocAssemblerService getAdobeAssemblerService() {
-		return new AdobeDocAssemblerServiceAdapter(docFactory, adobeAssembleService);
+		return new AdobeDocAssemblerServiceAdapter(adobeAssembleService, docFactory);
 	}
 
 }
