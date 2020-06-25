@@ -42,6 +42,7 @@ import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
+import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerArgumentBuilder;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AdobeDocAssemblerServiceAdapter;
@@ -96,8 +97,9 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			Map<String, Object> sourceDocuments = new HashMap<String, Object>();
 			InputStream dDXFile = createDdxFile(request, sourceDocuments);
 			Document ddx = docFactory.create(dDXFile);
-		
-			try (AssemblerResult assemblerResult  = executeOn(ddx, sourceDocuments, assemblerService)) {
+			Boolean isFailonError = false;
+		    AssemblerArgumentBuilder argumentBuilder = assemblerService.invoke().transform(b->isFailonError == null ? b : b.setFailOnError(isFailonError));
+			try (AssemblerResult assemblerResult  = executeOn(ddx, sourceDocuments, assemblerService, argumentBuilder)) {
 				Map<String, Document> allDocsReturned = assemblerResult.getDocuments();
 
 				Document concatenatedDoc = null;
@@ -185,14 +187,9 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 	}
 	
 	
-	private AssemblerResult executeOn(Document ddx, Map<String, Object> sourceDocuments, AssemblerService assemblerService)
+	private AssemblerResult executeOn(Document ddx, Map<String, Object> sourceDocuments, AssemblerService assemblerService, AssemblerArgumentBuilder argumentBuilder)
 			throws AssemblerServiceException, IOException {
-        AssemblerOptionsSpec assemblerOptionSpec = new AssemblerOptionsSpecImpl();
-		log.info("FailonError=" + assemblerOptionSpec.isFailOnError());
-
-		AssemblerResult assemblerResult = assemblerService.invoke(ddx, sourceDocuments, assemblerOptionSpec);
-		
-		return assemblerResult;
+		return argumentBuilder.executeOn(ddx, sourceDocuments);	
 	}
 
 

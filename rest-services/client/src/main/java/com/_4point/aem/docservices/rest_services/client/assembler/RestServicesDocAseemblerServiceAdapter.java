@@ -2,6 +2,7 @@ package com._4point.aem.docservices.rest_services.client.assembler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -32,6 +33,7 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 
 	private static final String ASSEMBLE_DOCUMENT_PATH = "/services/AssemblerService/AssembleDocuments";
 	private static final String TEMPLATE_PARAM = "template";
+	private static final String DATA_PARAM = "data";
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
 	// Only callable from Builder
 	private RestServicesDocAseemblerServiceAdapter(WebTarget target) {
@@ -47,6 +49,7 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 	public AssemblerResult invoke(Document ddx, Map<String, Object> inputs,
 			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException, OperationException {
 		WebTarget assembleDocTarget = baseTarget.path(ASSEMBLE_DOCUMENT_PATH);
+		Boolean isFailOnError = adobAssemblerOptionSpec.isFailOnError();
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			
 			if (ddx != null) {
@@ -54,8 +57,14 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 			} else {
 				throw new NullPointerException("ddx can not be null");
 			}
+			
+			if (inputs != null) {
+				multipart.field(DATA_PARAM, inputs, MediaType.MULTIPART_FORM_DATA_TYPE);
+			} else {
+				throw new NullPointerException("inputs can not be null");
+			}
+			
 			if(adobAssemblerOptionSpec != null) {
-		        Boolean isFailOnError= adobAssemblerOptionSpec.isFailOnError();
 		        MultipartTransformer.create(multipart).transform((t) -> isFailOnError == null?t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()));
 			}
             Response result = postToServer(assembleDocTarget, multipart, APPLICATION_PDF);
@@ -85,16 +94,16 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
 			resultDoc.setContentType(APPLICATION_PDF.toString());
 			
-		   AssemblerResult assemblerResult = new AssemblerResultImpl();
-	
-		   return null;
+			Map<String, Document> getDocuments = new HashMap<String, Document>();
+			getDocuments.put("concatenatedPDF.pdf", resultDoc);
+			AssemblerResult assemblerResult = new AssemblerResultImpl(getDocuments);
+			return assemblerResult;
 		
 		}catch (IOException e) {
 			throw new AssemblerServiceException("I/O Error while reader merging document. (" + baseTarget.getUri().toString() + ").", e);
 		} catch (RestServicesServiceException e) {
 			throw new AssemblerServiceException("Error while POSTing to server", e);
 		}
-		//return null;
 		
 	}
 

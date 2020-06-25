@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 
 public interface AssemblerOptionsSetter {
+	
 	AssemblerOptionsSetter setFailOnError (boolean isFailOnError);
 
 	AssemblerOptionsSetter setContentRoot(PathOrUrl contentRoot);

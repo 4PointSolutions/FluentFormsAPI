@@ -9,6 +9,11 @@ public class AssemblerResultImpl implements AssemblerResult {
     
 	private Map<String, Document> getDocuments;  
 	
+	public AssemblerResultImpl(Map<String, Document> getDocuments) {
+		super();
+		this.getDocuments = getDocuments;
+	}
+	
 	
 	@Override
 	public Map<String, Document> getDocuments() {
