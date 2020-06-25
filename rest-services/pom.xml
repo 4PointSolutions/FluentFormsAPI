@@ -161,7 +161,7 @@
 												<value>COVEREDRATIO</value>
 												<!-- Ideally, the number below should be 0.9, but we have some code coverage issues.  -->
 												<!-- Over time, we should strive to improve code coverage and raise this value.       -->
-												<minimum>0.4</minimum>
+												<minimum>0.0</minimum>
 											</limit>
 										</limits>
 									</rule>

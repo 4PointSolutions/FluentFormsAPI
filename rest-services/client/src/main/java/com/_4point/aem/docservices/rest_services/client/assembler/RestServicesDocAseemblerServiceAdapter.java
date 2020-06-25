@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Supplier;
 
 import javax.ws.rs.client.Client;
@@ -49,7 +50,8 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 	public AssemblerResult invoke(Document ddx, Map<String, Object> inputs,
 			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException, OperationException {
 		WebTarget assembleDocTarget = baseTarget.path(ASSEMBLE_DOCUMENT_PATH);
-		Boolean isFailOnError = adobAssemblerOptionSpec.isFailOnError();
+		//don't set default value to false
+		Boolean isFailOnError = false;
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			
 			if (ddx != null) {
@@ -59,7 +61,9 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 			}
 			
 			if (inputs != null) {
-				multipart.field(DATA_PARAM, inputs, MediaType.MULTIPART_FORM_DATA_TYPE);
+				for(Entry<String, Object>doc : inputs.entrySet()) {
+				multipart.field(doc.getKey(), ((Document)doc.getValue()).getInputStream(), APPLICATION_PDF);
+				}
 			} else {
 				throw new NullPointerException("inputs can not be null");
 			}
@@ -102,7 +106,7 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 		}catch (IOException e) {
 			throw new AssemblerServiceException("I/O Error while reader merging document. (" + baseTarget.getUri().toString() + ").", e);
 		} catch (RestServicesServiceException e) {
-			throw new AssemblerServiceException("Error while POSTing to server", e);
+			throw new AssemblerServiceException("Error while posting to server", e);
 		}
 		
 	}
