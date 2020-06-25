@@ -34,7 +34,6 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 
 	private static final String ASSEMBLE_DOCUMENT_PATH = "/services/AssemblerService/AssembleDocuments";
 	private static final String TEMPLATE_PARAM = "template";
-	private static final String DATA_PARAM = "data";
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
 	// Only callable from Builder
 	private RestServicesDocAseemblerServiceAdapter(WebTarget target) {
@@ -88,15 +87,15 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 			}
 			
 			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if ( responseContentType == null || !APPLICATION_PDF.isCompatible(MediaType.valueOf(responseContentType))) {
-				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
+			if ( responseContentType == null ) {
+				String msg = "Response from AEM server was null  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
 				InputStream entityStream = (InputStream) result.getEntity();
 				msg += "\n" + inputStreamtoString(entityStream);
 				throw new AssemblerServiceException(msg);
 			}
 			
 			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-			resultDoc.setContentType(APPLICATION_PDF.toString());
+			resultDoc.setContentType(MediaType.APPLICATION_XML_TYPE.toString());
 			
 			Map<String, Document> getDocuments = new HashMap<String, Document>();
 			getDocuments.put("concatenatedPDF.pdf", resultDoc);
