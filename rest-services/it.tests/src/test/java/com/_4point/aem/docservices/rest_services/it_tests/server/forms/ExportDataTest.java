@@ -30,12 +30,14 @@ import com._4point.aem.docservices.rest_services.it_tests.ByteArrayString;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
+import com.adobe.fd.forms.api.DataFormat;
 
 public class ExportDataTest{
 
 
 	private static final String EXPORT_DATA_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/FormsService/ExportData";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
+	protected static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	
 	private static final boolean SAVE_RESULTS = false;
 	
@@ -59,8 +61,46 @@ public class ExportDataTest{
 
 		try (@SuppressWarnings("resource")
 		final FormDataMultiPart multipart = new FormDataMultiPart()
-													.field("pdforxdp", TestUtils.SAMPLE_FORM_XDP.toFile() ,APPLICATION_PDF)
-													.field("dataformat", MediaType.APPLICATION_XML)) {
+        .field("pdforxdp", TestUtils.SAMPLE_FORM_XDP.toFile() ,APPLICATION_PDF)
+        .field("dataformat", DataFormat.XmlData.name())) {
+			
+			Response result = target.request()
+									  .accept(MediaType.APPLICATION_XML_TYPE)
+									  .post(Entity.entity(multipart, multipart.getMediaType()));
+			
+			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
+			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
+			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
+			assertThat("Expected a xml to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, X, M, L"));
+			if (SAVE_RESULTS) {
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData.xml")));
+			}
+			assertEquals(MediaType.APPLICATION_XML_TYPE, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
+		}
+		
+		try (@SuppressWarnings("resource")
+		final FormDataMultiPart multipart = new FormDataMultiPart()
+        .field("pdforxdp", TestUtils.SAMPLE_FORM_XDP.toFile() ,APPLICATION_PDF)
+        .field("dataformat", DataFormat.XDP.name())) {
+			
+			Response result = target.request()
+									  .accept(APPLICATION_XDP)
+									  .post(Entity.entity(multipart, multipart.getMediaType()));
+			
+			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
+			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
+			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
+			assertThat("Expected a xml to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, X, M, L"));
+			if (SAVE_RESULTS) {
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData.xml")));
+			}
+			assertEquals(APPLICATION_XDP, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
+		}
+		
+		try (@SuppressWarnings("resource")
+		final FormDataMultiPart multipart = new FormDataMultiPart()
+        .field("pdforxdp", TestUtils.SAMPLE_FORM_XDP.toFile() ,APPLICATION_PDF)
+        .field("dataformat", DataFormat.Auto.name())) {
 			
 			Response result = target.request()
 									  .accept(MediaType.APPLICATION_XML_TYPE)

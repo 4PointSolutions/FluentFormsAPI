@@ -70,8 +70,8 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 		}
 		WebTarget exportDataTarget = baseTarget.path(EXPORT_DATA_PATH);
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field("pdforxdp", pdfOrXdp.getInputStream(),APPLICATION_PDF)
-					 .field("dataformat", MediaType.APPLICATION_XML);
+			multipart.field("pdforxdp", pdfOrXdp.getInputStream(), APPLICATION_PDF)
+			 .field("dataformat", DataFormat.XmlData.name());
 			
 		Response result = postToServer(exportDataTarget, multipart, MediaType.APPLICATION_XML_TYPE);//xml
 		StatusType resultStatus = result.getStatusInfo();
