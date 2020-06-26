@@ -61,7 +61,7 @@ public class ExportDataTest{
 
 		try (@SuppressWarnings("resource")
 		final FormDataMultiPart multipart = new FormDataMultiPart()
-        .field("pdforxdp", TestUtils.SAMPLE_FORM_XDP.toFile() ,APPLICATION_PDF)
+        .field("pdforxdp", TestUtils.SAMPLE_FORM_PDF.toFile() ,APPLICATION_PDF)
         .field("dataformat", DataFormat.XmlData.name())) {
 			
 			Response result = target.request()
@@ -71,7 +71,7 @@ public class ExportDataTest{
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
-			assertThat("Expected a xml to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, X, M, L"));
+			assertThat("Expected a xml to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, X, M, L,-, 1, ., 7"));
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData.xml")));
 			}
@@ -84,17 +84,17 @@ public class ExportDataTest{
         .field("dataformat", DataFormat.XDP.name())) {
 			
 			Response result = target.request()
-									  .accept(APPLICATION_XDP)
+									  .accept(MediaType.APPLICATION_XML_TYPE)
 									  .post(Entity.entity(multipart, multipart.getMediaType()));
 			
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
-			assertThat("Expected a xml to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, X, M, L"));
+			assertThat("Expected a xml to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, X, M, L,-, 1, ., 7"));
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData.xml")));
 			}
-			assertEquals(APPLICATION_XDP, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
+			assertEquals(MediaType.APPLICATION_XML_TYPE, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
 		}
 		
 		try (@SuppressWarnings("resource")
@@ -109,7 +109,7 @@ public class ExportDataTest{
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
-			assertThat("Expected a xml to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, X, M, L"));
+			assertThat("Expected a xml to be returned.", ByteArrayString.toString(resultBytes, 8), containsString("%, X, M, L,-, 1, ., 7"));
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData.xml")));
 			}
