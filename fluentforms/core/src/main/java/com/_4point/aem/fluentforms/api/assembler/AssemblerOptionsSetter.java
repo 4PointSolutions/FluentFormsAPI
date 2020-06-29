@@ -10,7 +10,17 @@ public interface AssemblerOptionsSetter {
 	AssemblerOptionsSetter setFailOnError (boolean isFailOnError);
 
 	AssemblerOptionsSetter setContentRoot(PathOrUrl contentRoot);
-	
+ 
+	AssemblerOptionsSetter setDefaultStyle(String defaultStyle);
+    
+	AssemblerOptionsSetter setFirstBatesNumber(int start);
+    
+	AssemblerOptionsSetter setLogLevel(String logLevel);
+   
+	AssemblerOptionsSetter setTakeOwnership(boolean takeOwnership);
+    
+	AssemblerOptionsSetter setValidateOnly(boolean validateOnly);
+
 	default AssemblerOptionsSetter setContentRoot(Path contentRoot) {
 		return setContentRoot(new PathOrUrl(contentRoot));
 	}
@@ -18,5 +28,5 @@ public interface AssemblerOptionsSetter {
 	default AssemblerOptionsSetter setContentRoot(URL contentRoot) {
 		return setContentRoot(new PathOrUrl(contentRoot));
 	}
-
+	
 }

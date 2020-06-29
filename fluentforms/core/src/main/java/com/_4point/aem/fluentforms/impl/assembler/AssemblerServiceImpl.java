@@ -1,6 +1,5 @@
 package com._4point.aem.fluentforms.impl.assembler;
 
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 
@@ -10,8 +9,11 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSetter;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
-import com._4point.aem.fluentforms.api.output.OutputService.GeneratePdfOutputArgumentBuilder;
 import com._4point.aem.fluentforms.impl.UsageContext;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
+import com.adobe.fd.assembler.client.PDFAConversionResult;
+import com.adobe.fd.assembler.client.PDFAValidationOptionSpec;
+import com.adobe.fd.assembler.client.PDFAValidationResult;
 
 public class AssemblerServiceImpl implements AssemblerService {
 	private final TraditionalDocAssemblerService adobDocAssemblerService;
@@ -31,6 +33,28 @@ public class AssemblerServiceImpl implements AssemblerService {
 		try {
 			return adobDocAssemblerService.invoke(ddx, sourceDocuments, assemblerOptionSpec);
 		} catch (Exception e) {
+			throw new AssemblerServiceException(e);
+		}
+	}
+
+	@Override
+	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) throws AssemblerServiceException {
+		Objects.requireNonNull(inDoc, "inDoc Document cannot be null.");
+		Objects.requireNonNull(options, "options cannot be null.");
+		try {
+		return adobDocAssemblerService.isPDFA(inDoc, options);
+		} catch(Exception e) {
+			throw new AssemblerServiceException(e);
+		}
+	}
+
+	@Override
+	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) throws AssemblerServiceException {
+		Objects.requireNonNull(inDoc, "options Document cannot be null.");
+		Objects.requireNonNull(options, "options cannot be null.");
+		try {
+		return adobDocAssemblerService.toPDFA(inDoc, options);
+		} catch( Exception e) {
 			throw new AssemblerServiceException(e);
 		}
 	}
@@ -56,6 +80,36 @@ public class AssemblerServiceImpl implements AssemblerService {
 			this.assemblerOptionsSpec.setContentRoot(contentRoot);
 			return this;
 		}
+
+		@Override
+		public AssemblerOptionsSetter setDefaultStyle(String defaultStyle) {
+			this.assemblerOptionsSpec.setDefaultStyle(defaultStyle);
+			return this;
+		}
+
+		@Override
+		public AssemblerOptionsSetter setFirstBatesNumber(int start) {
+			this.assemblerOptionsSpec.setFirstBatesNumber(start);
+			return this;
+		}
+
+		@Override
+		public AssemblerOptionsSetter setLogLevel(String logLevel) {
+			this.assemblerOptionsSpec.setLogLevel(logLevel);
+			return this;
+		}
+
+		@Override
+		public AssemblerOptionsSetter setTakeOwnership(boolean takeOwnership) {
+			this.assemblerOptionsSpec.setTakeOwnership(takeOwnership);
+			return this;
+		}
+
+		@Override
+		public AssemblerOptionsSetter setValidateOnly(boolean validateOnly) {
+			this.assemblerOptionsSpec.setValidateOnly(validateOnly);
+			return this;
+		}
         
 
 	}
@@ -64,5 +118,6 @@ public class AssemblerServiceImpl implements AssemblerService {
 	public AssemblerArgumentBuilder invoke() {
 		return new AssemblerArgumentBuilderImpl();
 	}
+
 
 }

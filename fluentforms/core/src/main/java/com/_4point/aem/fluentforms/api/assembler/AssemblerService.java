@@ -7,9 +7,18 @@ import java.util.Map;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.Transformable;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
+import com.adobe.fd.assembler.client.PDFAConversionResult;
+import com.adobe.fd.assembler.client.PDFAValidationOptionSpec;
+import com.adobe.fd.assembler.client.PDFAValidationResult;
 public interface AssemblerService {
 	
 	AssemblerResult invoke(Document ddx, Map<String,Object> sourceDocuments, AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException; 
+
+	
+	PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) throws AssemblerServiceException;
+    
+    PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) throws AssemblerServiceException;
 
 	AssemblerArgumentBuilder invoke();
 	

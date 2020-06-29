@@ -3,6 +3,7 @@ package com._4point.aem.fluentforms.impl.assembler;
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -17,6 +18,10 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com.adobe.fd.assembler.client.OperationException;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
+import com.adobe.fd.assembler.client.PDFAConversionResult;
+import com.adobe.fd.assembler.client.PDFAValidationOptionSpec;
+import com.adobe.fd.assembler.client.PDFAValidationResult;
 
 public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerService, AssemblerResult {
 
@@ -58,7 +63,16 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 				toAdobeAssemblerOptionSpec(adobAssemblerOptionSpec));
 		return toAssemblerResult(assemblerResult);
 	}
+	
+	@Override
+	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) {
+		return null;
+	}
 
+	@Override
+	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) {
+		return null;
+	}
 	
 	static com.adobe.fd.assembler.client.AssemblerOptionSpec toAdobeAssemblerOptionSpec(
 			AssemblerOptionsSpec assemblerOptionSpec) {
@@ -90,6 +104,54 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 	@Override
 	public void close() throws Exception {
 		
+	}
+
+	@Override
+	public List<String> getFailedBlockNames() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Document etJobLog() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getLastBatesNumber() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Map<String, List<String>> getMultipleResultsBlocks() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getNumRequestedBlocks() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public List<String> getSuccessfulBlockNames() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getSuccessfulDocumentNames() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<String, OperationException> getThrowables() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

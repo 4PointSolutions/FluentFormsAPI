@@ -29,19 +29,25 @@ import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 import com.adobe.fd.assembler.client.OperationException;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
+import com.adobe.fd.assembler.client.PDFAConversionResult;
+import com.adobe.fd.assembler.client.PDFAValidationOptionSpec;
+import com.adobe.fd.assembler.client.PDFAValidationResult;
 
-public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceAdapter implements TraditionalDocAssemblerService {
+public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceAdapter implements TraditionalDocAssemblerService {
 
 	private static final String ASSEMBLE_DOCUMENT_PATH = "/services/AssemblerService/AssembleDocuments";
-	private static final String TEMPLATE_PARAM = "template";
+	private static final String DATA_PARAM_NAME = "formTemplate";
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
+	private static final String FORM_DATA = "formData";
+	
 	// Only callable from Builder
-	private RestServicesDocAseemblerServiceAdapter(WebTarget target) {
+	private RestServicesDocAssemblerServiceAdapter(WebTarget target) {
 		super(target);
 	}
 
 	// Only callable from Builder
-	private RestServicesDocAseemblerServiceAdapter(WebTarget target, Supplier<String> correlationId) {
+	private RestServicesDocAssemblerServiceAdapter(WebTarget target, Supplier<String> correlationId) {
 		super(target, correlationId);
 	}
 
@@ -54,14 +60,15 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			
 			if (ddx != null) {
-				multipart.field(TEMPLATE_PARAM, ddx.getInputStream(), APPLICATION_PDF);
+				multipart.field(DATA_PARAM_NAME, ddx.getInputStream(), MediaType.APPLICATION_XML_TYPE);
 			} else {
 				throw new NullPointerException("ddx can not be null");
 			}
 			
 			if (inputs != null) {
-				for(Entry<String, Object>doc : inputs.entrySet()) {
-				multipart.field(doc.getKey(), ((Document)doc.getValue()).getInputStream(), APPLICATION_PDF);
+			//	multipart.field(FORM_DATA, inputs, MediaType.APPLICATION_XML_TYPE);	
+				for (Entry<String, Object> sourceDocs: inputs.entrySet()) {
+				  multipart.field(sourceDocs.getKey(), (Document)sourceDocs.getValue(), APPLICATION_PDF);	
 				}
 			} else {
 				throw new NullPointerException("inputs can not be null");
@@ -93,14 +100,12 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 				msg += "\n" + inputStreamtoString(entityStream);
 				throw new AssemblerServiceException(msg);
 			}
-			
-			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-			resultDoc.setContentType(MediaType.APPLICATION_XML_TYPE.toString());
-			
-			Map<String, Document> getDocuments = new HashMap<String, Document>();
-			getDocuments.put("concatenatedPDF.pdf", resultDoc);
-			AssemblerResult assemblerResult = new AssemblerResultImpl(getDocuments);
-			return assemblerResult;
+						
+			  Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream)result.getEntity()); 
+			  resultDoc.setContentType(APPLICATION_PDF.toString());
+			  Map<String, Document> mergedDocument = new HashMap<String, Document>();
+			  mergedDocument.put("concatenatedPDF.pdf", resultDoc);
+			  return new AssemblerResultImpl(mergedDocument);
 		
 		}catch (IOException e) {
 			throw new AssemblerServiceException("I/O Error while reader merging document. (" + baseTarget.getUri().toString() + ").", e);
@@ -109,6 +114,21 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 		}
 		
 	}
+	
+	@Override
+	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) {
+		
+		return null;
+	}
+
+	@Override
+	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) {
+		
+		return null;
+	}
+
+
+
 
 	public static AssemblerServiceBuilder builder() {
 		return new AssemblerServiceBuilder();
@@ -164,11 +184,9 @@ public class RestServicesDocAseemblerServiceAdapter extends RestServicesServiceA
 			return builder.createLocalTarget();
 		}
 		
-		public RestServicesDocAseemblerServiceAdapter build() {
-			return new RestServicesDocAseemblerServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
+		public RestServicesDocAssemblerServiceAdapter build() {
+			return new RestServicesDocAssemblerServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
 		}
 	}
-
-
 	
 }

@@ -33,6 +33,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
+import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
@@ -111,10 +112,10 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 						break;
 					}
 				}
-				String contentType = concatenatedDoc.getContentType();
+
+				String contentType = ContentType.APPLICATION_PDF.toString();
 				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
 				response.setContentType(contentType);
-				response.setContentLength((int) concatenatedDoc.length());
 				ServletUtils.transfer(concatenatedDoc.getInputStream(), response.getOutputStream());
 			}
 		} catch (AssemblerServiceException | IOException e) {
@@ -147,7 +148,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			xmlInputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
 		} catch (Exception e) {
-			throw new Exception("Error creating ddx xml file", e);
+			throw new Exception("Error creating ddx xml file ", e);
 		}
 
 		return xmlInputStream;
@@ -162,25 +163,26 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			for (Map.Entry<String, org.apache.sling.api.request.RequestParameter[]> pairs : params.entrySet()) {
 				final RequestParameter[] pArr = pairs.getValue();
 				final RequestParameter param = pArr[0];
-
 				try {
 					if (!param.isFormField()) {
 						final InputStream stream = param.getInputStream();
 						log.debug("the file name is " + param.getFileName());
+						System.out.println("the file name is " + param.getFileName());
 						log.debug("Got input Stream inside my servlet####" + stream.available());
 						Document document = docFactory.create(stream);
+						System.out.println("Got input Stream inside my servlet####" + stream.available());
 						mapOfDocuments.put(param.getFileName(), document);
 						Element pdfSourceElement = ddx.createElement("PDF");
 						pdfSourceElement.setAttribute("source", param.getFileName() + ".pdf");
 						pdfResult.appendChild(pdfSourceElement);
 						log.debug("The map size is " + mapOfDocuments.size());
+						System.out.println("The map size is " + mapOfDocuments.size());
 					} else {
 						log.debug("The form field is" + param.getString());
 
 					}
 				} catch (IOException e) {
 					throw new InternalServerErrorException("Internal Error while merging PDF. (" + e.getMessage() + ").", e);			}
-
 			}
 		}
 		return pdfResult;
