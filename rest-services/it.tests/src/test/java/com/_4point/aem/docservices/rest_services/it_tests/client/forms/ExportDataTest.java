@@ -7,8 +7,10 @@ import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.nio.file.Files;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -19,12 +21,14 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 
 import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
+import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
@@ -39,6 +43,7 @@ class ExportDataTest {
 	private FormsService underTest; 
 	private static String path = "src" +File.separator+ "test"+File.separator + "resources"+File.separator+ "ActualResults" ;
 	Document document;
+	private static final boolean SAVE_RESULTS = true;
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -65,20 +70,22 @@ class ExportDataTest {
 		 XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("/form1");
 		 Node output1 = (Node)xpath.evaluate(document1, XPathConstants.NODE);
 	     String content = output1.getTextContent();
-	  // System.out.println(content.contains("abcd"));
-		 
+	
 	     assertEquals("form1",output1.getNodeName());
 	  		
-	  	//assertEquals("abcd",output1.getTextContent());
+	  	 assertEquals("abcd", output1.getTextContent().trim());
 		 
-		 TransformerFactory transformerFactory = TransformerFactory.newInstance();
-         Transformer transformer = transformerFactory.newTransformer();
-         DOMSource source = new DOMSource((Node) document1);
-         StreamResult result = new StreamResult(new File(path +"/result.xml"));
-         transformer.transform(source, result);
-          
-		assertEquals(APPLICATION_XML,pdfResult.getContentType());
 		
-	
+         if (SAVE_RESULTS) {
+        	 TransformerFactory transformerFactory = TransformerFactory.newInstance();
+             Transformer transformer = transformerFactory.newTransformer();
+             DOMSource source = new DOMSource((Node) document1);
+            
+             StreamResult result = new StreamResult(new File(path +"/result.xml"));
+             transformer.transform(source, result);
+			}
+		
+         assertEquals(APPLICATION_XML,pdfResult.getContentType());
+		
 		}
 }
