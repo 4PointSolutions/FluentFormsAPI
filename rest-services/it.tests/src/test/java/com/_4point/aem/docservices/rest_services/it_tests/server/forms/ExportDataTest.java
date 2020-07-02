@@ -94,17 +94,21 @@ public class ExportDataTest{
 			 output1.normalize();
 			 String content = output1.getTextContent();
 			
-			 System.out.println(content.contains("abcd"));
+			 //System.out.println(content.contains("abcd"));
 			 
 			 assertEquals("form1",output1.getNodeName());
-		 
+			 
+			 assertEquals(APPLICATION_XML, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
+				
 		 
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData1.xml")));
 			}
-			assertEquals(APPLICATION_XML, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
-		
 		}
+		}
+		
+		@Test
+		void testExportDataXdp_Bytes() throws Exception {
 		try (@SuppressWarnings("resource")
 		final FormDataMultiPart multipart = new FormDataMultiPart()
         .field("pdforxdp", TestUtils.SAMPLE_FORM_XDP.toFile() ,APPLICATION_PDF)
@@ -117,14 +121,18 @@ public class ExportDataTest{
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
-			String s=resultBytes.toString();
 			
+			assertEquals(MediaType.APPLICATION_XML_TYPE, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
 			
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData2.xml")));
 			}
-			assertEquals(MediaType.APPLICATION_XML_TYPE, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
+			
 		}
+		}
+		
+		@Test
+		void testExportDataAuto_Bytes() throws Exception {
 		
 		try (@SuppressWarnings("resource")
 		final FormDataMultiPart multipart = new FormDataMultiPart()
@@ -138,12 +146,12 @@ public class ExportDataTest{
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), ()->"Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
-		
+			assertEquals(MediaType.APPLICATION_XML_TYPE, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData3.xml")));
 			}
 			assertEquals(MediaType.APPLICATION_XML_TYPE, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
 		}
 	}
-
+		
 	}
