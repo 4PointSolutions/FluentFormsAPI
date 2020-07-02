@@ -23,14 +23,14 @@ import com._4point.aem.docservices.rest_services.it_tests.Pdf.PdfException;
 
 public class TestUtils {
 
-	public static final String TEST_MACHINE_NAME = "localhost";
-	public static final int TEST_MACHINE_PORT = 4502;
+	public static final String TEST_MACHINE_NAME = "adep.test.theprincipal.net";
+	public static final int TEST_MACHINE_PORT = 80;
 	public static final String TEST_MACHINE_PORT_STR = Integer.toString(TEST_MACHINE_PORT);
 	public static final String TEST_USER = "admin";
 	public static final String TEST_USER_PASSWORD = "admin";
 	
-	private static final String SAMPLE_FORM_PDF_NAME = "SampleForm.pdf";
-	private static final String SAMPLE_FORM_XDP_NAME = "SampleForm.xdp";
+	private static final String SAMPLE_FORM_PDF_NAME = "SampleForm1.pdf";
+	private static final String SAMPLE_FORM_XDP_NAME = "SampleForm1.xdp";
 	private static final String SAMPLE_FORM_DATA_XML_NAME = "SampleForm_data.xml";
 
 	private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
@@ -74,4 +74,7 @@ public class TestUtils {
 			assertAll(dynamicTest, interactiveTest, rightsTest);
 		}
 	}
+	
 }
+	
+
