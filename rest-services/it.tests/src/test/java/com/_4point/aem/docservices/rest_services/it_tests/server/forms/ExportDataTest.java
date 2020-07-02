@@ -41,6 +41,7 @@ public class ExportDataTest{
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	protected static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	private static final MediaType APPLICATION_XML = new MediaType("application", "xml");
+	
 	private static final boolean SAVE_RESULTS = false;
 	
 	private WebTarget target;
@@ -59,20 +60,24 @@ public class ExportDataTest{
 	
 		try (@SuppressWarnings("resource")
 		final FormDataMultiPart multipart = new FormDataMultiPart()
-												.field("pdforxdp", TestUtils.SAMPLE_FORM_PDF.toFile() ,APPLICATION_PDF)
+												.field("pdforxdp", TestUtils.SAMPLE_FORM_WITH_DATA_PDF.toFile() ,APPLICATION_PDF)
 												.field("dataformat", DataFormat.XmlData.name())) {
 			
 			Response result = target.request()
 									  .accept(MediaType.APPLICATION_XML_TYPE)
 									  .post(Entity.entity(multipart, multipart.getMediaType()));
 			
-			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
+			assertTrue(result.hasEntity(), "Expected the response to have an entity. Status=" + result.getStatus());
 			
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 			
 		
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
 			
+			if (SAVE_RESULTS) {
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData1.xml")));
+			}
+
 			org.w3c.dom.Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(resultBytes)); 
 			 XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("/form1");
 			 Node output1 = (Node)xpath.evaluate(document, XPathConstants.NODE);
@@ -81,19 +86,16 @@ public class ExportDataTest{
 			 
 			 assertEquals("abcd", output1.getTextContent().trim());
 			
-			if (SAVE_RESULTS) {
-				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData1.xml")));
-			}
 			 assertEquals(APPLICATION_XML, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
 		}
 		}
 		
-		@Test
-		void testExportDataXdp_Bytes() throws Exception {
+	@Test
+	void testExportDataXdp_Bytes() throws Exception {
 		try (@SuppressWarnings("resource")
-		final FormDataMultiPart multipart = new FormDataMultiPart()
-												.field("pdforxdp", TestUtils.SAMPLE_FORM_XDP.toFile() ,APPLICATION_PDF)
-												.field("dataformat", DataFormat.XDP.name())) {
+			final FormDataMultiPart multipart = new FormDataMultiPart()
+														.field("pdforxdp", TestUtils.SAMPLE_FORM_WITH_DATA_PDF.toFile() ,APPLICATION_PDF)
+														.field("dataformat", DataFormat.XDP.name())) {
 			
 			Response result = target.request()
 									  .accept(MediaType.APPLICATION_XML_TYPE)
@@ -105,27 +107,30 @@ public class ExportDataTest{
 			
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
 			
-			org.w3c.dom.Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(resultBytes)); 
-			 XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("//form1");
-			 Node output1 = (Node)xpath.evaluate(document, XPathConstants.NODE);
-			
-			 assertEquals("form1",output1.getNodeName());
-			 
-			 assertEquals("abcd", output1.getTextContent().trim());
-			
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData4.xml")));
 			}
+
+			org.w3c.dom.Document document = DocumentBuilderFactory.newInstance()
+																  .newDocumentBuilder()
+																  .parse(new ByteArrayInputStream(resultBytes));
+			XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("//form1");
+			Node output1 = (Node) xpath.evaluate(document, XPathConstants.NODE);
+
+			assertEquals("form1", output1.getNodeName());
+
+			assertEquals("abcd", output1.getTextContent().trim());
+
 			assertEquals(MediaType.APPLICATION_XML_TYPE, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
 		}
-		}
+	}
 		
-		@Test
-		void testExportDataAuto_Bytes() throws Exception {
+	@Test
+	void testExportDataAuto_Bytes() throws Exception {
 		
 		try (@SuppressWarnings("resource")
 		final FormDataMultiPart multipart = new FormDataMultiPart()
-												.field("pdforxdp", TestUtils.SAMPLE_FORM_XDP.toFile() ,APPLICATION_PDF)
+												.field("pdforxdp", TestUtils.SAMPLE_FORM_WITH_DATA_PDF.toFile() ,APPLICATION_PDF)
 												.field("dataformat", DataFormat.Auto.name())) {
 			
 			Response result = target.request()
@@ -138,8 +143,12 @@ public class ExportDataTest{
 			
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
 			
+			if (SAVE_RESULTS) {
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData3.xml")));
+			}
+	
 			org.w3c.dom.Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(resultBytes)); 
-			 XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("//form1");
+			XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("//form1");
 			 Node output1 = (Node)xpath.evaluate(document, XPathConstants.NODE);
 			 			 
 			 assertEquals("form1",output1.getNodeName());
@@ -147,11 +156,8 @@ public class ExportDataTest{
 			 assertEquals("abcd", output1.getTextContent().trim());
 			
 			
-			if (SAVE_RESULTS) {
-				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData3.xml")));
-			}
 			assertEquals(MediaType.APPLICATION_XML_TYPE, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
 		}
 	}
 		
-	}
+}
