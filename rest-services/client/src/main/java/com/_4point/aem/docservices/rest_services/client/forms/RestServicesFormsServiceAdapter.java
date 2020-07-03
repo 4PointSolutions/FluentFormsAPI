@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
-
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
@@ -39,7 +38,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 
 	private static final String IMPORT_DATA_PATH = "/services/FormsService/ImportData";
 	private static final String RENDER_PDF_FORM_PATH = "/services/FormsService/RenderPdfForm";
-	
+	private static final String EXPORT_DATA_PATH="/services/FormsService/ExportData";
 	private static final String PDF_PARAM = "pdf";
 	private static final String DATA_PARAM = "data";
 	private static final String TEMPLATE_PARAM = "template";
@@ -66,8 +65,47 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 
 	@Override
 	public Document exportData(Document pdfOrXdp, DataFormat dataFormat) throws FormsServiceException {
-		throw new UnsupportedOperationException("exportData has not been implemented yet.");
+		if (pdfOrXdp == null &&dataFormat == null) {
+			throw new FormsServiceException("Internal Error, must provide document and its dataformat");
+		}
+		WebTarget exportDataTarget = baseTarget.path(EXPORT_DATA_PATH);
+		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
+			multipart.field("pdforxdp", pdfOrXdp.getInputStream(), APPLICATION_PDF)
+			 .field("dataformat", DataFormat.XmlData.name());
+			
+		Response result = postToServer(exportDataTarget, multipart, MediaType.APPLICATION_XML_TYPE);//xml
+		StatusType resultStatus = result.getStatusInfo();
+		
+		if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
+			String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
+			if (result.hasEntity()) {
+				InputStream entityStream = (InputStream) result.getEntity();
+				message += "\n" + inputStreamtoString(entityStream);
+			}
+			throw new FormsServiceException(message);
+		}
+		if (!result.hasEntity()) {
+			throw new FormsServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
+		}
+	
+		String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
+		if ( responseContentType == null ) {
+			String msg = "Response from AEM server was null.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
+			InputStream entityStream = (InputStream) result.getEntity();
+			msg += "\n" + inputStreamtoString(entityStream);
+			throw new FormsServiceException(msg);
+		}
+
+		Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+		resultDoc.setContentType(MediaType.APPLICATION_XML_TYPE.toString());
+		return resultDoc;
+		
+	} catch (IOException e) {
+		throw new FormsServiceException("I/O Error while exporting data. (" + baseTarget.getUri().toString() + ").", e);
+	} catch (RestServicesServiceException e) {
+		throw new FormsServiceException("Error while POSTing to server", e);
 	}
+}
 
 	@Override
 	public Document importData(Document pdf, Document data) throws FormsServiceException {

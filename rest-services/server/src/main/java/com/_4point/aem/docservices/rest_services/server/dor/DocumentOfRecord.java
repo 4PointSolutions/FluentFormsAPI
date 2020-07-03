@@ -41,6 +41,7 @@ import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
+import com._4point.aem.docservices.rest_services.server.docassurance.SecureDocument;
 import com._4point.aem.docservices.rest_services.server.dor.DocumentOfRecordService.DocumentOfRecordException;
 import com._4point.aem.docservices.rest_services.server.dor.DocumentOfRecordService.DocumentOfRecordOptions;
 import com._4point.aem.docservices.rest_services.server.dor.DocumentOfRecordService.DocumentOfRecordOptionsBuilder;
@@ -54,7 +55,7 @@ import com.adobe.forms.common.service.FileAttachmentWrapper;
 @SlingServletPaths("/services/DorService/Generate")
 public class DocumentOfRecord extends SlingAllMethodsServlet {
 
-	private static final Logger log = LoggerFactory.getLogger(ImportData.class);
+	private static final Logger log = LoggerFactory.getLogger(DocumentOfRecord.class);
 
 	private final Supplier<DocumentOfRecordService> dorServiceFactory = this::getAdobeDorService;
 
@@ -83,6 +84,9 @@ public class DocumentOfRecord extends SlingAllMethodsServlet {
 
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws BadRequestException, InternalServerErrorException, NotAcceptableException {
 		DorRenderFormParameters params = DorRenderFormParameters.readFormParameters(request);
+
+		log.debug("FormUri = '{}'", params.getFormURI());
+		log.debug("DataXml size = {}", params.getDataXml().length());
 
 		byte[] fileBytes = generateDoR(params);
 

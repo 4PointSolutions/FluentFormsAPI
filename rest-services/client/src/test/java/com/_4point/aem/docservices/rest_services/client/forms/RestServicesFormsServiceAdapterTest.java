@@ -47,6 +47,7 @@ import com._4point.aem.fluentforms.impl.forms.PDFFormRenderOptionsImpl;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
+import com.adobe.fd.forms.api.DataFormat;
 import com.adobe.fd.forms.api.RenderAtClient;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,6 +59,7 @@ class RestServicesFormsServiceAdapterTest {
 	private static final int TEST_MACHINE_PORT = 8080;
 
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
+	private static final MediaType APPLICATION_XML = new MediaType("application", "xml");
 	private static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	
 	@Mock(answer = Answers.RETURNS_SELF) Client client;	// answers used to mock Client's fluent interface. 
@@ -77,9 +79,58 @@ class RestServicesFormsServiceAdapterTest {
 	void setUp() throws Exception {
 	}
 
-	@Disabled
-	void testExportData() {
-		fail("Not yet implemented");
+	private enum ExportHappyPath {
+		SSL_AND_CORRELATION_ID(true, true), NO_SSL_OR_CORRLATION_ID(false, false);
+		
+		final boolean useSsl;
+		final boolean useCorrelationId;
+		
+		private ExportHappyPath(boolean useSsl, boolean useCorrelationId) {
+			this.useSsl = useSsl;
+			this.useCorrelationId = useCorrelationId;
+		}
+	};
+	@ParameterizedTest
+	@EnumSource(ExportHappyPath.class)
+	void testExportData_HappyPaths(ExportHappyPath codePath) throws Exception {
+
+		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
+
+		this.setupRestClientMocks1(codePath.useCorrelationId, responseData);
+		
+		com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter.FormsServiceBuilder adapterBuilder = RestServicesFormsServiceAdapter.builder()
+						.machineName(TEST_MACHINE_NAME)
+						.port(TEST_MACHINE_PORT)
+						.basicAuthentication("username", "password")
+						.useSsl(codePath.useSsl)
+						.clientFactory(()->client);
+		if (codePath.useCorrelationId) {
+			adapterBuilder.correlationId(()->CORRELATION_ID);
+		}
+		
+		underTest = adapterBuilder
+						.build();
+				
+		Document pdforxdp = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
+		DataFormat dataformat = com.adobe.fd.forms.api.DataFormat.XmlData;
+
+		Document pdfResult = underTest.exportData(pdforxdp, dataformat);
+		
+		// Make sure the correct URL is called.
+		this.performCommonValidations("ExportData", codePath.useSsl, codePath.useCorrelationId);
+
+		// Make sure that the arguments we passed in are transmitted correctly.
+		@SuppressWarnings("unchecked")
+		Entity<FormDataMultiPart> postedEntity = (Entity<FormDataMultiPart>)entity.getValue();
+		FormDataMultiPart postedData = postedEntity.getEntity();
+		
+		assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
+		validateDocumentFormField(postedData, "pdforxdp", new MediaType("application", "pdf"), pdforxdp.getInlineData());
+		
+		
+		// Make sure the response is correct.
+		assertArrayEquals(responseData.getInlineData(), pdfResult.getInlineData());
+		assertEquals(APPLICATION_XML, MediaType.valueOf(pdfResult.getContentType()));
 	}
 
 	private enum ImportHappyPath {
@@ -166,6 +217,23 @@ class RestServicesFormsServiceAdapterTest {
 		}
 	}
 	
+	private void setupRestClientMocks1(boolean setupCorrelationId, Document responseData) throws IOException {
+		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
+		when(client.target(machineName.capture())).thenReturn(target);
+		when(target.path(path.capture())).thenReturn(target);
+		when(target.request()).thenReturn(builder);
+		when(builder.accept(APPLICATION_XML)).thenReturn(builder);
+		when(builder.post(entity.capture())).thenReturn(response);
+		when(response.getStatusInfo()).thenReturn(statusType);
+		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
+		when(response.hasEntity()).thenReturn(true);
+		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
+		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn(APPLICATION_PDF.toString());
+
+		if (setupCorrelationId) {
+			when(builder.header(eq(CORRELATION_ID_HTTP_HDR), correlationId.capture())).thenReturn(builder);
+		}
+	}
 	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {
 		List<FormDataBodyPart> fieldValues = postedData.getFields(fieldName);
 		assertEquals(1, fieldValues.size());
@@ -399,4 +467,31 @@ class RestServicesFormsServiceAdapterTest {
 		fail("Not yet implemented");
 	}
 
+	@Test
+	void testExportData_SuccessButNoEntity() throws Exception {
+
+		when(client.target(machineName.capture())).thenReturn(target);
+		when(target.path(path.capture())).thenReturn(target);
+		when(target.request()).thenReturn(builder);
+		when(builder.accept(APPLICATION_XML)).thenReturn(builder);
+		when(builder.post(entity.capture())).thenReturn(response);
+		when(response.getStatusInfo()).thenReturn(statusType);
+		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
+		
+		underTest = RestServicesFormsServiceAdapter.builder()
+				.machineName(TEST_MACHINE_NAME)
+				.port(TEST_MACHINE_PORT)
+				.basicAuthentication("username", "password")
+				.useSsl(false)
+				.clientFactory(()->client)
+				.build();
+		
+		
+		Document pdforxdp = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
+		DataFormat  dataformat = com.adobe.fd.forms.api.DataFormat.XmlData;
+
+		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->underTest.exportData(pdforxdp, dataformat));
+		assertThat(ex.getMessage(), containsString("should never happen"));
+	}
+	
 }
