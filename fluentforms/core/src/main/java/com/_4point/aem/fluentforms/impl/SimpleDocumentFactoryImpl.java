@@ -105,6 +105,11 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 		return new SimpleDocumentImpl(url);
 	}
 	
+	/**
+	 * This method always returns the same immutable empty Document object.
+	 * 
+	 * @return empty document
+	 */
 	public static Document emptyDocument() {
 		return EMPTY_DOCUMENT;
 	}
@@ -243,6 +248,10 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 		
 	}
 	
+	/**
+	 * Immutable empty document implementation of the Document interface.
+	 *
+	 */
 	private static class EmptyDocumentImpl extends SimpleDocumentImpl implements Document {
 
 		private EmptyDocumentImpl() {
@@ -252,22 +261,22 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 		// Override and disable any methods that modify the state of this document in order to make it immutable.
 		@Override
 		public void setAttribute(String name, Object val) {
-			throw new UnsupportedOperationException("Changes to the Empty Document Object is not allowed!");
+			throw new UnsupportedOperationException("Changes to the Empty Document Object are not allowed!");
 		}
 
 		@Override
 		public void removeAttribute(String name) {
-			throw new UnsupportedOperationException("Changes to the Empty Document Object is not allowed!");
+			throw new UnsupportedOperationException("Changes to the Empty Document Object are not allowed!");
 		}
 
 		@Override
 		public void setContentType(String contentType) {
-			throw new UnsupportedOperationException("Changes to the Empty Document Object is not allowed!");
+			throw new UnsupportedOperationException("Changes to the Empty Document Object are not allowed!");
 		}
 
 		@Override
 		public void setMaxInlineSize(int maxInlineSize) {
-			throw new UnsupportedOperationException("Changes to the Empty Document Object is not allowed!");
+			throw new UnsupportedOperationException("Changes to the Empty Document Object are not allowed!");
 		}
 	}
 
