@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
@@ -34,8 +35,9 @@ public class FormsServiceImpl implements FormsService {
 	}
 
 	@Override
-	public Document exportData(Document pdfOrXdp, DataFormat dataFormat) throws FormsServiceException {
-		return adobeFormsService.exportData(pdfOrXdp, dataFormat);
+	public Optional<Document> exportData(Document pdfOrXdp, DataFormat dataFormat) throws FormsServiceException {
+		Document result = adobeFormsService.exportData(pdfOrXdp, dataFormat);
+		return result.isEmpty() ? Optional.empty() : Optional.of(result);	
 	}
 
 	@Override

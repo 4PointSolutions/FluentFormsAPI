@@ -11,6 +11,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
@@ -84,21 +85,27 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			}
 			throw new FormsServiceException(message);
 		}
-		if (!result.hasEntity()) {
-			throw new FormsServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
+		if (resultStatus.getStatusCode() != Status.NO_CONTENT.getStatusCode()) {
+			if (!result.hasEntity()) {
+				// If the status code is not "No content" then we expect there to be an entity.  Throw an exception if there isn't one.
+				throw new FormsServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
+			}
+			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
+			if (responseContentType == null) {
+				String msg = "Response from AEM server was null.  "
+						+ (responseContentType != null ? "content-type='" + responseContentType + "'"
+								: "content-type was null")
+						+ ".";
+				InputStream entityStream = (InputStream) result.getEntity();
+				msg += "\n" + inputStreamtoString(entityStream);
+				throw new FormsServiceException(msg);
+			}
+			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+			resultDoc.setContentType(MediaType.APPLICATION_XML_TYPE.toString());
+			return resultDoc;
+		} else {
+			return SimpleDocumentFactoryImpl.emptyDocument();
 		}
-	
-		String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-		if ( responseContentType == null ) {
-			String msg = "Response from AEM server was null.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
-			InputStream entityStream = (InputStream) result.getEntity();
-			msg += "\n" + inputStreamtoString(entityStream);
-			throw new FormsServiceException(msg);
-		}
-
-		Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-		resultDoc.setContentType(MediaType.APPLICATION_XML_TYPE.toString());
-		return resultDoc;
 		
 	} catch (IOException e) {
 		throw new FormsServiceException("I/O Error while exporting data. (" + baseTarget.getUri().toString() + ").", e);
