@@ -113,7 +113,7 @@ class GetHtml5FormTest {
 						if (scenario.dataType == DataType.BY_VALUE) {
 							assertArrayEquals(formData, (byte[])(request.getAttribute(DATA_PARAM)));
 						} else if (scenario.dataType == DataType.BY_REFERENCE) {
-							assertEquals(sampleData.toString(), request.getAttribute(DATA_REF_PARAM));
+							assertEquals(sampleData.toUri().toString(), request.getAttribute(DATA_REF_PARAM));
 						}
 						response.setContentType("text/html");
 						response.getOutputStream().write(resultDataBytes);

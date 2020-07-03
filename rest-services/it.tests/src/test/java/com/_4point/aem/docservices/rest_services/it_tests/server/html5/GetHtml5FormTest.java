@@ -47,7 +47,7 @@ public class GetHtml5FormTest {
 	private static final String AEM_RENDER_HTML5_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/content/xfaforms/profiles/default.html";
 	private static final String APPLICATION_XDP = "application/vnd.adobe.xdp+xml";
 
-	private static final boolean SAVE_RESULTS = true;
+	private static final boolean SAVE_RESULTS = false;
 	
 	private WebTarget target;
 
@@ -88,7 +88,7 @@ public class GetHtml5FormTest {
 	private enum HappyPathScenario {
 		FORM_REF_ONLY(FormType.BY_REFERENCE, DataType.NO_DATA),
 //		FORM_VAL_ONLY(FormType.BY_VALUE, DataType.NO_DATA),		// Not supported at this time
-//		FORM_REF_DATA_REF(FormType.BY_REFERENCE, DataType.BY_REFERENCE),	// Uncomment this.
+//		FORM_REF_DATA_REF(FormType.BY_REFERENCE, DataType.BY_REFERENCE),	// Doesn't work for some reason.  Isn't needed at this time.
 		FORM_REF_DATA_VAL(FormType.BY_REFERENCE, DataType.BY_VALUE),
 //		FORM_VAL_DATA_REF(FormType.BY_VALUE, DataType.BY_REFERENCE),		// Not supported at this time
 //		FORM_VAL_DATA_VAL(FormType.BY_VALUE, DataType.BY_VALUE)		// Not supported at this time
@@ -110,7 +110,7 @@ public class GetHtml5FormTest {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			switch (scenario.formType) {
 			case BY_REFERENCE:
-				multipart.field(TEMPLATE_PARAM_NAME, SAMPLE_FORM_XDP.toString());
+				multipart.field(TEMPLATE_PARAM_NAME, SAMPLE_FORM_XDP.toAbsolutePath().toString());
 				break;
 			case BY_VALUE:
 				multipart.field(TEMPLATE_PARAM_NAME, SAMPLE_FORM_XDP.toFile(), MediaType.valueOf(APPLICATION_XDP));

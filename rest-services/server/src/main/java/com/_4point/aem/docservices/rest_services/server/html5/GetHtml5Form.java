@@ -26,7 +26,6 @@ import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
-import com._4point.aem.docservices.rest_services.server.data.DataCacheService;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.impl.TemplateValues;
 import com._4point.aem.fluentforms.impl.UsageContext;
@@ -40,7 +39,7 @@ public class GetHtml5Form extends SlingAllMethodsServlet {
 	private static final String DATA_ATTRIBUTE_NAME = "data";
 	private static final String CONTENT_ROOT_ATTRIBUTE_NAME = "contentRoot";
 	private static final String TEMPLATE_ATTRIBUTE_NAME = "template";
-	private static final Logger log = LoggerFactory.getLogger(DataCacheService.class);
+	private static final Logger log = LoggerFactory.getLogger(GetHtml5Form.class);
 
 	@Override
 	protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -66,18 +65,6 @@ public class GetHtml5Form extends SlingAllMethodsServlet {
 		// Parse the Parameters
 		GetHtml5FormParameters parameters = GetHtml5FormParameters.readParameter(request, false);
 		
-		// TODO: Call AEM
-		// The following check is temporary - just to help out with testing and limit what I am expecting.
-		// I'm still in the stages where I am trying to determine *if* this will work.
-//		if (parameters.getTemplate().getType() != GetHtml5FormParameters.TemplateParameter.ParameterType.PathOrUrl) {
-//			throw new BadRequestException("Template must provided by reference. (" + parameters.getTemplate().getType().toString() + ").");
-//		}
-//		if (!parameters.getTemplate().getPathOrUrl().isPath()) {
-//			throw new BadRequestException("Template must provided by Path reference. (" + parameters.getTemplate().getPathOrUrl().toString() + ").");
-//		}
-//		if (parameters.getData().isPresent() && parameters.getData().get().getType() != GetHtml5FormParameters.DataParameter.ParameterType.ByteArray) {
-//			throw new BadRequestException("If provided, Data must be provided by value. (" + parameters.getData().get().getType().toString() + ").");
-//		}
 		try {
 			// Set the template and contentRoot parameters.
 			GetHtml5FormParameters.TemplateParameter templateParam = parameters.getTemplate();
@@ -86,11 +73,17 @@ public class GetHtml5Form extends SlingAllMethodsServlet {
 				if (templateLocation.isPath()) {
 					// template is a Path, so Rationalize template and contentRoot
 					TemplateValues templateValues = TemplateValues.determineTemplateValues(templateLocation.getPath(), parameters.getContentRoot(), UsageContext.CLIENT_SIDE);
-					request.setAttribute(TEMPLATE_ATTRIBUTE_NAME, templateValues.getTemplate().toString());
-					request.setAttribute(CONTENT_ROOT_ATTRIBUTE_NAME, templateValues.getContentRoot().toString());
+					String templateLocationStr = templateValues.getTemplate().toString();
+					String contentRootLocationStr = templateValues.getContentRoot().toString();
+					log.info("Setting '" + TEMPLATE_ATTRIBUTE_NAME + "' attribute in request to '" + templateLocationStr + "'.");
+					log.info("Setting '" + CONTENT_ROOT_ATTRIBUTE_NAME + "' attribute in request to '" + contentRootLocationStr + "'.");
+					request.setAttribute(TEMPLATE_ATTRIBUTE_NAME, templateLocationStr);
+					request.setAttribute(CONTENT_ROOT_ATTRIBUTE_NAME, contentRootLocationStr);
 				} else {
 					// template is an URL of some sort (either crx: or http:) so no context root.
-					request.setAttribute(TEMPLATE_ATTRIBUTE_NAME, templateLocation.toString());
+					String templateLocationStr = templateLocation.toString();
+					log.info("Setting '" + TEMPLATE_ATTRIBUTE_NAME + "' attribute in request to '" + templateLocationStr + "'.");
+					request.setAttribute(TEMPLATE_ATTRIBUTE_NAME, templateLocationStr);
 				}
 			} else {
 				// I would like to fix this in the future to allow for rendering templates by reference, but we don't need that
@@ -107,19 +100,20 @@ public class GetHtml5Form extends SlingAllMethodsServlet {
 		} catch (ServletException | IOException e) {
 			throw new InternalServerErrorException("Error while redirecting to html5 profile." + e.getMessage() == null ? "" : " (" + e.getMessage() + ")" , e);
 		}
-		
-		
-		// TODO: Fix up the response so that this server proxies the dependencies
-		// TODO: Return the fixed-up response.
 	}
 
 	private void setDataRequestParameter(SlingHttpServletRequest request, GetHtml5FormParameters.DataParameter dp) {
 		switch(dp.getType()) {
 		case ByteArray:
+			log.info("Setting '" + DATA_ATTRIBUTE_NAME + "' attribute in request.");
 			request.setAttribute(DATA_ATTRIBUTE_NAME, dp.getArray());
 			break;
 		case PathOrUrl:
-			request.setAttribute(DATA_REF_ATTRIBUTE_NAME, dp.getPathOrUrl().toString());
+			PathOrUrl dPathOrUrl = dp.getPathOrUrl();
+			log.info("PathOrUrl isUrl='" + dPathOrUrl.isUrl() + "', isPath='" + dPathOrUrl.isPath() + "'.");
+			String dataPath = dPathOrUrl.isPath() ? dPathOrUrl.getPath().toUri().toString() : dPathOrUrl.toString();
+			log.info("Setting '" + DATA_REF_ATTRIBUTE_NAME + "' attribute in request to '" + dataPath + "'.");
+			request.setAttribute(DATA_REF_ATTRIBUTE_NAME, dataPath);
 			break;
 		default:
 			throw new IllegalStateException("Unknown DataParameter Type (" + dp.getType().toString() + ").");
