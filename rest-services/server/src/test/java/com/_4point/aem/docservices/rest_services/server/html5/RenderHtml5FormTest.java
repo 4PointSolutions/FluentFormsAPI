@@ -32,7 +32,7 @@ import io.wcm.testing.mock.aem.junit5.AemContext;
 import uk.org.lidalia.slf4jtest.TestLogger;
 import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
-class GetHtml5FormTest {
+class RenderHtml5FormTest {
 	private static final String TEMPLATE_PARAM = "template";
 	private static final String DATA_PARAM = "data";
 	private static final String DATA_REF_PARAM = "dataRef";
@@ -47,9 +47,9 @@ class GetHtml5FormTest {
 
 	private final AemContext aemContext = new AemContext();
 
-	private TestLogger loggerCapture = TestLoggerFactory.getTestLogger(GetHtml5Form.class);
+	private TestLogger loggerCapture = TestLoggerFactory.getTestLogger(RenderHtml5Form.class);
 
-	private final GetHtml5Form underTest = new GetHtml5Form();
+	private final RenderHtml5Form underTest = new RenderHtml5Form();
 
 	private enum FormType { BY_VALUE, BY_REFERENCE };
 	private enum DataType { NO_DATA, BY_VALUE, BY_REFERENCE };
@@ -141,7 +141,7 @@ class GetHtml5FormTest {
 		
 		underTest.doPost(request, response);
 		
-		System.out.println("Status message='" + response.getStatusMessage() + "'.");
+		assertNull(response.getStatusMessage());
 		// Validate the result
 		assertEquals(SlingHttpServletResponse.SC_OK, response.getStatus());
 		assertEquals(TEXT_HTML, response.getContentType());

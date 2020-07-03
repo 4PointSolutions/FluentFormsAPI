@@ -33,13 +33,13 @@ import com._4point.aem.fluentforms.impl.UsageContext;
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=Html5 Service",
 		"sling.servlet.methods=" + HttpConstants.METHOD_POST})
-@SlingServletPaths("/services/Html5/GetHtml5Form")
-public class GetHtml5Form extends SlingAllMethodsServlet {
+@SlingServletPaths("/services/Html5/RenderHtml5Form")
+public class RenderHtml5Form extends SlingAllMethodsServlet {
 	private static final String DATA_REF_ATTRIBUTE_NAME = "dataRef";
 	private static final String DATA_ATTRIBUTE_NAME = "data";
 	private static final String CONTENT_ROOT_ATTRIBUTE_NAME = "contentRoot";
 	private static final String TEMPLATE_ATTRIBUTE_NAME = "template";
-	private static final Logger log = LoggerFactory.getLogger(GetHtml5Form.class);
+	private static final Logger log = LoggerFactory.getLogger(RenderHtml5Form.class);
 
 	@Override
 	protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -63,12 +63,12 @@ public class GetHtml5Form extends SlingAllMethodsServlet {
 
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws BadRequestException, InternalServerErrorException, NotAcceptableException {
 		// Parse the Parameters
-		GetHtml5FormParameters parameters = GetHtml5FormParameters.readParameter(request, false);
+		RenderHtml5FormParameters parameters = RenderHtml5FormParameters.readParameter(request, false);
 		
 		try {
 			// Set the template and contentRoot parameters.
-			GetHtml5FormParameters.TemplateParameter templateParam = parameters.getTemplate();
-			if (templateParam.getType() == GetHtml5FormParameters.TemplateParameter.ParameterType.PathOrUrl) {
+			RenderHtml5FormParameters.TemplateParameter templateParam = parameters.getTemplate();
+			if (templateParam.getType() == RenderHtml5FormParameters.TemplateParameter.ParameterType.PathOrUrl) {
 				PathOrUrl templateLocation = templateParam.getPathOrUrl();
 				if (templateLocation.isPath()) {
 					// template is a Path, so Rationalize template and contentRoot
@@ -102,7 +102,7 @@ public class GetHtml5Form extends SlingAllMethodsServlet {
 		}
 	}
 
-	private void setDataRequestParameter(SlingHttpServletRequest request, GetHtml5FormParameters.DataParameter dp) {
+	private void setDataRequestParameter(SlingHttpServletRequest request, RenderHtml5FormParameters.DataParameter dp) {
 		switch(dp.getType()) {
 		case ByteArray:
 			log.info("Setting '" + DATA_ATTRIBUTE_NAME + "' attribute in request.");
@@ -125,7 +125,7 @@ public class GetHtml5Form extends SlingAllMethodsServlet {
 	 * - Based on https://docs.adobe.com/content/help/en/experience-manager-65/forms/html5-forms/rendering-form-template.html
 	 *
 	 */
-	private static class GetHtml5FormParameters {
+	private static class RenderHtml5FormParameters {
 		private static final String TEMPLATE_PARAM = TEMPLATE_ATTRIBUTE_NAME;
 		private static final String DATA_PARAM = DATA_ATTRIBUTE_NAME;
 		private static final String CONTENT_ROOT_PARAM = CONTENT_ROOT_ATTRIBUTE_NAME;
@@ -138,7 +138,7 @@ public class GetHtml5Form extends SlingAllMethodsServlet {
 		private final Optional<URL> submitUrl;
 		private final Optional<DataParameter> data;
 		
-		public GetHtml5FormParameters(TemplateParameter template, PathOrUrl contentRoot, Optional<URL> submitUrl, Optional<DataParameter> data) {
+		public RenderHtml5FormParameters(TemplateParameter template, PathOrUrl contentRoot, Optional<URL> submitUrl, Optional<DataParameter> data) {
 			super();
 			this.template = template;
 			this.contentRoot = contentRoot;
@@ -162,7 +162,7 @@ public class GetHtml5Form extends SlingAllMethodsServlet {
 			return data;
 		}
 
-		public static GetHtml5FormParameters readParameter(SlingHttpServletRequest request, boolean validateXml) throws BadRequestException {
+		public static RenderHtml5FormParameters readParameter(SlingHttpServletRequest request, boolean validateXml) throws BadRequestException {
 			try {
 				TemplateParameter template = TemplateParameter.readParameter(getMandatoryParameter(request, TEMPLATE_PARAM));
 				PathOrUrl contentRoot = getOptionalParameter(request, CONTENT_ROOT_PARAM)
@@ -171,11 +171,11 @@ public class GetHtml5Form extends SlingAllMethodsServlet {
 														.orElse(DEFAULT_CONTENT_ROOT);	// If it wasn't supplied, provide a default.
 				Optional<URL> submitUrl = getOptionalParameter(request, SUBMIT_URL_PARAM)
 														.map(RequestParameter::getString)
-														.map(GetHtml5FormParameters::createSubmitUrl);
+														.map(RenderHtml5FormParameters::createSubmitUrl);
 				Optional<DataParameter> data = getOptionalParameter(request, DATA_PARAM)
 														.map(DataParameter::readParameter);
 
-				return new GetHtml5FormParameters(template, contentRoot, submitUrl, data);
+				return new RenderHtml5FormParameters(template, contentRoot, submitUrl, data);
 			} catch (IllegalArgumentException e) {
 				throw new BadRequestException("There was a problem with one of the incoming parameters.", e);
 			}

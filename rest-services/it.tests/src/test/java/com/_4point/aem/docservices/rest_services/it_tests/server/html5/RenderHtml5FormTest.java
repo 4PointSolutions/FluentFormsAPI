@@ -38,12 +38,12 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
-public class GetHtml5FormTest {
+public class RenderHtml5FormTest {
 
 	private static final String TEMPLATE_PARAM_NAME = "template";
 	private static final String CONTEXT_ROOT_PARAM_NAME = "contentRoot";
 	private static final String DATA_PARAM_NAME = "data";
-	private static final String GET_HTML5_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/Html5/GetHtml5Form";
+	private static final String RENDER_HTML5_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/Html5/RenderHtml5Form";
 	private static final String AEM_RENDER_HTML5_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/content/xfaforms/profiles/default.html";
 	private static final String APPLICATION_XDP = "application/vnd.adobe.xdp+xml";
 
@@ -57,11 +57,11 @@ public class GetHtml5FormTest {
 		target = ClientBuilder.newClient()
 							  .register(feature)
 							  .register(MultiPartFeature.class)
-							  .target(GET_HTML5_FORM_URL);
+							  .target(RENDER_HTML5_FORM_URL);
 	}
 
 	@Test
-	void testGetHtml5Form_FormRef() throws IOException {
+	void testRenderHtml5Form_FormRef() throws IOException {
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(TEMPLATE_PARAM_NAME, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString());
