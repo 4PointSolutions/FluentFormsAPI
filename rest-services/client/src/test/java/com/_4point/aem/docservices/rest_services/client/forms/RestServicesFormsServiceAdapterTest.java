@@ -96,7 +96,7 @@ class RestServicesFormsServiceAdapterTest {
 
 		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
 
-		this.setupRestClientMocks1(codePath.useCorrelationId, responseData);
+		this.setupRestClientMocks(codePath.useCorrelationId, responseData, APPLICATION_XML);
 		
 		com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter.FormsServiceBuilder adapterBuilder = RestServicesFormsServiceAdapter.builder()
 						.machineName(TEST_MACHINE_NAME)
@@ -151,7 +151,7 @@ class RestServicesFormsServiceAdapterTest {
 
 		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
 
-		this.setupRestClientMocks(codePath.useCorrelationId, responseData);
+		this.setupRestClientMocks(codePath.useCorrelationId, responseData, APPLICATION_PDF);
 		
 		com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter.FormsServiceBuilder adapterBuilder = RestServicesFormsServiceAdapter.builder()
 						.machineName(TEST_MACHINE_NAME)
@@ -199,41 +199,24 @@ class RestServicesFormsServiceAdapterTest {
 		}
 	}
 
-	private void setupRestClientMocks(boolean setupCorrelationId, Document responseData) throws IOException {
+	private void setupRestClientMocks(boolean setupCorrelationId, Document responseData, MediaType produces) throws IOException {
 		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
 		when(client.target(machineName.capture())).thenReturn(target);
 		when(target.path(path.capture())).thenReturn(target);
 		when(target.request()).thenReturn(builder);
-		when(builder.accept(APPLICATION_PDF)).thenReturn(builder);
+		when(builder.accept(produces)).thenReturn(builder);
 		when(builder.post(entity.capture())).thenReturn(response);
 		when(response.getStatusInfo()).thenReturn(statusType);
 		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
 		when(response.hasEntity()).thenReturn(true);
 		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
-		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn(APPLICATION_PDF.toString());
+		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn(produces.toString());
 
 		if (setupCorrelationId) {
 			when(builder.header(eq(CORRELATION_ID_HTTP_HDR), correlationId.capture())).thenReturn(builder);
 		}
 	}
 	
-	private void setupRestClientMocks1(boolean setupCorrelationId, Document responseData) throws IOException {
-		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
-		when(client.target(machineName.capture())).thenReturn(target);
-		when(target.path(path.capture())).thenReturn(target);
-		when(target.request()).thenReturn(builder);
-		when(builder.accept(APPLICATION_XML)).thenReturn(builder);
-		when(builder.post(entity.capture())).thenReturn(response);
-		when(response.getStatusInfo()).thenReturn(statusType);
-		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
-		when(response.hasEntity()).thenReturn(true);
-		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
-		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn(APPLICATION_PDF.toString());
-
-		if (setupCorrelationId) {
-			when(builder.header(eq(CORRELATION_ID_HTTP_HDR), correlationId.capture())).thenReturn(builder);
-		}
-	}
 	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {
 		List<FormDataBodyPart> fieldValues = postedData.getFields(fieldName);
 		assertEquals(1, fieldValues.size());
@@ -361,7 +344,7 @@ class RestServicesFormsServiceAdapterTest {
 
 		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
 
-		this.setupRestClientMocks(codePath.isSsl(), responseData);
+		this.setupRestClientMocks(codePath.isSsl(), responseData, APPLICATION_PDF);
 		
 		com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter.FormsServiceBuilder adapterBuilder = RestServicesFormsServiceAdapter.builder()
 						.machineName(TEST_MACHINE_NAME)
