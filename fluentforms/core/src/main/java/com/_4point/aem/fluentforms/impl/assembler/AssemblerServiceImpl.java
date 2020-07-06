@@ -58,13 +58,18 @@ public class AssemblerServiceImpl implements AssemblerService {
 			throw new AssemblerServiceException(e);
 		}
 	}
+	
+	protected TraditionalDocAssemblerService getAdobeAssemblerService() {
+		return adobDocAssemblerService;
+	}
+
 
 	private class AssemblerArgumentBuilderImpl implements AssemblerArgumentBuilder {
 
 		AssemblerOptionsSpec assemblerOptionsSpec = new AssemblerOptionsSpecImpl();
 
 		@Override
-		public AssemblerArgumentBuilder setFailOnError(boolean isFailOnError) {
+		public AssemblerArgumentBuilder setFailOnError(Boolean isFailOnError) {
 			this.assemblerOptionsSpec.setFailOnError(isFailOnError);
 			return this;
 		}
@@ -100,13 +105,13 @@ public class AssemblerServiceImpl implements AssemblerService {
 		}
 
 		@Override
-		public AssemblerOptionsSetter setTakeOwnership(boolean takeOwnership) {
+		public AssemblerOptionsSetter setTakeOwnership(Boolean takeOwnership) {
 			this.assemblerOptionsSpec.setTakeOwnership(takeOwnership);
 			return this;
 		}
 
 		@Override
-		public AssemblerOptionsSetter setValidateOnly(boolean validateOnly) {
+		public AssemblerOptionsSetter setValidateOnly(Boolean validateOnly) {
 			this.assemblerOptionsSpec.setValidateOnly(validateOnly);
 			return this;
 		}

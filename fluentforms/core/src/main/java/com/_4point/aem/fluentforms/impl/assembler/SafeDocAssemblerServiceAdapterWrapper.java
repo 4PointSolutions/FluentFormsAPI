@@ -15,11 +15,11 @@ import com.adobe.fd.assembler.client.PDFAValidationResult;
 
 
 public class SafeDocAssemblerServiceAdapterWrapper implements TraditionalDocAssemblerService {
-	private final TraditionalDocAssemblerService docAssemblerService;
+	private final TraditionalDocAssemblerService assemblerService;
 
 	public SafeDocAssemblerServiceAdapterWrapper(TraditionalDocAssemblerService docAssemblerService) {
 		super();
-		this.docAssemblerService = docAssemblerService;
+		this.assemblerService = docAssemblerService;
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public class SafeDocAssemblerServiceAdapterWrapper implements TraditionalDocAsse
 			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException, OperationException {
 		Objects.requireNonNull(ddx, "ddx Document cannot be null.");
 		Objects.requireNonNull(sourceDocuments, "sourceDocuments cannot be null.");
-		return docAssemblerService.invoke(ddx, sourceDocuments, adobAssemblerOptionSpec);
+		return assemblerService.invoke(ddx, sourceDocuments, adobAssemblerOptionSpec);
 
 	}
 
@@ -40,5 +40,10 @@ public class SafeDocAssemblerServiceAdapterWrapper implements TraditionalDocAsse
 	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) {		
 		return null;
 	}
+    
+	// This is required by the mock services.
+    public TraditionalDocAssemblerService getAssemblerService() {
+			return assemblerService;
+    }
 
 }

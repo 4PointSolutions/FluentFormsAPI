@@ -3,7 +3,12 @@ package com._4point.aem.fluentforms.testing.assembler;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
+import com._4point.aem.fluentforms.impl.assembler.SafeDocAssemblerServiceAdapterWrapper;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
+import com._4point.aem.fluentforms.impl.output.SafeOutputServiceAdapterWrapper;
+import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService.GenerateAssemblerResultArgs;
+import com._4point.aem.fluentforms.testing.output.MockTraditionalOutputService;
+import com._4point.aem.fluentforms.testing.output.MockTraditionalOutputService.GeneratePdfArgs;
 
 /**
  * MockAssemblerService can be used to mock calls to the OutputService.
@@ -53,6 +58,18 @@ public class MockAssemblerService extends AssemblerServiceImpl {
 	public static MockAssemblerService createExceptionalMock(String message) {
 		return new MockAssemblerService(ExceptionalMockTraditionalAssemblerService.create(message)); 
 	}
+	
+	
+	public GenerateAssemblerResultArgs getGenerateAssemblerResultArgs() {
+		return getMockService().getGenerateAssemblerResultArgs();
+	}
+   
+	
+
+	private MockTraditionalAssemblerService getMockService() {
+		return (MockTraditionalAssemblerService)((SafeDocAssemblerServiceAdapterWrapper)(this.getAdobeAssemblerService())).getAssemblerService();
+	}
+
 
 }
 

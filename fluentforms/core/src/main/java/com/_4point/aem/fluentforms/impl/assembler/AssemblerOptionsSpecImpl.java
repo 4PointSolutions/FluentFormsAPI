@@ -4,16 +4,17 @@ import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSetter;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 
-public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec{
+public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec {
+	
 	private Boolean isFailOnError;
 	private PathOrUrl contentRoot;
 	
 	@Override
-	public boolean isFailOnError() {
+	public Boolean isFailOnError() {
 		return isFailOnError;
 	}
 	@Override
-	public AssemblerOptionsSpecImpl setFailOnError(boolean isFailOnError) {
+	public AssemblerOptionsSpecImpl setFailOnError(Boolean isFailOnError) {
 		 this.isFailOnError = isFailOnError;
 		 return this;
 	}
@@ -43,12 +44,12 @@ public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec{
 	}
 	
 	@Override
-	public boolean isTakeOwnership() {		
+	public Boolean isTakeOwnership() {		
 		return false;
 	}
 	
 	@Override
-	public boolean isValidateOnly() {
+	public Boolean isValidateOnly() {
 		
 		return false;
 	}
@@ -72,13 +73,13 @@ public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec{
 	}
 	
 	@Override
-	public AssemblerOptionsSpec setTakeOwnership(boolean takeOwnership) {
+	public AssemblerOptionsSpec setTakeOwnership(Boolean takeOwnership) {
 		
 		return null;
 	}
 	
 	@Override
-	public AssemblerOptionsSpec setValidateOnly(boolean validateOnly) {
+	public AssemblerOptionsSpec setValidateOnly(Boolean validateOnly) {
 		
 		return null;
 	}

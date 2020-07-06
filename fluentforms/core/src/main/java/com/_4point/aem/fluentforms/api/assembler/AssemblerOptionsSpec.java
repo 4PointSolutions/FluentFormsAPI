@@ -8,10 +8,10 @@ public interface AssemblerOptionsSpec extends AssemblerOptionsSetter {
    
     String	getLogLevel();
    
-    boolean	isFailOnError();
+    Boolean	isFailOnError();
    
-    boolean	isTakeOwnership();
+    Boolean	isTakeOwnership();
    
-    boolean	isValidateOnly();
+    Boolean	isValidateOnly();
   
 }

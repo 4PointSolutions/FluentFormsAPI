@@ -7,7 +7,7 @@ import com._4point.aem.fluentforms.api.PathOrUrl;
 
 public interface AssemblerOptionsSetter {
 	
-	AssemblerOptionsSetter setFailOnError (boolean isFailOnError);
+	AssemblerOptionsSetter setFailOnError (Boolean isFailOnError);
 
 	AssemblerOptionsSetter setContentRoot(PathOrUrl contentRoot);
  
@@ -17,9 +17,9 @@ public interface AssemblerOptionsSetter {
     
 	AssemblerOptionsSetter setLogLevel(String logLevel);
    
-	AssemblerOptionsSetter setTakeOwnership(boolean takeOwnership);
+	AssemblerOptionsSetter setTakeOwnership(Boolean takeOwnership);
     
-	AssemblerOptionsSetter setValidateOnly(boolean validateOnly);
+	AssemblerOptionsSetter setValidateOnly(Boolean validateOnly);
 
 	default AssemblerOptionsSetter setContentRoot(Path contentRoot) {
 		return setContentRoot(new PathOrUrl(contentRoot));

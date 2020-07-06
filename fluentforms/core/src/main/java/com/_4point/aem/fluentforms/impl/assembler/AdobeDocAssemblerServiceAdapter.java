@@ -60,11 +60,11 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 		return null;
 	}
 	
-	static com.adobe.fd.assembler.client.AssemblerOptionSpec toAdobeAssemblerOptionSpec(
+    public static com.adobe.fd.assembler.client.AssemblerOptionSpec toAdobeAssemblerOptionSpec(
 			AssemblerOptionsSpec assemblerOptionSpec) {
 		com.adobe.fd.assembler.client.AssemblerOptionSpec adobeAssemblerOptionSpec = new com.adobe.fd.assembler.client.AssemblerOptionSpec();
 		setIfNotNull(adobeAssemblerOptionSpec::setFailOnError, assemblerOptionSpec.isFailOnError());
-		log.info("FailonError=" + assemblerOptionSpec.isFailOnError());
+		log.info("FailonError= " + assemblerOptionSpec.isFailOnError());
 		return adobeAssemblerOptionSpec;
 
 	}	
