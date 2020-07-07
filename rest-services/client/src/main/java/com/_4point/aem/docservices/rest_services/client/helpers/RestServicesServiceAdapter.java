@@ -1,16 +1,21 @@
 package com._4point.aem.docservices.rest_services.client.helpers;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 public abstract class RestServicesServiceAdapter {
@@ -40,6 +45,10 @@ public abstract class RestServicesServiceAdapter {
 		}
 		Response result;
 		try {
+			Map<String, List<FormDataBodyPart>> fields = multipart.getFields();
+			for(String s: fields.keySet()) {
+				System.out.println("S "+s);
+			}
 			result = invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType()));
 		} catch (javax.ws.rs.ProcessingException e) {
 			String msg = e.getMessage();

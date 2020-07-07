@@ -1,9 +1,9 @@
 package com._4point.aem.docservices.rest_services.server.assembler;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,11 +13,14 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Result;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
@@ -29,25 +32,22 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.ContentType;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
-import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
-import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerArgumentBuilder;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AdobeDocAssemblerServiceAdapter;
-import com._4point.aem.fluentforms.impl.assembler.AssemblerOptionsSpecImpl;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 
@@ -59,12 +59,13 @@ import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService
 public class AssembleDocuments extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(AssembleDocuments.class);
-
+	private static final String DDX = "ddx";
+	private static final String SOURCE_DOCUMENT_KEY = "sourceDocumentMap.key";
+	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
 	@Reference
 	private com.adobe.fd.assembler.service.AssemblerService adobeAssembleService;
 
 	private final Supplier<TraditionalDocAssemblerService> assemblerServiceFactory = this::getAdobeAssemblerService;
-	
 
 	private final DocumentFactory docFactory = DocumentFactory.getDefault();
 
@@ -84,41 +85,44 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			response.sendError(SlingHttpServletResponse.SC_NOT_ACCEPTABLE, nae.getMessage());
 		} catch (Exception e) { // Some exception we haven't anticipated.
 			log.error(e.getMessage() != null ? e.getMessage() : e.getClass().getName(), e); // Make sure this gets into
-																							// our log.
+			// our log.
 			throw e;
 		}
 	}
 
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response)
 			throws BadRequestException, InternalServerErrorException, NotAcceptableException {
-			AssemblerService assemblerService = new AssemblerServiceImpl(assemblerServiceFactory.get(),
+		AssemblerService assemblerService = new AssemblerServiceImpl(assemblerServiceFactory.get(),
 				UsageContext.SERVER_SIDE);
 		log.debug("In Assemble Uploaded Files");
 		try {
 			Map<String, Object> sourceDocuments = new HashMap<String, Object>();
-			InputStream dDXFile = createDdxFile(request, sourceDocuments);
-			Document ddx = docFactory.create(dDXFile);
+            createSourceDocumentMap(sourceDocuments, request);
+			RequestParameter parameter = request.getRequestParameter(DDX);
+	
+			
+			/*
+			 * RequestParameter[] requestParameters=
+			 * request.getRequestParameters(SOURCE_DOCUMENT_KEY); RequestParameter[]
+			 * requestParameters1= request.getRequestParameters(SOURCE_DOCUMENT_VALUE);
+			 * if(requestParameters.length == requestParameters1.length) { for (int i = 0; i
+			 * < requestParameters.length; i++) {
+			 * sourceDocuments.put(requestParameters[i].toString(), requestParameters1[i]);
+			 * } }
+			 */
+			 
 			Boolean isFailonError = false;
-		    AssemblerArgumentBuilder argumentBuilder = assemblerService.invoke().transform(b->isFailonError == null ? b : b.setFailOnError(isFailonError));
-			try (AssemblerResult assemblerResult  = executeOn(ddx, sourceDocuments, assemblerService, argumentBuilder)) {
-				Map<String, Document> allDocsReturned = assemblerResult.getDocuments();
-
-				Document concatenatedDoc = null;
-				for (Entry<String, Document> docsMap : allDocsReturned.entrySet()) {
-					String concatenatedPDFName = (String) docsMap.getKey();
-					if (concatenatedPDFName.equalsIgnoreCase("concatenatedPDF.pdf")) {
-						Object pdf = docsMap.getValue();
-						concatenatedDoc = (Document) pdf;
-						break;
-					}
-				}
-
-				String contentType = ContentType.APPLICATION_PDF.toString();
-				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-				response.setContentType(contentType);
-				ServletUtils.transfer(concatenatedDoc.getInputStream(), response.getOutputStream());
+			Document ddx = docFactory.create(parameter.getInputStream());
+		
+			AssemblerArgumentBuilder argumentBuilder = assemblerService.invoke()
+					.transform(b -> isFailonError == null ? b : b.setFailOnError(isFailonError));
+			try (AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
+				String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
+				response.setContentType(ContentType.APPLICATION_XML.getContentTypeStr());
+				response.getWriter().write(assemblerResultxml);
 			}
-		} catch (AssemblerServiceException | IOException e) {
+
+		} catch (AssemblerServiceException e) {
 			throw new InternalServerErrorException("Internal Error while merging PDF. (" + e.getMessage() + ").", e);
 		} catch (Exception e) {
 			log.error("Error while Merging pdfs " + e.getMessage());
@@ -126,74 +130,65 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
 	}
 
-	private InputStream createDdxFile(SlingHttpServletRequest request, Map<String, Object> sourceDocuments)
-			throws Exception {
-		InputStream xmlInputStream = null;
+	private void createSourceDocumentMap(Map<String, Object> sourceDocuments, SlingHttpServletRequest request) {
+		final java.util.Map<String, org.apache.sling.api.request.RequestParameter[]> params = request
+                .getRequestParameterMap();
+        for (Entry<String, org.apache.sling.api.request.RequestParameter[]> pairs : params
+                .entrySet()) {
+         
+            final org.apache.sling.api.request.RequestParameter[] pArr = pairs.getValue();
+            final org.apache.sling.api.request.RequestParameter param = pArr[0];
 
-		final boolean isMultipart = org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent(request);
-		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder = null;
-		try {
-			docBuilder = docBuilderFactory.newDocumentBuilder();
-			org.w3c.dom.Document ddx = docBuilder.newDocument();
-			Element mainRootElement = ddx.createElementNS("http://ns.adobe.com/DDX/1.0/", "DDX");
-			ddx.appendChild(mainRootElement);
-			mainRootElement.appendChild(getPDFNodes(ddx, isMultipart, sourceDocuments, request));
+            try {
+            	if(!pairs.getKey().equals(DDX) && !pairs.getKey().equals("isFailOnError")) {
+                if (!param.isFormField()) {
+                    final InputStream stream = param.getInputStream();
+                    log.debug("the file name is " + param.getFileName());
+                    log.debug("Got input Stream inside my servlet####" + stream.available());
+                    Document document = docFactory.create(stream);
+                    sourceDocuments.put(param.getFileName(), document);
+                    log.debug("The map size is " + sourceDocuments.size());
+                } else {
+                    log.debug("The form field is" + param.getString());
 
-			DOMSource domSource = new DOMSource(ddx);
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			Result outputTarget = new StreamResult(outputStream);
+                }
+            	}
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
-			TransformerFactory.newInstance().newTransformer().transform(domSource, outputTarget);
-			xmlInputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        }
+		
+	}
 
-		} catch (Exception e) {
-			throw new Exception("Error creating ddx xml file ", e);
+	private String convertAssemblerResultToxml(AssemblerResult assemblerResult)
+			throws ParserConfigurationException, IOException, TransformerException {
+		Map<String, Document> resultDocMap = assemblerResult.getDocuments();
+		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+		org.w3c.dom.Document document = documentBuilder.newDocument();
+		org.w3c.dom.Element root = document.createElement("assemblerResult");
+		document.appendChild(root);
+		for (Entry<String, Document> resultDoc : resultDocMap.entrySet()) {
+			Element result = document.createElement("resultDocument");
+			root.appendChild(result);
+			Attr attr = document.createAttribute("documentName");
+			attr.setValue(resultDoc.getKey());
+			result.setAttributeNode(attr);
+			Document concatenatedDoc = resultDoc.getValue();
+			String decoded = Base64.getEncoder().encodeToString(concatenatedDoc.getInlineData());
+			Element mergedDoc = document.createElement("mergedDoc");
+			mergedDoc.appendChild(document.createTextNode(decoded));
+			result.appendChild(mergedDoc);
 		}
-
-		return xmlInputStream;
+		DOMSource domSource = new DOMSource(document);
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		StringWriter sw = new StringWriter();
+		StreamResult sr = new StreamResult(sw);
+		transformer.transform(domSource, sr);
+		return sw.toString();
 	}
-
-	private Node getPDFNodes(org.w3c.dom.Document ddx, boolean isMultipart, Map<String, Object> mapOfDocuments,
-			SlingHttpServletRequest request) throws InternalServerErrorException {
-		Element pdfResult = ddx.createElement("PDF");
-		pdfResult.setAttribute("result", "concatenatedPDF.pdf");
-		if (isMultipart) {
-			Map<String, org.apache.sling.api.request.RequestParameter[]> params = request.getRequestParameterMap();
-			for (Map.Entry<String, org.apache.sling.api.request.RequestParameter[]> pairs : params.entrySet()) {
-				final RequestParameter[] pArr = pairs.getValue();
-				final RequestParameter param = pArr[0];
-				try {
-					if (!param.isFormField()) {
-						final InputStream stream = param.getInputStream();
-						log.debug("the file name is " + param.getFileName());
-						System.out.println("the file name is " + param.getFileName());
-						log.debug("Got input Stream inside my servlet####" + stream.available());
-						Document document = docFactory.create(stream);
-						System.out.println("Got input Stream inside my servlet####" + stream.available());
-						mapOfDocuments.put(param.getFileName(), document);
-						Element pdfSourceElement = ddx.createElement("PDF");
-						pdfSourceElement.setAttribute("source", param.getFileName() + ".pdf");
-						pdfResult.appendChild(pdfSourceElement);
-						log.debug("The map size is " + mapOfDocuments.size());
-						System.out.println("The map size is " + mapOfDocuments.size());
-					} else {
-						log.debug("The form field is" + param.getString());
-
-					}
-				} catch (IOException e) {
-					throw new InternalServerErrorException("Internal Error while merging PDF. (" + e.getMessage() + ").", e);			}
-			}
-		}
-		return pdfResult;
-	}
-	
-	
-	private AssemblerResult executeOn(Document ddx, Map<String, Object> sourceDocuments, AssemblerService assemblerService, AssemblerArgumentBuilder argumentBuilder)
-			throws AssemblerServiceException, IOException {
-		return argumentBuilder.executeOn(ddx, sourceDocuments);	
-	}
-
 
 	private TraditionalDocAssemblerService getAdobeAssemblerService() {
 		return new AdobeDocAssemblerServiceAdapter(adobeAssembleService, docFactory);

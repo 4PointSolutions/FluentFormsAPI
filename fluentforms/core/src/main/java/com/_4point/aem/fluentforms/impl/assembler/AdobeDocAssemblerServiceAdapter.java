@@ -83,7 +83,7 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 		 * pass false.
 		 */
 		setIfNotNull(adobeAssemblerOptionSpec::setFailOnError, assemblerOptionSpec.isFailOnError());
-		log.info("FailonError=" + assemblerOptionSpec.isFailOnError());
+		log.info("FailonError= " + assemblerOptionSpec.isFailOnError());
 		return adobeAssemblerOptionSpec;
 
 	}	

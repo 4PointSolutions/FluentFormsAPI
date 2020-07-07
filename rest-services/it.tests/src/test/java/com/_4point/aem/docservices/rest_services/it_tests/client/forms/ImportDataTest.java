@@ -1,19 +1,22 @@
 package com._4point.aem.docservices.rest_services.it_tests.client.forms;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.ACTUAL_RESULTS_DIR;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_DATA_XML;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_PDF;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.file.Files;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
 import com._4point.aem.docservices.rest_services.it_tests.ByteArrayString;
 import com._4point.aem.fluentforms.api.Document;
