@@ -2,6 +2,7 @@ package com._4point.aem.docservices.rest_services.server.forms;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.servlet.Servlet;
@@ -89,13 +90,18 @@ public class ExportData extends SlingAllMethodsServlet {
 			
 		
 			try {
-				try (Document result = formsService.exportData(pdforxdp, dataformat)) {
-				
-					String contentType = ContentType.APPLICATION_XML.toString();	// We know the result is always PDF.
-					ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-					response.setContentType(contentType);
-
-					ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+				Optional<Document> optResult = formsService.exportData(pdforxdp, dataformat);
+				if (optResult.isPresent()) {
+					try (Document result = optResult.get()) {
+					
+						String contentType = ContentType.APPLICATION_XML.toString();	// We know the result is always PDF.
+						ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
+						response.setContentType(contentType);
+	
+						ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+					}
+				} else {
+					response.setStatus(SlingHttpServletResponse.SC_NO_CONTENT);
 				}
 			} catch (FormsServiceException | IOException ex1) {
 				throw new InternalServerErrorException("Internal Error while importing data", ex1);

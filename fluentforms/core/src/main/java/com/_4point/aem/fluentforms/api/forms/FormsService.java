@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
@@ -19,7 +20,7 @@ import com.adobe.fd.forms.api.RenderAtClient;
 
 public interface FormsService {
 
-	Document exportData(Document pdfOrXdp, DataFormat dataFormat) throws FormsServiceException;
+	Optional<Document> exportData(Document pdfOrXdp, DataFormat dataFormat) throws FormsServiceException;
 
 	Document importData(Document pdf, Document data) throws FormsServiceException;
 

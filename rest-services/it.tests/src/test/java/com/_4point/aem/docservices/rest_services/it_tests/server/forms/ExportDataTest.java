@@ -6,6 +6,7 @@ import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -75,7 +76,7 @@ public class ExportDataTest{
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
 			
 			if (SAVE_RESULTS) {
-				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData1.xml")));
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testExportData_Bytes_result.xml")));
 			}
 
 			org.w3c.dom.Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(resultBytes)); 
@@ -108,7 +109,7 @@ public class ExportDataTest{
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
 			
 			if (SAVE_RESULTS) {
-				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData4.xml")));
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testExportDataXdp_Bytes_result.xml")));
 			}
 
 			org.w3c.dom.Document document = DocumentBuilderFactory.newInstance()
@@ -144,7 +145,7 @@ public class ExportDataTest{
 			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
 			
 			if (SAVE_RESULTS) {
-				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("ExportedData3.xml")));
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testExportDataAuto_Bytes_result.xml")));
 			}
 	
 			org.w3c.dom.Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(resultBytes)); 
@@ -159,5 +160,29 @@ public class ExportDataTest{
 			assertEquals(MediaType.APPLICATION_XML_TYPE, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
 		}
 	}
+
+	@Test
+	void testExportData_NoContent() throws Exception {
 		
+		try (@SuppressWarnings("resource")
+		final FormDataMultiPart multipart = new FormDataMultiPart()
+												.field("pdforxdp", TestUtils.SAMPLE_FORM_PDF.toFile() ,APPLICATION_PDF)
+												.field("dataformat", DataFormat.XmlData.name())) {
+			
+			Response result = target.request()
+									  .accept(MediaType.APPLICATION_XML_TYPE)
+									  .post(Entity.entity(multipart, multipart.getMediaType()));
+			
+			assertFalse(result.hasEntity(), "Expected the response to have no entity.");
+			
+			assertEquals(Response.Status.NO_CONTENT.getStatusCode(), result.getStatus(), ()->"Expected response to be 'No Content'.");
+			
+			byte[] resultBytes = IOUtils.toByteArray((InputStream)result.getEntity());
+			
+			if (SAVE_RESULTS) {
+				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testExportData_NoContent_result.xml")));
+			}
+		}
+	}
+
 }
