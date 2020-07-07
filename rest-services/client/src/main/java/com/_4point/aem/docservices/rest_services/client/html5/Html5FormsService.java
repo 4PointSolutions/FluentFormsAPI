@@ -2,6 +2,9 @@ package com._4point.aem.docservices.rest_services.client.html5;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.ws.rs.client.Client;
@@ -36,22 +39,38 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 	}
 	
 	public Document renderHtml5Form(PathOrUrl template) throws Html5FormsServiceException {
-		return renderHtml5Form(template, /* SimpleDocumentFactoryImpl.emptyDocument() */ null);
+		return renderHtml5Form(template, SimpleDocumentFactoryImpl.emptyDocument());
+	}
+
+	public Document renderHtml5Form(String template) throws Html5FormsServiceException {
+		return renderHtml5Form(PathOrUrl.from(template), SimpleDocumentFactoryImpl.emptyDocument());
+	}
+	
+	public Document renderHtml5Form(Path template) throws Html5FormsServiceException {
+		return renderHtml5Form(PathOrUrl.from(template), SimpleDocumentFactoryImpl.emptyDocument());
+	}
+	
+	public Document renderHtml5Form(URL template) throws Html5FormsServiceException {
+		return renderHtml5Form(PathOrUrl.from(template), SimpleDocumentFactoryImpl.emptyDocument());
 	}
 
 	public Document renderHtml5Form(PathOrUrl template, Document data) throws Html5FormsServiceException {
+		Objects.requireNonNull(template, "Template parameter cannot be null.");
+		Objects.requireNonNull(data, "Data parameter cannot be null.");
 		
 		WebTarget importDataTarget = baseTarget.path(RENDER_HTML5_PATH);
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(TEMPLATE_PARAM, template.toString());
 			
-			if (/* !data.isEmpty() */ data != null) {
-				multipart.field(DATA_PARAM, data.getInputStream(), MediaType.valueOf(data.getContentType()));
+			if (!data.isEmpty()) {
+				String contentType = data.getContentType();
+				// If the contentType is null, assume APPLICATION_XML
+				multipart.field(DATA_PARAM, data.getInputStream(), contentType != null ? MediaType.valueOf(contentType) : MediaType.APPLICATION_XML_TYPE);
 			}
 					 
 
-			Response result = postToServer(importDataTarget, multipart, APPLICATION_PDF);
+			Response result = postToServer(importDataTarget, multipart, MediaType.TEXT_HTML_TYPE);
 			
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
@@ -68,15 +87,15 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 			}
 
 			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if ( responseContentType == null || !APPLICATION_PDF.isCompatible(MediaType.valueOf(responseContentType))) {
-				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
+			if ( responseContentType == null || !MediaType.TEXT_HTML_TYPE.isCompatible(MediaType.valueOf(responseContentType))) {
+				String msg = "Response from AEM server was not HTML.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
 				InputStream entityStream = (InputStream) result.getEntity();
 				msg += "\n" + inputStreamtoString(entityStream);
 				throw new Html5FormsServiceException(msg);
 			}
 
 			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-			resultDoc.setContentType(APPLICATION_PDF.toString());
+			resultDoc.setContentType(responseContentType);
 			return resultDoc;
 			
 		} catch (IOException e) {
@@ -86,6 +105,23 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 		}
 	}
 
+	public Document renderHtml5Form(String template, Document data) throws Html5FormsServiceException {
+		return renderHtml5Form(PathOrUrl.from(template), data);
+	}
+	
+	public Document renderHtml5Form(Path template, Document data) throws Html5FormsServiceException {
+		return renderHtml5Form(PathOrUrl.from(template), data);
+	}
+	
+	public Document renderHtml5Form(URL template, Document data) throws Html5FormsServiceException {
+		return renderHtml5Form(PathOrUrl.from(template), data);
+	}
+
+
+	// The following methods have not been implemented yet for various reasons:
+	//  - The Adobe dataRef attribute is failing on the server
+	//  - Adobe doesn't support passing the value in directly, so we need to write additional code to make this variation work.
+	// They remain here "aspirationally" (i.e. I would like to see them implemented at some point in the future).
 //	public Document renderHtml5Form(PathOrUrl template, PathOrUrl data) throws Html5FormsServiceException {
 //		throw new UnsupportedOperationException("This method has not been implemented yet.");
 //	}
