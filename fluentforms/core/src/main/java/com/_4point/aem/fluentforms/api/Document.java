@@ -42,5 +42,14 @@ public interface Document extends AutoCloseable, Closeable, HasAttributes {
 		return this;
 	}
 	
+	public default boolean isEmpty() {
+		try {
+			return !(this.length() > 1);
+		} catch (IOException e) {		// Convert the checked IOException to an unchecked exception.  This should be rare enough that a user shouldn't have to handle it.
+			String exMsg = e.getMessage();
+			throw new IllegalStateException("I/O Error while determining the length of document." + (exMsg != null ? " (" + exMsg + ")" : ""), e);
+		}
+	}
+	
 	public static String CONTENT_TYPE_PDF = "application/pdf";
 }

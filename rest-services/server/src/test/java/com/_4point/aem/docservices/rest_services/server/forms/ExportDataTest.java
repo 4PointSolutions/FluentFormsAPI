@@ -108,6 +108,43 @@ class ExportDataTest {
 		assertEquals(dataformat.toString(), data.toString());		
 	}
 
+	@Test
+	void testDoPost_NoContent_Bytes(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
+
+		byte[] resultDataBytes = new byte[0];
+		MockTraditionalFormsService exportDataMock = mockExportData(resultDataBytes);
+
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+
+		// Set request parameters
+		String pdfDataBytes = "PDF Bytes";
+		String dataformat="XmlData";
+		//DataFormat dataformat =com.adobe.fd.forms.api.DataFormat.XmlData;
+		
+		request.addRequestParameter("pdforxdp", pdfDataBytes.getBytes(), APPLICATION_PDF);
+		request.addRequestParameter("dataformat", dataformat.getBytes(), APPLICATION_XML);
+
+		request.setHeader("Accept", APPLICATION_XML);
+
+		
+		underTest.doPost(request, response);
+		
+		// Validate the result
+		assertEquals(SlingHttpServletResponse.SC_NO_CONTENT, response.getStatus());
+		assertNull(response.getContentType());
+		//	assertEquals(resultDataBytes.length, response.getContentLength()); // We can't set the length because AEM throws an exception when we do.
+		
+		// Validate the inputs were used
+		ExportDataArgs exportDataArgs = exportDataMock.getExportDataArgs();
+		Document pdforxdp = exportDataArgs.getPdfOrXdp();
+		DataFormat data=exportDataArgs.getDataFormat();
+		byte[] pdforxdpData = pdforxdp.getInlineData();
+		assertArrayEquals(pdfDataBytes.getBytes(), pdforxdpData);
+		assertEquals(dataformat.toString(), data.toString());		
+	}
+
 	
 	@Test
 	void testDoPost_NoDataArg(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
@@ -220,7 +257,8 @@ class ExportDataTest {
 
 		@Override
 		public long length() throws IOException {
-			throw new UnsupportedOperationException("getLength() not supported on PDF-based documents under AEM 6.5!");
+			return this.exportDataResult.length();
+//			throw new UnsupportedOperationException("getLength() not supported on PDF-based documents under AEM 6.5!");
 		}
 
 		@Override

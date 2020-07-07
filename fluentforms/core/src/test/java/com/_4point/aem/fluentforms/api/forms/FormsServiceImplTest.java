@@ -4,7 +4,9 @@ import static com._4point.aem.fluentforms.api.TestUtils.SAMPLE_FORM;
 import static com._4point.aem.fluentforms.api.TestUtils.SAMPLE_FORMS_DIR;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,6 +15,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,8 +57,9 @@ class FormsServiceImplTest {
 
 	@Test
 	@DisplayName("Test exportData() Happy Path.")
-	void testExportData() throws Exception {
+	void testExportData_HappyPath() throws Exception {
 		Document result = Mockito.mock(Document.class);
+		Mockito.when(result.isEmpty()).thenReturn(Boolean.FALSE);
 		ArgumentCaptor<com.adobe.fd.forms.api.DataFormat> dataFormatArg = ArgumentCaptor.forClass(com.adobe.fd.forms.api.DataFormat.class);
 		ArgumentCaptor<Document> documenttArg = ArgumentCaptor.forClass(Document.class);
 		Mockito.when(adobeFormsService.exportData(documenttArg.capture(), dataFormatArg.capture())).thenReturn(result);
@@ -63,14 +67,34 @@ class FormsServiceImplTest {
 		DataFormat dataFormat = DataFormat.XmlData;
 		Document pdfOrXdp = Mockito.mock(Document.class);
 
-		Document exportedData = underTest.exportData(pdfOrXdp, dataFormat);
+		Optional<Document> exportedData = underTest.exportData(pdfOrXdp, dataFormat);
 
 		// Verify that all the results are correct.
-		assertTrue(documenttArg.getValue() == pdfOrXdp, "Expected the Document passed to AEM would match the Document object argument.");
-		assertTrue(dataFormatArg.getValue() == dataFormat, "Expected the DataFormat passed to AEM would match the DataFormat object argument.");
-		assertTrue(exportedData == result, "Expected the Document returned by AEM would match the Document result.");
+		assertSame(pdfOrXdp, documenttArg.getValue(), "Expected the Document passed to AEM would match the Document object argument.");
+		assertSame(dataFormat, dataFormatArg.getValue(), "Expected the DataFormat passed to AEM would match the DataFormat object argument.");
+		assertTrue(exportedData.isPresent(), "Expected the result to be present");
+		assertTrue(exportedData.get() == result, "Expected the Document returned by AEM would match the Document result.");
 	}
 
+	@Test
+	@DisplayName("Test exportData() Empty Result.")
+	void testExportData_EmptyResult() throws Exception {
+		Document result = Mockito.mock(Document.class);
+		Mockito.when(result.isEmpty()).thenReturn(Boolean.TRUE);
+		ArgumentCaptor<com.adobe.fd.forms.api.DataFormat> dataFormatArg = ArgumentCaptor.forClass(com.adobe.fd.forms.api.DataFormat.class);
+		ArgumentCaptor<Document> documenttArg = ArgumentCaptor.forClass(Document.class);
+		Mockito.when(adobeFormsService.exportData(documenttArg.capture(), dataFormatArg.capture())).thenReturn(result);
+
+		DataFormat dataFormat = DataFormat.XmlData;
+		Document pdfOrXdp = Mockito.mock(Document.class);
+
+		Optional<Document> exportedData = underTest.exportData(pdfOrXdp, dataFormat);
+
+		// Verify that all the results are correct.
+		assertSame(pdfOrXdp, documenttArg.getValue(), "Expected the Document passed to AEM would match the Document object argument.");
+		assertSame(dataFormat, dataFormatArg.getValue(), "Expected the DataFormat passed to AEM would match the DataFormat object argument.");
+		assertFalse(exportedData.isPresent(), "Expected the result to not be present");
+	}
 	@Test
 	@DisplayName("Test exportData() with null arguments throws exception and the exception contains the argument name.")
 	void testExportData_nullArguments() throws Exception {
@@ -107,9 +131,9 @@ class FormsServiceImplTest {
 		Document pdfResult = underTest.importData(pdf, data);
 
 		// Verify that all the results are correct.
-		assertTrue(pdfArg.getValue() == pdf, "Expected the pdf Document passed to AEM would match the pdf Document used.");
-		assertTrue(dataArg.getValue() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(pdfResult == result, "Expected the Document returned by AEM would match the Document result.");
+		assertSame(pdf, pdfArg.getValue(), "Expected the pdf Document passed to AEM would match the pdf Document used.");
+		assertSame(data, dataArg.getValue(), "Expected the data Document passed to AEM would match the data Docyment used.");
+		assertSame(pdfResult, result, "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -146,9 +170,9 @@ class FormsServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(svc.getDataArg(), data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -209,9 +233,9 @@ class FormsServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(fileUrl, new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Docyment used.");
+		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -257,9 +281,9 @@ class FormsServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(filename.getUrl(), new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Docyment used.");
+		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -274,9 +298,9 @@ class FormsServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(filePath.getPath().getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -321,9 +345,9 @@ class FormsServiceImplTest {
 		Document pdfResult = underTest.renderPDFForm(template, data, pdfFormRenderOptions);
 		
 		assertEquals(template, svc.getTemplateArg(), "Expected the template passed to AEM would match the template used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(svc.getOptionsArg() == pdfFormRenderOptions, "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -372,9 +396,9 @@ class FormsServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(template, Paths.get(templateArg.getValue()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(dataArg.getValue() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(optionsArg.getValue() == validationOptions, "Expected the validationOptions passed to AEM would match the validationOptions used.");
-		assertTrue(validationResult == result, "Expected the validation result returned by AEM would match the validation result.");
+		assertSame(data, dataArg.getValue(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(validationOptions, optionsArg.getValue(), "Expected the validationOptions passed to AEM would match the validationOptions used.");
+		assertSame(validationResult, result, "Expected the validation result returned by AEM would match the validation result.");
 	}
 
 	@Test
@@ -428,8 +452,8 @@ class FormsServiceImplTest {
 								   .executeOn(filePath, data);
 
 		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 
 		PDFFormRenderOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
@@ -458,8 +482,8 @@ class FormsServiceImplTest {
 									   .executeOn(filePath, data);
 
 		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 
 		PDFFormRenderOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
@@ -488,8 +512,8 @@ class FormsServiceImplTest {
 									   .executeOn(filePath, data);
 
 		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 
 		PDFFormRenderOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
@@ -504,8 +528,8 @@ class FormsServiceImplTest {
 				 				      .executeOn(filePath, data);
 
 		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 
 		PDFFormRenderOptionsImplTest.assertEmpty(svc.getOptionsArg(), filePath.getParent().toString());
 	}
@@ -533,8 +557,8 @@ class FormsServiceImplTest {
 				   .executeOn(fileUrl, data);
 
 		assertEquals(fileUrl, new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(pdfResult,  svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 
 		PDFFormRenderOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
@@ -549,8 +573,8 @@ class FormsServiceImplTest {
 				 				      .executeOn(fileUrl, data);
 
 		assertEquals(fileUrl, new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(pdfResult == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 
 		PDFFormRenderOptionsImplTest.assertEmpty(svc.getOptionsArg(), null);
 	}
@@ -572,8 +596,8 @@ class FormsServiceImplTest {
 
 		// Verify that all the results are correct.
 		assertEquals(template, Paths.get(templateArg.getValue()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(dataArg.getValue() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(validationResult == result, "Expected the validation result returned by AEM would match the validation result.");
+		assertSame(data, dataArg.getValue(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(validationResult,  result, "Expected the validation result returned by AEM would match the validation result.");
 		
 		ValidationOptions adobeValidationOptions = optionsArg.getValue();
 		assertEquals(SAMPLE_FORMS_DIR, adobeValidationOptions.getContentRoot());
@@ -595,8 +619,8 @@ class FormsServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(template, Paths.get(templateArg.getValue()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(dataArg.getValue() == data, "Expected the data Document passed to AEM would match the data Document used.");
-		assertTrue(validationResult == result, "Expected the validation result returned by AEM would match the validation result.");
+		assertSame(data, dataArg.getValue(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(validationResult,  result, "Expected the validation result returned by AEM would match the validation result.");
 
 		ValidationOptions adobeValidationOptions = optionsArg.getValue();
 		assertNull(adobeValidationOptions.getContentRoot());
