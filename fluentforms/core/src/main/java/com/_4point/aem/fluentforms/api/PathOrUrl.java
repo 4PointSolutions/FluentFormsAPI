@@ -32,13 +32,9 @@ public class PathOrUrl {
 	/**
 	 * Constructor
 	 * 
-	 * @deprecated
-	 * This constructor is slated to become private.  Use <code>PathOrUrl.from(Path path)</code> instead.
-	 * 
 	 * @param path
 	 */
-	@Deprecated
-	public PathOrUrl(Path path) {
+	private PathOrUrl(Path path) {
 		super();
 		this.path = path;
 		this.url = null;
@@ -48,13 +44,9 @@ public class PathOrUrl {
 	/**
 	 * Constructor
 	 * 
-	 * @deprecated
-	 * This constructor is slated to become private.  Use <code>PathOrUrl.from(URL url)</code> instead.
-	 * 
 	 * @param url
 	 */
-	@Deprecated
-	public PathOrUrl(URL url) {
+	private PathOrUrl(URL url) {
 		super();
 		this.path = null;
 		this.url = url;
@@ -144,25 +136,11 @@ public class PathOrUrl {
 	/**
 	 * Static constructor
 	 * 
-	 * @deprecated
-	 * Use <code>PathOrUrl.from(String string)</code> instead.
-	 * 
-	 * @param pathOrUrl
-	 * @return
-	 */
-	@Deprecated
-	public static PathOrUrl fromString(final String pathOrUrl) {
-		return from(pathOrUrl);
-	}
-	
-	/**
-	 * Static constructor
-	 * 
 	 * @param pathOrUrl
 	 * @return
 	 */
 	public static PathOrUrl from(final String pathOrUrl) {
-		String trimmedPathOrUrl = Objects.requireNonNull(pathOrUrl, "Null Path or Url provided.").trim();
+		String trimmedPathOrUrl = Objects.requireNonNull(pathOrUrl, "Null Path or Url String provided.").trim();
 		if (trimmedPathOrUrl.isEmpty()) {
 			throw new IllegalArgumentException("Empty Path or Url provided.");
 		}
@@ -195,7 +173,7 @@ public class PathOrUrl {
 	 * @return
 	 */
 	public static PathOrUrl from(final Path path) {
-		return new PathOrUrl(path);
+		return new PathOrUrl(Objects.requireNonNull(path, "Null Path provided."));
 	}
 	
 	/**
@@ -205,7 +183,7 @@ public class PathOrUrl {
 	 * @return
 	 */
 	public static PathOrUrl from(final URL url) {
-		return new PathOrUrl(url);
+		return new PathOrUrl(Objects.requireNonNull(url, "Null Url provided."));
 	}
 	
 	@Override
