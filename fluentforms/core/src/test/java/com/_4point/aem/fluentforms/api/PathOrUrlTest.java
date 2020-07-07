@@ -72,12 +72,6 @@ class PathOrUrlTest {
 		IllegalArgumentException iaex = assertThrows(IllegalArgumentException.class, ()->PathOrUrl.from(str));
 	}
 
-	@ParameterizedTest
-	@NullSource
-	void testFromString_Null(String str) {
-		NullPointerException iaex = assertThrows(NullPointerException.class, ()->PathOrUrl.from(str));
-	}
-
 	@EnabledOnOs(OS.WINDOWS)	// Only execute on Windows, because crap://more/crap is a valid unix path.
 	@ParameterizedTest
 	@ValueSource(strings = { "crap://more/crap" })
@@ -88,6 +82,16 @@ class PathOrUrlTest {
 	@Test
 	void testFromString_Null() {
 		assertThrows(NullPointerException.class, ()->PathOrUrl.from((String)null));
+	}
+	
+	@Test
+	void testFromPath_Null() {
+		assertThrows(NullPointerException.class, ()->PathOrUrl.from((Path)null));
+	}
+	
+	@Test
+	void testFromUrl_Null() {
+		assertThrows(NullPointerException.class, ()->PathOrUrl.from((URL)null));
 	}
 	
 	private enum FilenameScenario {
