@@ -82,9 +82,10 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 			
 			if (inputs != null) { 			
 				for (Entry<String, Object> param: inputs.entrySet()) {	
-				    	  multipart.field(param.getKey(), ((Document)param.getValue()).getInputStream(), APPLICATION_PDF);		     
-				 }
-			  
+					      multipart.field(SOURCE_DOCUMENT_KEY, param.getKey());
+				    	  multipart.field(SOURCE_DOCUMENT_VALUE, ((Document)param.getValue()).getInputStream(),
+				    			  MediaType.MULTIPART_FORM_DATA_TYPE);		     
+				 }			  
 			 } else { 
 				 throw new NullPointerException("inputs can not be null"); 
 			 }

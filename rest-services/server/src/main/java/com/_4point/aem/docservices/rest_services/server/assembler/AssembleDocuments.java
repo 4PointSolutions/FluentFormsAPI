@@ -1,7 +1,10 @@
 package com._4point.aem.docservices.rest_services.server.assembler;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.Base64;
 import java.util.HashMap;
@@ -94,22 +97,24 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			throws BadRequestException, InternalServerErrorException, NotAcceptableException {
 		AssemblerService assemblerService = new AssemblerServiceImpl(assemblerServiceFactory.get(),
 				UsageContext.SERVER_SIDE);
-		log.debug("In Assemble Uploaded Files");
+		log.info("In Assemble Uploaded Files");
 		try {
 			Map<String, Object> sourceDocuments = new HashMap<String, Object>();
-            createSourceDocumentMap(sourceDocuments, request);
+           // createSourceDocumentMap(sourceDocuments, request);
 			RequestParameter parameter = request.getRequestParameter(DDX);
 	
 			
-			/*
-			 * RequestParameter[] requestParameters=
-			 * request.getRequestParameters(SOURCE_DOCUMENT_KEY); RequestParameter[]
-			 * requestParameters1= request.getRequestParameters(SOURCE_DOCUMENT_VALUE);
-			 * if(requestParameters.length == requestParameters1.length) { for (int i = 0; i
-			 * < requestParameters.length; i++) {
-			 * sourceDocuments.put(requestParameters[i].toString(), requestParameters1[i]);
-			 * } }
-			 */
+			
+			  RequestParameter[] requestParameters= request.getRequestParameters(SOURCE_DOCUMENT_KEY);
+              RequestParameter[] requestParameters1= request.getRequestParameters(SOURCE_DOCUMENT_VALUE);
+			  if(requestParameters.length == requestParameters1.length) { 
+				  for (int i = 0; i < requestParameters.length; i++) {
+					  log.info("Document Name: "+requestParameters[i].toString());
+						
+			      sourceDocuments.put(requestParameters[i].toString(),  docFactory.create(requestParameters1[i].getInputStream()));
+			  } 
+		  }
+			 
 			 
 			Boolean isFailonError = false;
 			Document ddx = docFactory.create(parameter.getInputStream());
@@ -117,6 +122,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			AssemblerArgumentBuilder argumentBuilder = assemblerService.invoke()
 					.transform(b -> isFailonError == null ? b : b.setFailOnError(isFailonError));
 			try (AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
+				log.info("assemblerResult : "+assemblerResult);
 				String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
 				response.setContentType(ContentType.APPLICATION_XML.getContentTypeStr());
 				response.getWriter().write(assemblerResultxml);
@@ -141,17 +147,18 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
             try {
             	if(!pairs.getKey().equals(DDX) && !pairs.getKey().equals("isFailOnError")) {
-                if (!param.isFormField()) {
+                //if (!param.isFormField()) {
                     final InputStream stream = param.getInputStream();
-                    log.debug("the file name is " + param.getFileName());
-                    log.debug("Got input Stream inside my servlet####" + stream.available());
+                    log.info("the file name is " + param.getFileName());
+                    log.info("Got input Stream inside my servlet####" + stream.available());
                     Document document = docFactory.create(stream);
                     sourceDocuments.put(param.getFileName(), document);
-                    log.debug("The map size is " + sourceDocuments.size());
-                } else {
-                    log.debug("The form field is" + param.getString());
-
-                }
+                    log.info("The map size is " + sourceDocuments.size());
+					/*
+					 * } else { log.info("The form field is" + param.getString());
+					 * 
+					 * }
+					 */
             	}
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -193,5 +200,5 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 	private TraditionalDocAssemblerService getAdobeAssemblerService() {
 		return new AdobeDocAssemblerServiceAdapter(adobeAssembleService, docFactory);
 	}
-
+	
 }

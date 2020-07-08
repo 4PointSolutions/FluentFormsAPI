@@ -45,10 +45,12 @@ public abstract class RestServicesServiceAdapter {
 		}
 		Response result;
 		try {
-			Map<String, List<FormDataBodyPart>> fields = multipart.getFields();
-			for(String s: fields.keySet()) {
-				System.out.println("S "+s);
-			}
+		multipart.getFields().forEach((k, v) ->
+		 {
+			 System.out.println("Key: "+k);
+
+		 });;
+			
 			result = invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType()));
 		} catch (javax.ws.rs.ProcessingException e) {
 			String msg = e.getMessage();
