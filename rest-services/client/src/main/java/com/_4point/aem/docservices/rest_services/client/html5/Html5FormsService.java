@@ -64,9 +64,7 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 			multipart.field(TEMPLATE_PARAM, template.toString());
 			
 			if (!data.isEmpty()) {
-				String contentType = data.getContentType();
-				// If the contentType is null, assume APPLICATION_XML
-				multipart.field(DATA_PARAM, data.getInputStream(), contentType != null ? MediaType.valueOf(contentType) : MediaType.APPLICATION_XML_TYPE);
+				multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE);
 			}
 					 
 
