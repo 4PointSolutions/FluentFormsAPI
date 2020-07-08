@@ -1,6 +1,5 @@
 package com._4point.aem.fluentforms.testing.assembler;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +18,10 @@ import com.adobe.fd.assembler.client.PDFAValidationResult;
 public class MockTraditionalAssemblerService implements TraditionalDocAssemblerService {
 
 	private final AssemblerResult DUMMY_ASSEMBLER_RESULT;
+
+	public AssemblerResult getDUMMY_ASSEMBLER_RESULT() {
+		return DUMMY_ASSEMBLER_RESULT;
+	}
 
 	AssemblerResult assemblerResult;
 	GenerateAssemblerResultArgs generateAssemblerResultArgs;
@@ -92,11 +95,11 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 
 		@Override
 		public List<String> getFailedBlockNames() {
-			return Collections.emptyList();
+			return null;
 		}
 
 		@Override
-		public Document etJobLog() {
+		public Document getJobLog() {
 			return null;
 		}
 
@@ -117,19 +120,19 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 
 		@Override
 		public List<String> getSuccessfulBlockNames() {
-			return Collections.emptyList();
+			return null;
 		}
 
 		@Override
 		public List<String> getSuccessfulDocumentNames() {
-			return Collections.emptyList();
+			return null;
 		}
 
 		@Override
 		public Map<String, OperationException> getThrowables() {
 			return null;
 		}
-
+	
 	}
 
 }

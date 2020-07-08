@@ -12,7 +12,7 @@ public interface AssemblerResult {
 	
 	 List<String> getFailedBlockNames();
     
-     Document etJobLog();
+	 Document getJobLog();
      
      int getLastBatesNumber();
      

@@ -3,7 +3,7 @@ package com._4point.aem.fluentforms.testing.assembler;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
-import com._4point.aem.fluentforms.impl.assembler.SafeDocAssemblerServiceAdapterWrapper;
+import com._4point.aem.fluentforms.impl.assembler.SafeAssemblerServiceAdapterWrapper;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 import com._4point.aem.fluentforms.impl.output.SafeOutputServiceAdapterWrapper;
 import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService.GenerateAssemblerResultArgs;
@@ -67,7 +67,7 @@ public class MockAssemblerService extends AssemblerServiceImpl {
 	
 
 	private MockTraditionalAssemblerService getMockService() {
-		return (MockTraditionalAssemblerService)((SafeDocAssemblerServiceAdapterWrapper)(this.getAdobeAssemblerService())).getAssemblerService();
+		return (MockTraditionalAssemblerService)((SafeAssemblerServiceAdapterWrapper)(this.getAdobeAssemblerService())).getAssemblerService();
 	}
 
 

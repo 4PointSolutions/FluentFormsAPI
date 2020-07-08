@@ -2,6 +2,7 @@ package com._4point.aem.fluentforms.impl.assembler;
 
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -10,37 +11,61 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
+import com.adobe.fd.assembler.client.ConversionException;
 import com.adobe.fd.assembler.client.OperationException;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
 import com.adobe.fd.assembler.client.PDFAConversionResult;
 import com.adobe.fd.assembler.client.PDFAValidationOptionSpec;
 import com.adobe.fd.assembler.client.PDFAValidationResult;
+import com.adobe.fd.assembler.client.ValidationException;
 
-public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerService, AssemblerResult {
+public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerService, AssemblerResult {
 
-	private static final Logger log = LoggerFactory.getLogger(AdobeDocAssemblerServiceAdapter.class);
+	private static final Logger log = LoggerFactory.getLogger(AdobeAssemblerServiceAdapter.class);
 
 	private final com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService;
     private final com.adobe.fd.assembler.client.AssemblerResult assemblerResult;
+    private final DocumentFactory documentFactory;
 	
-	public AdobeDocAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService, com.adobe.fd.assembler.client.AssemblerResult assemblerResult) {		
+	public AdobeAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService, com.adobe.fd.assembler.client.AssemblerResult assemblerResult) {		
 		super();
+		this.documentFactory = DocumentFactory.getDefault();
 		this.adobeDocAssemblerService = Objects.requireNonNull(adobeDocAssemblerService,
 				"adobeDocAssemblerService cannot be null.");		
 		this.assemblerResult = Objects.requireNonNull(assemblerResult, "assemblerResult cannot be null.");
 		
 	}
 
-	public AdobeDocAssemblerServiceAdapter(com.adobe.fd.assembler.client.AssemblerResult assemblerResult ) {
+	public AdobeAssemblerServiceAdapter(com.adobe.fd.assembler.client.AssemblerResult assemblerResult ) {
 		super();
+		this.documentFactory = DocumentFactory.getDefault();
 		this.adobeDocAssemblerService = null;
 		this.assemblerResult = Objects.requireNonNull(assemblerResult, "assemblerResult cannot be null.");
 	}
-
+  
+	
+	public AdobeAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService, DocumentFactory documentFactory) {		
+		super();
+		this.adobeDocAssemblerService = Objects.requireNonNull(adobeDocAssemblerService,
+				"adobeDocAssemblerService cannot be null.");		
+		this.documentFactory = Objects.requireNonNull(documentFactory, "Document Factory cannot be null.");
+		this.assemblerResult = null;
+		
+	}
+	
+	public AdobeAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService) {		
+		super();
+		this.adobeDocAssemblerService = Objects.requireNonNull(adobeDocAssemblerService,
+				"adobeDocAssemblerService cannot be null.");		
+		this.documentFactory = DocumentFactory.getDefault();
+		this.assemblerResult = null;
+		
+	}
 
 	@Override
 	public AssemblerResult invoke(Document ddx, Map<String, Object> inputs,
@@ -50,14 +75,15 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 		return toAssemblerResult(assemblerResult);
 	}
 	
+	
 	@Override
-	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) {
-		return null;
+	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) throws AssemblerServiceException, ValidationException {
+		return adobeDocAssemblerService.isPDFA(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), options);
 	}
 
 	@Override
-	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) {
-		return null;
+	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) throws AssemblerServiceException, ConversionException {
+		return adobeDocAssemblerService.toPDFA(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), options);
 	}
 	
     public static com.adobe.fd.assembler.client.AssemblerOptionSpec toAdobeAssemblerOptionSpec(
@@ -70,52 +96,57 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 	}	
 
 	static AssemblerResult toAssemblerResult(com.adobe.fd.assembler.client.AssemblerResult assemblerResult) {
-		return new AdobeDocAssemblerServiceAdapter(assemblerResult);
+		return new AdobeAssemblerServiceAdapter(assemblerResult);
 	}
 
 	@Override
 	public Map<String, Document> getDocuments() {
-		return null;
+		Map<String, com.adobe.aemfd.docmanager.Document> assembleDocuments = assemblerResult.getDocuments();
+		Map<String, Document> sourceDocuments = new HashMap<String, Document>();
+		assembleDocuments.forEach((docName, document) -> {
+			sourceDocuments.put(docName, documentFactory.create(document));
+		});
+		 return sourceDocuments;
 	}
 
 	@Override
 	public List<String> getFailedBlockNames() {
-		return null;
+		return assemblerResult.getSuccessfulBlockNames();
 	}
 
 	@Override
-	public Document etJobLog() {
-		return null;
+	public Document getJobLog() {
+		return documentFactory.create(assemblerResult.getJobLog());
 	}
 
 	@Override
 	public int getLastBatesNumber() {
-		return 0;
+		return assemblerResult.getLastBatesNumber();
 	}
 
 	@Override
 	public Map<String, List<String>> getMultipleResultsBlocks() {
-		return null;
+		return assemblerResult.getMultipleResultsBlocks();
 	}
 
 	@Override
 	public int getNumRequestedBlocks() {
-		return 0;
+		return assemblerResult.getNumRequestedBlocks();
 	}
 
 	@Override
 	public List<String> getSuccessfulBlockNames() {
-		return null;
+		return assemblerResult.getSuccessfulBlockNames();
 	}
 
 	@Override
 	public List<String> getSuccessfulDocumentNames() {
-		return null;
+		return assemblerResult.getSuccessfulDocumentNames();
 	}
 
 	@Override
 	public Map<String, OperationException> getThrowables() {
-		return null;
+		return assemblerResult.getThrowables();
 	}
 	
 	

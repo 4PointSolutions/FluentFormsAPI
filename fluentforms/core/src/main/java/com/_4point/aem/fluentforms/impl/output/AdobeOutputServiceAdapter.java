@@ -3,7 +3,6 @@ package com._4point.aem.fluentforms.impl.output;
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -13,20 +12,17 @@ import org.slf4j.LoggerFactory;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
-import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.api.output.BatchOptions;
 import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
-import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
-import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 
 public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 
 	private static final Logger log = LoggerFactory.getLogger(AdobeOutputServiceAdapter.class);
-
 	private final DocumentFactory documentFactory;
 	private final com.adobe.fd.output.api.OutputService adobeOutputService;
 

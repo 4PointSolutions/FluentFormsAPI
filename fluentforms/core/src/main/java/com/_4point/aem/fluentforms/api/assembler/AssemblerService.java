@@ -1,12 +1,10 @@
 package com._4point.aem.fluentforms.api.assembler;
 
-import java.net.URL;
-import java.nio.file.Path;
 import java.util.Map;
 
 import com._4point.aem.fluentforms.api.Document;
-import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.Transformable;
+import com.adobe.fd.assembler.client.OperationException;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
 import com.adobe.fd.assembler.client.PDFAConversionResult;
 import com.adobe.fd.assembler.client.PDFAValidationOptionSpec;
@@ -18,7 +16,7 @@ public interface AssemblerService {
 	
 	PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) throws AssemblerServiceException;
     
-    PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) throws AssemblerServiceException;
+    PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) throws AssemblerServiceException ;
 
 	AssemblerArgumentBuilder invoke();
 	
@@ -40,6 +38,8 @@ public interface AssemblerService {
         public AssemblerServiceException(Throwable cause) {
 			super(cause);
 		}
+        
+        
 	}
    
 	
@@ -49,21 +49,21 @@ public interface AssemblerService {
 		AssemblerArgumentBuilder setFailOnError(Boolean isFailOnError);
 		
 		@Override
-		AssemblerArgumentBuilder setContentRoot(PathOrUrl contentRoot);
-
+		AssemblerArgumentBuilder setDefaultStyle(String defaultStyle);
+	    
 		@Override
-		default AssemblerArgumentBuilder setContentRoot(Path contentRoot) {
-			AssemblerOptionsSetter.super.setContentRoot(contentRoot);
-			return this;
-		}
-
+		AssemblerArgumentBuilder setFirstBatesNumber(int start);
+	    
 		@Override
-		default AssemblerArgumentBuilder setContentRoot(URL contentRoot) {
-			AssemblerOptionsSetter.super.setContentRoot(contentRoot);
-			return this;
-		}
+		AssemblerArgumentBuilder setLogLevel(String logLevel);
+	    
+		@Override
+		AssemblerArgumentBuilder setTakeOwnership(Boolean takeOwnership);
+	    
+		@Override
+		AssemblerArgumentBuilder setValidateOnly(Boolean validateOnly);	
        
-		public AssemblerResult executeOn(Document ddx, Map<String,Object>sourceDocuments) throws AssemblerServiceException;
+		public AssemblerResult executeOn(Document ddx, Map<String,Object>sourceDocuments) throws AssemblerServiceException, OperationException;
         	
 	}
 

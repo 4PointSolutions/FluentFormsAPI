@@ -1,92 +1,83 @@
 package com._4point.aem.fluentforms.impl.assembler;
 
-import com._4point.aem.fluentforms.api.PathOrUrl;
-import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSetter;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 
 public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec {
 	
 	private Boolean isFailOnError;
-	private PathOrUrl contentRoot;
+    private String defaultStyle;
+    private int firstBatesNumber;
+    private String logLevel;
+    private Boolean isTakeOwnerShip;
+    private Boolean isValidateOnly;
 	
 	@Override
 	public Boolean isFailOnError() {
 		return isFailOnError;
 	}
+	
 	@Override
 	public AssemblerOptionsSpecImpl setFailOnError(Boolean isFailOnError) {
 		 this.isFailOnError = isFailOnError;
 		 return this;
 	}
-	@Override
-	public AssemblerOptionsSetter setContentRoot(PathOrUrl contentRoot) {
-		this.contentRoot = contentRoot;
-		return this;
-	}
-	public PathOrUrl getContentRoot() {
-		return contentRoot;
-	}
 	
 	@Override
 	public String getDefaultStyle() {		
-		return null;
+		return defaultStyle;
 	}
 	
 	@Override
 	public int getFirstBatesNumber() {		
-		return 0;
+		return firstBatesNumber;
 	}
 	
 	@Override
 	public String getLogLevel() {
-		
-		return null;
+		for(LogLevel l : LogLevel.values()){
+			logLevel = l.toString();
+		}
+		return logLevel;
 	}
 	
 	@Override
 	public Boolean isTakeOwnership() {		
-		return false;
+		return isTakeOwnerShip;
 	}
 	
 	@Override
-	public Boolean isValidateOnly() {
-		
-		return false;
+	public Boolean isValidateOnly() {	
+		return isValidateOnly;
 	}
 	
 	@Override
-	public AssemblerOptionsSpec setDefaultStyle(String defaultStyle) {
-		
-		return null;
+	public AssemblerOptionsSpecImpl setDefaultStyle(String defaultStyle) {
+		 this.defaultStyle = defaultStyle;
+		 return this;
 	}
 	
 	@Override
-	public AssemblerOptionsSpec setFirstBatesNumber(int start) {
-		
-		return null;
+	public AssemblerOptionsSpecImpl setFirstBatesNumber(int firstBatesNumber) {
+		this.firstBatesNumber = firstBatesNumber;
+		return this;
 	}
 	
 	@Override
-	public AssemblerOptionsSpec setLogLevel(String logLevel) {
-		
-		return null;
+	public AssemblerOptionsSpecImpl setLogLevel(String logLevel) {
+		this.logLevel = logLevel;
+		return this;
 	}
 	
 	@Override
-	public AssemblerOptionsSpec setTakeOwnership(Boolean takeOwnership) {
-		
-		return null;
+	public AssemblerOptionsSpecImpl setTakeOwnership(Boolean isTakeOwnerShip) {
+		this.isTakeOwnerShip = isTakeOwnerShip;
+		return this;
 	}
 	
 	@Override
-	public AssemblerOptionsSpec setValidateOnly(Boolean validateOnly) {
-		
-		return null;
+	public AssemblerOptionsSpecImpl setValidateOnly(Boolean isValidateOnly) {
+		this.isValidateOnly = isValidateOnly;
+		return this;
 	}
-	
-
-	
-	
-
 
 }
