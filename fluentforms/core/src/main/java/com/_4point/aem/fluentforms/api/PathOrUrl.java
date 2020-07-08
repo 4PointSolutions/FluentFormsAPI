@@ -108,31 +108,70 @@ public class PathOrUrl {
 	 */
 	public boolean isCrxUrl() { return this.isCrxUrl && this.url != null; }
 
+	/**
+	 * Returns the filename part of the PathOrUrl.
+	 * 
+	 * If the PathOrUrl is an URL or CRX Url and ends in a /, then this returns empty.
+	 * If the PathOrUrl is a Path, then this returns Path.getFileName().
+	 * 
+	 * @return Optional filename  
+	 */
 	public Optional<String> getFilename() {
 		if (isPath()) {
 			return Optional.ofNullable(getPath().getFileName()).map(Path::toString);
 		} else if (isUrl()) {
-			String urlPath = getUrl().getPath();
-			int lastSlashIndex = urlPath.lastIndexOf('/');
-			if (lastSlashIndex > -1 && lastSlashIndex < urlPath.length() - 1) {
-				return Optional.of(urlPath.substring(lastSlashIndex + 1));   
-			} else {
-				return Optional.empty();
-			}
+			return getUrlFilename(getUrl().getPath());
 		} else if (isCrxUrl()) {
-			String urlPath = getCrxUrl();
-			int lastSlashIndex = urlPath.lastIndexOf('/');
-			if (lastSlashIndex > -1 && lastSlashIndex < urlPath.length() - 1) {
-				return Optional.of(urlPath.substring(lastSlashIndex + 1));   
-			} else {
-				return Optional.empty();
-			}
+			return getUrlFilename(getCrxUrl());
 		} else {
 			// This should never happen.
 			throw new IllegalStateException("Encountered a PathOrUrl that was not a Path, URL or CRX Url!");
 		}
 	}
 
+	private Optional<String> getUrlFilename(String urlPath) {
+		int lastSlashIndex = urlPath.lastIndexOf('/');
+		if (lastSlashIndex > -1 && lastSlashIndex < urlPath.length() - 1) {
+			return Optional.of(urlPath.substring(lastSlashIndex + 1));   
+		} else {
+			return Optional.empty();
+		}
+	}
+
+	/**
+	 * Returns the filename part of the PathOrUrl.
+	 * 
+	 * If the PathOrUrl is an URL or CRX Url and ends in a /, then this returns the object this operating on.
+	 * If the PathOrUrl is a Path, then this returns Path.getParent().
+	 * 
+	 * @return Optional Parent
+	 */
+	public Optional<PathOrUrl> getParent() {
+		if (isPath()) {
+			return Optional.ofNullable(getPath().getParent()).map(PathOrUrl::from);
+		} else if (isUrl()) {
+			return getUrlParent(getUrl().toString());
+		} else if (isCrxUrl()) {
+			return getUrlParent(getCrxUrl());
+		} else {
+			// This should never happen.
+			throw new IllegalStateException("Encountered a PathOrUrl that was not a Path, URL or CRX Url!");
+		}
+	}
+
+	private Optional<PathOrUrl> getUrlParent(String urlPath) {
+		Optional<String> optFilename = getFilename();
+		if (optFilename.isPresent()) {
+			String parentStr = urlPath.substring(0, urlPath.length() - optFilename.get().length());
+			if (parentStr == null || parentStr.isEmpty()) {
+				return Optional.empty();
+			}
+			return Optional.of(PathOrUrl.from(parentStr));
+		} else {
+			return Optional.of(this);
+		}
+	}
+	
 	/**
 	 * Static constructor
 	 * 
