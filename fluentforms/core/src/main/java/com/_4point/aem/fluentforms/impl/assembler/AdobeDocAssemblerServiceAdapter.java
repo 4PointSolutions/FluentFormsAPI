@@ -2,6 +2,10 @@ package com._4point.aem.fluentforms.impl.assembler;
 
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,13 +61,23 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 	
 
 	@Override
-	public AssemblerResult invoke(Document ddx, Map<String, Object> inputs,
+	public AssemblerResult invoke(Document ddx, Map<String, Object> souceDocuments,
 			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException, OperationException {
-		com.adobe.fd.assembler.client.AssemblerResult assemblerResult = adobeDocAssemblerService.invoke(AdobeDocumentFactoryImpl.getAdobeDocument(ddx), inputs,
+		com.adobe.fd.assembler.client.AssemblerResult assemblerResult = adobeDocAssemblerService.invoke(AdobeDocumentFactoryImpl.getAdobeDocument(ddx), toAdobeMapOfDocuments(souceDocuments),
 				toAdobeAssemblerOptionSpec(adobAssemblerOptionSpec));
+		
 		return toAssemblerResult(assemblerResult);
 	}
 	
+	
+	private Map<String, Object> toAdobeMapOfDocuments(Map<String, Object> souceDocuments) {
+		Map<String, Object> sourceDoc = new HashMap<String, Object>();
+		souceDocuments.forEach((docName, doc) -> {
+			sourceDoc.put(docName, AdobeDocumentFactoryImpl.getAdobeDocument((Document)doc));
+		});
+		return sourceDoc;
+	}
+
 	@Override
 	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) {
 		return null;

@@ -31,14 +31,14 @@ public class TestUtils {
 	public static final String TEST_USER_PASSWORD = "admin";
 	
 	private static final String SAMPLE_FORM_PDF_NAME = "SampleForm.pdf";
-	//private static final String SAMPLE_FORM1_PDF_NAME = "SampleForm1.pdf";
+	private static final String SAMPLE_FORM_DDX_NAME = "SampleForm_ddx.xml";
 	private static final String SAMPLE_FORM_XDP_NAME = "SampleForm.xdp";
 	private static final String SAMPLE_FORM_DATA_XML_NAME = "SampleForm_data.xml";
 
 	private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 	
 	public static final Path SAMPLE_FORM_PDF = getPath(SAMPLE_FORM_PDF_NAME);
-	//public static final Path SAMPLE_FORM1_PDF = getPath(SAMPLE_FORM1_PDF_NAME);
+	public static final Path SAMPLE_FORM_DDX = getPath(SAMPLE_FORM_DDX_NAME);
 	public static final Path SAMPLE_FORM_XDP = getPath(SAMPLE_FORM_XDP_NAME);
 	public static final Path SAMPLE_FORM_DATA_XML = getPath(SAMPLE_FORM_DATA_XML_NAME);
 	

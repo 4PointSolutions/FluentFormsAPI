@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 
+import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
@@ -101,31 +102,46 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		try {
 			Map<String, Object> sourceDocuments = new HashMap<String, Object>();
            // createSourceDocumentMap(sourceDocuments, request);
-			RequestParameter parameter = request.getRequestParameter(DDX);
-	
-			
-			
-			  RequestParameter[] requestParameters= request.getRequestParameters(SOURCE_DOCUMENT_KEY);
-              RequestParameter[] requestParameters1= request.getRequestParameters(SOURCE_DOCUMENT_VALUE);
-			  if(requestParameters.length == requestParameters1.length) { 
-				  for (int i = 0; i < requestParameters.length; i++) {
-					  log.info("Document Name: "+requestParameters[i].toString());
-						
-			      sourceDocuments.put(requestParameters[i].toString(),  docFactory.create(requestParameters1[i].getInputStream()));
+			RequestParameter parameter = request.getRequestParameter(DDX);			
+			  RequestParameter[] soruceDocName= request.getRequestParameters(SOURCE_DOCUMENT_KEY);
+              RequestParameter[] sourceDocs= request.getRequestParameters(SOURCE_DOCUMENT_VALUE);
+			  if(soruceDocName.length == sourceDocs.length) { 
+				  log.info("sourceDocs Size : "+sourceDocs.length);
+				  for (int i = 0; i < soruceDocName.length; i++) {
+					  log.info("Document Name: "+soruceDocName[i].toString());
+					  log.info("Content Type: "+sourceDocs[i].getContentType());
+			          sourceDocuments.put(soruceDocName[i].getString(), docFactory.create(sourceDocs[i].get()));
 			  } 
 		  }
 			 
 			 
 			Boolean isFailonError = false;
-			Document ddx = docFactory.create(parameter.getInputStream());
+			
+			Document ddx = docFactory.create(parameter.get());
 		
 			AssemblerArgumentBuilder argumentBuilder = assemblerService.invoke()
 					.transform(b -> isFailonError == null ? b : b.setFailOnError(isFailonError));
 			try (AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
-				log.info("assemblerResult : "+assemblerResult);
-				String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
-				response.setContentType(ContentType.APPLICATION_XML.getContentTypeStr());
-				response.getWriter().write(assemblerResultxml);
+				log.info("assemblerResult : " +assemblerResult);
+				//String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
+				//response.setContentType(ContentType.APPLICATION_XML.getContentTypeStr());
+				//response.getWriter().write(assemblerResultxml);
+				//Document result = null;
+				String contentType = ContentType.APPLICATION_PDF.toString();	// We know the result is always PDF.
+				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
+				response.setContentType(contentType);
+				assemblerResult.getDocuments().forEach((docName, mergedPDf) ->{
+					Document result  = mergedPDf;
+					try {
+						ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				});
+				
+			
+				
 			}
 
 		} catch (AssemblerServiceException e) {
@@ -136,41 +152,10 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
 	}
 
-	private void createSourceDocumentMap(Map<String, Object> sourceDocuments, SlingHttpServletRequest request) {
-		final java.util.Map<String, org.apache.sling.api.request.RequestParameter[]> params = request
-                .getRequestParameterMap();
-        for (Entry<String, org.apache.sling.api.request.RequestParameter[]> pairs : params
-                .entrySet()) {
-         
-            final org.apache.sling.api.request.RequestParameter[] pArr = pairs.getValue();
-            final org.apache.sling.api.request.RequestParameter param = pArr[0];
-
-            try {
-            	if(!pairs.getKey().equals(DDX) && !pairs.getKey().equals("isFailOnError")) {
-                //if (!param.isFormField()) {
-                    final InputStream stream = param.getInputStream();
-                    log.info("the file name is " + param.getFileName());
-                    log.info("Got input Stream inside my servlet####" + stream.available());
-                    Document document = docFactory.create(stream);
-                    sourceDocuments.put(param.getFileName(), document);
-                    log.info("The map size is " + sourceDocuments.size());
-					/*
-					 * } else { log.info("The form field is" + param.getString());
-					 * 
-					 * }
-					 */
-            	}
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-        }
-		
-	}
-
-	private String convertAssemblerResultToxml(AssemblerResult assemblerResult)
-			throws ParserConfigurationException, IOException, TransformerException {
+	private String convertAssemblerResultToxml(AssemblerResult assemblerResult) throws AssemblerServiceException
+		{
+		log.info("Converting assemblerresult to xml");
+		try {
 		Map<String, Document> resultDocMap = assemblerResult.getDocuments();
 		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
@@ -178,12 +163,15 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		org.w3c.dom.Element root = document.createElement("assemblerResult");
 		document.appendChild(root);
 		for (Entry<String, Document> resultDoc : resultDocMap.entrySet()) {
+			log.info("Result pdf name : " +resultDoc.getKey());
 			Element result = document.createElement("resultDocument");
 			root.appendChild(result);
 			Attr attr = document.createAttribute("documentName");
 			attr.setValue(resultDoc.getKey());
 			result.setAttributeNode(attr);
-			Document concatenatedDoc = resultDoc.getValue();
+			Document concatenatedDoc = docFactory.create(resultDoc.getValue().getInputStream());
+			log.info("map size " +resultDocMap.size());
+			//log.info(resultDoc.getKey() + " is of type " +resultDoc.getValue().getContentType());
 			String decoded = Base64.getEncoder().encodeToString(concatenatedDoc.getInlineData());
 			Element mergedDoc = document.createElement("mergedDoc");
 			mergedDoc.appendChild(document.createTextNode(decoded));
@@ -195,6 +183,9 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		StreamResult sr = new StreamResult(sw);
 		transformer.transform(domSource, sr);
 		return sw.toString();
+		} catch (Exception e) {
+			throw new AssemblerServiceException("Error while converting assemblerResult to xml ", e);
+		}
 	}
 
 	private TraditionalDocAssemblerService getAdobeAssemblerService() {

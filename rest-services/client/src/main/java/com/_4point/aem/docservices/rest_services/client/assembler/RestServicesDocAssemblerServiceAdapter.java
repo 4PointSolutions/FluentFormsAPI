@@ -55,6 +55,7 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
 	private static final String SOURCE_DOCUMENT_KEY = "sourceDocumentMap.key";
 	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
+	
 	protected static final String TEXT = "text/plain";
 
 	// Only callable from Builder
@@ -84,7 +85,7 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 				for (Entry<String, Object> param: inputs.entrySet()) {	
 					      multipart.field(SOURCE_DOCUMENT_KEY, param.getKey());
 				    	  multipart.field(SOURCE_DOCUMENT_VALUE, ((Document)param.getValue()).getInputStream(),
-				    			  MediaType.MULTIPART_FORM_DATA_TYPE);		     
+				    			  APPLICATION_PDF);		     
 				 }			  
 			 } else { 
 				 throw new NullPointerException("inputs can not be null"); 
@@ -95,7 +96,7 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 						(t) -> isFailOnError == null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()));
 			}
 			
-			Response result = postToServer(assembleDocTarget, multipart, MediaType.APPLICATION_XML_TYPE);
+			Response result = postToServer(assembleDocTarget, multipart, APPLICATION_PDF);
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
 				String msg = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='"
@@ -123,9 +124,12 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 				msg += "\n" + inputStreamtoString(entityStream);
 				throw new AssemblerServiceException(msg);
 			}
-			String resultXml = result.readEntity(String.class);
-			System.out.println("resultXml: "+resultXml);
-			Map<String, Document> resultMap = convertXmlDocument(resultXml);
+			//String resultXml = result.readEntity(String.class);
+			//System.out.println("resultXml: "+resultXml);
+			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+			resultDoc.setContentType(APPLICATION_PDF.toString());
+		    Map<String, Document> resultMap = new HashMap<String, Document>();
+		    resultMap.put("concatenatedPDF.pdf", resultDoc);
 			AssemblerResult assemblerResult = new AssemblerResultImpl(resultMap);
 			return assemblerResult;
 

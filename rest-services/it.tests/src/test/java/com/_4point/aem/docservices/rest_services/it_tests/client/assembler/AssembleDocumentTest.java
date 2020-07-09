@@ -1,7 +1,8 @@
-package com._4point.aem.docservices.rest_services.it_tests.server.assembler;
+package com._4point.aem.docservices.rest_services.it_tests.client.assembler;
 
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.ACTUAL_RESULTS_DIR;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_PDF;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_DDX;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
@@ -47,16 +48,13 @@ private static final boolean SAVE_RESULTS = true;
 	@Test
 	@DisplayName("Test importData() Happy Path.")
 	void testInvoke() throws Exception {
-        String sampleDdx = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><DDX xmlns=\"http://ns.adobe.com/DDX/1.0/\">\r\n" + 
-       		"<PDF result=\"concatenatedPDF.pdf\"><PDF source=\"File0.pdf\"/>\r\n" + 
-       		"<PDF source=\"File1.pdf\"/></PDF></DDX>";
-
-		Document pdf = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_PDF.toFile());;
+       
+        Document ddx = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_DDX.toFile());
+		Document pdf = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_PDF.toFile());
 		Map<String, Object> sourceDocuments = new HashMap<String, Object>();
 		sourceDocuments.put("File0.pdf", pdf);
 		sourceDocuments.put("File1.pdf", pdf);
 		
-		Document ddx = SimpleDocumentFactoryImpl.INSTANCE.create(sampleDdx.getBytes());
 		AssemblerOptionsSpec assemblerOptionSpec = null;
 
 		AssemblerResult assemblerResult = underTest.invoke(ddx, sourceDocuments, assemblerOptionSpec);;
