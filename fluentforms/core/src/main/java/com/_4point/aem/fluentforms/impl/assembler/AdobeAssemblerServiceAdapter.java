@@ -16,13 +16,7 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
-import com.adobe.fd.assembler.client.ConversionException;
 import com.adobe.fd.assembler.client.OperationException;
-import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
-import com.adobe.fd.assembler.client.PDFAConversionResult;
-import com.adobe.fd.assembler.client.PDFAValidationOptionSpec;
-import com.adobe.fd.assembler.client.PDFAValidationResult;
-import com.adobe.fd.assembler.client.ValidationException;
 
 public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerService, AssemblerResult {
 
@@ -69,22 +63,31 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 
 	@Override
 	public AssemblerResult invoke(Document ddx, Map<String, Object> inputs,
-			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException, OperationException {
-		com.adobe.fd.assembler.client.AssemblerResult assemblerResult = adobeDocAssemblerService.invoke(AdobeDocumentFactoryImpl.getAdobeDocument(ddx), inputs,
-				toAdobeAssemblerOptionSpec(adobAssemblerOptionSpec));
+			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException {
+		com.adobe.fd.assembler.client.AssemblerResult assemblerResult;
+		try {
+			assemblerResult = adobeDocAssemblerService.invoke(AdobeDocumentFactoryImpl.getAdobeDocument(ddx), inputs,
+					toAdobeAssemblerOptionSpec(adobAssemblerOptionSpec));
+		} catch (OperationException e) {
+			 throw new AssemblerServiceException("Error while aasembling the documents ",e);
+		}
 		return toAssemblerResult(assemblerResult);
 	}
 	
 	
-	@Override
-	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) throws AssemblerServiceException, ValidationException {
-		return adobeDocAssemblerService.isPDFA(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), options);
-	}
-
-	@Override
-	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) throws AssemblerServiceException, ConversionException {
-		return adobeDocAssemblerService.toPDFA(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), options);
-	}
+	/*
+	 * @Override public PDFAValidationResult isPDFA(Document inDoc,
+	 * PDFAValidationOptionSpec options) throws AssemblerServiceException,
+	 * ValidationException { return
+	 * adobeDocAssemblerService.isPDFA(AdobeDocumentFactoryImpl.getAdobeDocument(
+	 * inDoc), options); }
+	 * 
+	 * @Override public PDFAConversionResult toPDFA(Document inDoc,
+	 * PDFAConversionOptionSpec options) throws AssemblerServiceException,
+	 * ConversionException { return
+	 * adobeDocAssemblerService.toPDFA(AdobeDocumentFactoryImpl.getAdobeDocument(
+	 * inDoc), options); }
+	 */
 	
     public static com.adobe.fd.assembler.client.AssemblerOptionSpec toAdobeAssemblerOptionSpec(
 			AssemblerOptionsSpec assemblerOptionSpec) {

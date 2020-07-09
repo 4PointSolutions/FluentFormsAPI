@@ -7,13 +7,7 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.impl.UsageContext;
-import com.adobe.fd.assembler.client.ConversionException;
 import com.adobe.fd.assembler.client.OperationException;
-import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
-import com.adobe.fd.assembler.client.PDFAConversionResult;
-import com.adobe.fd.assembler.client.PDFAValidationOptionSpec;
-import com.adobe.fd.assembler.client.PDFAValidationResult;
-import com.adobe.fd.assembler.client.ValidationException;
 
 public class AssemblerServiceImpl implements AssemblerService {
 	private final TraditionalDocAssemblerService adobDocAssemblerService;
@@ -26,31 +20,24 @@ public class AssemblerServiceImpl implements AssemblerService {
 	@Override
 	public AssemblerResult invoke(Document ddx, Map<String, Object> sourceDocuments,
 			AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException {
-		try {
-			return adobDocAssemblerService.invoke(ddx, sourceDocuments, assemblerOptionSpec);
-		} catch(OperationException e) {
-			throw new AssemblerServiceException("Erroer while assembling documents ", e);
-		}
+		return adobDocAssemblerService.invoke(ddx, sourceDocuments, assemblerOptionSpec);
 	}
 
-	@Override
-	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) throws AssemblerServiceException {
-		try {
-			return adobDocAssemblerService.isPDFA(inDoc, options);
-		} catch (ValidationException e) {
-			throw new AssemblerServiceException("Erroer while Validating pdf ", e);
-		}
-	}
-
-	@Override
-	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) throws AssemblerServiceException {
-		try {
-			return adobDocAssemblerService.toPDFA(inDoc, options);
-		}  catch (AssemblerServiceException | ConversionException e) {
-			throw new AssemblerServiceException("Error while converting pdf ", e);
-		}
-		
-	}
+	/*
+	 * @Override public PDFAValidationResult isPDFA(Document inDoc,
+	 * PDFAValidationOptionSpec options) throws AssemblerServiceException { try {
+	 * return adobDocAssemblerService.isPDFA(inDoc, options); } catch
+	 * (ValidationException e) { throw new
+	 * AssemblerServiceException("Erroer while Validating pdf ", e); } }
+	 * 
+	 * @Override public PDFAConversionResult toPDFA(Document inDoc,
+	 * PDFAConversionOptionSpec options) throws AssemblerServiceException { try {
+	 * return adobDocAssemblerService.toPDFA(inDoc, options); } catch
+	 * (AssemblerServiceException | ConversionException e) { throw new
+	 * AssemblerServiceException("Error while converting pdf ", e); }
+	 * 
+	 * }
+	 */
 	
 	protected TraditionalDocAssemblerService getAdobeAssemblerService() {
 		return adobDocAssemblerService;

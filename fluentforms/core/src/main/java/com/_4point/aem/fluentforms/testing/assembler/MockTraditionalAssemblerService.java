@@ -1,5 +1,6 @@
 package com._4point.aem.fluentforms.testing.assembler;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -10,53 +11,51 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 import com.adobe.fd.assembler.client.OperationException;
-import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
-import com.adobe.fd.assembler.client.PDFAConversionResult;
-import com.adobe.fd.assembler.client.PDFAValidationOptionSpec;
-import com.adobe.fd.assembler.client.PDFAValidationResult;
 
 public class MockTraditionalAssemblerService implements TraditionalDocAssemblerService {
 
 	private final AssemblerResult DUMMY_ASSEMBLER_RESULT;
+	private AssemblerResult assemblerResult;
+	private GenerateAssemblerResultArgs generateAssemblerResultArgs;
 
-	public AssemblerResult getDUMMY_ASSEMBLER_RESULT() {
-		return DUMMY_ASSEMBLER_RESULT;
-	}
-
-	AssemblerResult assemblerResult;
-	GenerateAssemblerResultArgs generateAssemblerResultArgs;
-
-	public GenerateAssemblerResultArgs getGenerateAssemblerResultArgs() {
-		return generateAssemblerResultArgs;
-	}
-
+	
 	@Override
 	public AssemblerResult invoke(Document ddx, Map<String, Object> inputs,
-			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException, OperationException {
+			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException {
 		this.generateAssemblerResultArgs = new GenerateAssemblerResultArgs(ddx, inputs, adobAssemblerOptionSpec);
 		return this.assemblerResult == null ? DUMMY_ASSEMBLER_RESULT : this.assemblerResult;
 	}
 
-	@Override
-	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options)
-			throws AssemblerServiceException {
-		throw new UnsupportedOperationException("isPDFA has not been implemented yet.");
-	}
-
-	@Override
-	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options)
-			throws AssemblerServiceException {
-		throw new UnsupportedOperationException("toPDFA has not been implemented yet.");
-	}
+	/*
+	 * @Override public PDFAValidationResult isPDFA(Document inDoc,
+	 * PDFAValidationOptionSpec options) throws AssemblerServiceException { throw
+	 * new UnsupportedOperationException("isPDFA has not been implemented yet."); }
+	 * 
+	 * @Override public PDFAConversionResult toPDFA(Document inDoc,
+	 * PDFAConversionOptionSpec options) throws AssemblerServiceException { throw
+	 * new UnsupportedOperationException("toPDFA has not been implemented yet."); }
+	 */
 
 	MockTraditionalAssemblerService() {
 		super();
 		this.DUMMY_ASSEMBLER_RESULT = new DummyAssemblerResult();
 	}
+	
+	public static MockTraditionalAssemblerService createAssemblerMock(AssemblerResult assemblerResult) {
+		return new MockTraditionalAssemblerService().setAssmeblerResult(assemblerResult);
+	}
 
-	public MockTraditionalAssemblerService setResult(AssemblerResult assemblerResult) {
+	public MockTraditionalAssemblerService setAssmeblerResult(AssemblerResult assemblerResult) {
 		this.assemblerResult = assemblerResult;
 		return this;
+	}
+	
+	public AssemblerResult getDummyAssemblerResult() {
+		return DUMMY_ASSEMBLER_RESULT;
+	}
+
+	public GenerateAssemblerResultArgs getGenerateAssemblerResultArgs() {
+		return generateAssemblerResultArgs;
 	}
 
 	public static class GenerateAssemblerResultArgs {
@@ -90,12 +89,12 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 
 		@Override
 		public Map<String, Document> getDocuments() {
-			return null;
+			return  Collections.emptyMap();
 		}
 
 		@Override
 		public List<String> getFailedBlockNames() {
-			return null;
+			return  Collections.emptyList();
 		}
 
 		@Override
@@ -110,7 +109,7 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 
 		@Override
 		public Map<String, List<String>> getMultipleResultsBlocks() {
-			return null;
+			return  Collections.emptyMap();
 		}
 
 		@Override
@@ -120,17 +119,17 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 
 		@Override
 		public List<String> getSuccessfulBlockNames() {
-			return null;
+			return  Collections.emptyList();
 		}
 
 		@Override
 		public List<String> getSuccessfulDocumentNames() {
-			return null;
+			return  Collections.emptyList();
 		}
 
 		@Override
 		public Map<String, OperationException> getThrowables() {
-			return null;
+			return  Collections.emptyMap();
 		}
 	
 	}

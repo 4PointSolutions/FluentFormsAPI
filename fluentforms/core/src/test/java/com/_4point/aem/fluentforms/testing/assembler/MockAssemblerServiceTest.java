@@ -26,11 +26,11 @@ public class MockAssemblerServiceTest {
 		Map<String,Object>sourceDocuments =  Mockito.mock(Map.class);
 		
 		MockTraditionalAssemblerService mockTraditionalAssemblerService = new MockTraditionalAssemblerService() ;
-	    MockAssemblerService underTest = MockAssemblerService.createAssemblerResultMock(mockTraditionalAssemblerService.getDUMMY_ASSEMBLER_RESULT());
+	    MockAssemblerService underTest = MockAssemblerService.createAssemblerResultMock(mockTraditionalAssemblerService.getDummyAssemblerResult());
 		AssemblerResult result = underTest.invoke()
 				 .executeOn(ddx, sourceDocuments);		
 		GenerateAssemblerResultArgs capturedArgs = underTest.getGenerateAssemblerResultArgs();
-		assertEquals(result, mockTraditionalAssemblerService.getDUMMY_ASSEMBLER_RESULT());
+		assertEquals(result, mockTraditionalAssemblerService.getDummyAssemblerResult());
 		assertEquals(ddx, capturedArgs.getDdx());
 		assertEquals(sourceDocuments, capturedArgs.getSourceDocuments());
 	}
