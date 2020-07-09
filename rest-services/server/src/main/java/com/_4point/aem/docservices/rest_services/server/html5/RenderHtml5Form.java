@@ -39,6 +39,8 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 	private static final String DATA_ATTRIBUTE_NAME = "data";
 	private static final String CONTENT_ROOT_ATTRIBUTE_NAME = "contentRoot";
 	private static final String TEMPLATE_ATTRIBUTE_NAME = "template";
+	private static final String SUBMIT_URL_ATTRIBUTE_NAME = "submitUrl";
+
 	private static final Logger log = LoggerFactory.getLogger(RenderHtml5Form.class);
 
 	@Override
@@ -70,35 +72,41 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 			RenderHtml5FormParameters.TemplateParameter templateParam = parameters.getTemplate();
 			if (templateParam.getType() == RenderHtml5FormParameters.TemplateParameter.ParameterType.PathOrUrl) {
 				PathOrUrl templateLocation = templateParam.getPathOrUrl();
-				if (templateLocation.isPath()) {
-					// template is a Path, so Rationalize template and contentRoot
-					TemplateValues templateValues = TemplateValues.determineTemplateValues(templateLocation.getPath(), parameters.getContentRoot(), UsageContext.CLIENT_SIDE);
-					String templateLocationStr = templateValues.getTemplate().toString();
-					String contentRootLocationStr = templateValues.getContentRoot().toString();
-					log.info("Setting '" + TEMPLATE_ATTRIBUTE_NAME + "' attribute in request to '" + templateLocationStr + "'.");
-					log.info("Setting '" + CONTENT_ROOT_ATTRIBUTE_NAME + "' attribute in request to '" + contentRootLocationStr + "'.");
-					request.setAttribute(TEMPLATE_ATTRIBUTE_NAME, templateLocationStr);
+
+				// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
+				PathOrUrl contentRoot = parameters.getContentRoot().orElse(null);
+				Optional<TemplateValues> otvs = TemplateValues.determineTemplateValues(templateLocation, contentRoot, UsageContext.CLIENT_SIDE);
+				if (otvs.isPresent()) {
+					TemplateValues tvs = otvs.get();
+					templateLocation = PathOrUrl.from(tvs.getTemplate());
+					contentRoot = tvs.getContentRoot();
+				}
+				String templateLocationStr = templateLocation.toString();
+				log.info("Setting '" + TEMPLATE_ATTRIBUTE_NAME + "' attribute in request to '" + templateLocationStr + "'.");
+				request.setAttribute(TEMPLATE_ATTRIBUTE_NAME, templateLocationStr);
+
+				if (contentRoot != null) {
+					String contentRootLocationStr = contentRoot.toString();
+					log.info("Setting '" + CONTENT_ROOT_ATTRIBUTE_NAME + "' attribute in request to '" + contentRootLocationStr  + "'.");
 					request.setAttribute(CONTENT_ROOT_ATTRIBUTE_NAME, contentRootLocationStr);
-				} else {
-					// template is an URL of some sort (either crx: or http:) so no context root.
-					String templateLocationStr = templateLocation.toString();
-					log.info("Setting '" + TEMPLATE_ATTRIBUTE_NAME + "' attribute in request to '" + templateLocationStr + "'.");
-					request.setAttribute(TEMPLATE_ATTRIBUTE_NAME, templateLocationStr);
 				}
 			} else {
 				// I would like to fix this in the future to allow for rendering templates by reference, but we don't need that
 				// immediately, so this code does not support it yet.
-				throw new BadRequestException("GetHtml5 only supports rendering templates by reference at this time.");
+				throw new BadRequestException("RenderHtml5Form only supports rendering templates by reference at this time.");
 			}
 			
 			// Set the data parameter
 			parameters.getData()
 					  .ifPresent((dp)->setDataRequestParameter(request, dp));
+			
+			parameters.getSubmitUrl()
+					  .ifPresent(url->request.setAttribute(SUBMIT_URL_ATTRIBUTE_NAME, url.toString()));
 
 			// AEM needs to have "protected mode" turned off for this to work.
 			request.getRequestDispatcher("/content/xfaforms/profiles/default.html").include(request, response);
 		} catch (ServletException | IOException e) {
-			throw new InternalServerErrorException("Error while redirecting to html5 profile." + e.getMessage() == null ? "" : " (" + e.getMessage() + ")" , e);
+			throw new InternalServerErrorException("Error while redirecting to html5 profile. (" + (e.getMessage() == null ? e.getClass().getName() : e.getMessage()) + ")" , e);
 		}
 	}
 
@@ -131,14 +139,12 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 		private static final String CONTENT_ROOT_PARAM = CONTENT_ROOT_ATTRIBUTE_NAME;
 		private static final String SUBMIT_URL_PARAM = "submitUrl";
 		
-		private static final PathOrUrl DEFAULT_CONTENT_ROOT = PathOrUrl.from("/content/dam/formsanddocuments");
-
 		private final TemplateParameter template;
-		private final PathOrUrl contentRoot;
+		private final Optional<PathOrUrl> contentRoot;
 		private final Optional<URL> submitUrl;
 		private final Optional<DataParameter> data;
 		
-		public RenderHtml5FormParameters(TemplateParameter template, PathOrUrl contentRoot, Optional<URL> submitUrl, Optional<DataParameter> data) {
+		public RenderHtml5FormParameters(TemplateParameter template, Optional<PathOrUrl> contentRoot, Optional<URL> submitUrl, Optional<DataParameter> data) {
 			super();
 			this.template = template;
 			this.contentRoot = contentRoot;
@@ -150,7 +156,7 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 			return template;
 		}
 
-		public PathOrUrl getContentRoot() {
+		public Optional<PathOrUrl> getContentRoot() {
 			return contentRoot;
 		}
 
@@ -165,10 +171,10 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 		public static RenderHtml5FormParameters readParameter(SlingHttpServletRequest request, boolean validateXml) throws BadRequestException {
 			try {
 				TemplateParameter template = TemplateParameter.readParameter(getMandatoryParameter(request, TEMPLATE_PARAM));
-				PathOrUrl contentRoot = getOptionalParameter(request, CONTENT_ROOT_PARAM)
+				Optional<PathOrUrl> contentRoot = getOptionalParameter(request, CONTENT_ROOT_PARAM)
 														.map(RequestParameter::getString)
-														.map(PathOrUrl::from)
-														.orElse(DEFAULT_CONTENT_ROOT);	// If it wasn't supplied, provide a default.
+														.map(PathOrUrl::from);
+														
 				Optional<URL> submitUrl = getOptionalParameter(request, SUBMIT_URL_PARAM)
 														.map(RequestParameter::getString)
 														.map(RenderHtml5FormParameters::createSubmitUrl);
@@ -177,7 +183,8 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 
 				return new RenderHtml5FormParameters(template, contentRoot, submitUrl, data);
 			} catch (IllegalArgumentException e) {
-				throw new BadRequestException("There was a problem with one of the incoming parameters.", e);
+				String msg = e.getMessage();
+				throw new BadRequestException("There was a problem with one of the incoming parameters. (" + (msg == null ? e.getClass().getName() : msg) + ").", e);
 			}
 		}
 		
@@ -185,7 +192,7 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 			try {
 				return new URL(urlString);
 			} catch (MalformedURLException e) {
-				throw new IllegalArgumentException("Malformed URL in submitUrl", e);
+				throw new IllegalArgumentException("Malformed URL in submitUrl (" + urlString + ").", e);
 			}
 		}
 		
@@ -225,7 +232,11 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 			public static TemplateParameter readParameter(RequestParameter templateParameter) {
 				ContentType templateContentType = ContentType.valueOf(templateParameter.getContentType());
 				if (templateContentType.isCompatibleWith(ContentType.TEXT_PLAIN)) {
-					return new TemplateParameter(PathOrUrl.from(templateParameter.getString()));
+					PathOrUrl templateRef = PathOrUrl.from(templateParameter.getString());
+					if (!templateRef.getFilename().isPresent()) {
+						throw new IllegalArgumentException("Template Parameter must point to an XDP file (" + templateRef.toString() + ").");
+					}
+					return new TemplateParameter(templateRef);
 				} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_XDP)) {
 					return new TemplateParameter(templateParameter.get());
 				} else {
