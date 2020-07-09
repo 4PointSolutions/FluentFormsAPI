@@ -62,11 +62,11 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 	}
 
 	@Override
-	public AssemblerResult invoke(Document ddx, Map<String, Object> inputs,
+	public AssemblerResult invoke(Document ddx, Map<String, Object> sourceDocuments,
 			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException {
 		com.adobe.fd.assembler.client.AssemblerResult assemblerResult;
 		try {
-			assemblerResult = adobeDocAssemblerService.invoke(AdobeDocumentFactoryImpl.getAdobeDocument(ddx), inputs,
+			assemblerResult = adobeDocAssemblerService.invoke(AdobeDocumentFactoryImpl.getAdobeDocument(ddx), toAdobeDocumentMap(sourceDocuments),
 					toAdobeAssemblerOptionSpec(adobAssemblerOptionSpec));
 		} catch (OperationException e) {
 			 throw new AssemblerServiceException("Error while aasembling the documents ",e);
@@ -75,6 +75,14 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 	}
 	
 	
+	private Map<String, Object> toAdobeDocumentMap(Map<String, Object> sourceDocuments) {
+		Map<String, Object> input = new HashMap<String, Object>();
+		sourceDocuments.forEach((docName, doc) -> {
+			input.put(docName, AdobeDocumentFactoryImpl.getAdobeDocument((Document)doc));
+		});
+		return input;
+	}
+
 	/*
 	 * @Override public PDFAValidationResult isPDFA(Document inDoc,
 	 * PDFAValidationOptionSpec options) throws AssemblerServiceException,

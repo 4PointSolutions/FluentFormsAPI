@@ -6,10 +6,12 @@ import java.util.Map;
 import java.util.Objects;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
+import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.assembler.client.OperationException;
 
 public class MockTraditionalAssemblerService implements TraditionalDocAssemblerService {
@@ -17,6 +19,8 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 	private final AssemblerResult DUMMY_ASSEMBLER_RESULT;
 	private AssemblerResult assemblerResult;
 	private GenerateAssemblerResultArgs generateAssemblerResultArgs;
+	private final Document DUMMY_DOCUMENT;
+	private final DocumentFactory documentFactory;
 
 	
 	@Override
@@ -38,6 +42,8 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 
 	MockTraditionalAssemblerService() {
 		super();
+		this.documentFactory = new MockDocumentFactory();
+		this.DUMMY_DOCUMENT = documentFactory.create(new byte[0]);
 		this.DUMMY_ASSEMBLER_RESULT = new DummyAssemblerResult();
 	}
 	
@@ -52,6 +58,10 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 	
 	public AssemblerResult getDummyAssemblerResult() {
 		return DUMMY_ASSEMBLER_RESULT;
+	}
+	
+	public AssemblerResult getAssemblerResult() {
+		return assemblerResult;
 	}
 
 	public GenerateAssemblerResultArgs getGenerateAssemblerResultArgs() {
@@ -99,7 +109,7 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 
 		@Override
 		public Document getJobLog() {
-			return null;
+			return DUMMY_DOCUMENT;
 		}
 
 		@Override
