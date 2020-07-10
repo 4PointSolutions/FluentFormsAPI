@@ -69,8 +69,10 @@ public class AssemblerServiceImplTest {
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.invoke(nullDocument, sourceDocuments, options));
 		assertTrue(ex1.getMessage().contains("ddx"), ()->"'" + ex1.getMessage() + "' does not contain 'ddx'");
         
-		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.invoke(ddx, null, options));
-		assertTrue(ex3.getMessage().contains("sourceDocuments"), ()->"'" + ex3.getMessage() + "' does not contain 'sourceDocuments'");
+		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.invoke(ddx, null, options));
+		assertTrue(ex2.getMessage().contains("sourceDocuments"), ()->"'" + ex2.getMessage() + "' does not contain 'sourceDocuments'");
+		
+	
 	}
   
 	@SuppressWarnings("unchecked")
@@ -85,7 +87,29 @@ public class AssemblerServiceImplTest {
 		
 		assertThrows(AssemblerServiceException.class, ()->underTest.invoke(ddx, sourceDocuments, options));
 	}
+	
 
+	@SuppressWarnings("unchecked")
+	@Test
+	void testAssembleDocument() throws Exception {
+	    MockPdfAssemblerService svc = new MockPdfAssemblerService();
+		Document ddx = Mockito.mock(Document.class);
+		Map<String, Object> sourceDocuments = Mockito.mock(Map.class);
+		AssemblerResult result = underTest.invoke().setFailOnError(false)
+				                                   .setDefaultStyle("abc")
+				                                   .setLogLevel("DEBUG")
+				                                   .setFirstBatesNumber(0)
+				                                   .setTakeOwnership(true)
+				                                   .setValidateOnly(true)
+				                                   .executeOn(ddx, sourceDocuments);
+		
+		
+		// Verify that all the results are correct.
+		assertEquals(ddx, svc.getDdxOrg(), "Expected the ddx passed to AEM would match the ddx used.");
+		assertTrue(svc.getSourceDocs() == sourceDocuments, "Expected the SourceDocuments passed to AEM would match the SourceDocuments used.");
+		assertTrue(result == svc.getAssemblerResult(), "Expected the AssemblerResult returned by AEM would match the AssemblerResult.");
+		AssemblerOptionSpecTest.assertNotEmpty(svc.getOptionsArg());
+	}
 	
 	private class MockPdfAssemblerService {
 		private final AssemblerResult assemblerResult =  Mockito.mock(AssemblerResult.class);

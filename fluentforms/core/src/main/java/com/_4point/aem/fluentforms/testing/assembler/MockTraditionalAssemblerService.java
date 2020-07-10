@@ -48,10 +48,10 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 	}
 	
 	public static MockTraditionalAssemblerService createAssemblerMock(AssemblerResult assemblerResult) {
-		return new MockTraditionalAssemblerService().setAssmeblerResult(assemblerResult);
+		return new MockTraditionalAssemblerService().setAssemblerResult(assemblerResult);
 	}
 
-	public MockTraditionalAssemblerService setAssmeblerResult(AssemblerResult assemblerResult) {
+	public MockTraditionalAssemblerService setAssemblerResult(AssemblerResult assemblerResult) {
 		this.assemblerResult = assemblerResult;
 		return this;
 	}

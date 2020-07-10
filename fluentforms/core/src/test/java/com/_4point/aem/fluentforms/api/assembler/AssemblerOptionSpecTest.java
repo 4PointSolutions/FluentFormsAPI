@@ -44,13 +44,13 @@ public class AssemblerOptionSpecTest {
 		assertNotEmpty(underTest);
 	}
 
-	private void assertNotEmpty(AssemblerOptionsSpecImpl assemblerOptionsSpecImpl) {
-	    assertNotEquals(emptyAssemblerOptionSpec.isFailOnError(), assemblerOptionsSpecImpl.isFailOnError());
-	    assertNotEquals(emptyAssemblerOptionSpec.getDefaultStyle(), assemblerOptionsSpecImpl.getDefaultStyle());
-	    assertNotEquals(emptyAssemblerOptionSpec.getFirstBatesNumber(), assemblerOptionsSpecImpl.getFirstBatesNumber());
-	    assertNotEquals(emptyAssemblerOptionSpec.getLogLevel(), assemblerOptionsSpecImpl.getLogLevel());
-		assertNotEquals(emptyAssemblerOptionSpec.isValidateOnly(), assemblerOptionsSpecImpl.isValidateOnly());
-		assertNotEquals(emptyAssemblerOptionSpec.isTakeOwnership(), assemblerOptionsSpecImpl.isTakeOwnership());
+	static void assertNotEmpty(AssemblerOptionsSpec assemblerOptionsSpec) {
+	    assertNotEquals(emptyAssemblerOptionSpec.isFailOnError(), assemblerOptionsSpec.isFailOnError());
+	    assertNotEquals(emptyAssemblerOptionSpec.getDefaultStyle(), assemblerOptionsSpec.getDefaultStyle());
+	    assertNotEquals(emptyAssemblerOptionSpec.getFirstBatesNumber(), assemblerOptionsSpec.getFirstBatesNumber());
+	    assertNotEquals(emptyAssemblerOptionSpec.getLogLevel(), assemblerOptionsSpec.getLogLevel());
+		assertNotEquals(emptyAssemblerOptionSpec.isValidateOnly(), assemblerOptionsSpec.isValidateOnly());
+		assertNotEquals(emptyAssemblerOptionSpec.isTakeOwnership(), assemblerOptionsSpec.isTakeOwnership());
 		 
 	}
 

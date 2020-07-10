@@ -45,7 +45,7 @@ public class MockAssemblerService extends AssemblerServiceImpl {
 	 * @return
 	 */
 	public static MockAssemblerService createAssemblerResultMock(AssemblerResult assemblerResult) {
-		return new MockAssemblerService(new MockTraditionalAssemblerService().setAssmeblerResult(assemblerResult)); 
+		return new MockAssemblerService(new MockTraditionalAssemblerService().setAssemblerResult(assemblerResult)); 
 	}
 	
 
