@@ -2,7 +2,10 @@ package com._4point.aem.fluentforms.impl;
 
 import static com._4point.aem.fluentforms.api.TestUtils.SAMPLE_FORM;
 import static com._4point.aem.fluentforms.api.TestUtils.SAMPLE_FORMS_DIR;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.net.URL;

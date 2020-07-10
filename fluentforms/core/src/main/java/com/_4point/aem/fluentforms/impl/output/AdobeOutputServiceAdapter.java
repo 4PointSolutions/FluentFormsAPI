@@ -23,7 +23,6 @@ import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 
 	private static final Logger log = LoggerFactory.getLogger(AdobeOutputServiceAdapter.class);
-
 	private final DocumentFactory documentFactory;
 	private final com.adobe.fd.output.api.OutputService adobeOutputService;
 
