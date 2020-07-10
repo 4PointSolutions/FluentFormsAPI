@@ -58,7 +58,7 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 		Objects.requireNonNull(template, "Template parameter cannot be null.");
 		Objects.requireNonNull(data, "Data parameter cannot be null.");
 		
-		WebTarget importDataTarget = baseTarget.path(RENDER_HTML5_PATH);
+		WebTarget renderHtml5Target = baseTarget.path(RENDER_HTML5_PATH);
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(TEMPLATE_PARAM, template.toString());
@@ -68,7 +68,7 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 			}
 					 
 
-			Response result = postToServer(importDataTarget, multipart, MediaType.TEXT_HTML_TYPE);
+			Response result = postToServer(renderHtml5Target, multipart, MediaType.TEXT_HTML_TYPE);
 			
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
@@ -97,9 +97,10 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 			return resultDoc;
 			
 		} catch (IOException e) {
-			throw new Html5FormsServiceException("I/O Error while importing data. (" + baseTarget.getUri().toString() + ").", e);
+			String msg = e.getMessage();
+			throw new Html5FormsServiceException("I/O Error while rendering Html5 Form. (" + baseTarget.getUri().toString() + ") (" + (msg == null ? e.getClass().getName() : msg) + ").", e);
 		} catch (RestServicesServiceException e) {
-			throw new Html5FormsServiceException("Error while POSTing to server", e);
+			throw new Html5FormsServiceException("Error while POSTing to AEM server.", e);
 		}
 	}
 

@@ -49,7 +49,7 @@ class RenderHtml5FormTest {
 
 		// Make sure the data wasn't populated.
 		String html = new String(resultBytes, StandardCharsets.UTF_8);
-		// Does not contain field data, does not contain auth string but *does* contain environment name.
+		// Does not contain field data.
 		assertThat(html, not(anyOf(containsString("Text Field1 Data"), containsString("Text Field2 Data"))));
 	
 	}
@@ -69,7 +69,7 @@ class RenderHtml5FormTest {
 
 		// Make sure the data was populated.
 		String html = new String(resultBytes, StandardCharsets.UTF_8);
-		// Contains field data, does not contain auth string but *does* contain environment name.
+		// Contains field data.
 		assertThat(html, allOf(containsString("Text Field1 Data"), containsString("Text Field2 Data")));
 	}
 
