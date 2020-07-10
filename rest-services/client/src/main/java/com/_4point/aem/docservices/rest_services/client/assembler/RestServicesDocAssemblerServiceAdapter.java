@@ -96,7 +96,7 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 						(t) -> isFailOnError == null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()));
 			}
 			
-			Response result = postToServer(assembleDocTarget, multipart, APPLICATION_PDF);
+			Response result = postToServer(assembleDocTarget, multipart,  MediaType.APPLICATION_XML_TYPE);
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
 				String msg = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='"
@@ -124,12 +124,12 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 				msg += "\n" + inputStreamtoString(entityStream);
 				throw new AssemblerServiceException(msg);
 			}
-			//String resultXml = result.readEntity(String.class);
-			//System.out.println("resultXml: "+resultXml);
-			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-			resultDoc.setContentType(APPLICATION_PDF.toString());
-		    Map<String, Document> resultMap = new HashMap<String, Document>();
-		    resultMap.put("concatenatedPDF.pdf", resultDoc);
+			String resultXml = result.readEntity(String.class);
+			System.out.println("resultXml: "+resultXml);
+//			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+//			resultDoc.setContentType(APPLICATION_PDF.toString());
+		    Map<String, Document> resultMap = convertXmlDocument(resultXml);
+		   // resultMap.put("concatenatedPDF.pdf", resultDoc);
 			AssemblerResult assemblerResult = new AssemblerResultImpl(resultMap);
 			return assemblerResult;
 
@@ -161,6 +161,7 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 					bytesPdf = Base64.getDecoder()
 							.decode(eElement.getElementsByTagName("mergedDoc").item(0).getTextContent());
 					Document concatenatedDoc = SimpleDocumentFactoryImpl.getFactory().create(bytesPdf);
+					concatenatedDoc.setContentType(APPLICATION_PDF.toString());
 					resultMap.put(eElement.getAttribute("documentName"), concatenatedDoc);
 				}
 			}

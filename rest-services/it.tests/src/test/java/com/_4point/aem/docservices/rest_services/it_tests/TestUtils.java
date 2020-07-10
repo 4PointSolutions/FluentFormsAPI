@@ -31,7 +31,7 @@ public class TestUtils {
 	public static final String TEST_USER_PASSWORD = "admin";
 	
 	private static final String SAMPLE_FORM_PDF_NAME = "SampleForm.pdf";
-	private static final String SAMPLE_FORM_DDX_NAME = "SampleForm_ddx.xml";
+	private static final String SAMPLE_FORM_DDX_NAME = "SampleFormDDX.xml";
 	private static final String SAMPLE_FORM_XDP_NAME = "SampleForm.xdp";
 	private static final String SAMPLE_FORM_DATA_XML_NAME = "SampleForm_data.xml";
 

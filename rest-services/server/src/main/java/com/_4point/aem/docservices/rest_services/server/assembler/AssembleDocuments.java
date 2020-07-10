@@ -50,6 +50,7 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerArgumentBuilder;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AdobeDocAssemblerServiceAdapter;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
@@ -66,6 +67,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 	private static final String DDX = "ddx";
 	private static final String SOURCE_DOCUMENT_KEY = "sourceDocumentMap.key";
 	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
+	
 	@Reference
 	private com.adobe.fd.assembler.service.AssemblerService adobeAssembleService;
 
@@ -123,23 +125,23 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 					.transform(b -> isFailonError == null ? b : b.setFailOnError(isFailonError));
 			try (AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
 				log.info("assemblerResult : " +assemblerResult);
-				//String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
-				//response.setContentType(ContentType.APPLICATION_XML.getContentTypeStr());
-				//response.getWriter().write(assemblerResultxml);
+				String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
+				response.setContentType(ContentType.APPLICATION_XML.getContentTypeStr());
+				response.getWriter().write(assemblerResultxml);
 				//Document result = null;
-				String contentType = ContentType.APPLICATION_PDF.toString();	// We know the result is always PDF.
-				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-				response.setContentType(contentType);
-				assemblerResult.getDocuments().forEach((docName, mergedPDf) ->{
-					Document result  = mergedPDf;
-					try {
-						ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				});
-				
+//				String contentType = ContentType.APPLICATION_PDF.toString();	// We know the result is always PDF.
+//				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
+//				response.setContentType(contentType);
+//				assemblerResult.getDocuments().forEach((docName, mergedPDf) ->{
+//					Document result  = mergedPDf;
+//					try {
+//						ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//				});
+//				
 			
 				
 			}
@@ -162,6 +164,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		org.w3c.dom.Document document = documentBuilder.newDocument();
 		org.w3c.dom.Element root = document.createElement("assemblerResult");
 		document.appendChild(root);
+		String decoded = null;
 		for (Entry<String, Document> resultDoc : resultDocMap.entrySet()) {
 			log.info("Result pdf name : " +resultDoc.getKey());
 			Element result = document.createElement("resultDocument");
@@ -169,13 +172,23 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			Attr attr = document.createAttribute("documentName");
 			attr.setValue(resultDoc.getKey());
 			result.setAttributeNode(attr);
-			Document concatenatedDoc = docFactory.create(resultDoc.getValue().getInputStream());
-			log.info("map size " +resultDocMap.size());
-			//log.info(resultDoc.getKey() + " is of type " +resultDoc.getValue().getContentType());
-			String decoded = Base64.getEncoder().encodeToString(concatenatedDoc.getInlineData());
+	        Document concatenatedDoc = resultDoc.getValue();
+	        if(resultDoc.getValue() != null) {
+	        concatenatedDoc.setContentType(ContentType.APPLICATION_PDF.toString());
+	        log.info("Bconverting to bytarray");
+	        byte[] concatenatedPdf = org.apache.commons.io.IOUtils.toByteArray(concatenatedDoc.getInputStream());;
+	        if(concatenatedPdf != null) {
+	        decoded = Base64.getEncoder().encodeToString(concatenatedPdf);
 			Element mergedDoc = document.createElement("mergedDoc");
-			mergedDoc.appendChild(document.createTextNode(decoded));
+			mergedDoc.appendChild(document.createTextNode(decoded));      
 			result.appendChild(mergedDoc);
+	        } else {
+	        	log.error("Byte array of doc is null");
+	        }
+	        } else {
+	        	log.error("resultDoc is null");
+	        }
+	     
 		}
 		DOMSource domSource = new DOMSource(document);
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
