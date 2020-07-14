@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.ws.rs.client.Client;
@@ -30,12 +31,16 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 	private static final String TEMPLATE_PARAM = "template";
 	private static final String DATA_PARAM = "data";
 
-	protected Html5FormsService(WebTarget baseTarget) {
+	private final Function<InputStream, InputStream> responseFilter; 
+
+	protected Html5FormsService(WebTarget baseTarget, Function<InputStream, InputStream> responseFilter) {
 		super(baseTarget);
+		this.responseFilter = responseFilter != null ? responseFilter : Function.identity();
 	}
 
-	protected Html5FormsService(WebTarget baseTarget, Supplier<String> correlationIdFn) {
+	protected Html5FormsService(WebTarget baseTarget, Supplier<String> correlationIdFn, Function<InputStream, InputStream> responseFilter) {
 		super(baseTarget, correlationIdFn);
+		this.responseFilter = responseFilter != null ? responseFilter : Function.identity();
 	}
 	
 	public Document renderHtml5Form(PathOrUrl template) throws Html5FormsServiceException {
@@ -92,7 +97,7 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 				throw new Html5FormsServiceException(msg);
 			}
 
-			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
+			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create(this.responseFilter.apply((InputStream) result.getEntity()));
 			resultDoc.setContentType(responseContentType);
 			return resultDoc;
 			
@@ -148,7 +153,8 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 	
 	public static class Html5FormsServiceBuilder implements Builder {
 		private BuilderImpl builder = new BuilderImpl();
-		
+		private Function<InputStream, InputStream> renderResultFilter; 
+
 		private Html5FormsServiceBuilder() {
 			super();
 		}
@@ -198,9 +204,19 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 		public WebTarget createLocalTarget() {
 			return builder.createLocalTarget();
 		}
+
+		public Html5FormsServiceBuilder addRenderResultFilter(Function<InputStream, InputStream> filter) {
+			this.renderResultFilter = this.renderResultFilter != null ? this.renderResultFilter.andThen(filter)
+											  : filter;  
+			return this;
+		}
 		
+		public Function<InputStream, InputStream> getRenderResultFilter() {
+			return renderResultFilter;
+		}
+
 		public Html5FormsService build() {
-			return new Html5FormsService(this.createLocalTarget(), this.getCorrelationIdFn());
+			return new Html5FormsService(this.createLocalTarget(), this.getCorrelationIdFn(), this.getRenderResultFilter());
 		}
 		
 	}

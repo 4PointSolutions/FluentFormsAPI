@@ -25,7 +25,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.io.IOUtils;
@@ -44,6 +43,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService.Html5FormsServiceBuilder;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService.Html5FormsServiceException;
 import com._4point.aem.fluentforms.api.Document;
@@ -145,7 +145,6 @@ class Html5FormsServiceTest {
 											  : underTest.renderHtml5Form(Paths.get(DUMMY_TEMPLATE_STR));
 			}
 			private static Document renderHtml5FormWithUrl(Boolean hasData, Html5FormsService underTest) throws Html5FormsServiceException {
-				Document result;
 				try {
 					return hasData.booleanValue() ? underTest.renderHtml5Form(new URL(DUMMY_TEMPLATE_URL), DUMMY_DATA) 
 												  : underTest.renderHtml5Form(new URL(DUMMY_TEMPLATE_URL));
@@ -229,8 +228,6 @@ class Html5FormsServiceTest {
 		// Make sure the response is correct.
 		assertArrayEquals(responseData.getInlineData(), result.getInlineData());
 		assertEquals(MediaType.TEXT_HTML_TYPE, MediaType.valueOf(result.getContentType()));
-
-		
 	}
 
 	private void setUpJaxRsClientMocks(Document responseData, MediaType produces, Status status, boolean gettingHeader) throws IOException {
@@ -259,6 +256,27 @@ class Html5FormsServiceTest {
 		}
 	}
 
+	@Test
+	void testRenderHtml5FormWithFilter() throws Exception {
+		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
+
+		setUpJaxRsClientMocks(responseData, MediaType.TEXT_HTML_TYPE, Response.Status.OK, true);
+		
+		Html5FormsService underTest = Html5FormsService.builder()
+													   .machineName(TEST_MACHINE_NAME)
+													   .port(TEST_MACHINE_PORT)
+													   .basicAuthentication("username", "password")
+													   .useSsl(false)
+													   .clientFactory(()->client)
+													   .addRenderResultFilter(is->new ReplacingInputStream(is, "Document", "tnemucoD"))
+													   .build();
+	
+		Document result = underTest.renderHtml5Form(DUMMY_TEMPLATE_STR, DUMMY_DATA);
+		
+		assertEquals("response tnemucoD Data", new String(result.getInlineData()));
+		assertEquals(MediaType.TEXT_HTML_TYPE, MediaType.valueOf(result.getContentType()));
+	}
+	
 	@Test
 	void testRenderHtml5FormFailureStatus() throws Exception {
 		String responseString = "response Document Data";
@@ -310,8 +328,6 @@ class Html5FormsServiceTest {
 
 	@Test
 	void testRenderHtml5FormBadResponseNoEntity() throws Exception {
-		String responseString = "response Document Data";
-		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create(responseString.getBytes());
 
 		setUpJaxRsClientMocks(SimpleDocumentFactoryImpl.emptyDocument(), MediaType.TEXT_PLAIN_TYPE, Response.Status.OK, false);
 
