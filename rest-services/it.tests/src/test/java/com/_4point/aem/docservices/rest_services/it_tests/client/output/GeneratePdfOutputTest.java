@@ -2,6 +2,7 @@ package com._4point.aem.docservices.rest_services.it_tests.client.output;
 
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_DATA_XML;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_XDP;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_WITH_DATA_PDF;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
@@ -91,4 +92,15 @@ class GeneratePdfOutputTest {
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_AllArgs.pdf", false, false, false);		
 	}
+	
+	@Test
+	@DisplayName("Test generatePdfOutput() Just Form Doc.  FluentFormsAPI Issue #15")
+	void testGeneratePdfOutput_JustFormDocIssue15() throws Exception {
+		Document pdfResult =  underTest.generatePDFOutput()
+									   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf")), null);
+		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
+	}
+
+
 }

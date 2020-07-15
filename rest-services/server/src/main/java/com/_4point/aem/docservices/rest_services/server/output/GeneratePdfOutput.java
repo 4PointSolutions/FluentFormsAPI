@@ -110,7 +110,7 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 				String contentType = result.getContentType();
 				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
 				response.setContentType(contentType);
-				response.setContentLength((int)result.length());
+				// response.setContentLength((int)result.length());	// Commented out length do to an issue with the Adobe code (see FluentFormsAPI Issue #15).
 				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
 			}
 		} catch (FileNotFoundException fnfex) {
@@ -329,7 +329,8 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 				
 				return result;
 			} catch (IllegalArgumentException e) {
-				throw new BadRequestException("There was a problem with one of the incoming parameters.", e);
+				String msg = e.getMessage();
+				throw new BadRequestException("There was a problem with one of the incoming parameters. (" + (msg == null ? e.getClass().getName() : msg) + ")", e);
 			}
 		}
 		
@@ -370,7 +371,8 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 				ContentType templateContentType = ContentType.valueOf(templateParameter.getContentType());
 				if (templateContentType.isCompatibleWith(ContentType.TEXT_PLAIN)) {
 					return new TemplateParameter(PathOrUrl.from(templateParameter.getString()));
-				} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_XDP)) {
+				} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_XDP) || templateContentType.isCompatibleWith(ContentType.APPLICATION_PDF)) {
+					// Accept either XDP or PDF here.
 					return new TemplateParameter(templateParameter.get());
 				} else {
 					throw new IllegalArgumentException("Template parmameter has invalid content type. (" + templateContentType.getContentTypeStr() + ").");

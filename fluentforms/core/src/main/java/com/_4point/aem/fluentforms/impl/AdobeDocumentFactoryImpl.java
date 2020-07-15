@@ -107,6 +107,7 @@ public enum AdobeDocumentFactoryImpl implements DocumentFactory {
 	private static class AdobeDocumentImpl implements Document {
 
 		private final com.adobe.aemfd.docmanager.Document doc;
+		private String contentType = null;		// Cache contentType in order to avoid FluentFormsAPI Issue #15.
 		
 		private AdobeDocumentImpl(byte[] data) {
 			doc = new com.adobe.aemfd.docmanager.Document(data);
@@ -182,7 +183,7 @@ public enum AdobeDocumentFactoryImpl implements DocumentFactory {
 		 */
 		@Override
 		public String getContentType() throws IOException {
-			return doc.getContentType();
+			return contentType != null ? contentType : doc.getContentType() ;
 		}
 
 		/* (non-Javadoc)
@@ -246,6 +247,7 @@ public enum AdobeDocumentFactoryImpl implements DocumentFactory {
 		 */
 		@Override
 		public void setContentType(String contentType) {
+			this.contentType = contentType;
 			doc.setContentType(contentType);
 		}
 
