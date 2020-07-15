@@ -1,6 +1,5 @@
 package com._4point.aem.docservices.rest_services.client.assembler;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -21,9 +20,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -32,14 +29,13 @@ import org.xml.sax.SAXException;
 
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
-import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
+import com._4point.aem.fluentforms.impl.assembler.AdobeDocAssemblerServiceAdapter;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 import com.adobe.fd.assembler.client.OperationException;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
@@ -91,11 +87,11 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 				 throw new NullPointerException("inputs can not be null"); 
 			 }
 
-			if (adobAssemblerOptionSpec != null) {
-				MultipartTransformer.create(multipart).transform(
-						(t) -> isFailOnError == null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()));
-			}
-			
+				/*
+				 * if (adobAssemblerOptionSpec != null) {
+				 * MultipartTransformer.create(multipart).transform( (t) -> isFailOnError ==
+				 * null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString())); }
+				 */
 			Response result = postToServer(assembleDocTarget, multipart,  MediaType.APPLICATION_XML_TYPE);
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
@@ -130,7 +126,10 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 //			resultDoc.setContentType(APPLICATION_PDF.toString());
 		    Map<String, Document> resultMap = convertXmlDocument(resultXml);
 		   // resultMap.put("concatenatedPDF.pdf", resultDoc);
-			AssemblerResult assemblerResult = new AssemblerResultImpl(resultMap);
+			System.out.println("Added docsmap in assemblerResult");
+			AssemblerResult assemblerResult = new AdobeDocAssemblerServiceAdapter(resultMap);
+			
+			System.out.println("Added docsmap in assemblerResult");
 			return assemblerResult;
 
 		} catch (IOException e) {

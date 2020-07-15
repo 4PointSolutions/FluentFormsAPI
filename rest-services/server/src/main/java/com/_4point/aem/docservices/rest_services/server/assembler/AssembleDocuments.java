@@ -23,6 +23,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -165,6 +166,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		org.w3c.dom.Element root = document.createElement("assemblerResult");
 		document.appendChild(root);
 		String decoded = null;
+		if(MapUtils.isNotEmpty(resultDocMap)) {
 		for (Entry<String, Document> resultDoc : resultDocMap.entrySet()) {
 			log.info("Result pdf name : " +resultDoc.getKey());
 			Element result = document.createElement("resultDocument");
@@ -189,6 +191,9 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 	        	log.error("resultDoc is null");
 	        }
 	     
+		}
+		} else {
+			log.error("resultDocMap is null");
 		}
 		DOMSource domSource = new DOMSource(document);
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();

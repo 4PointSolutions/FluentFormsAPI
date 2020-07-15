@@ -2,10 +2,6 @@ package com._4point.aem.fluentforms.impl.assembler;
 
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,32 +28,50 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 	private static final Logger log = LoggerFactory.getLogger(AdobeDocAssemblerServiceAdapter.class);
 
 	private final com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService;
-    private final com.adobe.fd.assembler.client.AssemblerResult assemblerResult;
-	private final DocumentFactory documentFactory;
+    private  com.adobe.fd.assembler.client.AssemblerResult assemblerResult;
+    private final DocumentFactory documentFactory;
+    private Map<String, Document> sourceDocuments ;
 
-	public AdobeDocAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService, com.adobe.fd.assembler.client.AssemblerResult assemblerResult,  DocumentFactory documentFactory ) {		
+	public AdobeDocAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService, DocumentFactory documentFactory) {		
 		super();
 		this.adobeDocAssemblerService = Objects.requireNonNull(adobeDocAssemblerService,
 				"adobeDocAssemblerService cannot be null.");		
-		this.assemblerResult = Objects.requireNonNull(assemblerResult, "assemblerResult cannot be null.");
+		this.assemblerResult =null;
+		
 		this.documentFactory = Objects.requireNonNull(documentFactory, "Document Factory cannot be null.");
+		this.sourceDocuments = null;
 	}
 
-	public AdobeDocAssemblerServiceAdapter(com.adobe.fd.assembler.client.AssemblerResult assemblerResult ) {
-		super();
-		this.documentFactory = DocumentFactory.getDefault();
-		this.adobeDocAssemblerService = null;
-		this.assemblerResult = Objects.requireNonNull(assemblerResult, "assemblerResult cannot be null.");
-	}
 
-	
-	public AdobeDocAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService, DocumentFactory documentFactory) {
+	public AdobeDocAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService) {
 		super();
 		this.documentFactory = DocumentFactory.getDefault();
+		
 		this.adobeDocAssemblerService = Objects.requireNonNull(adobeDocAssemblerService,
 				"adobeDocAssemblerService cannot be null.");	;
 		this.assemblerResult = null;
+		this.sourceDocuments = null;
 	}
+	
+
+	public AdobeDocAssemblerServiceAdapter(Map<String, Document> sourceDocuments) {
+		super();
+		log.info("initializing docs in AdobeDocAssemblerServiceAdapter");
+	    this.documentFactory = DocumentFactory.getDefault();
+		this.adobeDocAssemblerService =null;
+		this.assemblerResult = null;
+		this.sourceDocuments = sourceDocuments;
+	}
+	
+	public AdobeDocAssemblerServiceAdapter(com.adobe.fd.assembler.client.AssemblerResult assemblerResult) {
+		super();
+		this.documentFactory = DocumentFactory.getDefault();
+		this.adobeDocAssemblerService = null;
+		this.assemblerResult = assemblerResult;
+		this.sourceDocuments = null;
+	}
+	
+	
 	
 
 	@Override
@@ -108,11 +122,25 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 
 	@Override
 	public Map<String, Document> getDocuments() {
-		 Map<String, Document> documents= new HashMap<String, Document>();
-		 for(Entry<String,com.adobe.aemfd.docmanager.Document>docs:assemblerResult.getDocuments().entrySet()) {
-			 documents.put(docs.getKey(), documentFactory.create(docs.getValue()));
-		 }
-		return documents;
+
+if(sourceDocuments==null) {
+	log.info("sourceDocuments empty");
+	sourceDocuments =  new HashMap<String, Document>();
+		if (assemblerResult != null) {
+
+			if (assemblerResult.getDocuments() != null) {
+				log.info("assemblerResult is not empty");
+				assemblerResult.getDocuments().forEach((docName, doc) -> {
+					sourceDocuments.put(docName, documentFactory.create(doc));
+				});
+
+			} else {
+				log.error("dcoument map null");
+			}
+		}
+}
+log.info("sourceDocuments not empty");
+		return sourceDocuments;
 	}
 
 	@Override
