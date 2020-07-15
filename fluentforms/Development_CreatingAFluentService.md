@@ -15,7 +15,7 @@ Some examples are replacing Adobe Document objects with Fluent Forms Document in
 or Options objects that have Builder implementations, additional argument validation and strong argument typing.  Some Adobe objects are not replaced, for example, enums are not typically replaced as the code would just duplicate Adobe functionality without providing any value.
 
 The `AdobeWhateverServiceAdapter` is an implementation class that maps FluentForms objects to Adobe objects and calls the Adobe APIs.  It is the primary
-class that uses Adobe objects.  Outside of this class, the use of Adobe objects should be limited to enums and static classes that contain constants.
+class that uses Adobe objects.  The goal of this class is to encapsulate most dependencies on the Adobe API except for Adobe API constants (since it's not worth the effort of maintaining duplicate constants).  Outside of this class, the use of Adobe objects should be limited to enums and static classes that contain constants.
 
 The way I typically do this is to:
 * I create a new `AdobeWhateverServiceAdapter` Java class that extend/implements the original Adobe class/interface.
