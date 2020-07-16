@@ -316,8 +316,8 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 				Optional<DataParameter> data = getOptionalParameter(request, DATA_PARAM)
 																.map(p->DataParameter.readParameter(p,validateXml));
 				
-				if (data.isPresent() && data.get().getType() == ParameterType.PathOrUrl) {
-					throw new BadRequestException("RenderPdfForm does not support passing data by reference, only by value.");
+				if (data.isPresent() && data.get().getType() != ParameterType.ByteArray) {
+					throw new BadRequestException("RenderPdfForm only supports providing data by value at this time.");
 				}
 				byte[] inputData = data.map(DataParameter::getArray).orElse(null);
 	
