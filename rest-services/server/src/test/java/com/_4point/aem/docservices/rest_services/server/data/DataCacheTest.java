@@ -13,7 +13,7 @@ class DataCacheTest {
 		String expectedContentType = "text/plain";
 		byte[] expectedDataBytes = "testAddDataToCacheGetDataFromCache Result".getBytes();
 
-		Entry dataFromCache = DataCache.getDataFromCache(DataCache.addDataToCache(expectedDataBytes, expectedContentType));
+		Entry dataFromCache = DataCache.getDataFromCache(DataCache.addDataToCache(expectedDataBytes, expectedContentType)).get();
 		
 		assertEquals(expectedContentType,dataFromCache.contentType());
 		assertArrayEquals(expectedDataBytes, dataFromCache.data());
@@ -33,10 +33,15 @@ class DataCacheTest {
 
 		// Check the DataCache (in reverse order)
 		for(int i = numEntries - 1; i > -1; i--) {
-			Entry dataFromCache = DataCache.getDataFromCache(keys[i]);
+			Entry dataFromCache = DataCache.getDataFromCache(keys[i]).get();
 			assertEquals(expectedContentType,dataFromCache.contentType());
 			assertArrayEquals(expectedDataBytes[i], dataFromCache.data());
 		}
+	}
+
+	@Test
+	void testKeyNotInCache() {
+		assertFalse(DataCache.getDataFromCache("BadKey").isPresent());
 	}
 
 }

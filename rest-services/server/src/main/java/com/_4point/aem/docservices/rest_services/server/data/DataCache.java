@@ -1,5 +1,6 @@
 package com._4point.aem.docservices.rest_services.server.data;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -15,8 +16,8 @@ public  enum DataCache {
 		return key;
 	}
 	
-	public static Entry getDataFromCache(String key) {
-		return INSTANCE.dataMap.remove(key);
+	public static Optional<Entry> getDataFromCache(String key) {
+		return Optional.ofNullable(INSTANCE.dataMap.remove(key));
 	}
 	
 	public static class Entry {
