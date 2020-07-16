@@ -108,6 +108,7 @@ class RenderHtml5FormTest {
 			
 			@Override
 			public RequestDispatcher getRequestDispatcher(Resource resource, RequestDispatcherOptions options) {
+				fail("Wrong version of getRequestDispatcher called.");
 				return mockRequestDispatcher();
 			}
 			

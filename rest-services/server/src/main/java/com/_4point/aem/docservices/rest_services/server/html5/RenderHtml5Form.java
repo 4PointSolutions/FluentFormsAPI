@@ -83,14 +83,10 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 					templateLocation = PathOrUrl.from(tvs.getTemplate());
 					contentRoot = tvs.getContentRoot();
 				}
-				String templateLocationStr = templateLocation.toString();
-				log.info("Setting '" + TEMPLATE_ATTRIBUTE_NAME + "' attribute in request to '" + templateLocationStr + "'.");
-				request.setAttribute(TEMPLATE_ATTRIBUTE_NAME, templateLocationStr);
+				setRequestAttribute(request, TEMPLATE_ATTRIBUTE_NAME, templateLocation.toString());
 
 				if (contentRoot != null) {
-					String contentRootLocationStr = contentRoot.toString();
-					log.info("Setting '" + CONTENT_ROOT_ATTRIBUTE_NAME + "' attribute in request to '" + contentRootLocationStr  + "'.");
-					request.setAttribute(CONTENT_ROOT_ATTRIBUTE_NAME, contentRootLocationStr);
+					setRequestAttribute(request, CONTENT_ROOT_ATTRIBUTE_NAME, contentRoot.toString());
 				}
 			} else {
 				// I would like to fix this in the future to allow for rendering templates by reference, but we don't need that
@@ -112,18 +108,29 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 		}
 	}
 
+	private static SlingHttpServletRequest setRequestAttribute(SlingHttpServletRequest request, String attributeName, String attributeValue) {
+		log.info("Setting '" + attributeName + "' attribute in request to '" + attributeValue  + "'.");
+		request.setAttribute(attributeName, attributeValue);
+		return request;
+	}
+	
+	private static SlingHttpServletRequest setRequestAttribute(SlingHttpServletRequest request, String attributeName, byte[] attributeValue) {
+		log.info("Setting '" + attributeName + "' attribute in request.");
+		request.setAttribute(attributeName, attributeValue);
+		return request;
+	}
+	
+
 	private void setDataRequestParameter(SlingHttpServletRequest request, DataParameter dp) {
 		switch(dp.getType()) {
 		case ByteArray:
-			log.info("Setting '" + DATA_ATTRIBUTE_NAME + "' attribute in request.");
-			request.setAttribute(DATA_ATTRIBUTE_NAME, dp.getArray());
+			setRequestAttribute(request, DATA_ATTRIBUTE_NAME, dp.getArray());
 			break;
 		case PathOrUrl:
 			PathOrUrl dPathOrUrl = dp.getPathOrUrl();
 			log.info("PathOrUrl isUrl='" + dPathOrUrl.isUrl() + "', isPath='" + dPathOrUrl.isPath() + "'.");
 			String dataPath = dPathOrUrl.isPath() ? dPathOrUrl.getPath().toUri().toString() : dPathOrUrl.toString();
-			log.info("Setting '" + DATA_REF_ATTRIBUTE_NAME + "' attribute in request to '" + dataPath + "'.");
-			request.setAttribute(DATA_REF_ATTRIBUTE_NAME, dataPath);
+			setRequestAttribute(request, DATA_REF_ATTRIBUTE_NAME, dataPath);
 			break;
 		default:
 			throw new IllegalStateException("Unknown DataParameter Type (" + dp.getType().toString() + ").");
