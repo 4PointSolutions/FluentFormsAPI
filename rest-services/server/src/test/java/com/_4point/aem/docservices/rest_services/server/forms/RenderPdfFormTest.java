@@ -387,10 +387,9 @@ class RenderPdfFormTest {
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
-		Map<String, Object> parameterMap = new HashMap<>();
 		String badFormName = "bar.xdp";
-		request.addRequestParameter("template", "foo/" + badFormName);
-		request.addRequestParameter("data", "formData".getBytes(), APPLICATION_XML);
+		request.addRequestParameter(TEMPLATE_PARAM, "foo/" + badFormName);
+		request.addRequestParameter(DATA_PARAM, "formData".getBytes(), APPLICATION_XML);
 		
 		underTest.doPost(request, response);
 		
@@ -400,6 +399,28 @@ class RenderPdfFormTest {
 		assertThat(statusMsg, containsStringIgnoringCase("Bad request parameter"));
 		assertThat(statusMsg, containsStringIgnoringCase("unable to find template"));
 		assertThat(statusMsg, containsString(badFormName));
+	}
+
+	@Test
+	void testDoPost_BadData() throws ServletException, IOException, NoSuchFieldException {
+		String templateData = TestUtils.SAMPLE_FORM.toString();
+	String resultData = "testDoPost Happy Path Result";
+		byte[] resultDataBytes = resultData.getBytes();
+		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
+
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+		
+		request.addRequestParameter(TEMPLATE_PARAM, templateData);
+		request.addRequestParameter(DATA_PARAM, "formData");
+		
+		underTest.doPost(request, response);
+		
+		// Validate the result
+		assertEquals(SlingHttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+		String statusMsg = response.getStatusMessage();
+		assertThat(statusMsg, containsStringIgnoringCase("only supports providing data by value"));
 	}
 
 	@Test
