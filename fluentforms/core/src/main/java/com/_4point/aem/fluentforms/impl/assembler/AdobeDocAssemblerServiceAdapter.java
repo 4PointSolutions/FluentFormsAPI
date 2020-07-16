@@ -5,7 +5,6 @@ import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -123,23 +122,23 @@ public class AdobeDocAssemblerServiceAdapter implements TraditionalDocAssemblerS
 	@Override
 	public Map<String, Document> getDocuments() {
 
-if(sourceDocuments==null) {
-	log.info("sourceDocuments empty");
-	sourceDocuments =  new HashMap<String, Document>();
-		if (assemblerResult != null) {
+		if(sourceDocuments==null) {
+			log.info("sourceDocuments empty");
+			sourceDocuments =  new HashMap<String, Document>();
+			if (assemblerResult != null) {
 
-			if (assemblerResult.getDocuments() != null) {
-				log.info("assemblerResult is not empty");
-				assemblerResult.getDocuments().forEach((docName, doc) -> {
-					sourceDocuments.put(docName, documentFactory.create(doc));
-				});
+				if (assemblerResult.getDocuments() != null) {
+					log.info("assemblerResult is not empty");
+					assemblerResult.getDocuments().forEach((docName, doc) -> {
+						sourceDocuments.put(docName, documentFactory.create(doc));
+					});
 
-			} else {
-				log.error("dcoument map null");
+				} else {
+					log.error("dcoument map null");
+				}
 			}
 		}
-}
-log.info("sourceDocuments not empty");
+		log.info("sourceDocuments not empty");
 		return sourceDocuments;
 	}
 
@@ -155,7 +154,7 @@ log.info("sourceDocuments not empty");
 	}
 
 	@Override
-	public Document etJobLog() {
+	public Document getJobLog() {
 		// TODO Auto-generated method stub
 		return null;
 	}

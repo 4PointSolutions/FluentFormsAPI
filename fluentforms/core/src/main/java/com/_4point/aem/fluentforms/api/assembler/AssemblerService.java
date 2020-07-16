@@ -46,7 +46,7 @@ public interface AssemblerService {
 	public static interface AssemblerArgumentBuilder extends AssemblerOptionsSetter, Transformable<AssemblerArgumentBuilder> {
 		
 		@Override
-		AssemblerArgumentBuilder setFailOnError(boolean isFailOnError);
+		AssemblerArgumentBuilder setFailOnError(Boolean isFailOnError);
 		
 		@Override
 		AssemblerArgumentBuilder setContentRoot(PathOrUrl contentRoot);

@@ -1,30 +1,24 @@
 package com._4point.aem.docservices.rest_services.server.assembler;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.Supplier;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
@@ -37,11 +31,10 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.ContentType;
-import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
@@ -51,7 +44,6 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerArgumentBuilder;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
-import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AdobeDocAssemblerServiceAdapter;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
@@ -68,7 +60,8 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 	private static final String DDX = "ddx";
 	private static final String SOURCE_DOCUMENT_KEY = "sourceDocumentMap.key";
 	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
-	
+	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
+
 	@Reference
 	private com.adobe.fd.assembler.service.AssemblerService adobeAssembleService;
 
@@ -104,47 +97,30 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		log.info("In Assemble Uploaded Files");
 		try {
 			Map<String, Object> sourceDocuments = new HashMap<String, Object>();
-           // createSourceDocumentMap(sourceDocuments, request);
-			RequestParameter parameter = request.getRequestParameter(DDX);			
-			  RequestParameter[] soruceDocName= request.getRequestParameters(SOURCE_DOCUMENT_KEY);
-              RequestParameter[] sourceDocs= request.getRequestParameters(SOURCE_DOCUMENT_VALUE);
-			  if(soruceDocName.length == sourceDocs.length) { 
-				  log.info("sourceDocs Size : "+sourceDocs.length);
-				  for (int i = 0; i < soruceDocName.length; i++) {
-					  log.info("Document Name: "+soruceDocName[i].toString());
-					  log.info("Content Type: "+sourceDocs[i].getContentType());
-			          sourceDocuments.put(soruceDocName[i].getString(), docFactory.create(sourceDocs[i].get()));
-			  } 
-		  }
-			 
-			 
-			Boolean isFailonError = false;
-			
+			RequestParameter parameter = request.getRequestParameter(DDX);
+			RequestParameter[] soruceDocName = request.getRequestParameters(SOURCE_DOCUMENT_KEY);
+			RequestParameter[] sourceDocs = request.getRequestParameters(SOURCE_DOCUMENT_VALUE);
+			if (soruceDocName.length == sourceDocs.length) {
+				log.info("sourceDocs Size : " + sourceDocs.length);
+				for (int i = 0; i < soruceDocName.length; i++) {
+					log.info("Document Name: " + soruceDocName[i].toString());
+					log.info("Content Type: " + sourceDocs[i].getContentType());
+					sourceDocuments.put(soruceDocName[i].getString(), docFactory.create(sourceDocs[i].get()));
+				}
+			}
+
+			RequestParameter isFailonError = request.getRequestParameter(IS_FAIL_ON_ERROR);
+
 			Document ddx = docFactory.create(parameter.get());
-		
-			AssemblerArgumentBuilder argumentBuilder = assemblerService.invoke()
-					.transform(b -> isFailonError == null ? b : b.setFailOnError(isFailonError));
+
+			AssemblerArgumentBuilder argumentBuilder = assemblerService.invoke().transform(
+					b -> isFailonError == null ? b : b.setFailOnError(Boolean.valueOf(isFailonError.toString())));
 			try (AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
-				log.info("assemblerResult : " +assemblerResult);
+				log.info("assemblerResult : " + assemblerResult);
 				String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
 				response.setContentType(ContentType.APPLICATION_XML.getContentTypeStr());
 				response.getWriter().write(assemblerResultxml);
-				//Document result = null;
-//				String contentType = ContentType.APPLICATION_PDF.toString();	// We know the result is always PDF.
-//				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-//				response.setContentType(contentType);
-//				assemblerResult.getDocuments().forEach((docName, mergedPDf) ->{
-//					Document result  = mergedPDf;
-//					try {
-//						ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				});
-//				
-			
-				
+
 			}
 
 		} catch (AssemblerServiceException e) {
@@ -155,52 +131,122 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
 	}
 
-	private String convertAssemblerResultToxml(AssemblerResult assemblerResult) throws AssemblerServiceException
-		{
+	private String convertAssemblerResultToxml(AssemblerResult assemblerResult) throws AssemblerServiceException {
 		log.info("Converting assemblerresult to xml");
 		try {
-		Map<String, Document> resultDocMap = assemblerResult.getDocuments();
-		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
-		org.w3c.dom.Document document = documentBuilder.newDocument();
-		org.w3c.dom.Element root = document.createElement("assemblerResult");
-		document.appendChild(root);
-		String decoded = null;
-		if(MapUtils.isNotEmpty(resultDocMap)) {
-		for (Entry<String, Document> resultDoc : resultDocMap.entrySet()) {
-			log.info("Result pdf name : " +resultDoc.getKey());
-			Element result = document.createElement("resultDocument");
-			root.appendChild(result);
-			Attr attr = document.createAttribute("documentName");
-			attr.setValue(resultDoc.getKey());
-			result.setAttributeNode(attr);
-	        Document concatenatedDoc = resultDoc.getValue();
-	        if(resultDoc.getValue() != null) {
-	        concatenatedDoc.setContentType(ContentType.APPLICATION_PDF.toString());
-	        log.info("Bconverting to bytarray");
-	        byte[] concatenatedPdf = org.apache.commons.io.IOUtils.toByteArray(concatenatedDoc.getInputStream());;
-	        if(concatenatedPdf != null) {
-	        decoded = Base64.getEncoder().encodeToString(concatenatedPdf);
-			Element mergedDoc = document.createElement("mergedDoc");
-			mergedDoc.appendChild(document.createTextNode(decoded));      
-			result.appendChild(mergedDoc);
-	        } else {
-	        	log.error("Byte array of doc is null");
-	        }
-	        } else {
-	        	log.error("resultDoc is null");
-	        }
-	     
-		}
-		} else {
-			log.error("resultDocMap is null");
-		}
-		DOMSource domSource = new DOMSource(document);
-		Transformer transformer = TransformerFactory.newInstance().newTransformer();
-		StringWriter sw = new StringWriter();
-		StreamResult sr = new StreamResult(sw);
-		transformer.transform(domSource, sr);
-		return sw.toString();
+			Map<String, Document> resultDocMap = assemblerResult.getDocuments();
+			DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+			org.w3c.dom.Document document = documentBuilder.newDocument();
+			org.w3c.dom.Element root = document.createElement("assemblerResult");
+			document.appendChild(root);
+
+			if (MapUtils.isNotEmpty(resultDocMap)) {
+				resultDocMap.forEach((docName, resultDoc) -> {
+					log.info("Result pdf name : " + docName);
+					Element result = document.createElement("resultDocument");
+					root.appendChild(result);
+					Attr attr = document.createAttribute("documentName");
+					attr.setValue(docName);
+					result.setAttributeNode(attr);
+					Document concatenatedDoc = resultDoc;
+					if (resultDoc != null) {
+						concatenatedDoc.setContentType(ContentType.APPLICATION_PDF.toString());
+						log.info("converting to bytarray");
+						byte[] concatenatedPdf = null;
+						try {
+							concatenatedPdf = org.apache.commons.io.IOUtils
+									.toByteArray(concatenatedDoc.getInputStream());
+							if (concatenatedPdf != null) {
+								String doc = Base64.getEncoder().encodeToString(concatenatedPdf);
+								Element mergedDoc = document.createElement("mergedDoc");
+								mergedDoc.appendChild(document.createTextNode(doc));
+								result.appendChild(mergedDoc);
+							}
+						} catch (IOException e) {
+							log.error("Error in converting concatenatedPdf to String");
+						};
+					}
+					
+					Element failedBlockName = document.createElement("failedBlockNames");
+					root.appendChild(failedBlockName);
+					if(CollectionUtils.isNotEmpty(assemblerResult.getFailedBlockNames())) {
+						assemblerResult.getFailedBlockNames().forEach(blocName -> {
+							Element failedBlock = document.createElement("failedBlock");	
+							failedBlock.appendChild(document.createTextNode(blocName));
+							failedBlockName.appendChild(failedBlock);
+						});
+					}
+					
+					Element latestBatesNum = document.createElement("latestBatesNumber");
+					root.appendChild(latestBatesNum);
+					Attr latestBatesNumberAttr = document.createAttribute("Number");
+					latestBatesNumberAttr.setValue(Integer.toString(assemblerResult.getLastBatesNumber()));
+					latestBatesNum.setAttributeNode(latestBatesNumberAttr);
+					
+					Element numRequestedBlock = document.createElement("numRequestedBlocks");
+					root.appendChild(numRequestedBlock);
+					Attr numRequestedBlockAttr = document.createAttribute("numRequestedBlock");
+					numRequestedBlockAttr.setValue(Integer.toString(assemblerResult.getNumRequestedBlocks()));
+					latestBatesNum.setAttributeNode(numRequestedBlockAttr);
+					
+					Element successfulDocumentName = document.createElement("successfulDocumentNames");
+					root.appendChild(successfulDocumentName);			
+					if(CollectionUtils.isNotEmpty(assemblerResult.getSuccessfulBlockNames())) {
+						assemblerResult.getSuccessfulBlockNames().forEach(successFullDocName -> {
+							Element successfulDoc = document.createElement("successfulDocumentName");	
+							successfulDoc.appendChild(document.createTextNode(successFullDocName));
+							successfulDocumentName.appendChild(successfulDoc);
+						});
+					}
+					
+					Element successfulBlocNames  = document.createElement("successfulBlocNames");
+					root.appendChild(successfulBlocNames);			
+					if(CollectionUtils.isNotEmpty(assemblerResult.getSuccessfulBlockNames())) {
+						assemblerResult.getSuccessfulBlockNames().forEach(blocName -> {
+							Element successfulBloc = document.createElement("successfulBlocName");	
+							successfulBloc.appendChild(document.createTextNode(blocName));
+							successfulBlocNames.appendChild(successfulBloc);
+						});
+					}
+					
+					Element multipleResultBloc  = document.createElement("multipleResultBlocs");
+					root.appendChild(multipleResultBloc);			
+					if(MapUtils.isNotEmpty(assemblerResult.getMultipleResultsBlocks())) {
+						assemblerResult.getMultipleResultsBlocks().forEach((blockName,docNames)-> {
+							Element resultBlockName = document.createElement("resultBlockName");
+							root.appendChild(resultBlockName);
+							Attr nameAttr = document.createAttribute("name");
+							nameAttr.setValue(blockName);
+							resultBlockName.setAttributeNode(nameAttr);
+							Element documentNames  = document.createElement("documentNames");
+							root.appendChild(documentNames);			
+											
+						});
+					}
+					
+
+					Element log  = document.createElement("jobLog");
+					root.appendChild(log);	
+					if(assemblerResult.getJobLog() !=null) {
+						Attr logAttr = document.createAttribute("logValue");
+						try {
+							logAttr.setValue(Base64.getEncoder().encodeToString(assemblerResult.getJobLog().getInlineData()));
+						} catch (DOMException | IOException e) {
+										
+							}
+						log.setAttributeNode(logAttr);
+						log.setAttributeNode(logAttr);
+					}
+
+				});
+			}
+			DOMSource domSource = new DOMSource(document);
+			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			StringWriter sw = new StringWriter();
+			StreamResult sr = new StreamResult(sw);
+			transformer.transform(domSource, sr);
+			return sw.toString();
 		} catch (Exception e) {
 			throw new AssemblerServiceException("Error while converting assemblerResult to xml ", e);
 		}
@@ -209,5 +255,5 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 	private TraditionalDocAssemblerService getAdobeAssemblerService() {
 		return new AdobeDocAssemblerServiceAdapter(adobeAssembleService, docFactory);
 	}
-	
+
 }

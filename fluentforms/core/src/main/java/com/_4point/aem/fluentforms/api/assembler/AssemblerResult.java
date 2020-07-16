@@ -12,7 +12,7 @@ public interface AssemblerResult extends AutoCloseable{
 	
 	 List<String> getFailedBlockNames();
     
-     Document etJobLog();
+     Document getJobLog();
      
      int getLastBatesNumber();
      

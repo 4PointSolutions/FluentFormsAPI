@@ -29,6 +29,7 @@ import org.xml.sax.SAXException;
 
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
+import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
@@ -68,7 +69,7 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 	public AssemblerResult invoke(Document ddx, Map<String, Object> inputs,
 			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException, OperationException {
 		WebTarget assembleDocTarget = baseTarget.path(ASSEMBLE_DOCUMENT_PATH);
-		Boolean isFailOnError = false;
+		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 
 			if (ddx != null) {
@@ -87,12 +88,14 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 				 throw new NullPointerException("inputs can not be null"); 
 			 }
 
-				/*
-				 * if (adobAssemblerOptionSpec != null) {
-				 * MultipartTransformer.create(multipart).transform( (t) -> isFailOnError ==
-				 * null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString())); }
-				 */
-			Response result = postToServer(assembleDocTarget, multipart,  MediaType.APPLICATION_XML_TYPE);
+			if (adobAssemblerOptionSpec != null) {
+				Boolean isFailOnError = adobAssemblerOptionSpec.isFailOnError();
+				System.out.println("isFailOnError: "+isFailOnError);
+				MultipartTransformer.create(multipart).transform(
+						(t) -> isFailOnError == null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()));
+			}
+
+				Response result = postToServer(assembleDocTarget, multipart,  MediaType.APPLICATION_XML_TYPE);
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
 				String msg = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='"
@@ -122,14 +125,8 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 			}
 			String resultXml = result.readEntity(String.class);
 			System.out.println("resultXml: "+resultXml);
-//			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-//			resultDoc.setContentType(APPLICATION_PDF.toString());
 		    Map<String, Document> resultMap = convertXmlDocument(resultXml);
-		   // resultMap.put("concatenatedPDF.pdf", resultDoc);
-			System.out.println("Added docsmap in assemblerResult");
 			AssemblerResult assemblerResult = new AdobeDocAssemblerServiceAdapter(resultMap);
-			
-			System.out.println("Added docsmap in assemblerResult");
 			return assemblerResult;
 
 		} catch (IOException e) {
@@ -149,9 +146,7 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 			db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			InputSource is = new InputSource();
 			is.setCharacterStream(new StringReader(assemblerResultXml));
-
-			org.w3c.dom.Document doc = db.parse(is);
-			
+			org.w3c.dom.Document doc = db.parse(is);			
 			NodeList nList = doc.getElementsByTagName("resultDocument");
 			for (int temp = 0; temp < nList.getLength(); temp++) {
 				Node node = nList.item(temp);
@@ -164,6 +159,7 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 					resultMap.put(eElement.getAttribute("documentName"), concatenatedDoc);
 				}
 			}
+			
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new AssemblerServiceException("Error while parsing  to xml", e);
 		}

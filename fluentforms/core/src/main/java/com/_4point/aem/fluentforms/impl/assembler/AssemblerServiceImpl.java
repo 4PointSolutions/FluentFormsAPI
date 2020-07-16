@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
-import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSetter;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
@@ -64,15 +63,15 @@ public class AssemblerServiceImpl implements AssemblerService {
 		AssemblerOptionsSpec assemblerOptionsSpec = new AssemblerOptionsSpecImpl();
 
 		@Override
-		public AssemblerArgumentBuilder setFailOnError(boolean isFailOnError) {
-			this.assemblerOptionsSpec.setFailOnError(isFailOnError);
-			return this;
-		}
-
-		@Override
 		public AssemblerResult executeOn(Document ddx, Map<String, Object> sourceDocuments) throws AssemblerServiceException {
 			return invoke(ddx, sourceDocuments, this.assemblerOptionsSpec);
 
+		}
+
+		@Override
+		public AssemblerArgumentBuilder setFailOnError(Boolean isFailOnError) {
+			this.assemblerOptionsSpec.setFailOnError(isFailOnError);
+			return this;
 		}
 
 		@Override
@@ -82,31 +81,31 @@ public class AssemblerServiceImpl implements AssemblerService {
 		}
 
 		@Override
-		public AssemblerOptionsSetter setDefaultStyle(String defaultStyle) {
+		public AssemblerArgumentBuilder setDefaultStyle(String defaultStyle) {
 			this.assemblerOptionsSpec.setDefaultStyle(defaultStyle);
 			return this;
 		}
 
 		@Override
-		public AssemblerOptionsSetter setFirstBatesNumber(int start) {
+		public AssemblerArgumentBuilder setFirstBatesNumber(int start) {
 			this.assemblerOptionsSpec.setFirstBatesNumber(start);
 			return this;
 		}
 
 		@Override
-		public AssemblerOptionsSetter setLogLevel(String logLevel) {
+		public AssemblerArgumentBuilder setLogLevel(String logLevel) {
 			this.assemblerOptionsSpec.setLogLevel(logLevel);
 			return this;
 		}
 
 		@Override
-		public AssemblerOptionsSetter setTakeOwnership(boolean takeOwnership) {
+		public AssemblerArgumentBuilder setTakeOwnership(Boolean takeOwnership) {
 			this.assemblerOptionsSpec.setTakeOwnership(takeOwnership);
 			return this;
 		}
 
 		@Override
-		public AssemblerOptionsSetter setValidateOnly(boolean validateOnly) {
+		public AssemblerArgumentBuilder setValidateOnly(Boolean validateOnly) {
 			this.assemblerOptionsSpec.setValidateOnly(validateOnly);
 			return this;
 		}
