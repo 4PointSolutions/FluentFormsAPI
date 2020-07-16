@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.servlet.Servlet;
@@ -26,10 +27,13 @@ import org.slf4j.LoggerFactory;
 
 import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.ContentType;
+import com._4point.aem.docservices.rest_services.server.DataParameter;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
 import com._4point.aem.docservices.rest_services.server.ServletUtils;
+import com._4point.aem.docservices.rest_services.server.TemplateParameter;
+import com._4point.aem.docservices.rest_services.server.DataParameter.ParameterType;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -79,7 +83,7 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 		OutputService outputService = new OutputServiceImpl(outputServiceFactory.get(), UsageContext.SERVER_SIDE);
 
 		GeneratePdfOutputParameters reqParameters = GeneratePdfOutputParameters.readFormParameters(request, false);	// TODO: Make the validation of XML a config parameter.
-		GeneratePdfOutputParameters.TemplateParameter template = reqParameters.getTemplate();
+		TemplateParameter template = reqParameters.getTemplate();
 		Document data = reqParameters.getData() != null ? docFactory.create(reqParameters.getData()) : null;
 		PathOrUrl contentRoot = reqParameters.getContentRoot();
 		AcrobatVersion acrobatVersion = reqParameters.getAcrobatVersion();
@@ -122,7 +126,7 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 		}
 	}
 
-	private Document executeOn(GeneratePdfOutputParameters.TemplateParameter template, Document data, GeneratePdfOutputArgumentBuilder argBuilder) throws OutputServiceException, FileNotFoundException {
+	private Document executeOn(TemplateParameter template, Document data, GeneratePdfOutputArgumentBuilder argBuilder) throws OutputServiceException, FileNotFoundException {
 		switch(template.getType()) {
 			case ByteArray:
 			{
@@ -308,12 +312,15 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 				
 				TemplateParameter template = TemplateParameter.readParameter(getMandatoryParameter(request, TEMPLATE_PARAM));
 
-				// Data parameter is optional.  If Data is not supplied, then an empty form is produced.
-				byte[] inputData = getOptionalParameter(request, DATA_PARAM).map(RequestParameter::get).orElse(null);
-				if (inputData != null && validateXml) {
-					validateXmlData(inputData);
+				// Data parameter is optional. If Data is not supplied, then an empty form is produced.
+				Optional<DataParameter> data = getOptionalParameter(request, DATA_PARAM)
+															.map(p -> DataParameter.readParameter(p, validateXml));
+
+				if (data.isPresent() && data.get().getType() == ParameterType.PathOrUrl) {
+					throw new BadRequestException("GeneratePdfOutput does not support passing data by reference, only by value.");
 				}
-	
+				byte[] inputData = data.map(DataParameter::getArray).orElse(null);
+
 				GeneratePdfOutputParameters result = inputData == null ? new GeneratePdfOutputParameters(template) : new GeneratePdfOutputParameters(template, inputData);
 				
 				getOptionalParameter(request, ACROBAT_VERSION_PARAM).ifPresent(rp->result.setAcrobatVersion(rp.getString()));
@@ -331,52 +338,6 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 			} catch (IllegalArgumentException e) {
 				throw new BadRequestException("There was a problem with one of the incoming parameters.", e);
 			}
-		}
-		
-		public static class TemplateParameter {
-			public enum ParameterType { ByteArray, PathOrUrl };
-			
-			private final byte[] array;
-			private final PathOrUrl pathOrUrl;
-			private final ParameterType type;
-			
-			private TemplateParameter(byte[] array) {
-				super();
-				this.array = array;
-				this.pathOrUrl = null;
-				this.type = ParameterType.ByteArray;
-			}
-			
-			private TemplateParameter(PathOrUrl pathOrUrl) {
-				super();
-				this.array = null;
-				this.pathOrUrl = pathOrUrl;
-				this.type = ParameterType.PathOrUrl;
-			}
-
-			public byte[] getArray() {
-				return array;
-			}
-
-			public PathOrUrl getPathOrUrl() {
-				return pathOrUrl;
-			}
-
-			public ParameterType getType() {
-				return type;
-			}
-			
-			public static TemplateParameter readParameter(RequestParameter templateParameter) {
-				ContentType templateContentType = ContentType.valueOf(templateParameter.getContentType());
-				if (templateContentType.isCompatibleWith(ContentType.TEXT_PLAIN)) {
-					return new TemplateParameter(PathOrUrl.from(templateParameter.getString()));
-				} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_XDP)) {
-					return new TemplateParameter(templateParameter.get());
-				} else {
-					throw new IllegalArgumentException("Template parmameter has invalid content type. (" + templateContentType.getContentTypeStr() + ").");
-				}
-			}
-		}
+		}	
 	}
-
 }

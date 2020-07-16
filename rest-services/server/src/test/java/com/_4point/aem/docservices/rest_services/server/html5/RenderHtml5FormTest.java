@@ -51,7 +51,7 @@ class RenderHtml5FormTest {
 
 	private final RenderHtml5Form underTest = new RenderHtml5Form();
 
-	private enum FormType { BY_VALUE, BY_REFERENCE_PATH, BY_REFERENCE_CRXURL, BY_REFERENCE_NO_CR, BY_REFERENCE_WITH_CR  };
+	private enum FormType { BY_VALUE, BY_REFERENCE_PATH, BY_REFERENCE_CRXURL, BY_REFERENCE_NO_CONTENT_ROOT, BY_REFERENCE_WITH_CONTENT_ROOT  };
 	private enum DataType { NO_DATA, BY_VALUE, BY_REFERENCE };
 	private enum SubmitUrlType { NONE, SUBMIT_URL };
 	
@@ -62,12 +62,12 @@ class RenderHtml5FormTest {
 		FORM_REF_ONLY_CRX(FormType.BY_REFERENCE_CRXURL, DataType.NO_DATA, SubmitUrlType.SUBMIT_URL),
 		FORM_REF_DATA_REF_CRX(FormType.BY_REFERENCE_CRXURL, DataType.BY_REFERENCE, SubmitUrlType.NONE),
 		FORM_REF_DATA_CRX(FormType.BY_REFERENCE_CRXURL, DataType.BY_VALUE, SubmitUrlType.SUBMIT_URL),
-		FORM_REF_ONLY_NO_CR(FormType.BY_REFERENCE_NO_CR, DataType.NO_DATA, SubmitUrlType.NONE),
-		FORM_REF_DATA_REF_NO_CR(FormType.BY_REFERENCE_NO_CR, DataType.BY_REFERENCE, SubmitUrlType.SUBMIT_URL),
-		FORM_REF_DATA_NO_CR(FormType.BY_REFERENCE_NO_CR, DataType.BY_VALUE, SubmitUrlType.NONE),
-		FORM_REF_ONLY_WITH_CR(FormType.BY_REFERENCE_WITH_CR, DataType.NO_DATA, SubmitUrlType.SUBMIT_URL),
-		FORM_REF_DATA_REF_WITH_CR(FormType.BY_REFERENCE_WITH_CR, DataType.BY_REFERENCE, SubmitUrlType.NONE),
-		FORM_REF_DATA_WITH_CR(FormType.BY_REFERENCE_WITH_CR, DataType.BY_VALUE, SubmitUrlType.SUBMIT_URL),
+		FORM_REF_ONLY_NO_CR(FormType.BY_REFERENCE_NO_CONTENT_ROOT, DataType.NO_DATA, SubmitUrlType.NONE),
+		FORM_REF_DATA_REF_NO_CR(FormType.BY_REFERENCE_NO_CONTENT_ROOT, DataType.BY_REFERENCE, SubmitUrlType.SUBMIT_URL),
+		FORM_REF_DATA_NO_CR(FormType.BY_REFERENCE_NO_CONTENT_ROOT, DataType.BY_VALUE, SubmitUrlType.NONE),
+		FORM_REF_ONLY_WITH_CR(FormType.BY_REFERENCE_WITH_CONTENT_ROOT, DataType.NO_DATA, SubmitUrlType.SUBMIT_URL),
+		FORM_REF_DATA_REF_WITH_CR(FormType.BY_REFERENCE_WITH_CONTENT_ROOT, DataType.BY_REFERENCE, SubmitUrlType.NONE),
+		FORM_REF_DATA_WITH_CR(FormType.BY_REFERENCE_WITH_CONTENT_ROOT, DataType.BY_VALUE, SubmitUrlType.SUBMIT_URL),
 //		FORM_VAL_ONLY(FormType.BY_VALUE, DataType.NO_DATA),		// Not supported at this time
 //		FORM_VAL_DATA_REF(FormType.BY_VALUE, DataType.BY_REFERENCE),		// Not supported at this time
 //		FORM_VAL_DATA_VAL(FormType.BY_VALUE, DataType.BY_VALUE)		// Not supported at this time
@@ -86,7 +86,7 @@ class RenderHtml5FormTest {
 	
 	@ParameterizedTest
 	@EnumSource
-	void testDoPost_HappyPath_FormRefAndDataDoc(HappyPathScenario scenario) throws Exception {
+	void testDoPost_HappyPath(HappyPathScenario scenario) throws Exception {
 		Path sampleForm = TestUtils.SAMPLE_FORM;
 		String templateRef = sampleForm.toString();
 		byte[] templateData = IOUtils.toByteArray(Files.newInputStream(sampleForm)); 
@@ -130,10 +130,10 @@ class RenderHtml5FormTest {
 						} else if (scenario.formType == FormType.BY_VALUE) {
 							assertArrayEquals(templateData, (byte[])(request.getAttribute(TEMPLATE_PARAM)));
 							assertNull(request.getAttribute(CONTENT_ROOT_PARAM));
-						} else if (scenario.formType == FormType.BY_REFERENCE_NO_CR) {
+						} else if (scenario.formType == FormType.BY_REFERENCE_NO_CONTENT_ROOT) {
 							assertEquals(CRX_EXPECTED_FILENAME, request.getAttribute(TEMPLATE_PARAM));
 							assertNull(request.getAttribute(CONTENT_ROOT_PARAM));
-						} else if (scenario.formType == FormType.BY_REFERENCE_WITH_CR) {
+						} else if (scenario.formType == FormType.BY_REFERENCE_WITH_CONTENT_ROOT) {
 							assertEquals(CRX_EXPECTED_FILENAME, request.getAttribute(TEMPLATE_PARAM));
 							assertEquals(CRX_EXPECTED_CONTENT_ROOT, request.getAttribute(CONTENT_ROOT_PARAM));
 						}
@@ -166,9 +166,9 @@ class RenderHtml5FormTest {
 			request.addRequestParameter(TEMPLATE_PARAM, CRX_STRING.getBytes(StandardCharsets.UTF_8), "text/plain");
 		} else if (scenario.formType == FormType.BY_VALUE) {
 			request.addRequestParameter(TEMPLATE_PARAM, formData, APPLICATION_XDP, "SampleForm.xdp");
-		} else if (scenario.formType == FormType.BY_REFERENCE_NO_CR) {
+		} else if (scenario.formType == FormType.BY_REFERENCE_NO_CONTENT_ROOT) {
 			request.addRequestParameter(TEMPLATE_PARAM, CRX_EXPECTED_FILENAME.getBytes(StandardCharsets.UTF_8), "text/plain");
-		} else if (scenario.formType == FormType.BY_REFERENCE_WITH_CR) {
+		} else if (scenario.formType == FormType.BY_REFERENCE_WITH_CONTENT_ROOT) {
 			request.addRequestParameter(TEMPLATE_PARAM, CRX_EXPECTED_FILENAME.getBytes(StandardCharsets.UTF_8), "text/plain");
 			request.addRequestParameter(CONTENT_ROOT_PARAM, CRX_EXPECTED_CONTENT_ROOT.getBytes(StandardCharsets.UTF_8), "text/plain");
 		}
@@ -190,10 +190,6 @@ class RenderHtml5FormTest {
 		assertEquals(TEXT_HTML, response.getContentType());
 		assertEquals(resultData, response.getOutputAsString());
 		assertEquals(resultDataBytes.length, response.getContentLength());
-	}
-
-	@Test
-	void testDoPost_HappyPath_AllParameters() throws ServletException, IOException, NoSuchFieldException {
 	}
 
 	@Disabled

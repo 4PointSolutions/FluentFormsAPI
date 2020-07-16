@@ -14,6 +14,10 @@ import org.xml.sax.SAXException;
 
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 
+/**
+ * Utility functions relating to incoming form request parameters that are part of a multipart/form-data post to a servlet.
+ *
+ */
 public class FormParameters {
 
 	/**
@@ -100,26 +104,4 @@ public class FormParameters {
 		return booleanValue;
 	}
 	
-	/**
-	 * Validates incoming XML data.  This is a common operation required in order to validate request parameters.
-	 * 
-	 * @param xml
-	 * @throws BadRequestException
-	 */
-	public static void validateXmlData(byte[] xml) throws BadRequestException
-	{
-		//---------------------------------------------------------------------
-		// Validate the XML from the POST body
-		//---------------------------------------------------------------------
-		try {
-			InputSource is = new InputSource(new ByteArrayInputStream(xml));
-			DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
-		}
-		catch (SAXException | IOException | ParserConfigurationException e) {
-			String msg = "Input XML payload invalid: " + e.getMessage();
-			throw new BadRequestException(msg, e);
-		}
-	}
-
-
 }

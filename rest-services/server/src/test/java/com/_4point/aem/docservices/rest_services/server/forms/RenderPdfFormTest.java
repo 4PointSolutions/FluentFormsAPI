@@ -183,7 +183,7 @@ class RenderPdfFormTest {
 		
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
-		request.addRequestParameter(DATA_PARAM, formData);
+		request.addRequestParameter(DATA_PARAM, formData.getBytes(), APPLICATION_XML);
 		
 		underTest.doPost(request, response);
 		
@@ -389,9 +389,8 @@ class RenderPdfFormTest {
 		
 		Map<String, Object> parameterMap = new HashMap<>();
 		String badFormName = "bar.xdp";
-		parameterMap.put("template", "foo/" + badFormName);
-		parameterMap.put("data", "formData");
-		request.setParameterMap(parameterMap );
+		request.addRequestParameter("template", "foo/" + badFormName);
+		request.addRequestParameter("data", "formData".getBytes(), APPLICATION_XML);
 		
 		underTest.doPost(request, response);
 		
@@ -419,7 +418,7 @@ class RenderPdfFormTest {
 		
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
-		request.addRequestParameter(DATA_PARAM, formData);
+		request.addRequestParameter(DATA_PARAM, formData.getBytes(), APPLICATION_XML);
 		
 		underTest.doPost(request, response);
 		
@@ -445,7 +444,7 @@ class RenderPdfFormTest {
 		
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
-		request.addRequestParameter(DATA_PARAM, formData);
+		request.addRequestParameter(DATA_PARAM, formData.getBytes(), APPLICATION_XML);
 		request.addHeader("Accept", TEXT_HTML);
 		
 		underTest.doPost(request, response);

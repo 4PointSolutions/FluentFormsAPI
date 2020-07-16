@@ -23,9 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._4point.aem.docservices.rest_services.server.ContentType;
+import com._4point.aem.docservices.rest_services.server.DataParameter;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
+import com._4point.aem.docservices.rest_services.server.TemplateParameter;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.impl.TemplateValues;
 import com._4point.aem.fluentforms.impl.UsageContext;
@@ -69,8 +71,8 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 		
 		try {
 			// Set the template and contentRoot parameters.
-			RenderHtml5FormParameters.TemplateParameter templateParam = parameters.getTemplate();
-			if (templateParam.getType() == RenderHtml5FormParameters.TemplateParameter.ParameterType.PathOrUrl) {
+			TemplateParameter templateParam = parameters.getTemplate();
+			if (templateParam.getType() == TemplateParameter.ParameterType.PathOrUrl) {
 				PathOrUrl templateLocation = templateParam.getPathOrUrl();
 
 				// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
@@ -110,7 +112,7 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 		}
 	}
 
-	private void setDataRequestParameter(SlingHttpServletRequest request, RenderHtml5FormParameters.DataParameter dp) {
+	private void setDataRequestParameter(SlingHttpServletRequest request, DataParameter dp) {
 		switch(dp.getType()) {
 		case ByteArray:
 			log.info("Setting '" + DATA_ATTRIBUTE_NAME + "' attribute in request.");
@@ -144,7 +146,7 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 		private final Optional<URL> submitUrl;
 		private final Optional<DataParameter> data;
 		
-		public RenderHtml5FormParameters(TemplateParameter template, Optional<PathOrUrl> contentRoot, Optional<URL> submitUrl, Optional<DataParameter> data) {
+		private RenderHtml5FormParameters(TemplateParameter template, Optional<PathOrUrl> contentRoot, Optional<URL> submitUrl, Optional<DataParameter> data) {
 			super();
 			this.template = template;
 			this.contentRoot = contentRoot;
@@ -179,7 +181,7 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 														.map(RequestParameter::getString)
 														.map(RenderHtml5FormParameters::createSubmitUrl);
 				Optional<DataParameter> data = getOptionalParameter(request, DATA_PARAM)
-														.map(DataParameter::readParameter);
+														.map(p->DataParameter.readParameter(p,validateXml));
 
 				return new RenderHtml5FormParameters(template, contentRoot, submitUrl, data);
 			} catch (IllegalArgumentException e) {
@@ -195,101 +197,5 @@ public class RenderHtml5Form extends SlingAllMethodsServlet {
 				throw new IllegalArgumentException("Malformed URL in submitUrl (" + urlString + ").", e);
 			}
 		}
-		
-		public static class TemplateParameter {
-			public enum ParameterType { ByteArray, PathOrUrl };
-			
-			private final byte[] array;
-			private final PathOrUrl pathOrUrl;
-			private final ParameterType type;
-			
-			private TemplateParameter(byte[] array) {
-				super();
-				this.array = array;
-				this.pathOrUrl = null;
-				this.type = ParameterType.ByteArray;
-			}
-			
-			private TemplateParameter(PathOrUrl pathOrUrl) {
-				super();
-				this.array = null;
-				this.pathOrUrl = pathOrUrl;
-				this.type = ParameterType.PathOrUrl;
-			}
-
-			public byte[] getArray() {
-				return array;
-			}
-
-			public PathOrUrl getPathOrUrl() {
-				return pathOrUrl;
-			}
-
-			public ParameterType getType() {
-				return type;
-			}
-			
-			public static TemplateParameter readParameter(RequestParameter templateParameter) {
-				ContentType templateContentType = ContentType.valueOf(templateParameter.getContentType());
-				if (templateContentType.isCompatibleWith(ContentType.TEXT_PLAIN)) {
-					PathOrUrl templateRef = PathOrUrl.from(templateParameter.getString());
-					if (!templateRef.getFilename().isPresent()) {
-						throw new IllegalArgumentException("Template Parameter must point to an XDP file (" + templateRef.toString() + ").");
-					}
-					return new TemplateParameter(templateRef);
-				} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_XDP)) {
-					return new TemplateParameter(templateParameter.get());
-				} else {
-					throw new IllegalArgumentException("Template parmameter has invalid content type. (" + templateContentType.getContentTypeStr() + ").");
-				}
-			}
-		}
-
-		public static class DataParameter {
-			public enum ParameterType { ByteArray, PathOrUrl };
-			
-			private final byte[] array;
-			private final PathOrUrl pathOrUrl;
-			private final ParameterType type;
-			
-			private DataParameter(byte[] array) {
-				super();
-				this.array = array;
-				this.pathOrUrl = null;
-				this.type = ParameterType.ByteArray;
-			}
-			
-			private DataParameter(PathOrUrl pathOrUrl) {
-				super();
-				this.array = null;
-				this.pathOrUrl = pathOrUrl;
-				this.type = ParameterType.PathOrUrl;
-			}
-
-			public byte[] getArray() {
-				return array;
-			}
-
-			public PathOrUrl getPathOrUrl() {
-				return pathOrUrl;
-			}
-
-			public ParameterType getType() {
-				return type;
-			}
-			
-			public static DataParameter readParameter(RequestParameter dataParameter) {
-				ContentType dataContentType = ContentType.valueOf(dataParameter.getContentType());
-				if (dataContentType.isCompatibleWith(ContentType.TEXT_PLAIN)) {
-					return new DataParameter(PathOrUrl.from(dataParameter.getString()));
-				} else if (dataContentType.isCompatibleWith(ContentType.APPLICATION_XML)) {
-					return new DataParameter(dataParameter.get());
-				} else {
-					throw new IllegalArgumentException("Data parmameter has invalid content type. (" + dataContentType.getContentTypeStr() + ").");
-				}
-			}
-
-		}
-
 	}
 }
