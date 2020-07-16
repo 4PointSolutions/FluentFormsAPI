@@ -26,17 +26,21 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import com._4point.aem.docservices.rest_services.server.TestUtils;
+import com._4point.aem.docservices.rest_services.server.data.DataCache;
 
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import uk.org.lidalia.slf4jtest.TestLogger;
 import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
 class RenderAdaptiveFormTest {
+//	private static final String AF_URL_SUFFIX = ".html?wcmmode=disabled";
+	private static final String AF_URL_SUFFIX = ".html";
+	private static final String AF_URL_PREFIX = "/content/forms/af/";
 	private static final String TEMPLATE_PARAM = "template";
 	private static final String DATA_PARAM = "data";
 	private static final String DATA_REF_PARAM = "dataRef";
+	private static final String DATA_KEY_PARAM = "dataKey";
 	private static final String CONTENT_ROOT_PARAM = "contentRoot";
-	private static final String SUBMIT_URL_PARAM = "submitUrl";
 	
 	private static final String APPLICATION_XML = "application/xml";
 	private static final String APPLICATION_PDF = "application/pdf";
@@ -52,21 +56,21 @@ class RenderAdaptiveFormTest {
 
 	private enum FormType { BY_VALUE, BY_REFERENCE_PATH, BY_REFERENCE_CRXURL, BY_REFERENCE_NO_CONTENT_ROOT, BY_REFERENCE_WITH_CONTENT_ROOT  };
 	private enum DataType { NO_DATA, BY_VALUE, BY_REFERENCE };
-	private enum SubmitUrlType { NONE, SUBMIT_URL };
+	private enum SubmitUrlType { NONE };
 	
 	private enum HappyPathScenario {
 //		FORM_REF_ONLY(FormType.BY_REFERENCE_PATH, DataType.NO_DATA, SubmitUrlType.NONE),
-//		FORM_REF_DATA_REF(FormType.BY_REFERENCE_PATH, DataType.BY_REFERENCE, SubmitUrlType.SUBMIT_URL),
+//		FORM_REF_DATA_REF(FormType.BY_REFERENCE_PATH, DataType.BY_REFERENCE, SubmitUrlType.NONE),
 		FORM_REF_DATA_VAL(FormType.BY_REFERENCE_PATH, DataType.BY_VALUE, SubmitUrlType.NONE),
-//		FORM_REF_ONLY_CRX(FormType.BY_REFERENCE_CRXURL, DataType.NO_DATA, SubmitUrlType.SUBMIT_URL),
+//		FORM_REF_ONLY_CRX(FormType.BY_REFERENCE_CRXURL, DataType.NO_DATA, SubmitUrlType.NONE),
 //		FORM_REF_DATA_REF_CRX(FormType.BY_REFERENCE_CRXURL, DataType.BY_REFERENCE, SubmitUrlType.NONE),
-//		FORM_REF_DATA_CRX(FormType.BY_REFERENCE_CRXURL, DataType.BY_VALUE, SubmitUrlType.SUBMIT_URL),
+//		FORM_REF_DATA_CRX(FormType.BY_REFERENCE_CRXURL, DataType.BY_VALUE, SubmitUrlType.NONE),
 //		FORM_REF_ONLY_NO_CR(FormType.BY_REFERENCE_NO_CONTENT_ROOT, DataType.NO_DATA, SubmitUrlType.NONE),
-//		FORM_REF_DATA_REF_NO_CR(FormType.BY_REFERENCE_NO_CONTENT_ROOT, DataType.BY_REFERENCE, SubmitUrlType.SUBMIT_URL),
+//		FORM_REF_DATA_REF_NO_CR(FormType.BY_REFERENCE_NO_CONTENT_ROOT, DataType.BY_REFERENCE, SubmitUrlType.NONE),
 //		FORM_REF_DATA_NO_CR(FormType.BY_REFERENCE_NO_CONTENT_ROOT, DataType.BY_VALUE, SubmitUrlType.NONE),
-//		FORM_REF_ONLY_WITH_CR(FormType.BY_REFERENCE_WITH_CONTENT_ROOT, DataType.NO_DATA, SubmitUrlType.SUBMIT_URL),
+//		FORM_REF_ONLY_WITH_CR(FormType.BY_REFERENCE_WITH_CONTENT_ROOT, DataType.NO_DATA, SubmitUrlType.NONE),
 //		FORM_REF_DATA_REF_WITH_CR(FormType.BY_REFERENCE_WITH_CONTENT_ROOT, DataType.BY_REFERENCE, SubmitUrlType.NONE),
-//		FORM_REF_DATA_WITH_CR(FormType.BY_REFERENCE_WITH_CONTENT_ROOT, DataType.BY_VALUE, SubmitUrlType.SUBMIT_URL),
+//		FORM_REF_DATA_WITH_CR(FormType.BY_REFERENCE_WITH_CONTENT_ROOT, DataType.BY_VALUE, SubmitUrlType.NONE),
 //		FORM_VAL_ONLY(FormType.BY_VALUE, DataType.NO_DATA),		// Not supported at this time
 //		FORM_VAL_DATA_REF(FormType.BY_VALUE, DataType.BY_REFERENCE),		// Not supported at this time
 //		FORM_VAL_DATA_VAL(FormType.BY_VALUE, DataType.BY_VALUE)		// Not supported at this time
@@ -85,7 +89,7 @@ class RenderAdaptiveFormTest {
 	
 	@ParameterizedTest
 	@EnumSource
-	void testDoPost_HappyPath(HappyPathScenario scenario) throws Exception {
+	void testDoGet_HappyPath(HappyPathScenario scenario) throws Exception {
 		Path sampleForm = TestUtils.SAMPLE_FORM;
 		String templateRef = sampleForm.toString();
 		byte[] templateData = IOUtils.toByteArray(Files.newInputStream(sampleForm)); 
@@ -107,8 +111,8 @@ class RenderAdaptiveFormTest {
 			String filename = null;;
 			
 			String extractFilenameFromPath(String path) {
-				int expectedPrefixLen = "/content/forms/af/".length();
-				int expectedSuffixLen = ".html?wcmmode=disabled".length();
+				int expectedPrefixLen = AF_URL_PREFIX.length();
+				int expectedSuffixLen = AF_URL_SUFFIX.length();
 				return path.substring(expectedPrefixLen, path.length() - expectedSuffixLen);
 			}
 
@@ -121,6 +125,7 @@ class RenderAdaptiveFormTest {
 			@Override
 			public RequestDispatcher getRequestDispatcher(String path, RequestDispatcherOptions options) {
 				this.filename = extractFilenameFromPath(path);
+				assertEquals(AF_URL_PREFIX + this.filename + AF_URL_SUFFIX, path);
 				return mockRequestDispatcher();
 			}
 			
@@ -145,11 +150,6 @@ class RenderAdaptiveFormTest {
 						} else if (scenario.dataType == DataType.BY_REFERENCE) {
 							assertEquals(sampleData.toUri().toString(), request.getAttribute(DATA_REF_PARAM));
 						}
-						if (scenario.submitType == SubmitUrlType.SUBMIT_URL) {
-							assertEquals(expectedSubmitUrl, request.getAttribute(SUBMIT_URL_PARAM));
-						} else if (scenario.submitType == SubmitUrlType.NONE) {
-							assertNull(request.getAttribute(SUBMIT_URL_PARAM));
-						}
 						response.setContentType("text/html");
 						response.getOutputStream().write(resultDataBytes);
 						response.setContentLength(resultDataBytes.length);
@@ -164,7 +164,7 @@ class RenderAdaptiveFormTest {
 		});
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		if (scenario.formType == FormType.BY_REFERENCE_PATH) {
-			request.addRequestParameter(TEMPLATE_PARAM, templateRef.getBytes(StandardCharsets.UTF_8), "text/plain");
+			request.addRequestParameter(TEMPLATE_PARAM, templateRef);
 		} else if (scenario.formType == FormType.BY_REFERENCE_CRXURL) {
 			request.addRequestParameter(TEMPLATE_PARAM, CRX_STRING.getBytes(StandardCharsets.UTF_8), "text/plain");
 		} else if (scenario.formType == FormType.BY_VALUE) {
@@ -175,17 +175,15 @@ class RenderAdaptiveFormTest {
 			request.addRequestParameter(TEMPLATE_PARAM, CRX_EXPECTED_FILENAME.getBytes(StandardCharsets.UTF_8), "text/plain");
 			request.addRequestParameter(CONTENT_ROOT_PARAM, CRX_EXPECTED_CONTENT_ROOT.getBytes(StandardCharsets.UTF_8), "text/plain");
 		}
+		
 		if (scenario.dataType == DataType.BY_VALUE) {
-			request.addRequestParameter(DATA_PARAM, formData, APPLICATION_XML, "SampleFormData.xml");
+			String dataKey = DataCache.addDataToCache(formData, APPLICATION_XML);
+			request.addRequestParameter(DATA_KEY_PARAM, dataKey);
 		} else if (scenario.dataType == DataType.BY_REFERENCE) {
 			request.addRequestParameter(DATA_PARAM, dataRef.getBytes(StandardCharsets.UTF_8), "text/plain");
 		}
 		
-		if (scenario.submitType == SubmitUrlType.SUBMIT_URL) {
-			request.addRequestParameter(SUBMIT_URL_PARAM, expectedSubmitUrl.getBytes(StandardCharsets.UTF_8), "text/plain");
-		}
-		
-		underTest.doPost(request, response);
+		underTest.doGet(request, response);
 		
 		assertNull(response.getStatusMessage());
 		// Validate the result
