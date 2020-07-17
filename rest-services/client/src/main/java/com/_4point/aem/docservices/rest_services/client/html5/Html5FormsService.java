@@ -152,9 +152,10 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 	}
 	
 	public static class Html5FormsServiceBuilder implements Builder {
-		private BuilderImpl builder = new BuilderImpl();
+		private final BuilderImpl builder = new BuilderImpl();
 		private Function<InputStream, InputStream> renderResultFilter; 
 
+		// Prevent it from being instantiated outside of this class
 		private Html5FormsServiceBuilder() {
 			super();
 		}
@@ -206,8 +207,9 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 		}
 
 		public Html5FormsServiceBuilder addRenderResultFilter(Function<InputStream, InputStream> filter) {
-			this.renderResultFilter = this.renderResultFilter != null ? this.renderResultFilter.andThen(filter)
-											  : filter;  
+			this.renderResultFilter = this.renderResultFilter != null 
+															? this.renderResultFilter.andThen(filter)
+															: filter;  
 			return this;
 		}
 		
