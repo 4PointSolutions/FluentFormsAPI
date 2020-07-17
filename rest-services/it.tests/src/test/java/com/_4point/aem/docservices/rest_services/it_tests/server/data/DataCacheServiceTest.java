@@ -57,7 +57,7 @@ public class DataCacheServiceTest {
 
 			Response result = target
 					.request()
-					.accept(MediaType.TEXT_HTML_TYPE)
+					.accept(MediaType.TEXT_PLAIN_TYPE)
 					.post(Entity.entity(multipart, multipart.getMediaType()));
 						
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");

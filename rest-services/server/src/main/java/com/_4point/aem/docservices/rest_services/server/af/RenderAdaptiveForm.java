@@ -4,6 +4,7 @@ import static com._4point.aem.docservices.rest_services.server.FormParameters.ge
 import static com._4point.aem.docservices.rest_services.server.FormParameters.getOptionalParameter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -71,8 +72,9 @@ public class RenderAdaptiveForm extends SlingSafeMethodsServlet {
 		// Validate the parameters.
 		// I would like to allow for rendering templates by value in the future, but we don't need that
 		// immediately, so this code does not support it yet.
-		Path templatePath = Paths.get(parameters.getTemplate());	// Converting to Path and back eliminates any wayward slashes.
-
+			// Converting to Path and back eliminates any wayward slashes.
+		String relativeTemplateUrl = convertPathToRelativeUrl(Paths.get(parameters.getTemplate()));
+		log.info("Received request to render Adaptive Form '" + relativeTemplateUrl + "'.");
 		// Set the appropriate attributes in the request before dispatching it.
 //		setRequestAttribute(request, TEMPLATE_ATTRIBUTE_NAME, templateParam.getPathOrUrl().toString());
 
@@ -82,6 +84,7 @@ public class RenderAdaptiveForm extends SlingSafeMethodsServlet {
 		Optional<String> dataKey = parameters.getDataKey();
 		if (dataKey.isPresent()) {
 			String dataKeyStr = dataKey.get();
+			log.info("Retrieving data for data key '" + dataKeyStr + "'.");
 			Entry cacheEntry = DataCache.getDataFromCache(dataKeyStr)
 										.orElseThrow(()->new BadRequestException("Unable to locate data for key '" + dataKeyStr + "'."));
 			setRequestAttribute(request, DATA_ATTRIBUTE_NAME, cacheEntry.data());
@@ -93,7 +96,7 @@ public class RenderAdaptiveForm extends SlingSafeMethodsServlet {
 
 		// AEM needs to have "protected mode" turned off for this to work.
 		try {
-			request.getRequestDispatcher("/content/forms/af/" + convertPathToRelativeUrl(templatePath) + ".html").include(request, response);
+			request.getRequestDispatcher("/content/forms/af/" + relativeTemplateUrl + ".html").include(request, response);
 		} catch (ServletException | IOException e) {
 			throw new InternalServerErrorException("Error while redirecting to Adaptive Form url. (" + (e.getMessage() == null ? e.getClass().getName() : e.getMessage()) + ")" , e);
 		}
