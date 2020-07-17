@@ -2,6 +2,7 @@ package com._4point.aem.fluentforms.impl.assembler;
 
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 	private final com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService;
     private final com.adobe.fd.assembler.client.AssemblerResult assemblerResult;
     private final DocumentFactory documentFactory;
+    private Map<String, Document> sourceDocuments;
 	
 	public AdobeAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService, com.adobe.fd.assembler.client.AssemblerResult assemblerResult) {		
 		super();
@@ -32,6 +34,7 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 		this.adobeDocAssemblerService = Objects.requireNonNull(adobeDocAssemblerService,
 				"adobeDocAssemblerService cannot be null.");		
 		this.assemblerResult = Objects.requireNonNull(assemblerResult, "assemblerResult cannot be null.");
+		this.sourceDocuments = null;
 		
 	}
 
@@ -40,16 +43,17 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 		this.documentFactory = DocumentFactory.getDefault();
 		this.adobeDocAssemblerService = null;
 		this.assemblerResult = Objects.requireNonNull(assemblerResult, "assemblerResult cannot be null.");
+		this.sourceDocuments = null;
 	}
   
 	
-	public AdobeAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService, DocumentFactory documentFactory) {		
+	public AdobeAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService, DocumentFactory documentFactory) {				
 		super();
 		this.adobeDocAssemblerService = Objects.requireNonNull(adobeDocAssemblerService,
 				"adobeDocAssemblerService cannot be null.");		
 		this.documentFactory = Objects.requireNonNull(documentFactory, "Document Factory cannot be null.");
 		this.assemblerResult = null;
-		
+		this.sourceDocuments = null;
 	}
 	
 	public AdobeAssemblerServiceAdapter(com.adobe.fd.assembler.service.AssemblerService adobeDocAssemblerService) {		
@@ -58,6 +62,15 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 				"adobeDocAssemblerService cannot be null.");		
 		this.documentFactory = DocumentFactory.getDefault();
 		this.assemblerResult = null;
+		this.sourceDocuments = null;
+	}
+	
+	public AdobeAssemblerServiceAdapter(Map<String, Document> sourceDocuments) {		
+		super();
+		this.adobeDocAssemblerService = null;		
+		this.documentFactory = DocumentFactory.getDefault();
+		this.assemblerResult = null;
+		this.sourceDocuments = sourceDocuments ;
 		
 	}
 
@@ -112,12 +125,17 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 
 	@Override
 	public Map<String, Document> getDocuments() {
-		Map<String, com.adobe.aemfd.docmanager.Document> assembleDocuments = assemblerResult.getDocuments();
-		Map<String, Document> sourceDocuments = new HashMap<String, Document>();
-		assembleDocuments.forEach((docName, document) -> {
-			sourceDocuments.put(docName, documentFactory.create(document));
-		});
-		 return sourceDocuments;
+		if(sourceDocuments == null) {
+			sourceDocuments = new HashMap<String, Document>();
+			if (assemblerResult != null) {
+				if (assemblerResult.getDocuments() != null) {
+					assemblerResult.getDocuments().forEach((docName, doc) -> {
+						sourceDocuments.put(docName, documentFactory.create(doc));
+					});
+				} 
+			}
+		}
+		return sourceDocuments;
 	}
 
 	@Override
@@ -159,6 +177,12 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 	public Map<String, OperationException> getThrowables() {
 		return assemblerResult.getThrowables();
 	}
+
+	@Override
+	public void close() throws IOException {
+	
+	}
+
 	
 	
 

@@ -1,5 +1,6 @@
 package com._4point.aem.fluentforms.testing.assembler;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -140,6 +141,12 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 		@Override
 		public Map<String, OperationException> getThrowables() {
 			return  Collections.emptyMap();
+		}
+
+		@Override
+		public void close() throws IOException {
+
+			
 		}
 	
 	}
