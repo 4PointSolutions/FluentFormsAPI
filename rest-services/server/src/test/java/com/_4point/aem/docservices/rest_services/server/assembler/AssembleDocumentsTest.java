@@ -3,7 +3,6 @@ package com._4point.aem.docservices.rest_services.server.assembler;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,8 +32,6 @@ import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerSer
 
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
-import uk.org.lidalia.slf4jtest.TestLogger;
-import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
 @ExtendWith(AemContextExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -44,15 +41,19 @@ public class AssembleDocumentsTest {
 	private static final String DATA_PARAM_NAME = "ddx";
 	private static final String SOURCE_DOCUMENT_KEY = "sourceDocumentMap.key";
 	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
+	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
+	private static final String IS_TAKE_OWNER_SHIP = "isTakeOwnerShip";
+	private static final String DEFAULT_STYLE = "defaultStyle";
+	private static final String FIRST_BATES_NUMBER = "firstBatesNumber";
+	private static final String LOG_LEVEL = "logLevel";
+	private static final String IS_VALIDATE_ONLY = "isValidatedOnly";
 	
 	private final AemContext aemContext = new AemContext();
 
 	private final AssembleDocuments underTest =  new AssembleDocuments();
 
-	private TestLogger loggerCapture = TestLoggerFactory.getTestLogger(AssembleDocuments.class);
-
 	private MockDocumentFactory mockDocumentFactory = new MockDocumentFactory();
-
+	
 	@BeforeEach
 	void setUp() throws Exception {
 		// Always use the MockDocumentFactory() in the class that's under test because the Adobe Document object has unresolved dependencies.
@@ -61,16 +62,24 @@ public class AssembleDocumentsTest {
 	
 	@Test
 	void testDoPost_HappyPath_JustForm() throws ServletException, IOException, NoSuchFieldException {
-		String resultData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument></assemblerResult>\r\n" ;
+		String resultData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames/><latestBatesNumber Number=\"-1\" numRequestedBlock=\"0\"/><numRequestedBlocks/><successfulDocumentNames/><successfulBlocNames/><multipleResultBlocs/></assemblerResult>" ;
 		String data = "testDoPost Happy Path Result";
 		String templateData = TestUtils.SAMPLE_DDX.toString();
 		byte[] samplePdf1 = TestUtils.SAMPLE_PDF.toString().getBytes();
 		byte[] samplePdf2 = TestUtils.SAMPLE_PDF.toString().getBytes();
+		
+		Boolean isFailOnError = false;
+		Boolean isTakeOwnerShip = true;
+		Boolean isValidateOnly = true;
+		int firstBatesNumber = 0;
+		String defaultStyle = "test";
+		String logLevel = "DEBUG";
 
 	    Map<String, Document> sourceDocuments = new HashMap<String, Document>();
 	    sourceDocuments.put("concatenatedPDF.pdf", mockDocumentFactory.create(data.getBytes()));
-		AssemblerResult assemblerResult = new AdobeAssemblerServiceAdapter(sourceDocuments);
-		MockTraditionalAssemblerService assemblePdfMock = mockAssemblePdf(assemblerResult);
+		com.adobe.fd.assembler.client.AssemblerResult assemblerResult = new com.adobe.fd.assembler.client.AssemblerResult();
+		AssemblerResult assemblerResult1 = new AdobeAssemblerServiceAdapter(sourceDocuments, assemblerResult);
+		MockTraditionalAssemblerService assemblePdfMock = mockAssemblePdf(assemblerResult1);
 		Map<String, Object> inputs = new HashMap<String, Object>();
 		inputs.put("File0.pdf", samplePdf1);
 		inputs.put("File1.pdf", samplePdf2);
@@ -79,6 +88,12 @@ public class AssembleDocumentsTest {
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(DATA_PARAM_NAME, templateData);
+		request.addRequestParameter(IS_FAIL_ON_ERROR, Boolean.toString(isFailOnError));
+		request.addRequestParameter(IS_TAKE_OWNER_SHIP,  Boolean.toString(isTakeOwnerShip));
+		request.addRequestParameter(FIRST_BATES_NUMBER, String.valueOf(firstBatesNumber));
+		request.addRequestParameter(DEFAULT_STYLE, defaultStyle);
+		request.addRequestParameter(LOG_LEVEL, logLevel);
+		request.addRequestParameter(IS_VALIDATE_ONLY,  Boolean.toString(isValidateOnly));
 		
 		inputs.forEach((docName, doc) -> {
 			request.addRequestParameter(SOURCE_DOCUMENT_KEY, docName);
@@ -96,14 +111,16 @@ public class AssembleDocumentsTest {
 		GenerateAssemblerResultArgs generateAssemblerResultArgs = assemblePdfMock.getGenerateAssemblerResultArgs();
 		assertNotNull(generateAssemblerResultArgs.getDdx());
         AssemblerOptionsSpec assemblerOptionsSpec =
-		  generateAssemblerResultArgs.getAssemblerOptionsSpec(); assertAll(
+		  generateAssemblerResultArgs.getAssemblerOptionsSpec(); 
+        assertAll(
 		  ()->assertNotNull(assemblerOptionsSpec.getLogLevel()),
-		  ()->assertNull(assemblerOptionsSpec.isFailOnError()),
-		  ()->assertNull(assemblerOptionsSpec.isTakeOwnership()),
-		  ()->assertNull(assemblerOptionsSpec.isValidateOnly()),
-		  ()->assertNull(assemblerOptionsSpec.getDefaultStyle()),
+		  ()->assertNotNull(assemblerOptionsSpec.isFailOnError()),
+		  ()->assertNotNull(assemblerOptionsSpec.isTakeOwnership()),
+		  ()->assertNotNull(assemblerOptionsSpec.isValidateOnly()),
+		  ()->assertNotNull(assemblerOptionsSpec.getDefaultStyle()),
 		  ()->assertNotNull(assemblerOptionsSpec.getFirstBatesNumber()));	 
 	}
+	
 	
 	public MockTraditionalAssemblerService mockAssemblePdf(AssemblerResult assemblerResult) throws NoSuchFieldException {
 		MockTraditionalAssemblerService assemblerMock = MockTraditionalAssemblerService.createAssemblerMock(assemblerResult);

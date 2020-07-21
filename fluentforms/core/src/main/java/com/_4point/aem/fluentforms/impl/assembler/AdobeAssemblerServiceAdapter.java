@@ -65,11 +65,11 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 		this.sourceDocuments = null;
 	}
 	
-	public AdobeAssemblerServiceAdapter(Map<String, Document> sourceDocuments) {		
+	public AdobeAssemblerServiceAdapter(Map<String, Document> sourceDocuments, com.adobe.fd.assembler.client.AssemblerResult assemblerResult) {		
 		super();
 		this.adobeDocAssemblerService = null;		
 		this.documentFactory = DocumentFactory.getDefault();
-		this.assemblerResult = null;
+		this.assemblerResult =  Objects.requireNonNull(assemblerResult, "assemblerResult cannot be null.");
 		this.sourceDocuments = sourceDocuments ;
 		
 	}

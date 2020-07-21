@@ -5,13 +5,10 @@ import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
 import com._4point.aem.fluentforms.impl.assembler.SafeAssemblerServiceAdapterWrapper;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
-import com._4point.aem.fluentforms.impl.output.SafeOutputServiceAdapterWrapper;
 import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService.GenerateAssemblerResultArgs;
-import com._4point.aem.fluentforms.testing.output.MockTraditionalOutputService;
-import com._4point.aem.fluentforms.testing.output.MockTraditionalOutputService.GeneratePdfArgs;
 
 /**
- * MockAssemblerService can be used to mock calls to the OutputService.
+ * MockAssemblerService can be used to mock calls to the AssemblerService.
  * 
  * Calls to this object's methods can return specific results and the argument passed in those calls
  * are captured for later retrieval.  You can also create a service that always returns an AssemblerServiceException

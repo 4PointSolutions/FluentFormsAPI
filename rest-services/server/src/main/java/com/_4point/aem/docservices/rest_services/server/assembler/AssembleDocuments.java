@@ -11,8 +11,12 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -30,7 +34,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 
 import com._4point.aem.docservices.rest_services.server.ContentType;
@@ -47,6 +50,7 @@ import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AdobeAssemblerServiceAdapter;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
+import com.adobe.fd.assembler.client.OperationException;
 
 @SuppressWarnings("serial")
 @Component(service = Servlet.class, property = {
@@ -60,6 +64,11 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 	private static final String SOURCE_DOCUMENT_KEY = "sourceDocumentMap.key";
 	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
+	private static final String IS_TAKE_OWNER_SHIP ="isTakeOwnerShip";
+	private static final String DEFAULT_STYLE ="defaultStyle";
+	private static final String FIRST_BATES_NUMBER ="firstBatesNumber";
+	private static final String LOG_LEVEL = "logLevel";
+	private static final String IS_VALIDATE_ONLY = "isValidatedOnly";
 
 	@Reference
 	private com.adobe.fd.assembler.service.AssemblerService adobeAssembleService;
@@ -93,42 +102,51 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			throws BadRequestException, InternalServerErrorException, NotAcceptableException {
 		AssemblerService assemblerService = new AssemblerServiceImpl(assemblerServiceFactory.get(),
 				UsageContext.SERVER_SIDE);
-		log.info("In Assemble Uploaded Files");
 		try {
 			Map<String, Object> sourceDocuments = new HashMap<String, Object>();
 			RequestParameter parameter = request.getRequestParameter(DDX);
 			RequestParameter[] soruceDocName = request.getRequestParameters(SOURCE_DOCUMENT_KEY);
 			RequestParameter[] sourceDocs = request.getRequestParameters(SOURCE_DOCUMENT_VALUE);
 			if (soruceDocName.length == sourceDocs.length) {
-				log.info("sourceDocs Size : " + sourceDocs.length);
 				for (int i = 0; i < soruceDocName.length; i++) {
 					log.info("Document Name: " + soruceDocName[i].toString());
-					log.info("Content Type: " + sourceDocs[i].getContentType());
 					sourceDocuments.put(soruceDocName[i].getString(), docFactory.create(sourceDocs[i].get()));
 				}
 			}
+
 			RequestParameter isFailonError = request.getRequestParameter(IS_FAIL_ON_ERROR);
+			RequestParameter isTakeOwnerShip = request.getRequestParameter(IS_TAKE_OWNER_SHIP);
+			RequestParameter isValidateOnly = request.getRequestParameter(IS_VALIDATE_ONLY);
+			RequestParameter logLevel = request.getRequestParameter(LOG_LEVEL);
+			RequestParameter firstBatesNumber = request.getRequestParameter(FIRST_BATES_NUMBER);
+			RequestParameter defaultStyle = request.getRequestParameter(DEFAULT_STYLE);
+
 			Document ddx = docFactory.create(parameter.get());
-			AssemblerArgumentBuilder argumentBuilder = assemblerService.invoke().transform(
-					b -> isFailonError == null ? b : b.setFailOnError(Boolean.valueOf(isFailonError.toString())));
+			AssemblerArgumentBuilder argumentBuilder = assemblerService.invoke()
+					.transform(b -> isFailonError == null ? b : b.setFailOnError(Boolean.valueOf(isFailonError.toString())))
+					.transform(b -> isTakeOwnerShip == null ? b : b.setTakeOwnership(Boolean.valueOf(isTakeOwnerShip.toString())))
+					.transform(b -> isValidateOnly == null ? b : b.setValidateOnly((Boolean.valueOf(isValidateOnly.toString()))))
+					.transform(b -> logLevel == null ? b : b.setLogLevel(logLevel.toString()))
+					.transform(b -> firstBatesNumber == null ? b : b.setFirstBatesNumber(Integer.parseInt(firstBatesNumber.toString())))
+					.transform(b -> defaultStyle == null ? b : b.setDefaultStyle(defaultStyle.toString()));
+
 			try (AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
-				log.info("assemblerResult : " + assemblerResult);
 				String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
 				response.setContentType(ContentType.APPLICATION_XML.getContentTypeStr());
 				response.getWriter().write(assemblerResultxml);
-			}
-
-		} catch (AssemblerServiceException e) {
-			throw new InternalServerErrorException("Internal Error while merging PDF. (" + e.getMessage() + ").", e);
-		} catch (Exception e) {
-			log.error("Error while Merging pdfs " + e.getMessage());
+			} catch (TransformerFactoryConfigurationError | ParserConfigurationException | TransformerException e) {
+				throw new InternalServerErrorException("Internal Error while Converting assembler result to xml. (" + e.getMessage() + ").", e);
+			} 
+		} catch (AssemblerServiceException | IOException | OperationException ex1) {
+			throw new InternalServerErrorException("Internal Error while merging PDF. (" + ex1.getMessage() + ").", ex1);
+		} catch (IllegalArgumentException ex2) {
+			throw new BadRequestException("Bad arguments while merging PDF", ex2);
 		}
 
 	}
 
-	private String convertAssemblerResultToxml(AssemblerResult assemblerResult) throws AssemblerServiceException {
-		log.info("Converting assemblerresult to xml");
-		try {
+	private String convertAssemblerResultToxml(AssemblerResult assemblerResult) throws TransformerFactoryConfigurationError,ParserConfigurationException,TransformerException {
+		    log.info("Converting assemblerresult to xml");
 			Map<String, Document> resultDocMap = assemblerResult.getDocuments();
 			DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
@@ -136,103 +154,111 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			org.w3c.dom.Element root = document.createElement("assemblerResult");
 			document.appendChild(root);
 			if (MapUtils.isNotEmpty(resultDocMap)) {
-				resultDocMap.forEach((docName, resultDoc) -> {
-					log.info("Result pdf name : " + docName);
-					Element result = document.createElement("resultDocument");
-					root.appendChild(result);
-					Attr attr = document.createAttribute("documentName");
-					attr.setValue(docName);
-					result.setAttributeNode(attr);
-					Document concatenatedDoc = resultDoc;
-					if (resultDoc != null) {
-						concatenatedDoc.setContentType(ContentType.APPLICATION_PDF.toString());
-						log.info("converting to bytarray");
-						byte[] concatenatedPdf = null;
-						try {
-							concatenatedPdf = org.apache.commons.io.IOUtils
-									.toByteArray(concatenatedDoc.getInputStream());
-							if (concatenatedPdf != null) {
-								String doc = Base64.getEncoder().encodeToString(concatenatedPdf);
-								Element mergedDoc = document.createElement("mergedDoc");
-								mergedDoc.appendChild(document.createTextNode(doc));
-								result.appendChild(mergedDoc);
-							}
-						} catch (IOException e) {
-							log.error("Error in converting concatenatedPdf to String");
-						};
+				resultDocMap.forEach((docName, resultDoc) -> {		
+				try {
+					  addMapOfResultDocInXml(docName, resultDoc, document, root);
+					} catch (IOException e) {
+					  log.error("Error while adding map of document to xml",e);
 					}
-					
-					  Element failedBlockName = document.createElement("failedBlockNames");
-					  root.appendChild(failedBlockName);
-					  if(CollectionUtils.isNotEmpty(assemblerResult.getFailedBlockNames())) {
-					  assemblerResult.getFailedBlockNames().forEach(blocName -> { Element
-					  failedBlock = document.createElement("failedBlock");
-					  failedBlock.appendChild(document.createTextNode(blocName));
-					  failedBlockName.appendChild(failedBlock); 
-					   }); 
-					  }
-					  
-					  Element latestBatesNum = document.createElement("latestBatesNumber");
-					  root.appendChild(latestBatesNum); Attr latestBatesNumberAttr =
-					  document.createAttribute("Number");
-					  latestBatesNumberAttr.setValue(Integer.toString(assemblerResult.
-					  getLastBatesNumber()));
-					  latestBatesNum.setAttributeNode(latestBatesNumberAttr);
-					  
-					  Element numRequestedBlock = document.createElement("numRequestedBlocks");
-					  root.appendChild(numRequestedBlock); Attr numRequestedBlockAttr =
-					  document.createAttribute("numRequestedBlock");
-					  numRequestedBlockAttr.setValue(Integer.toString(assemblerResult.
-					  getNumRequestedBlocks()));
-					  latestBatesNum.setAttributeNode(numRequestedBlockAttr);
-					  
-					  Element successfulDocumentName =
-					  document.createElement("successfulDocumentNames");
-					  root.appendChild(successfulDocumentName);
-					  if(CollectionUtils.isNotEmpty(assemblerResult.getSuccessfulBlockNames())) {
-					  assemblerResult.getSuccessfulBlockNames().forEach(successFullDocName -> {
-					  Element successfulDoc = document.createElement("successfulDocumentName");
-					  successfulDoc.appendChild(document.createTextNode(successFullDocName));
-					  successfulDocumentName.appendChild(successfulDoc); }); }
-					  
-					  Element successfulBlocNames = document.createElement("successfulBlocNames");
-					  root.appendChild(successfulBlocNames);
-					  if(CollectionUtils.isNotEmpty(assemblerResult.getSuccessfulBlockNames())) {
-					  assemblerResult.getSuccessfulBlockNames().forEach(blocName -> { Element
-					  successfulBloc = document.createElement("successfulBlocName");
-					  successfulBloc.appendChild(document.createTextNode(blocName));
-					  successfulBlocNames.appendChild(successfulBloc); }); }
-					  
-					  Element multipleResultBloc = document.createElement("multipleResultBlocs");
-					  root.appendChild(multipleResultBloc);
-					  if(MapUtils.isNotEmpty(assemblerResult.getMultipleResultsBlocks())) {
-					  assemblerResult.getMultipleResultsBlocks().forEach((blockName,docNames)-> {
-					  Element resultBlockName = document.createElement("resultBlockName");
-					  root.appendChild(resultBlockName); Attr nameAttr =
-					  document.createAttribute("name"); nameAttr.setValue(blockName);
-					  resultBlockName.setAttributeNode(nameAttr); Element documentNames =
-					  document.createElement("documentNames"); root.appendChild(documentNames);
-					  
-					  }); }
-					  
-					  Element joblog = document.createElement("jobLog"); root.appendChild(joblog);
-					  if(assemblerResult.getJobLog() !=null) { Attr logAttr =
-					  document.createAttribute("joblogValue"); try {
-					  logAttr.setValue(Base64.getEncoder().encodeToString(assemblerResult.getJobLog
-					  ().getInlineData())); } catch (DOMException | IOException e) {
-					  log.error("Error in converting jobLog to bas64 String"); }
-					  joblog.setAttributeNode(logAttr); joblog.setAttributeNode(logAttr);
-					  }				 
+							
 				});
 			}
+
+			Element failedBlockName = document.createElement("failedBlockNames");
+			root.appendChild(failedBlockName);
+			if (CollectionUtils.isNotEmpty(assemblerResult.getFailedBlockNames())) {
+				assemblerResult.getFailedBlockNames().forEach(blocName -> {
+					Element failedBlock = document.createElement("failedBlock");
+					failedBlock.appendChild(document.createTextNode(blocName));
+					failedBlockName.appendChild(failedBlock);
+				});
+			}
+
+			Element latestBatesNum = document.createElement("latestBatesNumber");
+			root.appendChild(latestBatesNum);
+			Attr latestBatesNumberAttr = document.createAttribute("Number");
+			latestBatesNumberAttr.setValue(Integer.toString(assemblerResult.getLastBatesNumber()));
+			latestBatesNum.setAttributeNode(latestBatesNumberAttr);
+
+			Element numRequestedBlock = document.createElement("numRequestedBlocks");
+			root.appendChild(numRequestedBlock);
+			Attr numRequestedBlockAttr = document.createAttribute("numRequestedBlock");
+			numRequestedBlockAttr.setValue(Integer.toString(assemblerResult.getNumRequestedBlocks()));
+			latestBatesNum.setAttributeNode(numRequestedBlockAttr);
+
+			Element successfulDocumentName = document.createElement("successfulDocumentNames");
+			root.appendChild(successfulDocumentName);
+			if (CollectionUtils.isNotEmpty(assemblerResult.getSuccessfulBlockNames())) {
+				assemblerResult.getSuccessfulBlockNames().forEach(successFullDocName -> {
+					Element successfulDoc = document.createElement("successfulDocumentName");
+					successfulDoc.appendChild(document.createTextNode(successFullDocName));
+					successfulDocumentName.appendChild(successfulDoc);
+				});
+			}
+
+			Element successfulBlocNames = document.createElement("successfulBlocNames");
+			root.appendChild(successfulBlocNames);
+			if (CollectionUtils.isNotEmpty(assemblerResult.getSuccessfulBlockNames())) {
+				assemblerResult.getSuccessfulBlockNames().forEach(blocName -> {
+					Element successfulBloc = document.createElement("successfulBlocName");
+					successfulBloc.appendChild(document.createTextNode(blocName));
+					successfulBlocNames.appendChild(successfulBloc);
+				});
+			}
+
+			Element multipleResultBloc = document.createElement("multipleResultBlocs");
+			root.appendChild(multipleResultBloc);
+			if (MapUtils.isNotEmpty(assemblerResult.getMultipleResultsBlocks())) {
+				assemblerResult.getMultipleResultsBlocks().forEach((blockName, docNames) -> {
+					Element resultBlockName = document.createElement("resultBlockName");
+					root.appendChild(resultBlockName);
+					Attr nameAttr = document.createAttribute("name");
+					nameAttr.setValue(blockName);
+					resultBlockName.setAttributeNode(nameAttr);
+					Element documentNames = document.createElement("documentNames");
+					root.appendChild(documentNames);
+
+				});
+			}
+
+			/*
+			 * Element joblog = document.createElement("jobLog"); root.appendChild(joblog);
+			 * Document jobLogDoc = assemblerResult.getJobLog();
+			 * System.out.println("jobLogDoc: " + jobLogDoc); if (jobLogDoc != null) {
+			 * 
+			 * Attr logAttr = document.createAttribute("joblogValue"); try {
+			 * logAttr.setValue(Base64.getEncoder()
+			 * .encodeToString(org.apache.commons.io.IOUtils.toByteArray(jobLogDoc.
+			 * getInputStream()))); } catch (DOMException | IOException e) {
+			 * log.error("Error in converting jobLog to bas64 String"); }
+			 * joblog.setAttributeNode(logAttr); }
+			 */
+			
 			DOMSource domSource = new DOMSource(document);
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
 			StringWriter sw = new StringWriter();
 			StreamResult sr = new StreamResult(sw);
 			transformer.transform(domSource, sr);
 			return sw.toString();
-		} catch (Exception e) {
-			throw new AssemblerServiceException("Error while converting assemblerResult to xml ", e);
+	}
+
+	private void addMapOfResultDocInXml(String docName, Document resultDoc, org.w3c.dom.Document document,
+			Element root) throws IOException  {
+		Element result = document.createElement("resultDocument");
+		root.appendChild(result);
+		Attr attr = document.createAttribute("documentName");
+		attr.setValue(docName);
+		result.setAttributeNode(attr);
+		Document concatenatedDoc = resultDoc;
+		if (resultDoc != null) {
+			byte[] concatenatedPdf = null;
+				concatenatedPdf = org.apache.commons.io.IOUtils.toByteArray(concatenatedDoc.getInputStream());
+				if (concatenatedPdf != null) {
+					String doc = Base64.getEncoder().encodeToString(concatenatedPdf);
+					Element mergedDoc = document.createElement("mergedDoc");
+					mergedDoc.appendChild(document.createTextNode(doc));
+					result.appendChild(mergedDoc);
+				}			
 		}
 	}
 
