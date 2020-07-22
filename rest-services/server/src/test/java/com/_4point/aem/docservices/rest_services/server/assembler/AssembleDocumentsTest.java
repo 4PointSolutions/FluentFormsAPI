@@ -32,12 +32,10 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
 import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
-import com._4point.aem.fluentforms.impl.output.TraditionalOutputService;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com._4point.aem.fluentforms.testing.assembler.ExceptionalMockTraditionalAssemblerService;
 import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService;
 import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService.GenerateAssemblerResultArgs;
-import com._4point.aem.fluentforms.testing.output.ExceptionalMockTraditionalOutputService;
 
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;

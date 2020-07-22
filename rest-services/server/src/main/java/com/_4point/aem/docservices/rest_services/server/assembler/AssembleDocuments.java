@@ -38,10 +38,11 @@ import org.w3c.dom.Element;
 
 import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.ContentType;
-import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
+import com._4point.aem.docservices.rest_services.server.FormParameters;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
@@ -107,24 +108,24 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 				UsageContext.SERVER_SIDE);
 		try {
 			Map<String, Object> sourceDocuments = new HashMap<String, Object>();
-			RequestParameter parameter = request.getRequestParameter(DDX);
-			RequestParameter[] soruceDocName = request.getRequestParameters(SOURCE_DOCUMENT_KEY);
-			RequestParameter[] sourceDocs = request.getRequestParameters(SOURCE_DOCUMENT_VALUE);
+			RequestParameter ddxParam = FormParameters.getMandatoryParameter(request,DDX);
+			RequestParameter[] soruceDocName =  FormParameters.getMandatoryParameters(request, SOURCE_DOCUMENT_KEY);
+			RequestParameter[] sourceDocs = FormParameters.getMandatoryParameters(request, SOURCE_DOCUMENT_VALUE);
 			if (soruceDocName.length == sourceDocs.length) {
 				for (int i = 0; i < soruceDocName.length; i++) {
 					log.info("Document Name: " + soruceDocName[i].toString());
 					sourceDocuments.put(soruceDocName[i].getString(), docFactory.create(sourceDocs[i].get()));
 				}
 			}
-
+			
 			RequestParameter isFailonError = request.getRequestParameter(IS_FAIL_ON_ERROR);
 			RequestParameter isTakeOwnerShip = request.getRequestParameter(IS_TAKE_OWNER_SHIP);
 			RequestParameter isValidateOnly = request.getRequestParameter(IS_VALIDATE_ONLY);
 			RequestParameter logLevel = request.getRequestParameter(LOG_LEVEL);
 			RequestParameter firstBatesNumber = request.getRequestParameter(FIRST_BATES_NUMBER);
 			RequestParameter defaultStyle = request.getRequestParameter(DEFAULT_STYLE);
-
-			Document ddx = docFactory.create(parameter.get());
+           			
+			Document ddx = docFactory.create(ddxParam.get());
 			AssemblerArgumentBuilder argumentBuilder = assemblerService.invoke()
 					.transform(b -> isFailonError == null ? b
 							: b.setFailOnError(Boolean.valueOf(isFailonError.toString())))
