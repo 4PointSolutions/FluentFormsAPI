@@ -186,5 +186,23 @@ class GeneratePdfOutputTest {
 		}
 	}
 		
+	@Test
+	void testGeneratePdfOutput_JustForm_Issue15() throws Exception {
+		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
+			multipart.field(TEMPLATE_PARAM, TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf").toAbsolutePath().toString());
+
+			Response result = target.request()
+									.accept(APPLICATION_PDF)
+									.post(Entity.entity(multipart, multipart.getMediaType()));
+
+			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
+			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
+			assertEquals(APPLICATION_PDF, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
+
+			byte[] resultBytes = IOUtils.toByteArray((InputStream) result.getEntity());
+			TestUtils.validatePdfResult(resultBytes, "GeneratePdfOutput_JustFormDoc_Issue15.pdf", false, false, false);
+		}
+	}
+		
 
 }

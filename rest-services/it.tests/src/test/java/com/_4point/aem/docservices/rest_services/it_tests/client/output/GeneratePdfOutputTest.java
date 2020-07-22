@@ -102,5 +102,14 @@ class GeneratePdfOutputTest {
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
 	}
 
+	@Test
+	@DisplayName("Test generatePdfOutput() Just Form.  FluentFormsAPI Issue #15")
+	void testGeneratePdfOutput_JustFormIssue15() throws Exception {
+		Document pdfResult =  underTest.generatePDFOutput()
+									   .executeOn(TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf").toAbsolutePath(), null);
+		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
+	}
+
 
 }
