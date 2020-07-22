@@ -185,9 +185,9 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		createElementList(document, root, "successfulBlocNames", "successfulBlocName",
 				assemblerResult.getSuccessfulBlockNames());
 
-		createElmentWihtAttribute(document, root, "latestBatesNumber", "value", assemblerResult.getLastBatesNumber());
+		createElementWithAttribute(document, root, "latestBatesNumber", "value", assemblerResult.getLastBatesNumber());
 
-		createElmentWihtAttribute(document, root, "numRequestedBlocks", "value",
+		createElementWithAttribute(document, root, "numRequestedBlocks", "value",
 				assemblerResult.getNumRequestedBlocks());
 
 		Element multipleResultBloc = document.createElement("multipleResultBlocs");
@@ -247,7 +247,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		}
 	}
 
-	private static void createElmentWihtAttribute(org.w3c.dom.Document document, Element root, String parentElementName,
+	private static void createElementWithAttribute(org.w3c.dom.Document document, Element root, String parentElementName,
 			String attributeName, int assemblerResultProperty) {
 		Element latestBatesNum = document.createElement(parentElementName);
 		root.appendChild(latestBatesNum);
