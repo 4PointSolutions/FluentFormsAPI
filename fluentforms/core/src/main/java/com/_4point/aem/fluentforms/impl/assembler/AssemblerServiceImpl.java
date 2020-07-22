@@ -73,7 +73,7 @@ public class AssemblerServiceImpl implements AssemblerService {
 		}
 
 		@Override
-		public AssemblerArgumentBuilder setLogLevel(String logLevel) {
+		public AssemblerArgumentBuilder setLogLevel(LogLevel logLevel) {
 			this.assemblerOptionsSpec.setLogLevel(logLevel);
 			return this;
 		}

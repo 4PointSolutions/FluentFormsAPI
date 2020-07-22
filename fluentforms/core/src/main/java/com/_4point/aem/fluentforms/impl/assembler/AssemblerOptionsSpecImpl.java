@@ -1,5 +1,6 @@
 package com._4point.aem.fluentforms.impl.assembler;
 
+import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSetter;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 
 public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec {
@@ -7,19 +8,13 @@ public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec {
 	private Boolean isFailOnError;
     private String defaultStyle;
     private int firstBatesNumber;
-    private String logLevel;
+    private LogLevel logLevel;
     private Boolean isTakeOwnerShip;
     private Boolean isValidateOnly;
 	
 	@Override
 	public Boolean isFailOnError() {
 		return isFailOnError;
-	}
-	
-	@Override
-	public AssemblerOptionsSpecImpl setFailOnError(Boolean isFailOnError) {
-		 this.isFailOnError = isFailOnError;
-		 return this;
 	}
 	
 	@Override
@@ -33,10 +28,7 @@ public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec {
 	}
 	
 	@Override
-	public String getLogLevel() {
-		for(LogLevel l : LogLevel.values()){
-			logLevel = l.toString();
-		}
+	public LogLevel getLogLevel() {	
 		return logLevel;
 	}
 	
@@ -62,11 +54,6 @@ public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec {
 		return this;
 	}
 	
-	@Override
-	public AssemblerOptionsSpecImpl setLogLevel(String logLevel) {
-		this.logLevel = logLevel;
-		return this;
-	}
 	
 	@Override
 	public AssemblerOptionsSpecImpl setTakeOwnership(Boolean isTakeOwnerShip) {
@@ -80,4 +67,16 @@ public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec {
 		return this;
 	}
 
+	@Override
+	public AssemblerOptionsSpecImpl setFailOnError(Boolean isFailOnError) {
+		 this.isFailOnError = isFailOnError;
+		 return this;
+	}
+
+	@Override
+	public AssemblerOptionsSetter setLogLevel(LogLevel logLevel) {
+		this.logLevel = logLevel;
+		return this;
+	}
+	
 }

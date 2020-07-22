@@ -11,7 +11,8 @@ import org.mockito.Mockito;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
-import com._4point.aem.fluentforms.impl.assembler.AdobeAssemblerServiceAdapter;
+import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
+import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService.GenerateAssemblerResultArgs;
 
@@ -27,7 +28,7 @@ public class MockAssemblerServiceTest {
 		MockDocumentFactory mockDocumentFactory = new MockDocumentFactory();
 		Document ddx = mockDocumentFactory.create(expectedResultString.getBytes());
 		Map<String,Object>sourceDocuments =  Mockito.mock(Map.class);	
-	    AssemblerResult assemblerResult =  Mockito.mock(AdobeAssemblerServiceAdapter.class);
+	    AssemblerResult assemblerResult =  Mockito.mock(AssemblerResultImpl.class);
 	    MockAssemblerService underTest =MockAssemblerService.createAssemblerResultMock(assemblerResult);
 		AssemblerResult result = underTest.invoke()
 				 .executeOn(ddx, sourceDocuments);		
@@ -52,7 +53,7 @@ public class MockAssemblerServiceTest {
 		AssemblerResult result = underTest.invoke()
 				                    .setFailOnError(false)
 				                    .setDefaultStyle("abc")
-				                    .setLogLevel("DEBUG")
+				                    .setLogLevel(LogLevel.FINER)
 				                    .setFirstBatesNumber(0)
 				                    .setTakeOwnership(true)
 				                    .setValidateOnly(true)

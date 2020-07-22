@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.Transformable;
+import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 import com.adobe.fd.assembler.client.OperationException;
 public interface AssemblerService {
 	
@@ -55,7 +56,7 @@ public interface AssemblerService {
 		AssemblerArgumentBuilder setFirstBatesNumber(int start);
 	    
 		@Override
-		AssemblerArgumentBuilder setLogLevel(String logLevel);
+		AssemblerArgumentBuilder setLogLevel(LogLevel logLevel);
 	    
 		@Override
 		AssemblerArgumentBuilder setTakeOwnership(Boolean takeOwnership);
