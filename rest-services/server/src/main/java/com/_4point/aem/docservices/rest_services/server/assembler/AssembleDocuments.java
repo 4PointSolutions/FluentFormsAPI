@@ -36,7 +36,9 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 
+import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.ContentType;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
@@ -137,7 +139,9 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
 			try (AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
 				String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
-				response.setContentType(ContentType.APPLICATION_XML.getContentTypeStr());
+				String contentType = ContentType.APPLICATION_XML.toString();	// We know the result is always PDF.
+				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
+				response.setContentType(contentType);
 				response.getWriter().write(assemblerResultxml);
 			} catch (TransformerFactoryConfigurationError | ParserConfigurationException | TransformerException e) {
 				throw new InternalServerErrorException(
