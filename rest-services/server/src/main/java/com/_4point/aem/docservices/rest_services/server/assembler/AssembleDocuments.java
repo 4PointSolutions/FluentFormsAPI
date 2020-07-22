@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -21,6 +22,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
@@ -157,9 +159,9 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
 	}
 
-	private String convertAssemblerResultToxml(AssemblerResult assemblerResult)
-			throws TransformerFactoryConfigurationError, ParserConfigurationException, TransformerException {
-		log.info("Converting assemblerresult to xml");
+	private static String convertAssemblerResultToxml(AssemblerResult assemblerResult)
+			throws InternalServerErrorException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException {
+		log.info("Converting assemblerResult to xml");
 		Map<String, Document> resultDocMap = assemblerResult.getDocuments();
 		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
@@ -168,27 +170,15 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		document.appendChild(root);
 		if (MapUtils.isNotEmpty(resultDocMap)) {
 			resultDocMap.forEach((docName, resultDoc) -> {
-				try {
 					addMapOfResultDocInXml(docName, resultDoc, document, root);
-				} catch (IOException e) {
-					log.error("Error while adding map of document to xml", e);
-				}
-
 			});
 		}
 
 		createElementList(document, root, "failedBlockNames", "failedBlock", assemblerResult.getFailedBlockNames());
-
-		createElementList(document, root, "successfulDocumentNames", "successfulDocumentName",
-				assemblerResult.getSuccessfulDocumentNames());
-
-		createElementList(document, root, "successfulBlocNames", "successfulBlocName",
-				assemblerResult.getSuccessfulBlockNames());
-
+		createElementList(document, root, "successfulDocumentNames", "successfulDocumentName", assemblerResult.getSuccessfulDocumentNames());
+		createElementList(document, root, "successfulBlocNames", "successfulBlocName", assemblerResult.getSuccessfulBlockNames());
 		createElementWithAttribute(document, root, "latestBatesNumber", "value", assemblerResult.getLastBatesNumber());
-
-		createElementWithAttribute(document, root, "numRequestedBlocks", "value",
-				assemblerResult.getNumRequestedBlocks());
+		createElementWithAttribute(document, root, "numRequestedBlocks", "value", assemblerResult.getNumRequestedBlocks());
 
 		Element multipleResultBloc = document.createElement("multipleResultBlocs");
 		root.appendChild(multipleResultBloc);
@@ -210,15 +200,15 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		Document jobLogDoc = assemblerResult.getJobLog();
 		if (jobLogDoc != null) {
 			Attr logAttr = document.createAttribute("joblogValue");
-			try {
-				logAttr.setValue(Base64.getEncoder()
-						.encodeToString(org.apache.commons.io.IOUtils.toByteArray(jobLogDoc.getInputStream())));
-			} catch (DOMException | IOException e) {
-				log.error("Error in converting jobLog to bas64 String");
-			}
+			logAttr.setValue(toBase64String(jobLogDoc));
 			joblog.setAttributeNode(logAttr);
 		}
 
+		return domToString(document);
+	}
+
+	private static String domToString(org.w3c.dom.Document document)
+			throws TransformerConfigurationException, TransformerFactoryConfigurationError, TransformerException {
 		DOMSource domSource = new DOMSource(document);
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
 		StringWriter sw = new StringWriter();
@@ -227,23 +217,35 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		return sw.toString();
 	}
 
-	private void addMapOfResultDocInXml(String docName, Document resultDoc, org.w3c.dom.Document document, Element root)
-			throws IOException {
-		Element result = document.createElement("resultDocument");
-		root.appendChild(result);
-		Attr attr = document.createAttribute("documentName");
-		attr.setValue(docName);
-		result.setAttributeNode(attr);
-		Document concatenatedDoc = resultDoc;
-		if (resultDoc != null) {
-			byte[] concatenatedPdf = null;
-			concatenatedPdf = org.apache.commons.io.IOUtils.toByteArray(concatenatedDoc.getInputStream());
-			if (concatenatedPdf != null) {
-				String doc = Base64.getEncoder().encodeToString(concatenatedPdf);
-				Element mergedDoc = document.createElement("mergedDoc");
-				mergedDoc.appendChild(document.createTextNode(doc));
-				result.appendChild(mergedDoc);
+	private static String toBase64String(Document doc) throws InternalServerErrorException {
+		try {
+			return Base64.getEncoder().encodeToString(IOUtils.toByteArray(doc.getInputStream()));
+		} catch (IOException e) {
+			String msg = e.getMessage();
+			throw new InternalServerErrorException("Error while reading job log from assembler result. (" + (msg == null ? e.getClass().getName() : msg) + ").", e);
+		}
+	}
+
+	private static void addMapOfResultDocInXml(String docName, Document resultDoc, org.w3c.dom.Document document, Element root) {
+		try {
+			Element result = document.createElement("resultDocument");
+			root.appendChild(result);
+			Attr attr = document.createAttribute("documentName");
+			attr.setValue(docName);
+			result.setAttributeNode(attr);
+			if (resultDoc != null) {
+				byte[] concatenatedPdf = null;
+				concatenatedPdf = IOUtils.toByteArray(resultDoc.getInputStream());
+				if (concatenatedPdf != null) {
+					String doc = Base64.getEncoder().encodeToString(concatenatedPdf);
+					Element mergedDoc = document.createElement("mergedDoc");
+					mergedDoc.appendChild(document.createTextNode(doc));
+					result.appendChild(mergedDoc);
+				}
 			}
+		} catch (IOException e) {
+			String msg = e.getMessage();
+			throw new IllegalStateException("Error while reading result document. (" + (msg == null ? e.getClass().getName() : msg) + ").", e);
 		}
 	}
 
