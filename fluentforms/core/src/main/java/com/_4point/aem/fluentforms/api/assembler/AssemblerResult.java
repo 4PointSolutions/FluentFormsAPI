@@ -7,23 +7,23 @@ import com._4point.aem.fluentforms.api.Document;
 import com.adobe.fd.assembler.client.OperationException;
 
 public interface AssemblerResult extends AutoCloseable{
-	
-	 Map<String,Document> getDocuments();
-	
-	 List<String> getFailedBlockNames();
-    
-     Document getJobLog();
-     
-     int getLastBatesNumber();
-     
-     Map<String,List<String>> getMultipleResultsBlocks();
-     
-     int getNumRequestedBlocks();
-     
-     List<String> getSuccessfulBlockNames();
-    
-     List<String> getSuccessfulDocumentNames();
-    
-     Map<String,OperationException>	getThrowables();
-     
+
+	Map<String,Document> getDocuments();
+
+	List<String> getFailedBlockNames();
+
+	Document getJobLog();
+
+	int getLastBatesNumber();
+
+	Map<String,List<String>> getMultipleResultsBlocks();
+
+	int getNumRequestedBlocks();
+
+	List<String> getSuccessfulBlockNames();
+
+	List<String> getSuccessfulDocumentNames();
+
+	Map<String,OperationException>	getThrowables();
+
 }

@@ -36,7 +36,7 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
-import com._4point.aem.fluentforms.impl.assembler.AdobeDocAssemblerServiceAdapter;
+import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 import com.adobe.fd.assembler.client.OperationException;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec;
@@ -50,6 +50,12 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 	private static final String ASSEMBLE_DOCUMENT_PATH = "/services/AssemblerService/AssembleDocuments";
 	private static final String DATA_PARAM_NAME = "ddx";
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
+	private static final String IS_VALIDATE_ONLY = "isValidateOnly";
+	private static final String IS_TAKE_OWNER_SHIP = "isTakeOwnerShip";
+	private static final String JOB_LOG_LEVEL = "jobLogLevel";
+	private static final String DEFAULT_STYLE = "defaultStyle";
+	private static final String FIRST_BATES_NUMBER = "firstBatesNum";
+	
 	private static final String SOURCE_DOCUMENT_KEY = "sourceDocumentMap.key";
 	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
 	
@@ -90,12 +96,22 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 
 			if (adobAssemblerOptionSpec != null) {
 				Boolean isFailOnError = adobAssemblerOptionSpec.isFailOnError();
+				Boolean isTakeOwnerShip = adobAssemblerOptionSpec.isTakeOwnership();
+				Boolean isValidateOnly = adobAssemblerOptionSpec.isValidateOnly();
+				String jobLogLevel =  adobAssemblerOptionSpec.getLogLevel();
+				int firstBatesNum = adobAssemblerOptionSpec.getFirstBatesNumber();
+				String defaultStyle = adobAssemblerOptionSpec.getDefaultStyle();
 				System.out.println("isFailOnError: "+isFailOnError);
-				MultipartTransformer.create(multipart).transform(
-						(t) -> isFailOnError == null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()));
+				 MultipartTransformer.create(multipart)
+				.transform((t) -> isFailOnError == null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()))
+				.transform((t) -> isValidateOnly == null ? t : t.field(IS_VALIDATE_ONLY, isValidateOnly.toString()))
+				.transform((t) -> isTakeOwnerShip == null ? t : t.field(IS_TAKE_OWNER_SHIP, isTakeOwnerShip.toString()))
+				.transform((t) -> jobLogLevel == null ? t : t.field(JOB_LOG_LEVEL, jobLogLevel.toString()))
+				.transform((t) -> firstBatesNum == 0 ? t : t.field(FIRST_BATES_NUMBER, String.valueOf(firstBatesNum)))
+				.transform((t) -> defaultStyle == null ? t : t.field(DEFAULT_STYLE, defaultStyle.toString()));
 			}
 
-				Response result = postToServer(assembleDocTarget, multipart,  MediaType.APPLICATION_XML_TYPE);
+		    Response result = postToServer(assembleDocTarget, multipart,  MediaType.APPLICATION_XML_TYPE);
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
 				String msg = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='"
@@ -125,8 +141,9 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 			}
 			String resultXml = result.readEntity(String.class);
 			System.out.println("resultXml: "+resultXml);
-		    Map<String, Document> resultMap = convertXmlDocument(resultXml);
-			AssemblerResult assemblerResult = new AdobeDocAssemblerServiceAdapter(resultMap);
+			AssemblerResult assemblerResult = convertXmlDocument(resultXml);
+		   // com.adobe.fd.assembler.client.AssemblerResult adobeAssemblerResult = new com.adobe.fd.assembler.client.AssemblerResult();
+			//AssemblerResult assemblerResult = new AdobeDocAssemblerServiceAdapter(resultMap, adobeAssemblerResult);
 			return assemblerResult;
 
 		} catch (IOException e) {
@@ -138,10 +155,12 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 
 	}
 
-	private Map<String, Document> convertXmlDocument(String assemblerResultXml) throws AssemblerServiceException {
+	private AssemblerResult convertXmlDocument(String assemblerResultXml) throws AssemblerServiceException {
 		Map<String, Document> resultMap = new HashMap<String, Document>();
 		DocumentBuilder db;
 		byte[] bytesPdf = null;
+		AssemblerResultImpl assemblerResult = new AssemblerResultImpl();
+		
 		try {
 			db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			InputSource is = new InputSource();
@@ -163,8 +182,8 @@ public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceA
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new AssemblerServiceException("Error while parsing  to xml", e);
 		}
-
-		return resultMap;
+		assemblerResult.setDocuments(resultMap);
+		return assemblerResult;
 
 	}
 

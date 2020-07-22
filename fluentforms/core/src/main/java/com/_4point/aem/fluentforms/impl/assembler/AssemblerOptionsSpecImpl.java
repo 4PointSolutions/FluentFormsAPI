@@ -8,12 +8,9 @@ public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec{
 	private Boolean isFailOnError;
 	private PathOrUrl contentRoot;
 	
+	
 	@Override
-	public boolean isFailOnError() {
-		return isFailOnError;
-	}
-	@Override
-	public AssemblerOptionsSpecImpl setFailOnError(boolean isFailOnError) {
+	public AssemblerOptionsSpecImpl setFailOnError(Boolean isFailOnError) {
 		 this.isFailOnError = isFailOnError;
 		 return this;
 	}
@@ -40,16 +37,7 @@ public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec{
 		// TODO Auto-generated method stub
 		return null;
 	}
-	@Override
-	public boolean isTakeOwnership() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public boolean isValidateOnly() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+
 	@Override
 	public AssemblerOptionsSpec setDefaultStyle(String defaultStyle) {
 		// TODO Auto-generated method stub
@@ -65,13 +53,29 @@ public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec{
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 	@Override
-	public AssemblerOptionsSpec setTakeOwnership(boolean takeOwnership) {
+	public Boolean isFailOnError() {
+		// TODO Auto-generated method stub
+		return isFailOnError;
+	}
+	@Override
+	public Boolean isTakeOwnership() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	@Override
-	public AssemblerOptionsSpec setValidateOnly(boolean validateOnly) {
+	public Boolean isValidateOnly() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public AssemblerOptionsSetter setTakeOwnership(Boolean takeOwnership) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public AssemblerOptionsSetter setValidateOnly(Boolean validateOnly) {
 		// TODO Auto-generated method stub
 		return null;
 	}
