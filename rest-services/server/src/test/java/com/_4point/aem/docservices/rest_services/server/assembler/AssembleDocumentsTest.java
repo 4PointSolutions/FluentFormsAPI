@@ -10,11 +10,16 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import javax.servlet.ServletException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
@@ -24,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
@@ -70,7 +76,7 @@ public class AssembleDocumentsTest {
 	
 	@Test
 	void testDoPost_HappyPath_JustForm() throws ServletException, IOException, NoSuchFieldException {
-		String resultData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames/><successfulDocumentNames/><successfulBlocNames/><latestBatesNumber value=\"0\"/><numRequestedBlocks value=\"0\"/><multipleResultBlocs/><jobLog/></assemblerResult>" ;
+		String resultData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames/><successfulDocumentNames/><successfulBlockNames/><latestBatesNumber value=\"0\"/><numRequestedBlocks value=\"0\"/><jobLog/></assemblerResult>" ;
 		String data = "testDoPost Happy Path Result";
 		String templateData = TestUtils.SAMPLE_DDX.toString();
 		byte[] samplePdf1 = TestUtils.SAMPLE_PDF.toString().getBytes();
@@ -120,8 +126,7 @@ public class AssembleDocumentsTest {
 		assertNotNull(generateAssemblerResultArgs.getSourceDocuments());
         AssemblerOptionsSpec assemblerOptionsSpec =
 		generateAssemblerResultArgs.getAssemblerOptionsSpec(); 
-      
-          assertAll(
+        assertAll(
               	  ()->assertEquals(LogLevel.ALL, assemblerOptionsSpec.getLogLevel()),
         		  ()->assertFalse(false),
         		  ()->assertTrue(true),
@@ -129,18 +134,6 @@ public class AssembleDocumentsTest {
         		  ()->assertEquals("test", assemblerOptionsSpec.getDefaultStyle()),
         		  ()->assertEquals(1,assemblerOptionsSpec.getFirstBatesNumber()));
           
-          AssemblerResult assemblerResult2 = assemblePdfMock.getAssemblerResult();
-          assertAll(
-        		  () -> assertNotNull(assemblerResult2.getDocuments()),
-        		  ()->assertNull(assemblerResult2.getFailedBlockNames()),
-        		  ()->assertNull(assemblerResult2.getJobLog()),
-        		  ()->assertEquals(0, assemblerResult2.getLastBatesNumber()),
-        		  ()->assertNull(assemblerResult2.getMultipleResultsBlocks()),
-        		  ()->assertEquals(0, assemblerResult2.getNumRequestedBlocks()),
-        		  ()->assertNull(assemblerResult2.getSuccessfulBlockNames()),
-        		  ()->assertNull(assemblerResult2.getSuccessfulDocumentNames())
-        		  );
-         
         
 	}
 	
@@ -293,8 +286,47 @@ public class AssembleDocumentsTest {
 		assertThat(statusMsg, containsStringIgnoringCase(APPLICATION_XML));
 	}
 	
+	@Test
+	void testConvertAssemblerResultToxml() throws InternalServerErrorException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException{
+		AssemblerResultImpl assemblerResult = new AssemblerResultImpl();
+		setAssemblerResultProperties(assemblerResult);
+		String resultXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames><failedBlockName>failedBlock1</failedBlockName><failedBlockName>failedBlock2</failedBlockName></failedBlockNames><successfulDocumentNames><successfulDocumentName>successDocument1</successfulDocumentName><successfulDocumentName>successDocument2</successfulDocumentName></successfulDocumentNames><successfulBlockNames><successfulBlockName>succcessBlock1</successfulBlockName><successfulBlockName>succcessBlock2</successfulBlockName></successfulBlockNames><latestBatesNumber value=\"2\"/><numRequestedBlocks value=\"3\"/><multipleResultBlocks name=\"document\"><documentNames><documentName>test1</documentName><documentName>test2</documentName></documentNames></multipleResultBlocks><jobLog joblogValue=\"SU5GTw==\"/></assemblerResult>";
+		String responseXml = AssembleDocuments.convertAssemblerResultToxml(assemblerResult);
+		assertEquals(resultXml, responseXml);
+	}
 	
+	private void setAssemblerResultProperties(AssemblerResultImpl assemblerResult) {
+		String data = "testDoPost Happy Path Result";
+		Map<String, Document> sourceDocuments = new HashMap<String, Document>();
+		Map<String,List<String>> multipleResultsBlocks = new HashMap<String, List<String>>();
+		List<String> successfulBlockNames = new ArrayList<String>();
+		List<String> successfulDocumentNames = new ArrayList<String>();
+		List<String> failedBlockNames = new ArrayList<String>();
 		
+		sourceDocuments.put("concatenatedPDF.pdf", mockDocumentFactory.create(data.getBytes()));
+		assemblerResult.setDocuments(sourceDocuments);
+		assemblerResult.setLastBatesNumber(2);
+		assemblerResult.setNumRequestedBlocks(3);
+		assemblerResult.setJobLog(mockDocumentFactory.create("INFO".getBytes()));
+		successfulBlockNames.add("succcessBlock1");
+		successfulBlockNames.add("succcessBlock2");
+		assemblerResult.setSuccessfulBlockNames(successfulBlockNames);
+		
+		successfulDocumentNames.add("successDocument1");
+		successfulDocumentNames.add("successDocument2");
+		assemblerResult.setSuccessfulDocumentNames(successfulDocumentNames);
+		
+		failedBlockNames.add("failedBlock1");
+		failedBlockNames.add("failedBlock2");
+		assemblerResult.setFailedBlockNames(failedBlockNames);
+		
+		List<String> docNames = new ArrayList<String>();
+		docNames.add("test1");
+		docNames.add("test2");
+		multipleResultsBlocks.put("document", docNames);
+		assemblerResult.setMultipleResultsBlocks(multipleResultsBlocks);
+	}
+
 	public MockTraditionalAssemblerService mockAssemblePdf(AssemblerResult assemblerResult) throws NoSuchFieldException {
 		assemblerResult.getDocuments().forEach((doName, doc) -> {
 			doc.setContentType(APPLICATION_PDF);

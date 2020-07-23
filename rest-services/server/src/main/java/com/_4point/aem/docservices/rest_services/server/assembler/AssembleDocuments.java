@@ -22,6 +22,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -35,7 +36,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 
 import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
@@ -159,7 +159,8 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
 	}
 
-	private static String convertAssemblerResultToxml(AssemblerResult assemblerResult)
+	// Package visibility so that it can be unit tested.
+	/* package */ static String convertAssemblerResultToxml(AssemblerResult assemblerResult)
 			throws InternalServerErrorException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException {
 		log.info("Converting assemblerResult to xml");
 		Map<String, Document> resultDocMap = assemblerResult.getDocuments();
@@ -174,24 +175,29 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			});
 		}
 
-		createElementList(document, root, "failedBlockNames", "failedBlock", assemblerResult.getFailedBlockNames());
+		createElementList(document, root, "failedBlockNames", "failedBlockName", assemblerResult.getFailedBlockNames());
 		createElementList(document, root, "successfulDocumentNames", "successfulDocumentName", assemblerResult.getSuccessfulDocumentNames());
-		createElementList(document, root, "successfulBlocNames", "successfulBlocName", assemblerResult.getSuccessfulBlockNames());
+		createElementList(document, root, "successfulBlockNames", "successfulBlockName", assemblerResult.getSuccessfulBlockNames());
 		createElementWithAttribute(document, root, "latestBatesNumber", "value", assemblerResult.getLastBatesNumber());
 		createElementWithAttribute(document, root, "numRequestedBlocks", "value", assemblerResult.getNumRequestedBlocks());
 
-		Element multipleResultBloc = document.createElement("multipleResultBlocs");
-		root.appendChild(multipleResultBloc);
+		
 		if (MapUtils.isNotEmpty(assemblerResult.getMultipleResultsBlocks())) {
-			assemblerResult.getMultipleResultsBlocks().forEach((blockName, docNames) -> {
-				Element resultBlockName = document.createElement("resultBlockName");
+			assemblerResult.getMultipleResultsBlocks().forEach((blockName,docNames)-> {
+				Element resultBlockName = document.createElement("multipleResultBlocks");
 				root.appendChild(resultBlockName);
 				Attr nameAttr = document.createAttribute("name");
 				nameAttr.setValue(blockName);
 				resultBlockName.setAttributeNode(nameAttr);
-				Element documentNames = document.createElement("documentNames");
-				root.appendChild(documentNames);
-
+				Element documentNames  = document.createElement("documentNames");			
+				if(CollectionUtils.isNotEmpty(docNames)) {
+					docNames.forEach(docName -> {
+						Element documentName = document.createElement("documentName");	
+						documentName.appendChild(document.createTextNode(docName));
+						documentNames.appendChild(documentName);
+					});
+				}	
+				resultBlockName.appendChild(documentNames);
 			});
 		}
 
@@ -263,7 +269,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			String parentElementName, String childlementName, List<String> stringList) {
 		Element elementName = document.createElement(parentElementName);
 		root.appendChild(elementName);
-		if (stringList != null && !stringList.isEmpty()) {
+		if (CollectionUtils.isNotEmpty(stringList)) {
 			stringList.forEach(assemblerResultPropertyName -> createElement(document, elementName, childlementName,
 					assemblerResultPropertyName));
 		}
