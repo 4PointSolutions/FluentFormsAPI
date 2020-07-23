@@ -1,12 +1,13 @@
 package com._4point.aem.fluentforms.api.assembler;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.Map;
 
 import com._4point.aem.fluentforms.api.Document;
 import com.adobe.fd.assembler.client.OperationException;
 
-public interface AssemblerResult {
+public interface AssemblerResult extends Closeable {
 	
 	 Map<String,Document> getDocuments();
 	

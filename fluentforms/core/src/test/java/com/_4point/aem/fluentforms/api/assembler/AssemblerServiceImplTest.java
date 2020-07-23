@@ -19,6 +19,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
+import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 import com.adobe.fd.assembler.client.OperationException;
 
@@ -97,7 +98,7 @@ public class AssemblerServiceImplTest {
 		Map<String, Object> sourceDocuments = Mockito.mock(Map.class);
 		AssemblerResult result = underTest.invoke().setFailOnError(false)
 				                                   .setDefaultStyle("abc")
-				                                   .setLogLevel("DEBUG")
+				                                   .setLogLevel(LogLevel.CONFIG)
 				                                   .setFirstBatesNumber(0)
 				                                   .setTakeOwnership(true)
 				                                   .setValidateOnly(true)

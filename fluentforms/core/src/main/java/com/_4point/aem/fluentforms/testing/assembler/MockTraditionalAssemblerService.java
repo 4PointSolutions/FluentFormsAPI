@@ -1,5 +1,6 @@
 package com._4point.aem.fluentforms.testing.assembler;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +17,10 @@ import com.adobe.fd.assembler.client.OperationException;
 
 public class MockTraditionalAssemblerService implements TraditionalDocAssemblerService {
 
-	private final AssemblerResult DUMMY_ASSEMBLER_RESULT;
+	private final AssemblerResult dummtAssemblerResult;
 	private AssemblerResult assemblerResult;
 	private GenerateAssemblerResultArgs generateAssemblerResultArgs;
-	private final Document DUMMY_DOCUMENT;
+	private final Document dummyDocument;
 	private final DocumentFactory documentFactory;
 
 	
@@ -27,7 +28,7 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 	public AssemblerResult invoke(Document ddx, Map<String, Object> inputs,
 			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException {
 		this.generateAssemblerResultArgs = new GenerateAssemblerResultArgs(ddx, inputs, adobAssemblerOptionSpec);
-		return this.assemblerResult == null ? DUMMY_ASSEMBLER_RESULT : this.assemblerResult;
+		return this.assemblerResult == null ? dummtAssemblerResult : this.assemblerResult;
 	}
 
 	/*
@@ -43,8 +44,8 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 	MockTraditionalAssemblerService() {
 		super();
 		this.documentFactory = new MockDocumentFactory();
-		this.DUMMY_DOCUMENT = documentFactory.create(new byte[0]);
-		this.DUMMY_ASSEMBLER_RESULT = new DummyAssemblerResult();
+		this.dummyDocument = documentFactory.create(new byte[0]);
+		this.dummtAssemblerResult = new DummyAssemblerResult();
 	}
 	
 	public static MockTraditionalAssemblerService createAssemblerMock(AssemblerResult assemblerResult) {
@@ -57,7 +58,7 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 	}
 	
 	public AssemblerResult getDummyAssemblerResult() {
-		return DUMMY_ASSEMBLER_RESULT;
+		return dummtAssemblerResult;
 	}
 	
 	public AssemblerResult getAssemblerResult() {
@@ -109,7 +110,7 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 
 		@Override
 		public Document getJobLog() {
-			return DUMMY_DOCUMENT;
+			return dummyDocument;
 		}
 
 		@Override
@@ -140,6 +141,12 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 		@Override
 		public Map<String, OperationException> getThrowables() {
 			return  Collections.emptyMap();
+		}
+
+		@Override
+		public void close() throws IOException {
+
+			
 		}
 	
 	}

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import com._4point.aem.fluentforms.impl.assembler.AdobeAssemblerServiceAdapter;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerOptionsSpecImpl;
+import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 
 public class AssemblerOptionSpecTest {
 	
@@ -27,7 +28,9 @@ public class AssemblerOptionSpecTest {
 		assertEquals(emptyAssemblerOptionSpec.isFailOnError(), adobeAssemblerOptionSpec.isFailOnError());
 		assertEquals(emptyAssemblerOptionSpec.getDefaultStyle(), adobeAssemblerOptionSpec.getDefaultStyle());
 		assertEquals(emptyAssemblerOptionSpec.getFirstBatesNumber(), adobeAssemblerOptionSpec.getFirstBatesNumber());
-		assertEquals(emptyAssemblerOptionSpec.getLogLevel(), adobeAssemblerOptionSpec.getLogLevel());
+		LogLevel logLevel = LogLevel.valueOf(adobeAssemblerOptionSpec.getLogLevel());
+		LogLevel emptyAssemblerOptionSpecLogLevel = LogLevel.valueOf(adobeAssemblerOptionSpec.getLogLevel());
+		assertEquals(emptyAssemblerOptionSpecLogLevel, logLevel);
 		assertEquals(emptyAssemblerOptionSpec.isValidateOnly(), adobeAssemblerOptionSpec.isValidateOnly());
 		assertEquals(emptyAssemblerOptionSpec.isTakeOwnership(), adobeAssemblerOptionSpec.isTakeOwnership());
 	}
@@ -40,7 +43,7 @@ public class AssemblerOptionSpecTest {
 		underTest.setFirstBatesNumber(1);
 		underTest.setTakeOwnership(true); 
 		underTest.setValidateOnly(true);
-		underTest.setLogLevel("DEBUG"); 
+		underTest.setLogLevel(LogLevel.FINER); 
 		assertNotEmpty(underTest);
 	}
 
