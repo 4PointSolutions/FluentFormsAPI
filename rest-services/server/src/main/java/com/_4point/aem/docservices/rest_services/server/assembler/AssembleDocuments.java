@@ -142,7 +142,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 
 			try (AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
 				String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
-				String contentType = ContentType.APPLICATION_XML.toString();	// We know the result is always PDF.
+				String contentType = ContentType.APPLICATION_XML.toString();	// We know the result is always XML.
 				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
 				response.setContentType(contentType);
 				response.getWriter().write(assemblerResultxml);
