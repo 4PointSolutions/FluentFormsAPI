@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com._4point.aem.fluentforms.testing.assembler.ExceptionalMockTraditionalAssemblerService;
 import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService;
 import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService.GenerateAssemblerResultArgs;
+import com.adobe.fd.assembler.client.OperationException;
 
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -287,10 +289,18 @@ public class AssembleDocumentsTest {
 	}
 	
 	@Test
-	void testConvertAssemblerResultToxml() throws InternalServerErrorException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException{
+	void testConvertAssemblerResultToXml_EmptyResult() throws InternalServerErrorException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException{
+		AssemblerResultImpl assemblerResult = new AssemblerResultImpl();
+		String resultXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><failedBlockNames/><successfulDocumentNames/><successfulBlockNames/><latestBatesNumber value=\"0\"/><numRequestedBlocks value=\"0\"/><jobLog/></assemblerResult>";
+		String responseXml = AssembleDocuments.convertAssemblerResultToxml(assemblerResult);
+		assertEquals(resultXml, responseXml);
+	}
+	
+	@Test
+	void testConvertAssemblerResultToXml() throws InternalServerErrorException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException{
 		AssemblerResultImpl assemblerResult = new AssemblerResultImpl();
 		setAssemblerResultProperties(assemblerResult);
-		String resultXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames><failedBlockName>failedBlock1</failedBlockName><failedBlockName>failedBlock2</failedBlockName></failedBlockNames><successfulDocumentNames><successfulDocumentName>successDocument1</successfulDocumentName><successfulDocumentName>successDocument2</successfulDocumentName></successfulDocumentNames><successfulBlockNames><successfulBlockName>succcessBlock1</successfulBlockName><successfulBlockName>succcessBlock2</successfulBlockName></successfulBlockNames><latestBatesNumber value=\"2\"/><numRequestedBlocks value=\"3\"/><multipleResultBlocks name=\"document\"><documentNames><documentName>test1</documentName><documentName>test2</documentName></documentNames></multipleResultBlocks><jobLog joblogValue=\"SU5GTw==\"/></assemblerResult>";
+		String resultXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames><failedBlockName>failedBlock1</failedBlockName><failedBlockName>failedBlock2</failedBlockName></failedBlockNames><successfulDocumentNames><successfulDocumentName>successDocument1</successfulDocumentName><successfulDocumentName>successDocument2</successfulDocumentName></successfulDocumentNames><successfulBlockNames><successfulBlockName>successBlock1</successfulBlockName><successfulBlockName>successBlock2</successfulBlockName></successfulBlockNames><latestBatesNumber value=\"2\"/><numRequestedBlocks value=\"3\"/><multipleResultBlocks name=\"document\"><documentNames><documentName>test1</documentName><documentName>test2</documentName></documentNames></multipleResultBlocks><jobLog joblogValue=\"SU5GTw==\"/></assemblerResult>";
 		String responseXml = AssembleDocuments.convertAssemblerResultToxml(assemblerResult);
 		assertEquals(resultXml, responseXml);
 	}
@@ -308,8 +318,8 @@ public class AssembleDocumentsTest {
 		assemblerResult.setLastBatesNumber(2);
 		assemblerResult.setNumRequestedBlocks(3);
 		assemblerResult.setJobLog(mockDocumentFactory.create("INFO".getBytes()));
-		successfulBlockNames.add("succcessBlock1");
-		successfulBlockNames.add("succcessBlock2");
+		successfulBlockNames.add("successBlock1");
+		successfulBlockNames.add("successBlock2");
 		assemblerResult.setSuccessfulBlockNames(successfulBlockNames);
 		
 		successfulDocumentNames.add("successDocument1");
@@ -325,6 +335,9 @@ public class AssembleDocumentsTest {
 		docNames.add("test2");
 		multipleResultsBlocks.put("document", docNames);
 		assemblerResult.setMultipleResultsBlocks(multipleResultsBlocks);
+		
+		Map<String, OperationException> throwables = Collections.singletonMap("Exception", new OperationException("ExceptionMessage"));
+		assemblerResult.setThrowables(throwables );
 	}
 
 	public MockTraditionalAssemblerService mockAssemblePdf(AssemblerResult assemblerResult) throws NoSuchFieldException {
