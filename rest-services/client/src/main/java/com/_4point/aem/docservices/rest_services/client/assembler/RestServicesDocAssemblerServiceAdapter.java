@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,16 +121,15 @@ implements TraditionalDocAssemblerService {
 				throw new AssemblerServiceException("Call to server succeeded but server failed to return assemblerResult xml.  This should never happen.");
 			}
 
-			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if (responseContentType == null) {
-				String msg = "Response from AEM server was null  " + (responseContentType != null ? "content-type='" + responseContentType + "'"
+			MediaType responseContentType = result.getMediaType();
+			if (responseContentType == null || !responseContentType.isCompatible(MediaType.APPLICATION_XML_TYPE)) {
+				String msg = "Response from AEM server was  " + (responseContentType != null ? "content-type='" + responseContentType.toString() + "'"
 								: "content-type was null") + ".";
 				InputStream entityStream = (InputStream) result.getEntity();
 				msg += "\n" + inputStreamtoString(entityStream);
 				throw new AssemblerServiceException(msg);
 			}
-			String resultXml = result.readEntity(String.class);
-			AssemblerResult assemblerResult = convertXmlToAssemblerResult(resultXml);
+			AssemblerResult assemblerResult = convertXmlToAssemblerResult((InputStream)result.getEntity());
 			return assemblerResult;
 
 		} catch (IOException e) {
@@ -142,7 +142,7 @@ implements TraditionalDocAssemblerService {
 	}
 
 	// Package visibility so that it can be unit tested.
-	/* package */static AssemblerResult convertXmlToAssemblerResult(String assemblerResultXml) throws AssemblerServiceException {
+	/* package */static AssemblerResult convertXmlToAssemblerResult(InputStream assemblerResultXml) throws AssemblerServiceException {
 		Map<String, Document> resultMap = new HashMap<String, Document>();
 		Map<String,List<String>> multipleResultsBlocks = new HashMap<String, List<String>>();
 		List<String> successfulBlockNames = new ArrayList<String>();
@@ -153,9 +153,7 @@ implements TraditionalDocAssemblerService {
 		AssemblerResultImpl assemblerResult = new AssemblerResultImpl();
 		try {
 			db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			InputSource is = new InputSource();
-			is.setCharacterStream(new StringReader(assemblerResultXml));
-			org.w3c.dom.Document doc = db.parse(is);
+			org.w3c.dom.Document doc = db.parse(assemblerResultXml);
 			NodeList nList = doc.getElementsByTagName("resultDocument");
 			for (int temp = 0; temp < nList.getLength(); temp++) {
 				Node node = nList.item(temp);
@@ -192,7 +190,8 @@ implements TraditionalDocAssemblerService {
 			assemblerResult.setSuccessfulDocumentNames(successfulDocumentNames);
 			assemblerResult.setSuccessfulBlockNames(successfulBlockNames);
 			assemblerResult.setFailedBlockNames(failedBlockNames);
-			assemblerResult.setMultipleResultsBlocks(multipleResultsBlocks);	
+			assemblerResult.setMultipleResultsBlocks(multipleResultsBlocks);
+			assemblerResult.setThrowables(Collections.emptyMap());	// Not currently supported, so we return an empty map.
 
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new AssemblerServiceException("Error while parsing  to xml", e);
@@ -228,7 +227,6 @@ implements TraditionalDocAssemblerService {
 			assemblerResult.setJobLog(SimpleDocumentFactoryImpl.getFactory().create(bytesJobLog));
 		} else {
 			result = Integer.parseInt(eElement.getAttribute(attributeName));
-			System.out.println(result);
 			if(parentNodeName.equals("latestBatesNumber")) {
 				assemblerResult.setLastBatesNumber(result);
 			} else {

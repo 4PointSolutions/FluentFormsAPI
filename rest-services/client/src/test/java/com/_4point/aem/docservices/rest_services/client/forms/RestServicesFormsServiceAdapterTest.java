@@ -70,6 +70,7 @@ class RestServicesFormsServiceAdapterTest {
 	
 	@Captor ArgumentCaptor<String> machineName;
 	@Captor ArgumentCaptor<String> path;
+	@SuppressWarnings("rawtypes")
 	@Captor ArgumentCaptor<Entity> entity;
 	@Captor ArgumentCaptor<String> correlationId;
 
@@ -346,7 +347,7 @@ class RestServicesFormsServiceAdapterTest {
 
 		this.setupRestClientMocks(codePath.isSsl(), responseData, APPLICATION_PDF);
 		
-		com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter.FormsServiceBuilder adapterBuilder = RestServicesFormsServiceAdapter.builder()
+		RestServicesFormsServiceAdapter.FormsServiceBuilder adapterBuilder = RestServicesFormsServiceAdapter.builder()
 						.machineName(TEST_MACHINE_NAME)
 						.port(TEST_MACHINE_PORT)
 						.basicAuthentication("username", "password")
