@@ -69,7 +69,7 @@ implements TraditionalDocAssemblerService {
 
 	@Override
 	public AssemblerResult invoke(Document ddx, Map<String, Object> sourceDocuments,
-			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException {
+			AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException {
 		WebTarget assembleDocTarget = baseTarget.path(ASSEMBLE_DOCUMENT_PATH);
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
@@ -86,23 +86,23 @@ implements TraditionalDocAssemblerService {
 							APPLICATION_PDF);
 				}
 			} else {
-				throw new NullPointerException("inputs can not be null");
+				throw new NullPointerException("source documents map can not be null");
 			}
 
-			if (adobAssemblerOptionSpec != null) {
-				Boolean isFailOnError = adobAssemblerOptionSpec.isFailOnError();
-				Boolean isTakeOwnerShip = adobAssemblerOptionSpec.isTakeOwnership();
-				Boolean isValidateOnly = adobAssemblerOptionSpec.isValidateOnly();
-				LogLevel jobLogLevel =  adobAssemblerOptionSpec.getLogLevel();
-				int firstBatesNum = adobAssemblerOptionSpec.getFirstBatesNumber();
-				String defaultStyle = adobAssemblerOptionSpec.getDefaultStyle();;
+			if (assemblerOptionSpec != null) {
+				Boolean isFailOnError = assemblerOptionSpec.isFailOnError();
+				Boolean isTakeOwnerShip = assemblerOptionSpec.isTakeOwnership();
+				Boolean isValidateOnly = assemblerOptionSpec.isValidateOnly();
+				LogLevel jobLogLevel =  assemblerOptionSpec.getLogLevel();
+				int firstBatesNum = assemblerOptionSpec.getFirstBatesNumber();
+				String defaultStyle = assemblerOptionSpec.getDefaultStyle();;
 				MultipartTransformer.create(multipart)
-				.transform((t) -> isFailOnError == null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()))
-				.transform((t) -> isValidateOnly == null ? t : t.field(IS_VALIDATE_ONLY, isValidateOnly.toString()))
-				.transform((t) -> isTakeOwnerShip == null ? t : t.field(IS_TAKE_OWNER_SHIP, isTakeOwnerShip.toString()))
-				.transform((t) -> jobLogLevel == null ? t : t.field(JOB_LOG_LEVEL, jobLogLevel.toString()))
-				.transform((t) -> firstBatesNum == 0 ? t : t.field(FIRST_BATES_NUMBER, String.valueOf(firstBatesNum)))
-				.transform((t) -> defaultStyle == null ? t : t.field(DEFAULT_STYLE, defaultStyle.toString()));
+					.transform((t) -> isFailOnError == null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()))
+					.transform((t) -> isValidateOnly == null ? t : t.field(IS_VALIDATE_ONLY, isValidateOnly.toString()))
+					.transform((t) -> isTakeOwnerShip == null ? t : t.field(IS_TAKE_OWNER_SHIP, isTakeOwnerShip.toString()))
+					.transform((t) -> jobLogLevel == null ? t : t.field(JOB_LOG_LEVEL, jobLogLevel.toString()))
+					.transform((t) -> firstBatesNum == 0 ? t : t.field(FIRST_BATES_NUMBER, String.valueOf(firstBatesNum)))
+					.transform((t) -> defaultStyle == null ? t : t.field(DEFAULT_STYLE, defaultStyle.toString()));
 			}
 
 			Response result = postToServer(assembleDocTarget, multipart, MediaType.APPLICATION_XML_TYPE);
