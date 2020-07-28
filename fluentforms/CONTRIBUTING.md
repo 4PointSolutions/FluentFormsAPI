@@ -27,6 +27,8 @@ Once the change is complete (see coding standards below for what the requirement
 
 ## Coding Standards
 
+These contributing standards have been put in place to ensure that contributions don’t increase the technical debt of the project nor disproportionately increase the maintenance effort on the project.  If a pull request does not meet these contributing guidelines, it will not be committed into the main branch of the project.  It will remain as a PR until someone (either the original contributor, a committer or some interested third party) devotes the required time to do the additional required work. If a PR is outstanding for too long, the original work may become out of sync with the main branch and the committers may decide it is no longer relevant.  In this case the PR will be closed without being committed to the main branch of the project.
+
 ### Code Format
 
 The current code format mostly follows the default Eclipse Java formatting settings.  This includes 4 character tabs.  The only
