@@ -35,7 +35,7 @@ change from defaults is the maximum line length which has been increased from 72
 ### Code Structure
 
 It is expected that the general class structure of new services created will mirror the existing class structure.  See the
-[Development_CreatingAFluentService.md](Development_CreatingAFluentService.md) file for details.
+[Development_CreatingARestServicesClient.md](Development_CreatingARestServicesClient.md) file for details.
 
 ### Unit Tests
 
@@ -43,6 +43,12 @@ It is expected that all new classes will have unit tests and that any changes to
 changes to the associated unit test class.  The only exception to this is when a change to a class is internal only and has no externally visible changes to that classes API (i.e. it is only a refactoring).
 
 The build should run all unit tests.  Unit tests should not require a running AEM instance, thus performing a build should not require a running AEM instance.
+
+### Integration Tests
+
+There is a specific integration test project (rest-services.it.tests).  Both the client and server side code bases have existing integration tests.  Any new code contributed is expected to also have associated integration tests in order to demonstrate that the code works when run an an actual AEM instance.
+
+Whenever possible, please try and make the integration tests self-contained and independent of the AEM instance (with the only pre-condition being that the fluentforms and rest-services bundles are installed on the AEM instance).  In some cases this is not possible (for instance, Adaptive Forms require that the form reside on the AEM instance).  In most cases, however, you should be able to send all the required data to the server as part of a single, self-contained, transaction.
 
 ### Code Coverage
 
