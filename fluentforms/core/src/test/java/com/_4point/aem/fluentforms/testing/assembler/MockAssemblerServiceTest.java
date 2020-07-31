@@ -29,7 +29,7 @@ public class MockAssemblerServiceTest {
 		Document ddx = mockDocumentFactory.create(expectedResultString.getBytes());
 		Map<String,Object>sourceDocuments =  Mockito.mock(Map.class);	
 	    AssemblerResult assemblerResult =  Mockito.mock(AssemblerResultImpl.class);
-	    MockAssemblerService underTest =MockAssemblerService.createAssemblerResultMock(assemblerResult);
+	    MockAssemblerService underTest = MockAssemblerService.createAssemblerResultMock(assemblerResult);
 		AssemblerResult result = underTest.invoke()
 				 .executeOn(ddx, sourceDocuments);		
 		GenerateAssemblerResultArgs capturedArgs = underTest.getGenerateAssemblerResultArgs();
@@ -64,8 +64,4 @@ public class MockAssemblerServiceTest {
 		assertEquals(sourceDocuments, capturedArgs.getSourceDocuments());
 		assertNotEquals(assemblerOptionsSpec, capturedArgs.getAssemblerOptionsSpec());
 	}
-	
-	
-	
-	
 }
