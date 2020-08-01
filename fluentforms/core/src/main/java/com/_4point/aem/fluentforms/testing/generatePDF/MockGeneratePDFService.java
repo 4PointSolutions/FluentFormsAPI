@@ -1,12 +1,9 @@
 package com._4point.aem.fluentforms.testing.generatePDF;
 
-import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
 import com._4point.aem.fluentforms.impl.generatePDF.GeneratePDFServiceImpl;
 import com._4point.aem.fluentforms.impl.generatePDF.SafeGeneratePDFServiceAdapterWrapper;
 import com._4point.aem.fluentforms.impl.generatePDF.TraditionalGeneratePDFService;
-import com._4point.aem.fluentforms.testing.assembler.MockAssemblerService;
-import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService;
 import com._4point.aem.fluentforms.testing.generatePDF.MockTraditionalGeneratePDFService.GeneratePDFResultArgs;
 
 /**

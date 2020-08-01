@@ -38,7 +38,7 @@ public class GeneratePDFServiceImplTest {
 	@Test
 	@DisplayName("Test testCreatePDF2(Document,...) Happy Path.")
 	void testCreatePDF2() throws Exception {
-		MockGeneratePdfAssemblerService svc = new MockGeneratePdfAssemblerService();
+		GeneratePdfServiceMock svc = new GeneratePdfServiceMock();
 		Document inputDoc = Mockito.mock(Document.class);
 		String inputFileExtension = "docx";
 		String fileTypeSettings = null;
@@ -81,7 +81,7 @@ public class GeneratePDFServiceImplTest {
 	@Test  
 	@DisplayName("Test testGeneratePDF(Document,...) Happy Path.") void
 	testGeneratePDF() throws Exception {
-		MockGeneratePdfAssemblerService svc = new MockGeneratePdfAssemblerService();
+		GeneratePdfServiceMock svc = new GeneratePdfServiceMock();
 		Document inputDoc = Mockito.mock(Document.class);
 		CreatePDFResult pdfResult =  underTest.createPDF()
 				                               .setFileTypeSettings("Filetype Settings")
@@ -102,7 +102,7 @@ public class GeneratePDFServiceImplTest {
 	    assertNotNull(svc.getXmpDoc());
 	}
 
-	private class MockGeneratePdfAssemblerService {
+	private class GeneratePdfServiceMock {
 		private final CreatePDFResult createPDFResult = Mockito.mock(CreatePDFResult.class);
 		private final ArgumentCaptor<Document> inputDoc = ArgumentCaptor.forClass(Document.class);
 		private final ArgumentCaptor<String> inpuFileextension = ArgumentCaptor.forClass(String.class);
@@ -112,7 +112,7 @@ public class GeneratePDFServiceImplTest {
 		private final ArgumentCaptor<Document> settingsDoc = ArgumentCaptor.forClass(Document.class);
 		private final ArgumentCaptor<Document> xmpDoc = ArgumentCaptor.forClass(Document.class);
 
-		protected MockGeneratePdfAssemblerService() throws GeneratePDFServiceException {
+		protected GeneratePdfServiceMock() throws GeneratePDFServiceException {
 			super();
 			// These are "lenient" because we only expect one or the other to be called.
 			// Also, in some of the exceptional cases,
