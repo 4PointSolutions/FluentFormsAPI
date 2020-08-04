@@ -10,6 +10,8 @@ import org.mockito.Mockito;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
 import com._4point.aem.fluentforms.impl.generatePDF.CreatePDFResultImpl;
+import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
+import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com._4point.aem.fluentforms.testing.generatePDF.MockTraditionalGeneratePDFService.GeneratePDFResultArgs;
 
@@ -42,7 +44,7 @@ public class MockGeneratePDFServiceTest {
 		CreatePDFResult createPDFResult = Mockito.mock(CreatePDFResultImpl.class);
 		MockGeneratePDFService underTest = MockGeneratePDFService.createGeneratePDFServiceMock(createPDFResult);
 		CreatePDFResult result = underTest.createPDF().setFileTypeSettings("Filetype Settings")
-				.setPdfSetting("High_Quality_Print").setSecuritySetting("Password Security")
+				.setPdfSetting(PDFSettings.High_Quality_Print).setSecuritySetting(SecuritySettings.Password_Security)
 				.setSettingDoc(Mockito.mock(Document.class)).setxmpDoc(Mockito.mock(Document.class))
 				.executeOn(inputDoc, "pptx");
 		GeneratePDFResultArgs capturedArgs = underTest.getGeneratePDFResultArgs();
@@ -50,8 +52,8 @@ public class MockGeneratePDFServiceTest {
 		assertEquals(inputDoc, capturedArgs.getInputDoc());
 		assertEquals("pptx", capturedArgs.getInputFileExtension());
 		assertEquals("Filetype Settings", capturedArgs.getFileTypeSettings());
-		assertEquals("High_Quality_Print", capturedArgs.getPdfSettings());
-		assertEquals("Password Security", capturedArgs.getSecuritySettings());
+		assertEquals("High_Quality_Print", capturedArgs.getPdfSettings().toString());
+		assertEquals("Password_Security", capturedArgs.getSecuritySettings().toString());
 		assertNotNull(capturedArgs.getSettingsDoc());
 		assertNotNull(capturedArgs.getXmpDoc());
 	}

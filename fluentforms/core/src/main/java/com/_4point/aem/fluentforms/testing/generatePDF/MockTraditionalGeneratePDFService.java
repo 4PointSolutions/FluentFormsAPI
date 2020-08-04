@@ -6,6 +6,8 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService.GeneratePDFServiceException;
+import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
+import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 import com._4point.aem.fluentforms.impl.generatePDF.TraditionalGeneratePDFService;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 
@@ -26,7 +28,7 @@ public class MockTraditionalGeneratePDFService implements TraditionalGeneratePDF
 
 	@Override
 	public CreatePDFResult createPDF2(Document inputDoc, String inputFileExtension, String fileTypeSettings,
-			String pdfSettings, String securitySettings, Document settingsDoc, Document xmpDoc)
+			PDFSettings pdfSettings, SecuritySettings  securitySettings, Document settingsDoc, Document xmpDoc)
 			throws GeneratePDFServiceException {
 	   this.generatePDFResultArgs = new GeneratePDFResultArgs(inputDoc, inputFileExtension, fileTypeSettings, pdfSettings,
                       securitySettings, settingsDoc, xmpDoc);
@@ -78,13 +80,13 @@ public class MockTraditionalGeneratePDFService implements TraditionalGeneratePDF
 		private final Document inputDoc;
 		private final String inputFileExtension;
 		private final String fileTypeSettings;
-		private final String pdfSettings;
-		private final String securitySettings;
+		private final PDFSettings pdfSettings;
+		private final SecuritySettings securitySettings;
 		private final Document settingsDoc;
 		private final Document xmpDoc;
 		
 		public GeneratePDFResultArgs(Document inputDoc, String inputFileExtension, String fileTypeSettings,
-				String pdfSettings, String securitySettings, Document settingsDoc, Document xmpDoc) {
+				PDFSettings pdfSettings, SecuritySettings securitySettings, Document settingsDoc, Document xmpDoc) {
 			super();
 			this.inputDoc = inputDoc;
 			this.inputFileExtension = inputFileExtension;
@@ -104,10 +106,10 @@ public class MockTraditionalGeneratePDFService implements TraditionalGeneratePDF
 		public String getFileTypeSettings() {
 			return fileTypeSettings;
 		}
-		public String getPdfSettings() {
+		public PDFSettings getPdfSettings() {
 			return pdfSettings;
 		}
-		public String getSecuritySettings() {
+		public SecuritySettings getSecuritySettings() {
 			return securitySettings;
 		}
 		public Document getSettingsDoc() {

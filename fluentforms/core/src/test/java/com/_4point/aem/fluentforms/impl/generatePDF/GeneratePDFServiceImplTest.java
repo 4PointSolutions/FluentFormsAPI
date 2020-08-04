@@ -42,8 +42,8 @@ public class GeneratePDFServiceImplTest {
 		Document inputDoc = Mockito.mock(Document.class);
 		String inputFileExtension = "docx";
 		String fileTypeSettings = null;
-		String pdfSettings = null;
-		String securitySettings = null;
+		PDFSettings pdfSettings = null;
+		SecuritySettings securitySettings = null;
 		Document settingsDoc = Mockito.mock(Document.class);
 		Document xmpDoc = Mockito.mock(Document.class);
 		CreatePDFResult pdfResult = underTest.createPDF2(inputDoc, inputFileExtension, fileTypeSettings, pdfSettings,
@@ -85,8 +85,8 @@ public class GeneratePDFServiceImplTest {
 		Document inputDoc = Mockito.mock(Document.class);
 		CreatePDFResult pdfResult =  underTest.createPDF()
 				                               .setFileTypeSettings("Filetype Settings")
-				                          	   .setPdfSetting("High_Quality_Print")
-				                          	   .setSecuritySetting("Password Security")
+				                          	   .setPdfSetting(PDFSettings.High_Quality_Print)
+				                          	   .setSecuritySetting(SecuritySettings.Certificate_Security)
 				                          	   .setSettingDoc(Mockito.mock(Document.class))
 				                          	   .setxmpDoc(Mockito.mock(Document.class))
 				                          	   .executeOn(inputDoc, "docx");
@@ -107,8 +107,8 @@ public class GeneratePDFServiceImplTest {
 		private final ArgumentCaptor<Document> inputDoc = ArgumentCaptor.forClass(Document.class);
 		private final ArgumentCaptor<String> inpuFileextension = ArgumentCaptor.forClass(String.class);
 		private final ArgumentCaptor<String> fileTypeSettings = ArgumentCaptor.forClass(String.class);
-		private final ArgumentCaptor<String> pdfSettings = ArgumentCaptor.forClass(String.class);
-		private final ArgumentCaptor<String> securitySettings = ArgumentCaptor.forClass(String.class);
+		private final ArgumentCaptor<PDFSettings> pdfSettings = ArgumentCaptor.forClass(PDFSettings.class);
+		private final ArgumentCaptor<SecuritySettings> securitySettings = ArgumentCaptor.forClass(SecuritySettings.class);
 		private final ArgumentCaptor<Document> settingsDoc = ArgumentCaptor.forClass(Document.class);
 		private final ArgumentCaptor<Document> xmpDoc = ArgumentCaptor.forClass(Document.class);
 
@@ -140,11 +140,11 @@ public class GeneratePDFServiceImplTest {
 			return fileTypeSettings.getValue();
 		}
 
-		public String getPdfSettings() {
+		public PDFSettings getPdfSettings() {
 			return pdfSettings.getValue();
 		}
 
-		public String getSecuritySettings() {
+		public SecuritySettings getSecuritySettings() {
 			return securitySettings.getValue();
 		}
 

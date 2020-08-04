@@ -2,11 +2,13 @@ package com._4point.aem.fluentforms.api.generatePDF;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.Transformable;
+import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
+import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 
 public interface GeneratePDFService {
 
 	CreatePDFResult createPDF2(Document inputDoc, String inputFileExtension, String fileTypeSettings,
-			String pdfSettings, String securitySettings, Document settingsDoc, Document xmpDoc) throws GeneratePDFServiceException;
+			PDFSettings pdfSettings, SecuritySettings securitySettings, Document settingsDoc, Document xmpDoc) throws GeneratePDFServiceException;
 
 	/*
 	 * ExportPDFResult exportPDF2(Document inputDoc, String inputFileExtension,
@@ -49,8 +51,8 @@ public interface GeneratePDFService {
 
 	public static interface CreatePDFResultArgumentBuilder extends Transformable<CreatePDFResultArgumentBuilder> {
 		CreatePDFResultArgumentBuilder setFileTypeSettings(String fileTypeSettings);
-		CreatePDFResultArgumentBuilder setPdfSetting(String pdfSettings);
-		CreatePDFResultArgumentBuilder setSecuritySetting(String securitySettings);
+		CreatePDFResultArgumentBuilder setPdfSetting(PDFSettings pdfSettings);
+		CreatePDFResultArgumentBuilder setSecuritySetting(SecuritySettings securitySettings);
 		CreatePDFResultArgumentBuilder setSettingDoc(Document settingsDoc);
 		CreatePDFResultArgumentBuilder setxmpDoc(Document xmpDoc);
 		public CreatePDFResult executeOn(Document inputDoc, String inputFileExtension) throws GeneratePDFServiceException;

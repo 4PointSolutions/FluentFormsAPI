@@ -3,6 +3,8 @@ package com._4point.aem.fluentforms.testing.generatePDF;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService.GeneratePDFServiceException;
+import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
+import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 import com._4point.aem.fluentforms.impl.generatePDF.TraditionalGeneratePDFService;
 
 public class ExceptionalMockTraditionalGeneratePDFService implements TraditionalGeneratePDFService{
@@ -14,7 +16,7 @@ public class ExceptionalMockTraditionalGeneratePDFService implements Traditional
 	}
 	@Override
 	public CreatePDFResult createPDF2(Document inputDoc, String inputFileExtension, String fileTypeSettings,
-			String pdfSettings, String securitySettings, Document settingsDoc, Document xmpDoc)
+			PDFSettings pdfSettings, SecuritySettings securitySettings, Document settingsDoc, Document xmpDoc)
 			throws GeneratePDFServiceException {
 	    throw new GeneratePDFServiceException(this.message);
 	}

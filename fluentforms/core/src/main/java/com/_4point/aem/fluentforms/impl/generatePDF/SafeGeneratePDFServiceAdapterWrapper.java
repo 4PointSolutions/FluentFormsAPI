@@ -16,7 +16,7 @@ public class SafeGeneratePDFServiceAdapterWrapper implements TraditionalGenerate
 
 	@Override
 	public CreatePDFResult createPDF2(Document inputDoc, String inputFileExtension, String fileTypeSettings,
-			String pdfSettings, String securitySettings, Document settingsDoc, Document xmpDoc) throws GeneratePDFServiceException {
+			PDFSettings pdfSettings, SecuritySettings securitySettings, Document settingsDoc, Document xmpDoc) throws GeneratePDFServiceException {
 		Objects.requireNonNull(inputDoc, "inputDoc can not be null");
 		Objects.requireNonNull(inputFileExtension, "inputFileExtension can not be null");
 		return generatePdfService.createPDF2(inputDoc, inputFileExtension, fileTypeSettings, pdfSettings,

@@ -37,13 +37,13 @@ public class AdobeGeneratePDFServiceAdapter implements TraditionalGeneratePDFSer
 
 	@Override
 	public CreatePDFResult createPDF2(Document inputDoc, String inputFileExtension, String fileTypeSettings,
-			String pdfSettings, String securitySettings, Document settingsDoc, Document xmpDoc)
+			PDFSettings pdfSettings, SecuritySettings securitySettings, Document settingsDoc, Document xmpDoc)
 					throws GeneratePDFServiceException {
 		com.adobe.pdfg.result.CreatePDFResult createPDFResult;
 		try {
 			log.info("Converting document with extension " +inputFileExtension +" to pdf");
 			createPDFResult = adobeGeneratePDFService.createPDF2(AdobeDocumentFactoryImpl.getAdobeDocument(inputDoc),
-					inputFileExtension, fileTypeSettings, pdfSettings, securitySettings,
+					inputFileExtension, fileTypeSettings, pdfSettings.toString(), securitySettings.toString(),
 					AdobeDocumentFactoryImpl.getAdobeDocument(settingsDoc),
 					AdobeDocumentFactoryImpl.getAdobeDocument(xmpDoc));
 		} catch (ConversionException | InvalidParameterException | FileFormatNotSupportedException e) {

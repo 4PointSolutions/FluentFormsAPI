@@ -12,14 +12,14 @@ public class GeneratePDFServiceImpl implements GeneratePDFService {
 		super();
 		this.adobeGeneratePDF = new SafeGeneratePDFServiceAdapterWrapper(generatePdfService);
 	}
-
+	
 	@Override
 	public CreatePDFResult createPDF2(Document inputDoc, String inputFileExtension, String fileTypeSettings,
-			String pdfSettings, String securitySettings, Document settingsDoc, Document xmpDoc) throws GeneratePDFServiceException {
-		return adobeGeneratePDF.createPDF2(inputDoc, inputFileExtension, fileTypeSettings, pdfSettings,
-				securitySettings, settingsDoc, xmpDoc);
+			PDFSettings pdfSettings, SecuritySettings securitySettings, Document settingsDoc, Document xmpDoc)
+			throws GeneratePDFServiceException {
+		return adobeGeneratePDF.createPDF2(inputDoc, inputFileExtension, fileTypeSettings, pdfSettings, securitySettings, settingsDoc, xmpDoc);
 	}
-
+	
 	@Override
 	public CreatePDFResultArgumentBuilder createPDF() {
 		return new CreatePDFResultArgumentBuilderImpl();
@@ -32,8 +32,8 @@ public class GeneratePDFServiceImpl implements GeneratePDFService {
 	private class CreatePDFResultArgumentBuilderImpl implements CreatePDFResultArgumentBuilder {
 		
 		String fileTypeSettings;
-		String pdfSettings;
-		String securitySettings;
+		PDFSettings pdfSettings;
+		SecuritySettings securitySettings;
 		Document settingsDoc;
 		Document xmpDoc;
 
@@ -44,13 +44,13 @@ public class GeneratePDFServiceImpl implements GeneratePDFService {
 		}
 
 		@Override
-		public CreatePDFResultArgumentBuilder setPdfSetting(String pdfSettings) {
+		public CreatePDFResultArgumentBuilder setPdfSetting(PDFSettings pdfSettings) {
 			this.pdfSettings = pdfSettings;
 			return this;
 		}
 
 		@Override
-		public CreatePDFResultArgumentBuilder setSecuritySetting(String securitySettings) {
+		public CreatePDFResultArgumentBuilder setSecuritySetting(SecuritySettings securitySettings) {
 			this.securitySettings = securitySettings;
 			return this;
 		}
@@ -74,4 +74,5 @@ public class GeneratePDFServiceImpl implements GeneratePDFService {
 
 	}
 
+	
 }
