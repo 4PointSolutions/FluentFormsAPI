@@ -4,12 +4,14 @@ import java.io.IOException;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
+import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService.GeneratePDFServiceException;
 import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
 import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 import com._4point.aem.fluentforms.impl.generatePDF.TraditionalGeneratePDFService;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
+import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService;
 
 public class MockTraditionalGeneratePDFService implements TraditionalGeneratePDFService {
 	private final CreatePDFResult dummyCreatePDFResult;
@@ -35,8 +37,6 @@ public class MockTraditionalGeneratePDFService implements TraditionalGeneratePDF
 		return this.createPDFResult == null ? dummyCreatePDFResult: this.createPDFResult;
 	}
 	
-	
-
 	public CreatePDFResult getDummyCreatePDFResult() {
 		return dummyCreatePDFResult;
 	}
@@ -74,7 +74,9 @@ public class MockTraditionalGeneratePDFService implements TraditionalGeneratePDF
 		return this;
 	}
 
-
+	public static MockTraditionalGeneratePDFService createGeneratePDFMock(CreatePDFResult createPDFResult) {
+		return new MockTraditionalGeneratePDFService().setCreatePDFResult(createPDFResult);
+	}
 
 	public static class GeneratePDFResultArgs {
 		private final Document inputDoc;

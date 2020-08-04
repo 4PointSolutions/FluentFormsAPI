@@ -69,7 +69,8 @@ public class GeneratePDFServiceImpl implements GeneratePDFService {
 
 		@Override
 		public CreatePDFResult executeOn(Document inputDoc, String inputFileExtension) throws GeneratePDFServiceException {
-			return createPDF2(inputDoc, inputFileExtension, fileTypeSettings, pdfSettings, securitySettings, settingsDoc, xmpDoc);
+			return createPDF2(inputDoc, inputFileExtension, this.fileTypeSettings, this.pdfSettings, 
+					this.securitySettings, this.settingsDoc, this.xmpDoc);
 		}
 
 	}

@@ -19,11 +19,11 @@ public class CreatePDFResultImpl implements CreatePDFResult {
 		return getLogDocument;
 	}
 
-	public void setGetCreatedDocument(Document getCreatedDocument) {
+	public void setCreatedDocument(Document getCreatedDocument) {
 		this.getCreatedDocument = getCreatedDocument;
 	}
 
-	public void setGetLogDocument(Document getLogDocument) {
+	public void setLogDocument(Document getLogDocument) {
 		this.getLogDocument = getLogDocument;
 	}
 
