@@ -43,7 +43,8 @@ public class AdobeGeneratePDFServiceAdapter implements TraditionalGeneratePDFSer
 		try {
 			log.info("Converting document with extension " +inputFileExtension +" to pdf");
 			createPDFResult = adobeGeneratePDFService.createPDF2(AdobeDocumentFactoryImpl.getAdobeDocument(inputDoc),
-					inputFileExtension, fileTypeSettings, pdfSettings.toString(), securitySettings.toString(),
+					inputFileExtension, fileTypeSettings, pdfSettings!=null?pdfSettings.toString():null, 
+							securitySettings!=null?securitySettings.toString():null,
 					AdobeDocumentFactoryImpl.getAdobeDocument(settingsDoc),
 					AdobeDocumentFactoryImpl.getAdobeDocument(xmpDoc));
 		} catch (ConversionException | InvalidParameterException | FileFormatNotSupportedException e) {
@@ -57,7 +58,8 @@ public class AdobeGeneratePDFServiceAdapter implements TraditionalGeneratePDFSer
 		log.info("Converting adobeCreatePDFResult to createdPDFResult");
 		CreatePDFResultImpl createPDFResultImpl = new CreatePDFResultImpl();
 		createPDFResultImpl.setCreatedDocument(documentFactory.create(createPDFResult.getCreatedDocument()));
-		createPDFResultImpl.setLogDocument(documentFactory.create(createPDFResult.getLogDocument()));
+		createPDFResultImpl.setLogDocument(createPDFResult.getLogDocument()!=null?documentFactory.create(createPDFResult.getLogDocument())
+				:null);
 		return createPDFResultImpl;
 	}
 
