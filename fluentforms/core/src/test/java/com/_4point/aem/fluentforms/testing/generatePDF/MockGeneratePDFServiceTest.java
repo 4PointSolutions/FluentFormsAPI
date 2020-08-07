@@ -53,7 +53,7 @@ public class MockGeneratePDFServiceTest {
 		assertEquals("pptx", capturedArgs.getInputFileExtension());
 		assertEquals("Filetype Settings", capturedArgs.getFileTypeSettings());
 		assertEquals("High_Quality_Print", capturedArgs.getPdfSettings().toString());
-		assertEquals("Password_Security", capturedArgs.getSecuritySettings().toString());
+		assertEquals("Password Security", capturedArgs.getSecuritySettings().getSecuritySetting());
 		assertNotNull(capturedArgs.getSettingsDoc());
 		assertNotNull(capturedArgs.getXmpDoc());
 	}

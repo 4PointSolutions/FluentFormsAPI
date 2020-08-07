@@ -96,7 +96,7 @@ public class CreatePDFTest {
 		assertEquals("docx", generatePDFResultArgs.getInputFileExtension());
 		assertAll(() -> assertEquals(fileTypeSettings, generatePDFResultArgs.getFileTypeSettings()),
 				() -> assertEquals(pdfSettings, generatePDFResultArgs.getPdfSettings()),
-				() -> assertEquals(securitySettings, generatePDFResultArgs.getSecuritySettings()));
+				() -> assertEquals(securitySettings.getSecuritySetting(), generatePDFResultArgs.getSecuritySettings().getSecuritySetting()));
 	}
 
 	@Test

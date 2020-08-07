@@ -161,6 +161,7 @@ implements TraditionalGeneratePDFService {
 			createPDFResult.getCreatedDocument().setContentType(APPLICATION_PDF.toString());
 		} else {
 			createPDFResult.setLogDocument(SimpleDocumentFactoryImpl.getFactory().create(bytesJobLog));
+			createPDFResult.getLogDocument().setContentType(MediaType.TEXT_PLAIN_TYPE.toString());
 		}
 	}
 
