@@ -291,7 +291,7 @@ public class RestServicesGeneratePDFServiceAdapterTest {
 
 	private static final String FILE_EXTENSION_ARG = null;
 	
-	private static final String  FIL_TYPE_SETTINGS_ARG = null;
+	private static final String  FILE_TYPE_SETTINGS_ARG = null;
 
     private static final PDFSettings PDF_SETTINGS_ARG = null; 
     
@@ -303,11 +303,11 @@ public class RestServicesGeneratePDFServiceAdapterTest {
     
 
 	private enum NullArgumentTest {
-		INPUT_DOC_NULL("inputDoc", null, FILE_EXTENSION_ARG, FIL_TYPE_SETTINGS_ARG,
+		INPUT_DOC_NULL("inputDoc", null, FILE_EXTENSION_ARG, FILE_TYPE_SETTINGS_ARG,
 				PDF_SETTINGS_ARG, SECURITY_SETTINGS_ARG , SETTING_DOC_ARG, XMP_DOC_ARG),
 		
 
-		FILE_EXTENSION_NULL("file extension", INPUT_DOC_ARG, null, FIL_TYPE_SETTINGS_ARG,
+		FILE_EXTENSION_NULL("file extension", INPUT_DOC_ARG, null, FILE_TYPE_SETTINGS_ARG,
 				PDF_SETTINGS_ARG, SECURITY_SETTINGS_ARG , SETTING_DOC_ARG, XMP_DOC_ARG);
 
 		String argName;
