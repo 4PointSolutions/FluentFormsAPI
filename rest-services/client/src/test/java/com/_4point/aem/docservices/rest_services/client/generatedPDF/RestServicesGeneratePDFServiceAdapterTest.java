@@ -286,5 +286,64 @@ public class RestServicesGeneratePDFServiceAdapterTest {
 		assertTrue(result.getCreatedDocument().isEmpty());
 		assertTrue(result.getLogDocument().isEmpty());
 	}
+	
+	private static final Document INPUT_DOC_ARG = MockDocumentFactory.GLOBAL_DUMMY_DOCUMENT;
+
+	private static final String FILE_EXTENSION_ARG = null;
+	
+	private static final String  FIL_TYPE_SETTINGS_ARG = null;
+
+    private static final PDFSettings PDF_SETTINGS_ARG = null; 
+    
+    private static SecuritySettings SECURITY_SETTINGS_ARG = null; 
+    
+    private static Document SETTING_DOC_ARG = null; 
+    
+    private static Document XMP_DOC_ARG = null;
+    
+
+	private enum NullArgumentTest {
+		INPUT_DOC_NULL("inputDoc", null, FILE_EXTENSION_ARG, FIL_TYPE_SETTINGS_ARG,
+				PDF_SETTINGS_ARG, SECURITY_SETTINGS_ARG , SETTING_DOC_ARG, XMP_DOC_ARG),
+		
+
+		FILE_EXTENSION_NULL("file extension", INPUT_DOC_ARG, null, FIL_TYPE_SETTINGS_ARG,
+				PDF_SETTINGS_ARG, SECURITY_SETTINGS_ARG , SETTING_DOC_ARG, XMP_DOC_ARG);
+
+		String argName;
+		Document inputDoc;
+		String inputFileExtension;
+		String fileTypeSettings;
+		PDFSettings pdfSettings;
+		SecuritySettings securitySettings;
+		Document settingsDoc;
+		Document xmpDoc;
+
+		private NullArgumentTest(String argName, Document inputDoc, String inputFileExtension, String fileTypeSettings,
+				PDFSettings pdfSettings, SecuritySettings securitySettings, Document settingsDoc, Document xmpDoc) {
+			this.argName = argName;
+			this.inputDoc = inputDoc;
+			this.inputFileExtension = inputFileExtension;
+			this.fileTypeSettings = fileTypeSettings;
+			this.pdfSettings = pdfSettings;
+			this.securitySettings = securitySettings;
+			this.settingsDoc = settingsDoc;
+			this.xmpDoc = xmpDoc;
+		}		
+	}
+	
+	@ParameterizedTest
+	@EnumSource
+	void testNullArgs(NullArgumentTest scenario) throws Exception {
+		underTest = RestServicesGeneratePDFServiceAdapter.builder().build();	
+		NullPointerException ex = assertThrows(NullPointerException.class,()->underTest.createPDF2(scenario.inputDoc, scenario.inputFileExtension,
+				scenario.fileTypeSettings, scenario.pdfSettings, scenario.securitySettings, scenario.settingsDoc, scenario.xmpDoc));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		assertAll(
+				()->assertThat(msg, containsStringIgnoringCase(scenario.argName)),
+				()->assertThat(msg, containsStringIgnoringCase("can not be null"))
+			);
+	}
 
 }

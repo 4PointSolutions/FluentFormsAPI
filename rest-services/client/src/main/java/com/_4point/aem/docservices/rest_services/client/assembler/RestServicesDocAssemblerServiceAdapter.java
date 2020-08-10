@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.ws.rs.client.Client;
@@ -70,20 +71,11 @@ implements TraditionalDocAssemblerService {
 		WebTarget assembleDocTarget = baseTarget.path(ASSEMBLE_DOCUMENT_PATH);
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			if (ddx != null) {
-				multipart.field(DATA_PARAM_NAME, ddx.getInputStream(), MediaType.APPLICATION_XML_TYPE);
-			} else {
-				throw new NullPointerException("ddx can not be null");
-			}
-
-			if (sourceDocuments != null) {
-				for (Entry<String, Object> param : sourceDocuments.entrySet()) {
-					multipart.field(SOURCE_DOCUMENT_KEY, param.getKey());
-					multipart.field(SOURCE_DOCUMENT_VALUE, ((Document) param.getValue()).getInputStream(),
-							APPLICATION_PDF);
-				}
-			} else {
-				throw new NullPointerException("source documents map can not be null");
+			multipart.field(DATA_PARAM_NAME, Objects.requireNonNull(ddx, "ddx can not be null").getInputStream(), MediaType.APPLICATION_XML_TYPE);					
+			for (Entry<String, Object> param : Objects.requireNonNull(sourceDocuments, "source documents map can not be null").entrySet()) {
+				multipart.field(SOURCE_DOCUMENT_KEY, param.getKey());
+				multipart.field(SOURCE_DOCUMENT_VALUE, ((Document) param.getValue()).getInputStream(),
+						APPLICATION_PDF);
 			}
 
 			if (assemblerOptionSpec != null) {

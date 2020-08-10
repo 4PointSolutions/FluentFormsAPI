@@ -80,8 +80,8 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 		com.adobe.fd.assembler.client.AssemblerOptionSpec adobeAssemblerOptionSpec = new com.adobe.fd.assembler.client.AssemblerOptionSpec();
 		setIfNotNull(adobeAssemblerOptionSpec::setFailOnError, assemblerOptionSpec.isFailOnError());
 		setIfNotNull(adobeAssemblerOptionSpec::setDefaultStyle, assemblerOptionSpec.getDefaultStyle());
-		adobeAssemblerOptionSpec.setFirstBatesNumber(adobeAssemblerOptionSpec.getFirstBatesNumber());
-		adobeAssemblerOptionSpec.setLogLevel(adobeAssemblerOptionSpec.getLogLevel());
+		setIfNotNull(adobeAssemblerOptionSpec::setFirstBatesNumber, assemblerOptionSpec.getFirstBatesNumber());
+		setIfNotNull(adobeAssemblerOptionSpec::setLogLevel, assemblerOptionSpec.getLogLevel()!=null?assemblerOptionSpec.getLogLevel().toString():null);
 		setIfNotNull(adobeAssemblerOptionSpec::setTakeOwnership, assemblerOptionSpec.isTakeOwnership());
 		setIfNotNull(adobeAssemblerOptionSpec::setValidateOnly, assemblerOptionSpec.isValidateOnly());
 		return adobeAssemblerOptionSpec;
@@ -91,21 +91,21 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 	private AssemblerResult toAssemblerResult(com.adobe.fd.assembler.client.AssemblerResult assemblerResult) {
 		log.info("AdobeAssembler result to fluentForm assembler result");
 		AssemblerResultImpl assemblerResultImpl = new AssemblerResultImpl();
-		assemblerResultImpl.setFailedBlockNames(assemblerResult.getFailedBlockNames());
-		assemblerResultImpl.setJobLog(documentFactory.create(assemblerResult.getJobLog()));
-		assemblerResultImpl.setLastBatesNumber(assemblerResult.getLastBatesNumber());
-		assemblerResultImpl.setMultipleResultsBlocks(assemblerResult.getMultipleResultsBlocks());
-		assemblerResultImpl.setNumRequestedBlocks(assemblerResult.getNumRequestedBlocks());
-		assemblerResultImpl.setSuccessfulDocumentNames(assemblerResult.getSuccessfulBlockNames());
-		assemblerResultImpl.setThrowables(assemblerResult.getThrowables());
-		assemblerResultImpl.setSuccessfulBlockNames(assemblerResult.getSuccessfulBlockNames());
+		setIfNotNull(assemblerResultImpl::setFailedBlockNames, assemblerResult.getFailedBlockNames());
+		setIfNotNull(assemblerResultImpl::setJobLog, assemblerResult.getJobLog()!=null ? documentFactory.create(assemblerResult.getJobLog()):null);
+		setIfNotNull(assemblerResultImpl::setLastBatesNumber, assemblerResult.getLastBatesNumber());
+		setIfNotNull(assemblerResultImpl::setMultipleResultsBlocks, assemblerResult.getMultipleResultsBlocks());
+		setIfNotNull(assemblerResultImpl::setNumRequestedBlocks, assemblerResult.getNumRequestedBlocks());
+		setIfNotNull(assemblerResultImpl::setSuccessfulDocumentNames, assemblerResult.getSuccessfulDocumentNames());
+		setIfNotNull(assemblerResultImpl::setThrowables, assemblerResult.getThrowables());
+		setIfNotNull(assemblerResultImpl::setSuccessfulBlockNames, assemblerResult.getSuccessfulBlockNames());
 		Map<String, Document> documents= new HashMap<String, Document>();
 		if(MapUtils.isNotEmpty(assemblerResult.getDocuments())) {
 			assemblerResult.getDocuments().forEach((docName, doc) -> {
 				documents.put(docName, documentFactory.create(doc));
 			});		
 		}
-		assemblerResultImpl.setDocuments(documents);
+		setIfNotNull(assemblerResultImpl::setDocuments, documents);
 		return assemblerResultImpl;
 
 	}

@@ -27,10 +27,8 @@ public class AssemblerOptionSpecTest {
 		com.adobe.fd.assembler.client.AssemblerOptionSpec adobeAssemblerOptionSpec  = AdobeAssemblerServiceAdapter.toAdobeAssemblerOptionSpec(assemblerOptionsSpecImpl);
 		assertEquals(emptyAssemblerOptionSpec.isFailOnError(), adobeAssemblerOptionSpec.isFailOnError());
 		assertEquals(emptyAssemblerOptionSpec.getDefaultStyle(), adobeAssemblerOptionSpec.getDefaultStyle());
-		assertEquals(emptyAssemblerOptionSpec.getFirstBatesNumber(), adobeAssemblerOptionSpec.getFirstBatesNumber());
-		LogLevel logLevel = LogLevel.valueOf(adobeAssemblerOptionSpec.getLogLevel());
-		LogLevel emptyAssemblerOptionSpecLogLevel = LogLevel.valueOf(adobeAssemblerOptionSpec.getLogLevel());
-		assertEquals(emptyAssemblerOptionSpecLogLevel, logLevel);
+		assertEquals(emptyAssemblerOptionSpec.getFirstBatesNumber(), adobeAssemblerOptionSpec.getFirstBatesNumber()-1);
+		assertEquals(emptyAssemblerOptionSpec.getLogLevel(), adobeAssemblerOptionSpec.getLogLevel().toString());
 		assertEquals(emptyAssemblerOptionSpec.isValidateOnly(), adobeAssemblerOptionSpec.isValidateOnly());
 		assertEquals(emptyAssemblerOptionSpec.isTakeOwnership(), adobeAssemblerOptionSpec.isTakeOwnership());
 	}

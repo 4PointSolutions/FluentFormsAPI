@@ -54,8 +54,10 @@ public class AdobeGeneratePDFServiceAdapter implements TraditionalGeneratePDFSer
 			com.adobe.pdfg.result.CreatePDFResult createPDFResult) {
 		log.info("Converting adobeCreatePDFResult to createdPDFResult");
 		CreatePDFResultImpl createPDFResultImpl = new CreatePDFResultImpl();
-		setIfNotNull(createPDFResultImpl::setCreatedDocument, documentFactory.create(createPDFResult.getCreatedDocument()));
-		setIfNotNull(createPDFResultImpl::setLogDocument, documentFactory.create(createPDFResult.getCreatedDocument()));
+		Document createdDocument = createPDFResult.getCreatedDocument() != null ? documentFactory.create(createPDFResult.getCreatedDocument()) : null;
+		Document logDocument = createPDFResult.getLogDocument() != null? documentFactory.create(createPDFResult.getLogDocument()) : null;
+		setIfNotNull(createPDFResultImpl::setCreatedDocument, createdDocument);
+		setIfNotNull(createPDFResultImpl::setLogDocument, logDocument);
 		return createPDFResultImpl;
 	}
 

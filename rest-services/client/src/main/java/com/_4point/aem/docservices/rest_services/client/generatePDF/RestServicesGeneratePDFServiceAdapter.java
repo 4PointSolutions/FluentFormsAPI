@@ -3,6 +3,7 @@ package com._4point.aem.docservices.rest_services.client.generatePDF;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.ws.rs.client.Client;
@@ -33,7 +34,7 @@ import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 import com._4point.aem.fluentforms.impl.generatePDF.TraditionalGeneratePDFService;
 
 public class RestServicesGeneratePDFServiceAdapter extends RestServicesServiceAdapter
-implements TraditionalGeneratePDFService {
+		implements TraditionalGeneratePDFService {
 	private static final String GENERATE_PDF_PATH = "/services/GeneratePDFService/CreatePDF";
 	private static final String DATA_PARAM_NAME = "data";
 	private static final String FILE_EXTENSION = "fileExtension";
@@ -55,47 +56,28 @@ implements TraditionalGeneratePDFService {
 	@Override
 	public CreatePDFResult createPDF2(Document inputDoc, String inputFileExtension, String fileTypeSettings,
 			PDFSettings pdfSettings, SecuritySettings securitySettings, Document settingsDoc, Document xmpDoc)
-					throws GeneratePDFServiceException {
+			throws GeneratePDFServiceException {
 		WebTarget geneWebTarget = baseTarget.path(GENERATE_PDF_PATH);
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			if (inputDoc != null) {
-				multipart.field(DATA_PARAM_NAME, inputDoc.getInputStream(), MediaType.MULTIPART_FORM_DATA_TYPE);
-			} else {
-				throw new NullPointerException("inputDoc can not be null");
-			}
+			multipart.field(DATA_PARAM_NAME,
+					Objects.requireNonNull(inputDoc, "inputDoc can not be null").getInputStream(),
+					MediaType.MULTIPART_FORM_DATA_TYPE);
+			multipart.field(FILE_EXTENSION,
+					Objects.requireNonNull(inputFileExtension, "file extension can not be null"));
 
-			if (inputFileExtension != null) {
-				multipart.field(FILE_EXTENSION, inputFileExtension);
-			} else {
-				throw new NullPointerException("fileextension can not be null");
-			}
-
+			byte[] settingsData = settingsDoc != null ? settingsDoc.getInlineData() : null;
+			byte[] xmpDocData = xmpDoc != null ? xmpDoc.getInlineData() : null;
 			MultipartTransformer.create(multipart)
-			.transform((t) -> fileTypeSettings == null ? t : t.field(FILE_TYPE_SETTINGS, fileTypeSettings))
-			.transform((t) -> pdfSettings == null ? t : t.field(PDF_SETTINGS, pdfSettings.toString()))
-			.transform((t) -> securitySettings == null ? t : t.field(SECURITY_SETTINGS, securitySettings.toString()))
-			.transform((t) -> {
-				try {
-					return settingsDoc == null ? t
-							: t.field(SETTING_DOC, settingsDoc.getInlineData(),
-									MediaType.MULTIPART_FORM_DATA_TYPE);
-				} catch (IOException e) {
-					// if we encounter an exception, then we just don't add this field. This should
-					// of error shouldn't ever happen.
-					return t;
-				}
-			}).transform((t) -> {
-				try {
-					return xmpDoc == null ? t
-							: t.field(XMP_DOC, xmpDoc.getInlineData(), MediaType.MULTIPART_FORM_DATA_TYPE);
-				} catch (IOException e) {
-					// if we encounter an exception, then we just don't add this field. This should
-					// of error shouldn't ever happen.
-					return t;
-				}
-			});
-
+					.transform((t) -> fileTypeSettings == null ? t : t.field(FILE_TYPE_SETTINGS, fileTypeSettings))
+					.transform((t) -> pdfSettings == null ? t : t.field(PDF_SETTINGS, pdfSettings.toString()))
+					.transform((t) -> securitySettings == null ? t
+							: t.field(SECURITY_SETTINGS, securitySettings.toString()))
+					.transform((t) -> settingsData == null ? t
+							: t.field(SETTING_DOC, settingsData, MediaType.MULTIPART_FORM_DATA_TYPE))
+					.transform((t) -> xmpDocData == null ? t
+							: t.field(XMP_DOC, xmpDocData, MediaType.MULTIPART_FORM_DATA_TYPE));
+			
 			Response result = postToServer(geneWebTarget, multipart, MediaType.APPLICATION_XML_TYPE);
 			StatusType resultStatus = result.getStatusInfo();
 			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
@@ -114,7 +96,7 @@ implements TraditionalGeneratePDFService {
 			}
 
 			MediaType responseContentType = result.getMediaType();
-			
+
 			if (responseContentType == null || !responseContentType.isCompatible(MediaType.APPLICATION_XML_TYPE)) {
 				String msg = "Response from AEM server was  "
 						+ (responseContentType != null ? "content-type='" + responseContentType.toString() + "'"
@@ -137,10 +119,9 @@ implements TraditionalGeneratePDFService {
 	// Package visibility so that it can be unit tested.
 	/* package */public static CreatePDFResult convertXmlToCreatePDFResult(InputStream createPDFResultXml)
 			throws GeneratePDFServiceException {
-		//DocumentBuilder db;
 		CreatePDFResultImpl createPDFResult = new CreatePDFResultImpl();
 		try {
-			DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();		
+			DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			org.w3c.dom.Document doc = db.parse(createPDFResultXml);
 			doc.getDocumentElement().normalize();
 			getNodeValueForAttribute(doc, "createdDoc", "createdDocValue", createPDFResult);
