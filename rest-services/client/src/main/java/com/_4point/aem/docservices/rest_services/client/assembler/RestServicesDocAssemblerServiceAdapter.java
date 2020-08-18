@@ -131,7 +131,7 @@ implements TraditionalDocAssemblerService {
 	}
 
 	// Package visibility so that it can be unit tested.
-	/* package */static AssemblerResult convertXmlToAssemblerResult(InputStream assemblerResultXml) throws AssemblerServiceException {
+	/* package */public static AssemblerResult convertXmlToAssemblerResult(InputStream assemblerResultXml) throws AssemblerServiceException {
 		Map<String, Document> resultMap = new HashMap<String, Document>();
 		Map<String,List<String>> multipleResultsBlocks = new HashMap<String, List<String>>();
 		List<String> successfulBlockNames = new ArrayList<String>();
