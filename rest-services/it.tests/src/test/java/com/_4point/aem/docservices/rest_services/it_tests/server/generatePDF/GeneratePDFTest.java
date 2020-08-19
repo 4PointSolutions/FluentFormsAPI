@@ -59,21 +59,22 @@ public class GeneratePDFTest {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM_NAME, SAMPLE_FORM_DOCX.toFile(), MediaType.MULTIPART_FORM_DATA_TYPE).
 			field(FILE_EXTENSION, "docx")
-			.field(FILE_TYPE_SETTINGS, null)
-			.field(PDF_SETTINGS,PDFSettings.PDFA1b_2005_RGB.toString())
-			.field(SECURITY_SETTINGS, SecuritySettings.Adobe_Policy_Server.getSecuritySetting())
-			.field(SETTING_DOC, null, MediaType.MULTIPART_FORM_DATA_TYPE)
-			.field(XMP_DOC, null, MediaType.MULTIPART_FORM_DATA_TYPE);
+			.field(FILE_TYPE_SETTINGS, "")
+			.field(PDF_SETTINGS, PDFSettings.Press_Quality.toString())
+			.field(SECURITY_SETTINGS, SecuritySettings.Adobe_Policy_Server.getSecuritySetting());
+			//.field(SETTING_DOC, null, MediaType.MULTIPART_FORM_DATA_TYPE)
+			//.field(XMP_DOC, null, MediaType.MULTIPART_FORM_DATA_TYPE);
 			
 			Response result = target.request()
 					.accept(APPLICATION_XML)
 					.post(Entity.entity(multipart, multipart.getMediaType()));
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
-			assertEquals(APPLICATION_XML, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
-			
+		
 			CreatePDFResult createPDFResult = RestServicesGeneratePDFServiceAdapter.convertXmlToCreatePDFResult((InputStream) result.getEntity());
 			byte[] resultBytes = createPDFResult.getCreatedDocument().getInlineData();
+			
+			assertEquals(APPLICATION_PDF.toString(),createPDFResult.getCreatedDocument().getContentType());
 			TestUtils.validatePdfResult(resultBytes, "GeneratePdf.pdf", false, false, false);
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testGeneratePDF_result.pdf")));
@@ -91,10 +92,10 @@ public class GeneratePDFTest {
 					.post(Entity.entity(multipart, multipart.getMediaType()));
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
-			assertEquals(APPLICATION_XML, MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE)));
-			
+		
 			CreatePDFResult createPDFResult = RestServicesGeneratePDFServiceAdapter.convertXmlToCreatePDFResult((InputStream) result.getEntity());
 			byte[] resultBytes = createPDFResult.getCreatedDocument().getInlineData();
+			assertEquals(APPLICATION_PDF.toString(),createPDFResult.getCreatedDocument().getContentType());
 			TestUtils.validatePdfResult(resultBytes, "GeneratePdf.pdf", false, false, false);
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testGeneratePDF_JustDataAndFileExtensionResult.pdf")));
