@@ -72,7 +72,7 @@ public class AssembleDocumentsTest {
 	}
 	
 	@Test
-	@DisplayName("Test AssembleDocuments() Happy Path.")
+	@DisplayName("Test AssembleDocuments() with all arguments Happy Path.")
 	void testAssembleDocuments_withAllArgs() throws Exception {
 		byte[] samplePdf1 = SAMPLE_FORM_PDF.toString().getBytes();
 		byte[] samplePdf2 = SAMPLE_FORM_PDF.toString().getBytes();
