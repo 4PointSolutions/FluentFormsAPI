@@ -6,6 +6,7 @@ import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
@@ -33,7 +34,7 @@ import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.impl.assembler.LogLevel;
-public class AssembleDocumentstTest {
+public class AssembleDocumentsTest {
 	
 	private static final String ASSEMBLE_DOCUMENT_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/AssemblerService/AssembleDocuments";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
@@ -93,9 +94,9 @@ public class AssembleDocumentstTest {
 			for(Entry<String, Document> entry: resultDocument.entrySet()){
 				if(entry.getKey().equals("concatenatedPDF.pdf")) {
 					resultByte = entry.getValue().getInlineData();
+					assertNotNull(resultByte);
 					assertEquals(APPLICATION_PDF.toString(),entry.getValue().getContentType());
 				}
-				TestUtils.validatePdfResult(resultByte, "AssembleDocument.pdf", false, false, false);
 				if (SAVE_RESULTS) {
 					IOUtils.write(resultByte, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testAssembleDocumentPDFWithAllArguments_result.pdf")));
 				}		
@@ -129,9 +130,9 @@ public class AssembleDocumentstTest {
 			for(Entry<String, Document> entry: sourceDocuments.entrySet()) {
 				if(entry.getKey().equals("concatenatedPDF.pdf")) {
 					resultByte = entry.getValue().getInlineData();
+					assertNotNull(resultByte);
 					assertEquals(APPLICATION_PDF.toString(),entry.getValue().getContentType());
 				}
-				TestUtils.validatePdfResult(resultByte, "AssembleDocument.pdf", false, false, false);
 				if (SAVE_RESULTS) {
 					IOUtils.write(resultByte, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testAssembleDocumentPDF_result.pdf")));
 				}		

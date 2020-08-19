@@ -6,6 +6,7 @@ import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +35,8 @@ import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
 import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 
 
-public class AssembleDocumentstTest {
+public class AssembleDocumentsTest {
+	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private AssemblerService underTest;
 	@BeforeEach
 	void setUp() throws Exception {
@@ -61,8 +65,9 @@ public class AssembleDocumentstTest {
 		for(Entry<String, Document> entry: resultDocument.entrySet()){
 			if(entry.getKey().equals("concatenatedPDF.pdf")) {
 				resultByte = entry.getValue().getInlineData();
-			}
-			TestUtils.validatePdfResult(resultByte, "AssembleDocument.pdf", false, false, false);
+				assertNotNull(resultByte);
+				assertEquals(APPLICATION_PDF.toString(), entry.getValue().getContentType());
+			}		
 		}
 	}
 	
@@ -88,8 +93,10 @@ public class AssembleDocumentstTest {
 		for(Entry<String, Document> entry: resultDocument.entrySet()){
 			if(entry.getKey().equals("concatenatedPDF.pdf")) {
 				resultByte = entry.getValue().getInlineData();
+				assertNotNull(resultByte);
+				assertEquals(APPLICATION_PDF.toString(), entry.getValue().getContentType());
 			}
-			TestUtils.validatePdfResult(resultByte, "AssembleDocument.pdf", false, false, false);
+		
 		}
 	}
 	

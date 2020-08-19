@@ -5,9 +5,12 @@ import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +27,7 @@ import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
 import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 
 public class GeneratePDFTest {
-
+	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private GeneratePDFService underTest;
 
 	@BeforeEach
@@ -41,8 +44,8 @@ public class GeneratePDFTest {
 	void testGeneratePdf() throws Exception {
 		CreatePDFResult createPDFResult = underTest.createPDF()
 				.executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DOCX.toFile()), "docx");
-		TestUtils.validatePdfResult(createPDFResult.getCreatedDocument().getInlineData(), "testGeneratePdf.pdf", false,
-				false, false);
+	    assertNotNull(createPDFResult.getCreatedDocument().getInlineData());
+	    assertEquals(APPLICATION_PDF.toString(), createPDFResult.getCreatedDocument().getContentType());
 	}
 
 	@Test
@@ -52,8 +55,8 @@ public class GeneratePDFTest {
 				.setSecuritySetting(SecuritySettings.No_Security).setFileTypeSettings("").setSettingDoc(null)
 				.setxmpDoc(null)
 				.executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DOCX.toFile()), "docx");
-		TestUtils.validatePdfResult(createPDFResult.getCreatedDocument().getInlineData(), "testGeneratePdf_AllArgs.pdf",
-				false, false, false);
+		   assertNotNull(createPDFResult.getCreatedDocument().getInlineData());
+		   assertEquals(APPLICATION_PDF.toString(), createPDFResult.getCreatedDocument().getContentType());
 	}
 
 	@Test
@@ -64,7 +67,6 @@ public class GeneratePDFTest {
 						" ", null, null, null, null, null));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
-		System.out.println("error Message: " + msg);
 		assertTrue(msg.contains("Call to server failed"));
 	}
 }

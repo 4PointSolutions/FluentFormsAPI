@@ -42,7 +42,7 @@ public class AdobeGeneratePDFServiceAdapter implements TraditionalGeneratePDFSer
 		com.adobe.pdfg.result.CreatePDFResult createPDFResult;
 		try {
 			log.info("Converting document with extension " +inputFileExtension +" to pdf");
-			createPDFResult = adobeGeneratePDFService.createPDF2(AdobeDocumentFactoryImpl.getAdobeDocument(inputDoc),inputFileExtension, fileTypeSettings, pdfSettings!=null?pdfSettings.toString():null, 
+			createPDFResult = adobeGeneratePDFService.createPDF2(AdobeDocumentFactoryImpl.getAdobeDocument(inputDoc),inputFileExtension, fileTypeSettings, pdfSettings!=null?pdfSettings.getPdfSetting():null, 
 					securitySettings!=null?securitySettings.getSecuritySetting():null,AdobeDocumentFactoryImpl.getAdobeDocument(settingsDoc),AdobeDocumentFactoryImpl.getAdobeDocument(xmpDoc));
 		} catch (ConversionException | InvalidParameterException | FileFormatNotSupportedException e) {
 			throw new GeneratePDFServiceException("Error while converting document to pdf ", e);

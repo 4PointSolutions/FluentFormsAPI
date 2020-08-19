@@ -6,6 +6,7 @@ import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
@@ -60,10 +61,8 @@ public class GeneratePDFTest {
 			multipart.field(DATA_PARAM_NAME, SAMPLE_FORM_DOCX.toFile(), MediaType.MULTIPART_FORM_DATA_TYPE).
 			field(FILE_EXTENSION, "docx")
 			.field(FILE_TYPE_SETTINGS, "")
-			.field(PDF_SETTINGS, PDFSettings.Press_Quality.toString())
-			.field(SECURITY_SETTINGS, SecuritySettings.Adobe_Policy_Server.getSecuritySetting());
-			//.field(SETTING_DOC, null, MediaType.MULTIPART_FORM_DATA_TYPE)
-			//.field(XMP_DOC, null, MediaType.MULTIPART_FORM_DATA_TYPE);
+			.field(PDF_SETTINGS, PDFSettings.High_Quality_Print.toString())
+			.field(SECURITY_SETTINGS, SecuritySettings.No_Security.toString());
 			
 			Response result = target.request()
 					.accept(APPLICATION_XML)
@@ -73,9 +72,8 @@ public class GeneratePDFTest {
 		
 			CreatePDFResult createPDFResult = RestServicesGeneratePDFServiceAdapter.convertXmlToCreatePDFResult((InputStream) result.getEntity());
 			byte[] resultBytes = createPDFResult.getCreatedDocument().getInlineData();
-			
+			assertNotNull(createPDFResult.getCreatedDocument().getInlineData());
 			assertEquals(APPLICATION_PDF.toString(),createPDFResult.getCreatedDocument().getContentType());
-			TestUtils.validatePdfResult(resultBytes, "GeneratePdf.pdf", false, false, false);
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testGeneratePDF_result.pdf")));
 			}
@@ -95,8 +93,8 @@ public class GeneratePDFTest {
 		
 			CreatePDFResult createPDFResult = RestServicesGeneratePDFServiceAdapter.convertXmlToCreatePDFResult((InputStream) result.getEntity());
 			byte[] resultBytes = createPDFResult.getCreatedDocument().getInlineData();
+			assertNotNull(createPDFResult.getCreatedDocument().getInlineData());
 			assertEquals(APPLICATION_PDF.toString(),createPDFResult.getCreatedDocument().getContentType());
-			TestUtils.validatePdfResult(resultBytes, "GeneratePdf.pdf", false, false, false);
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testGeneratePDF_JustDataAndFileExtensionResult.pdf")));
 			}
