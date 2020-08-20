@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -41,9 +40,7 @@ public class GeneratePDFTest {
 	private static final String FILE_TYPE_SETTINGS = "fileTypeSettings";
 	private static final String PDF_SETTINGS = "pdfSettings";
 	private static final String SECURITY_SETTINGS = "securitySettings";
-	private static final String SETTING_DOC = "settingDoc";
-	private static final String XMP_DOC = "xmpDoc";
-	
+
 	private static final boolean SAVE_RESULTS = false;
 	
 	private WebTarget target;

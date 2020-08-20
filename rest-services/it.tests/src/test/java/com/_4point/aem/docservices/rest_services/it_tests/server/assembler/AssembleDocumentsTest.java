@@ -18,7 +18,6 @@ import java.util.Map.Entry;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -91,17 +90,17 @@ public class AssembleDocumentsTest {
 			AssemblerResult assemblerResult = RestServicesDocAssemblerServiceAdapter.convertXmlToAssemblerResult((InputStream) result.getEntity());
 			Map<String, Document> resultDocument = assemblerResult.getDocuments();
 			byte[] resultByte = null;
-			for(Entry<String, Document> entry: resultDocument.entrySet()){
+			for(Entry<String, Document> entry: resultDocument.entrySet()) {
 				if(entry.getKey().equals("concatenatedPDF.pdf")) {
 					resultByte = entry.getValue().getInlineData();
 					assertNotNull(resultByte);
 					assertEquals(APPLICATION_PDF.toString(),entry.getValue().getContentType());
-				}
-				if (SAVE_RESULTS) {
-					IOUtils.write(resultByte, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testAssembleDocumentPDFWithAllArguments_result.pdf")));
-				}		
-
+				}			
 			}
+			if (SAVE_RESULTS) {
+				IOUtils.write(resultByte, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testAssembleDocumentPDFWithAllArguments_result.pdf")));
+			}		
+
 		}
 	}
 	
@@ -132,12 +131,12 @@ public class AssembleDocumentsTest {
 					resultByte = entry.getValue().getInlineData();
 					assertNotNull(resultByte);
 					assertEquals(APPLICATION_PDF.toString(),entry.getValue().getContentType());
-				}
-				if (SAVE_RESULTS) {
-					IOUtils.write(resultByte, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testAssembleDocumentPDF_result.pdf")));
-				}		
-
+				}			
 			}
+			if (SAVE_RESULTS) {
+				IOUtils.write(resultByte, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testAssembleDocumentPDF_result.pdf")));
+			}		
+
 		}
 	}
 }
