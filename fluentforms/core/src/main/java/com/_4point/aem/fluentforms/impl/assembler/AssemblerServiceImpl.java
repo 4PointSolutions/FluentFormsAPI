@@ -10,17 +10,17 @@ import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.assembler.client.OperationException;
 
 public class AssemblerServiceImpl implements AssemblerService {
-	private final TraditionalDocAssemblerService adobDocAssemblerService;
+	private final TraditionalDocAssemblerService adobeDocAssemblerService;
 
 	public AssemblerServiceImpl(TraditionalDocAssemblerService adobDocAssemblerService, UsageContext usageContext) {
 		super();
-		this.adobDocAssemblerService = new SafeAssemblerServiceAdapterWrapper(adobDocAssemblerService);
+		this.adobeDocAssemblerService = new SafeAssemblerServiceAdapterWrapper(adobDocAssemblerService);
 	}
 
 	@Override
 	public AssemblerResult invoke(Document ddx, Map<String, Object> sourceDocuments,
 			AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException {
-		return adobDocAssemblerService.invoke(ddx, sourceDocuments, assemblerOptionSpec);
+		return adobeDocAssemblerService.invoke(ddx, sourceDocuments, assemblerOptionSpec);
 	}
 
 	/*
@@ -40,7 +40,7 @@ public class AssemblerServiceImpl implements AssemblerService {
 	 */
 	
 	protected TraditionalDocAssemblerService getAdobeAssemblerService() {
-		return adobDocAssemblerService;
+		return adobeDocAssemblerService;
 	}
 
 

@@ -2,7 +2,6 @@ package com._4point.aem.docservices.rest_services.client.assembler;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -10,11 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
@@ -27,7 +26,6 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
@@ -73,20 +71,11 @@ implements TraditionalDocAssemblerService {
 		WebTarget assembleDocTarget = baseTarget.path(ASSEMBLE_DOCUMENT_PATH);
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			if (ddx != null) {
-				multipart.field(DATA_PARAM_NAME, ddx.getInputStream(), MediaType.APPLICATION_XML_TYPE);
-			} else {
-				throw new NullPointerException("ddx can not be null");
-			}
-
-			if (sourceDocuments != null) {
-				for (Entry<String, Object> param : sourceDocuments.entrySet()) {
-					multipart.field(SOURCE_DOCUMENT_KEY, param.getKey());
-					multipart.field(SOURCE_DOCUMENT_VALUE, ((Document) param.getValue()).getInputStream(),
-							APPLICATION_PDF);
-				}
-			} else {
-				throw new NullPointerException("source documents map can not be null");
+			multipart.field(DATA_PARAM_NAME, Objects.requireNonNull(ddx, "ddx can not be null").getInputStream(), MediaType.APPLICATION_XML_TYPE);					
+			for (Entry<String, Object> param : Objects.requireNonNull(sourceDocuments, "source documents map can not be null").entrySet()) {
+				multipart.field(SOURCE_DOCUMENT_KEY, param.getKey());
+				multipart.field(SOURCE_DOCUMENT_VALUE, ((Document) param.getValue()).getInputStream(),
+						APPLICATION_PDF);
 			}
 
 			if (assemblerOptionSpec != null) {
@@ -142,7 +131,7 @@ implements TraditionalDocAssemblerService {
 	}
 
 	// Package visibility so that it can be unit tested.
-	/* package */static AssemblerResult convertXmlToAssemblerResult(InputStream assemblerResultXml) throws AssemblerServiceException {
+	/* package */public static AssemblerResult convertXmlToAssemblerResult(InputStream assemblerResultXml) throws AssemblerServiceException {
 		Map<String, Document> resultMap = new HashMap<String, Document>();
 		Map<String,List<String>> multipleResultsBlocks = new HashMap<String, List<String>>();
 		List<String> successfulBlockNames = new ArrayList<String>();
@@ -194,7 +183,7 @@ implements TraditionalDocAssemblerService {
 			assemblerResult.setThrowables(Collections.emptyMap());	// Not currently supported, so we return an empty map.
 
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new AssemblerServiceException("Error while parsing  to xml", e);
+			throw new AssemblerServiceException("Error while parsing xml", e);
 		}
 		return assemblerResult;
 	}
@@ -234,7 +223,6 @@ implements TraditionalDocAssemblerService {
 			}
 		}
 	}
-
 
 	/*
 	 * @Override public PDFAValidationResult isPDFA(Document inDoc,

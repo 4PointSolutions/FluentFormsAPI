@@ -134,9 +134,7 @@ public class AssembleDocumentsTest {
         		  ()->assertTrue(true),
         		  ()->assertTrue(true),
         		  ()->assertEquals("test", assemblerOptionsSpec.getDefaultStyle()),
-        		  ()->assertEquals(1,assemblerOptionsSpec.getFirstBatesNumber()));
-          
-        
+        		  ()->assertEquals(1,assemblerOptionsSpec.getFirstBatesNumber()));     
 	}
 	
 	@Test

@@ -38,12 +38,10 @@ public interface AssemblerService {
 
         public AssemblerServiceException(Throwable cause) {
 			super(cause);
-		}
-        
+		}       
         
 	}
    
-	
 	public static interface AssemblerArgumentBuilder extends AssemblerOptionsSetter, Transformable<AssemblerArgumentBuilder> {
 		
 		@Override
