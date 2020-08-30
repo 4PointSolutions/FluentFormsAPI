@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -14,12 +15,12 @@ import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com._4point.aem.fluentforms.impl.CrxUrlHandler;
 
 class PathOrUrlTest {
+	private static final String fileSeparator = FileSystems.getDefault().getSeparator();
 
 	@BeforeAll
 	static void setUpAll() throws Exception {
@@ -132,7 +133,7 @@ class PathOrUrlTest {
 			if (scenario.expectedParent == null) {
 				assertFalse(underTestOtherTest.getParent().isPresent());
 			} else {
-				assertEquals(scenario.expectedParent, underTestOtherTest.getParent().get().toString());
+				assertEquals(Paths.get(scenario.expectedParent), underTestOtherTest.getParent().get().getPath());
 			}
 		}
 		if (scenario.testType == FilenameScenario.TestType.URL) {
@@ -167,6 +168,7 @@ class PathOrUrlTest {
 		private final String input;
 		private final TestType testType;
 
+
 		private EmptyFilenameScenario(String input, TestType testType) {
 			this.input = input;
 			this.testType = testType;
@@ -180,6 +182,9 @@ class PathOrUrlTest {
 	@ParameterizedTest
 	@EnumSource
 	void test_EmptyFilename(EmptyFilenameScenario scenario) throws Exception {
+		if (scenario.testType == EmptyFilenameScenario.TestType.PATH && !scenario.input.startsWith(fileSeparator)) {
+			return;	// Skip the UNC tests if we're on a Unix system
+		}
 		PathOrUrl underTest = PathOrUrl.from(scenario.input);
 		assertFalse(underTest.getFilename().isPresent(), ()->"Expected to be empty, but was '" + underTest.getFilename().get() + "'.");
 		if (scenario.testType == EmptyFilenameScenario.TestType.PATH) {
