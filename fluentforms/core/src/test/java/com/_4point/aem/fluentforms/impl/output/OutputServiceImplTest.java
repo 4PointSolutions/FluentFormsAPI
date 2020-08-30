@@ -243,8 +243,6 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePDFOutput(PathOrUrl,...) with null arguments.")
 	void testGeneratePDFOutputPathOrUrl_nullArguments() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
-		
 		PathOrUrl filename = PathOrUrl.from("file:foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
 		PDFOutputOptions options = Mockito.mock(PDFOutputOptions.class);
