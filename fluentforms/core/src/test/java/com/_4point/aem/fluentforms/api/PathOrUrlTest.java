@@ -70,6 +70,7 @@ class PathOrUrlTest {
 	@ParameterizedTest
 	@ValueSource(strings = { "", " " })	// I'd like to find a crx: example that causes an invalid URL, but have been unable to find one.
 	void testFromString_Invalid(String str) {
+		@SuppressWarnings("unused")
 		IllegalArgumentException iaex = assertThrows(IllegalArgumentException.class, ()->PathOrUrl.from(str));
 	}
 
@@ -77,6 +78,7 @@ class PathOrUrlTest {
 	@ParameterizedTest
 	@ValueSource(strings = { "crap://more/crap" })
 	void testFromString_InvalidWindows(String str) {
+		@SuppressWarnings("unused")
 		IllegalArgumentException iaex = assertThrows(IllegalArgumentException.class, ()->PathOrUrl.from(str));
 	}
 
