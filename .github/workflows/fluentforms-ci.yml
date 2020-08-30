@@ -24,6 +24,27 @@ jobs:
           restore-keys: | 
               ${{ runner.os }}-maven-
     - name: Build with Maven
-#      run: mvn -B package --file fluentforms
-#
-      run: mvn -B deploy --file fluentforms -Dregistry=https://maven.pkg.github.com/4PointSolutions -Dtoken=GH_TOKEN
+      run: mvn -B package --file fluentforms
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Cache maven dependencies 
+      uses: actions/cache@v1
+      with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: | 
+              ${{ runner.os }}-maven-
+    - name: Deploy to Github Package Registry
+      env:
+        GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: mvn -B deploy --file fluentforms --settings settings.xml
