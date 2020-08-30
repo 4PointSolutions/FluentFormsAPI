@@ -113,7 +113,7 @@ class PathOrUrlTest {
 		private FilenameScenario(String input, String expectedFilename, String expectedParent, TestType testType) {
 			this.input = input;
 			this.expectedFilename = expectedFilename;
-			this.expectedParent = expectedParent;
+			this.expectedParent = expectedParent != null ? expectedParent.replace("\\", fileSeparator) : null;
 			this.testType = testType;
 		}
 	}
