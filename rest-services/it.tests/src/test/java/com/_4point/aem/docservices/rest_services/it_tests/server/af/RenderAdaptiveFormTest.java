@@ -83,7 +83,7 @@ public class RenderAdaptiveFormTest {
 		
 	// This does not currently work.  I'm not sure why but I think it's because of the way the form is configured rather than
 	// because the code isn't working (I can't get a manual test using the browser and the dataRef attribute to work either).
-	@Disabled
+	@Test
 	void testRenderAdaptiveForm_FormRefAndData() throws IOException {
 		Path sampleFormDataPath = TestUtils.SAMPLE_FORM_DATA_XML;
 		String dataKey = postDataToDataCacheService(sampleFormDataPath);

@@ -34,7 +34,9 @@ import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 public class AdaptiveFormsService extends RestServicesServiceAdapter {
 	private static final String RENDER_ADAPTIVE_FORM_PATH = "/services/AdaptiveForms/RenderAdaptiveForm";
 	private static final String TEMPLATE_PARAM = "template";
-	private static final String DATA_PARAM = "data";
+	private static final String DATA_KEY_PARAM = "dataKey";
+	private static final String DATA_CACHE_SERVICE_PATH = "/services/DataServices/DataCache";
+	private static final String DATA_SERVICE_DATA_PARAM = "Data";
 
 	private final Function<InputStream, InputStream> responseFilter; 
 
@@ -106,7 +108,7 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		WebTarget target = renderAdaptiveFormTarget.queryParam(TEMPLATE_PARAM, template.toString());
 		
 		if (!data.isEmpty()) {
-			target.queryParam(DATA_PARAM, postDataToDataCacheService(data));
+			target = target.queryParam(DATA_KEY_PARAM, postDataToDataCacheService(data));
 		}
 
 		Invocation.Builder invokeBuilder = target.request()
@@ -168,10 +170,10 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 	}
 	
 	private String postDataToDataCacheService(Document data) throws AdaptiveFormsServiceException { 
-		WebTarget dataCacheServiceTarget = baseTarget.path(RENDER_ADAPTIVE_FORM_PATH);
+		WebTarget dataCacheServiceTarget = baseTarget.path(DATA_CACHE_SERVICE_PATH);
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE);
+			multipart.field(DATA_SERVICE_DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE);
 	
 			Response result = postToServer(dataCacheServiceTarget, multipart, MediaType.TEXT_PLAIN_TYPE);
 			
