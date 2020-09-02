@@ -4,30 +4,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.core.Response.Status.Family;
+import javax.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
-import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService.AdaptiveFormsServiceException;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
-import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService.Html5FormsServiceException;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
@@ -87,17 +82,6 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 	}
 	
 	/**
-	 * See renderAdaptiveForm(PathOrUrl template, Document data), except no data is passed in.
-	 * 
-	 * @param template
-	 * @return
-	 * @throws AdaptiveFormsServiceException
-	 */
-	public Document renderAdaptiveForm(URL template) throws AdaptiveFormsServiceException {
-		return renderAdaptiveForm(PathOrUrl.from(template), SimpleDocumentFactoryImpl.emptyDocument());
-	}
-	
-	/**
 	 * This routine posts makes an HTTP GET to the Adaptive Forms Service URL to retrieve the Adaptive form.  If a non-empty data 
 	 * Document is passed in, then it makes an HTTP POST to a DataCache service first, gets back a data key and then passes that
 	 * data key as a query parameter to the Adaptive Forms Service.
@@ -113,6 +97,9 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 	public Document renderAdaptiveForm(PathOrUrl template, Document data) throws AdaptiveFormsServiceException {
 		Objects.requireNonNull(template, "Template parameter cannot be null.");
 		Objects.requireNonNull(data, "Data parameter cannot be null.");
+		if (!isRelative(template)) {
+			throw new AdaptiveFormsServiceException("Only relative paths are supported");
+		}
 		
 		WebTarget renderAdaptiveFormTarget = baseTarget.path(RENDER_ADAPTIVE_FORM_PATH);
 		
@@ -165,6 +152,21 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		}
 	}
 
+	private static boolean isRelative(PathOrUrl pathOrUrl) {
+		if (!pathOrUrl.isPath()) { 	// If it's an URL or a CRX: path, then it's absolute
+			return false; 
+		}
+		Path path = pathOrUrl.getPath();
+		if (path.isAbsolute()) { 	// If Path thinks it's absolute, then it is
+			return false;
+		}
+		Path root = path.getRoot();
+		if (root != null && root.toString().equals("\\")) {	// If we're on windows and it starts with \, then Path doesn't consider it to be absolute, but we do.
+			return false;
+		}
+		return true;
+	}
+	
 	private String postDataToDataCacheService(Document data) throws AdaptiveFormsServiceException { 
 		WebTarget dataCacheServiceTarget = baseTarget.path(RENDER_ADAPTIVE_FORM_PATH);
 
@@ -224,18 +226,6 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 	 * @throws AdaptiveFormsServiceException
 	 */
 	public Document renderAdaptiveForm(Path template, Document data) throws AdaptiveFormsServiceException {
-		return renderAdaptiveForm(PathOrUrl.from(template), data);
-	}
-	
-	/**
-	 * See renderAdaptiveForm(PathOrUrl template, Document data).
-	 * 
-	 * @param template
-	 * @param data
-	 * @return
-	 * @throws AdaptiveFormsServiceException
-	 */
-	public Document renderAdaptiveForm(URL template, Document data) throws AdaptiveFormsServiceException {
 		return renderAdaptiveForm(PathOrUrl.from(template), data);
 	}
 	
@@ -319,6 +309,7 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	public static class AdaptiveFormsServiceException extends Exception {
 
 		public AdaptiveFormsServiceException() {

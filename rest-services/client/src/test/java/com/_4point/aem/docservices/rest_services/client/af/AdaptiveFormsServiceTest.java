@@ -16,8 +16,6 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -39,8 +37,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -59,14 +59,12 @@ import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 class AdaptiveFormsServiceTest {
 	private static final Document EMPTY_DOCUMENT = SimpleDocumentFactoryImpl.emptyDocument();
 	private final static String DUMMY_TEMPLATE_STR = "TemplateString";
-	private final static String DUMMY_TEMPLATE_URL = "http://TemplateString/";
 	private final static Document DUMMY_DATA = MockDocumentFactory.GLOBAL_INSTANCE.create("Dummy Data".getBytes());
 
 	private static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	private static final String CORRELATION_ID = "correlationId";
 	private static final String TEST_MACHINE_NAME = "testmachinename";
 	private static final int TEST_MACHINE_PORT = 8080;
-	private static final String CRX_CONTENT_ROOT = "crx:/content/dam/formsanddocuments/sample-forms";
 
 	@Mock(answer = Answers.RETURNS_SELF) Client afClient;	// answers used to mock Client's fluent interface for the Adaptive Forms Service
 	@Mock WebTarget afTarget;
@@ -76,7 +74,6 @@ class AdaptiveFormsServiceTest {
 	
 	@Captor ArgumentCaptor<String> afMachineName;
 	@Captor ArgumentCaptor<String> afPath;
-	@SuppressWarnings("rawtypes")
 	@Captor ArgumentCaptor<String> afCorrelationId;
 
 	@Mock(answer = Answers.RETURNS_SELF) Client dcClient;	// answers used to mock Client's fluent interface for the Data Cache Service. 
@@ -107,8 +104,6 @@ class AdaptiveFormsServiceTest {
 
 		SSL_NODATA_STR(true, false, TemplateType.STRING),
 		SSL_DATA_STR(true, true, TemplateType.STRING),
-		NOSSL_NODATA_URL(false, false, TemplateType.URL),
-		NOSSL_DATA_URL(false, true, TemplateType.URL),
 		SSL_NODATA_PATH(true, false, TemplateType.PATH),
 		SSL_DATA_PATH(true, true, TemplateType.PATH),
 		NOSSL_NODATA_PATHORURL(false, false, TemplateType.PATH_OR_URL),
@@ -139,7 +134,6 @@ class AdaptiveFormsServiceTest {
 		private enum TemplateType {
 			STRING(TemplateType::renderAdaptiveFormWithString), 
 			PATH(TemplateType::renderAdaptiveFormWithPath),
-			URL(TemplateType::renderAdaptiveFormWithUrl),
 			PATH_OR_URL(TemplateType::renderAdaptiveFormWithPathOrUrl);
 			
 			private final BiFunction_WithExceptions<Boolean, AdaptiveFormsService, Document, AdaptiveFormsServiceException> renderAdaptiveFormFn;
@@ -160,14 +154,6 @@ class AdaptiveFormsServiceTest {
 				
 				return hasData.booleanValue() ? underTest.renderAdaptiveForm(Paths.get(DUMMY_TEMPLATE_STR), DUMMY_DATA) 
 											  : underTest.renderAdaptiveForm(Paths.get(DUMMY_TEMPLATE_STR));
-			}
-			private static Document renderAdaptiveFormWithUrl(Boolean hasData, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
-				try {
-					return hasData.booleanValue() ? underTest.renderAdaptiveForm(new URL(DUMMY_TEMPLATE_URL), DUMMY_DATA) 
-												  : underTest.renderAdaptiveForm(new URL(DUMMY_TEMPLATE_URL));
-				} catch (MalformedURLException e) {
-					throw new IllegalStateException("Error while turning DUMMY_TEMPLATE_STR into URL.", e);
-				}
 			}
 			private static Document renderAdaptiveFormWithPathOrUrl(Boolean hasData, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
 				return hasData.booleanValue() ? underTest.renderAdaptiveForm(PathOrUrl.from(DUMMY_TEMPLATE_STR), DUMMY_DATA) 
@@ -554,14 +540,6 @@ class AdaptiveFormsServiceTest {
 		}
 
 		@Test 
-		void testRenderAdaptiveForm_NullTemplateUrl() throws Exception { 
-			NullPointerException ex = assertThrows(NullPointerException.class, ()->underTest.renderAdaptiveForm((URL)null));
-			String msg = ex.getMessage();
-			assertNotNull(msg);
-			// Caught by PathOrUrl code.  We don't need to check the contents of the message.
-		}
-
-		@Test 
 		void testRenderAdaptiveForm_NullTemplateString() throws Exception { 
 			NullPointerException ex = assertThrows(NullPointerException.class, ()->underTest.renderAdaptiveForm((String)null));
 			String msg = ex.getMessage();
@@ -571,6 +549,24 @@ class AdaptiveFormsServiceTest {
 
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {"http://foo/bar/sampleform", "/foo/bar/sampleform", "crx://foo/bar/sampleform"})
+	void testRenderAdaptiveForm_NonRelativePath(String testString) throws Exception { 
+		AdaptiveFormsService underTest = AdaptiveFormsService.builder().build();
+		Executable[] executableTest =  {
+				()->underTest.renderAdaptiveForm(PathOrUrl.from(testString)),
+				()->underTest.renderAdaptiveForm(testString)
+		};
+		
+		for (Executable test : executableTest) {
+			AdaptiveFormsServiceException ex = assertThrows(AdaptiveFormsServiceException.class, test);
+			String msg = ex.getMessage();
+			assertNotNull(msg);
+			assertThat(ex.getMessage(), containsStringIgnoringCase("Only relative paths are supported"));
+		}
+	}
+	
+	
 	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {
 		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
 		assertEquals(1, pdfFields.size());
