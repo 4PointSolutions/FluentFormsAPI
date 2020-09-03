@@ -87,7 +87,7 @@ public class RenderAdaptiveFormTest {
 	void testRenderAdaptiveForm_FormRefAndData() throws IOException {
 		Path sampleFormDataPath = TestUtils.SAMPLE_FORM_DATA_XML;
 		String dataKey = postDataToDataCacheService(sampleFormDataPath);
-		System.out.println(dataKey);
+
 		Response result = client.target(constructAfUrl(SAMPLE_AF_NAME))
 				.queryParam("wcmmode", "disabled")
 				.queryParam(DATA_REF_PARAM, constructDataRef(dataKey))
