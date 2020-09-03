@@ -209,17 +209,18 @@ class AdaptiveFormsServiceTest {
 				()->assertThat("Expected target url contains '" + expectedPrefix + "'", afMachineName.getValue(), containsString(expectedPrefix)),
 				()->assertThat("Expected target url contains TEST_MACHINE_NAME", afMachineName.getValue(), containsString(TEST_MACHINE_NAME)),
 				()->assertThat("Expected target url contains TEST_MACHINE_PORT", afMachineName.getValue(), containsString(Integer.toString(TEST_MACHINE_PORT))),
-				()->assertThat("Expected target url contains '/services/AdaptiveForms/RenderAdaptiveForm'", afPath.getValue(), containsString("/services/AdaptiveForms/RenderAdaptiveForm"))
+				()->assertThat("Expected target url contains '/content/forms/af/'", scenario.hasData ? afPath.getAllValues().get(0) : afPath.getValue(), containsString("/content/forms/af/"))
 		);
 
 		// Make sure that the arguments we passed in are transmitted correctly.
 		if (scenario.hasData()) {
+			assertThat("Expected target data url contains '/services/DataServices/DataCache'", afPath.getAllValues().get(1), containsString("/services/DataServices/DataCache"));
 			@SuppressWarnings("unchecked")
 			Entity<FormDataMultiPart> postedEntity = (Entity<FormDataMultiPart>)dcEntity.getValue();
 			FormDataMultiPart postedData = postedEntity.getEntity();
 
 			assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
-			validateDocumentFormField(postedData, "data", new MediaType("application", "xml"),DUMMY_DATA.getInlineData());
+			validateDocumentFormField(postedData, "Data", new MediaType("application", "xml"),DUMMY_DATA.getInlineData());
 		}
 		
 		if (useCorrelationId) {
@@ -569,6 +570,7 @@ class AdaptiveFormsServiceTest {
 	
 	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {
 		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
+		assertNotNull(pdfFields);
 		assertEquals(1, pdfFields.size());
 		
 		FormDataBodyPart pdfPart = pdfFields.get(0);

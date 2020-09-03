@@ -32,9 +32,9 @@ import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
  *
  */
 public class AdaptiveFormsService extends RestServicesServiceAdapter {
-	private static final String RENDER_ADAPTIVE_FORM_PATH = "/services/AdaptiveForms/RenderAdaptiveForm";
-	private static final String TEMPLATE_PARAM = "template";
-	private static final String DATA_KEY_PARAM = "dataKey";
+	// private static final String RENDER_ADAPTIVE_FORM_PATH = "/services/AdaptiveForms/RenderAdaptiveForm";  // Not currently being used.
+	// private static final String TEMPLATE_PARAM = "template";
+	private static final String DATA_REF_PARAM = "dataRef";
 	private static final String DATA_CACHE_SERVICE_PATH = "/services/DataServices/DataCache";
 	private static final String DATA_SERVICE_DATA_PARAM = "Data";
 
@@ -103,12 +103,11 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 			throw new AdaptiveFormsServiceException("Only relative paths are supported");
 		}
 		
-		WebTarget renderAdaptiveFormTarget = baseTarget.path(RENDER_ADAPTIVE_FORM_PATH);
-		
-		WebTarget target = renderAdaptiveFormTarget.queryParam(TEMPLATE_PARAM, template.toString());
+		WebTarget target = baseTarget.path(constructAfPath(template.toString()))
+									 .queryParam("wcmmode", "disabled");
 		
 		if (!data.isEmpty()) {
-			target = target.queryParam(DATA_KEY_PARAM, postDataToDataCacheService(data));
+			target = target.queryParam(DATA_REF_PARAM, generateDataRefParam(postDataToDataCacheService(data)));
 		}
 
 		Invocation.Builder invokeBuilder = target.request()
@@ -167,6 +166,14 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 			return false;
 		}
 		return true;
+	}
+	
+	private String constructAfPath(String formName) {
+		return "/content/forms/af/" + formName + ".html";
+	}
+	
+	private String generateDataRefParam(String uuid) {
+		return "service://FFPrefillService/" + uuid;
 	}
 	
 	private String postDataToDataCacheService(Document data) throws AdaptiveFormsServiceException { 
