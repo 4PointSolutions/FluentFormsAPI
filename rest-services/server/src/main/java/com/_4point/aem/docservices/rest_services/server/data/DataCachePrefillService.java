@@ -51,18 +51,16 @@ public class DataCachePrefillService implements DataXMLProvider {
 			displayParams(options);
 		}
 		
-		String uuid = extractIdentifier(dataRef);
-		Optional<Entry> entry = DataCache.getDataFromCache(uuid);
-		
-//		if (entry.isPresent() ) {
-//			return new ByteArrayInputStream(entry.get().data()); 
-//		} else {
-//			issueWarning(uuid);
-//			return null;
-//		}
-		return entry.map(Entry::data)
-					.map(ByteArrayInputStream::new)
-					.orElseGet(()->issueWarning(uuid));
+		if (dataRef == null) {
+			return null;
+		} else {
+			String uuid = extractIdentifier(dataRef);
+			Optional<Entry> entry = DataCache.getDataFromCache(uuid);
+
+			return entry.map(Entry::data)
+						.map(ByteArrayInputStream::new)
+						.orElseGet(()->issueWarning(uuid));
+		}
 	}
 
 	private ByteArrayInputStream issueWarning(String uuid) {

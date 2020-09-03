@@ -44,29 +44,29 @@ public class RenderAdaptiveFormTest {
 	private static final String TEMPLATE_PARAM_NAME = "template";
 	private static final String DATA_SERVICE_DATA_PARAM = "Data";
 	private static final String DATA_PARAM_NAME = "data";
-	private static final String DATA_KEY_PARAM = "dataKey";
-	private static final String RENDER_ADAPTIVE_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/AdaptiveForms/RenderAdaptiveForm";
+	private static final String DATA_REF_PARAM = "dataRef";
+//	private static final String RENDER_ADAPTIVE_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/AdaptiveForms/RenderAdaptiveForm";
+//	private static final String RENDER_ADAPTIVE_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/AdaptiveForms/RenderAdaptiveForm";
+	// 
 	private static final String DATA_CACHE_SERVICE_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/DataServices/DataCache";
 	private static final String SAMPLE_AF_NAME = "sample00002test";
 	private static final boolean SAVE_RESULTS = false;
 	
-	private WebTarget renderAfTarget;
+	private Client client;
 	private WebTarget dataCacheTarget;
 
 	@BeforeEach
 	void setUp() throws Exception {
 		HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(TEST_USER, TEST_USER_PASSWORD);	// default AEM passwords
-		Client client = ClientBuilder.newClient()
+		client = ClientBuilder.newClient()
 							  .register(feature)
 							  .register(MultiPartFeature.class);
-		renderAfTarget = client.target(RENDER_ADAPTIVE_FORM_URL);
 		dataCacheTarget = client.target(DATA_CACHE_SERVICE_URL);
 	}
 
 	@Test
 	void testRenderAdaptiveForm_FormRef() throws IOException {
-		Response result = renderAfTarget
-				.queryParam(TEMPLATE_PARAM_NAME, SAMPLE_AF_NAME)
+		Response result = client.target(constructAfUrl(SAMPLE_AF_NAME))
 				.request()
 				.accept(MediaType.TEXT_HTML_TYPE)
 				.get();
@@ -87,10 +87,10 @@ public class RenderAdaptiveFormTest {
 	void testRenderAdaptiveForm_FormRefAndData() throws IOException {
 		Path sampleFormDataPath = TestUtils.SAMPLE_FORM_DATA_XML;
 		String dataKey = postDataToDataCacheService(sampleFormDataPath);
-		
-		Response result = renderAfTarget
-				.queryParam(TEMPLATE_PARAM_NAME, SAMPLE_AF_NAME)
-				.queryParam(DATA_KEY_PARAM, dataKey)
+		System.out.println(dataKey);
+		Response result = client.target(constructAfUrl(SAMPLE_AF_NAME))
+				.queryParam("wcmmode", "disabled")
+				.queryParam(DATA_REF_PARAM, constructDataRef(dataKey))
 				.request()
 				.accept(MediaType.TEXT_HTML_TYPE)
 				.get();
@@ -112,6 +112,10 @@ public class RenderAdaptiveFormTest {
 		Path sampleFormDataPath = TestUtils.SAMPLE_FORM_DATA_XML;
 		String dataKey = postDataToDataCacheService(sampleFormDataPath);
 		System.out.println("Data stored.  DataKey='" + dataKey + "'.");
+	}
+	
+	private String constructAfUrl(String formName) {
+		return "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/content/forms/af/" + formName + ".html";
 	}
 	
 	private String postDataToDataCacheService(Path sampleFormDataPath) throws IOException {
@@ -138,5 +142,8 @@ public class RenderAdaptiveFormTest {
 		return dataKey;
 	}
 
+	private static String constructDataRef(String key) {
+		return "service://FFPrefillService/" + key;
+	}
 
 }

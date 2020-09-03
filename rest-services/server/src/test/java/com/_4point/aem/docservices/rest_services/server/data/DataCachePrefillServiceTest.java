@@ -37,9 +37,39 @@ class DataCachePrefillServiceTest {
 	@Test
 	void testGetDataXMLForDataRef_InvalidUuid() throws Exception {
 		
-		// Store data in the cache and then call the preFill service with mock options object that contains the UUID from the cache.
+		// Send an invalid uuid
 		String uuid = "foobar";
 		InputStream result = underTest.getDataXMLForDataRef(mockDataXmlOptions(uuid));
+		
+		// Verify the result
+		assertNull(result, "Expect to get null back if an invalid cache id is provided.");
+	}
+
+	@Test
+	void testGetDataXMLForDataRef_EmptyIdentifier() throws Exception {
+		
+		// Send an empty UUID
+		InputStream result = underTest.getDataXMLForDataRef(mockDataXmlOptions(""));
+		
+		// Verify the result
+		assertNull(result, "Expect to get null back if an invalid cache id is provided.");
+	}
+
+	@Test
+	void testGetDataXMLForDataRef_EmptyIdentifier2() throws Exception {
+		
+		// send service name only
+		InputStream result = underTest.getDataXMLForDataRef(mockDataXmlOptions(null));
+		
+		// Verify the result
+		assertNull(result, "Expect to get null back if an invalid cache id is provided.");
+	}
+
+	@Test
+	void testGetDataXMLForDataRef_EmptyOptions() throws Exception {
+		
+		// Send empty DataXmlOptions structure (which is what happens when called from editor).
+		InputStream result = underTest.getDataXMLForDataRef(new DataXMLOptions());
 		
 		// Verify the result
 		assertNull(result, "Expect to get null back if an invalid cache id is provided.");
@@ -72,7 +102,7 @@ class DataCachePrefillServiceTest {
 	
 	private DataXMLOptions mockDataXmlOptions(String identifier) {
 		DataXMLOptions options = new DataXMLOptions();
-		options.setDataRef("service://FFPrefillService/" + identifier);
+		options.setDataRef("service://FFPrefillService" + (identifier != null ? "/" + identifier : ""));
 		return options;
 	}
 }
