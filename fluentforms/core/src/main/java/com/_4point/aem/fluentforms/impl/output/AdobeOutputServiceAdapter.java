@@ -23,7 +23,6 @@ import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 
 	private static final Logger log = LoggerFactory.getLogger(AdobeOutputServiceAdapter.class);
-
 	private final DocumentFactory documentFactory;
 	private final com.adobe.fd.output.api.OutputService adobeOutputService;
 
@@ -42,8 +41,10 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 	@Override
 	public Document generatePDFOutput(Document template, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
 		try {
-			return documentFactory.create(adobeOutputService.generatePDFOutput(AdobeDocumentFactoryImpl.getAdobeDocument(template), AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePDFOutputOptions(pdfOutputOptions))).setContentTypeIfEmpty(Document.CONTENT_TYPE_PDF);
-		} catch (com.adobe.fd.output.api.OutputServiceException | IOException e) {
+			Document resultDoc = documentFactory.create(adobeOutputService.generatePDFOutput(AdobeDocumentFactoryImpl.getAdobeDocument(template), AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePDFOutputOptions(pdfOutputOptions)));
+			resultDoc.setContentType(Document.CONTENT_TYPE_PDF);	// Originally we were doing a setContentTypeIfEmpty() but that fails because of FluentFormsAPI Issue #15
+			return resultDoc;
+		} catch (com.adobe.fd.output.api.OutputServiceException e) {
 			throw new OutputServiceException(e);
 		}
 	}
@@ -51,8 +52,10 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 	@Override
 	public Document generatePDFOutput(String urlOrFileName, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
 		try {
-			return documentFactory.create(adobeOutputService.generatePDFOutput(urlOrFileName, AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePDFOutputOptions(pdfOutputOptions))).setContentTypeIfEmpty(Document.CONTENT_TYPE_PDF);
-		} catch (com.adobe.fd.output.api.OutputServiceException | IOException e) {
+			Document resultDoc = documentFactory.create(adobeOutputService.generatePDFOutput(urlOrFileName, AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePDFOutputOptions(pdfOutputOptions)));
+			resultDoc.setContentType(Document.CONTENT_TYPE_PDF);	// Originally we were doing a setContentTypeIfEmpty() but that fails because of FluentFormsAPI Issue #15
+			return resultDoc;
+		} catch (com.adobe.fd.output.api.OutputServiceException e) {
 			throw new OutputServiceException(e);
 		}
 	}

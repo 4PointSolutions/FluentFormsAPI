@@ -109,6 +109,28 @@ public class PathOrUrl {
 	public boolean isCrxUrl() { return this.isCrxUrl && this.url != null; }
 
 	/**
+	 * Drops the protocol (if any) from the value and returns a Path object.
+	 *  
+	 * @return  Path portion of the object
+	 */
+	public Path toPath() {
+		if (isPath()) {
+			return this.path; 
+		} else if (isCrxUrl()) {
+			String pathStr = this.toString().split(":")[1];
+			while (pathStr.startsWith("//")) {
+				pathStr = pathStr.substring(1);
+			}
+			return Paths.get(pathStr);
+		} else if (isUrl()){
+			return Paths.get(this.url.getPath());
+		} else {
+			// This should never happen.
+			throw new IllegalStateException("Encountered a PathOrUrl that was not a Path, URL or CRX Url!");
+		}
+	}
+	
+	/**
 	 * Returns the filename part of the PathOrUrl.
 	 * 
 	 * If the PathOrUrl is an URL or CRX Url and ends in a /, then this returns empty.

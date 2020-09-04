@@ -2,11 +2,17 @@
 
 # AEM Forms REST Services
 
-This project provides REST services for the AEM Forms Document Services APIs.
+This project provides REST services for the AEM Forms Document Services APIs.  It allows a client system to make calls to a remote AEM instance in order to perform AEM functions and return the results to the client.  The library handles the task of making REST calls from the client to the AEM server, receiving the REST calls on the server, translating them to AEM API calls and then returning the results to the client.
 
 ## Goals of this project
 
-The goal of this project is to provide REST services that an application can call in order to execute AEM Form functions.
+The goals of this project are:
+
+* to provide a REST services interface that any application can call in order to execute AEM Forms functions
+* to provide a client library to allow a Java client application to call the REST services interface remotely without having to know REST.
+
+The rest-services code relies on the FluentForms API to wrap the AEM interfaces and provide a fluent interface to clients that are leveraging the rest-services library’s functionality.
+
 
 ## API Implementation Status
 
@@ -17,8 +23,8 @@ The AEM Forms API consists of a series of smaller APIs that are targeted at spec
 | Forms | Mostly |
 | Output | In progress |
 | Document Assurance | Partial |
-| PDF Generator | No |
-| Assembler | No |
+| PDF Generator | Partial |
+| Assembler | Mostly |
 | Barcoded Forms | No |
 | Convert PDF | No |
 | Send To Printer | No |
@@ -48,6 +54,6 @@ Or to deploy only the bundle to the author, run
 
 ## Maven settings
 
-The project comes with the auto-public repository configured. To setup the repository in your Maven settings, refer to:
+The project comes with the adobe-public repository configured. To setup the repository in your Maven settings, refer to:
 
     http://helpx.adobe.com/experience-manager/kb/SetUpTheAdobeMavenRepository.html

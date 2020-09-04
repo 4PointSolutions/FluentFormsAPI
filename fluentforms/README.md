@@ -66,15 +66,15 @@ class OutputServiceExample {
 
 ## API Implementation Status
 
-The AEM Forms API consists of a series of smaller APIs that are targetted at specific functions.  The plan is to eventually support all the entire AEM Forms API.  This section outlines the progress towards that goal. 
+The AEM Forms API consists of a series of smaller APIs that are targeted at specific functions.  The plan is to eventually support the entire AEM Forms API.  This section outlines the progress towards that goal. 
 
 | AEM Forms API | Fluent API Implemented | Servlet Implemented | Client side adapter implemented |
 | ------------- | ---------------------- | ------------------- | ------------------------------- |
 | Forms | Yes | Yes | Yes |
 | Output | Partial | Partial | Partial |
 | Document Assurance | Partial | Partial | Partial |
-| PDF Generator | No | No | No |
-| Assembler | No | No | No |
+| PDF Generator | Partial | Partial | Partial |
+| Assembler | Partial | Partial | Partial |
 | Barcoded Forms | No | No | No |
 | Convert PDF | No | No | No |
 | Send To Printer | No | No | No |

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<DDX xmlns="http://ns.adobe.com/DDX/1.0/">
+<PDF result="concatenatedPDF.pdf">
+<PDF source="File0.pdf"/>
+<PDF source="File1.pdf"/>
+</PDF>
+</DDX>
+
+
