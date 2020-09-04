@@ -218,7 +218,7 @@ class GeneratePdfOutputTest {
 		
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
-		request.addRequestParameter(DATA_PARAM, formData);
+		request.addRequestParameter(DATA_PARAM, formData.getBytes(), APPLICATION_XML);
 		
 		underTest.doPost(request, response);
 		
@@ -397,11 +397,9 @@ class GeneratePdfOutputTest {
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
-		Map<String, Object> parameterMap = new HashMap<>();
 		String badFormName = "bar.xdp";
-		parameterMap.put("template", "foo/" + badFormName);
-		parameterMap.put("data", "formData");
-		request.setParameterMap(parameterMap );
+		request.addRequestParameter(TEMPLATE_PARAM, "foo/" + badFormName);
+		request.addRequestParameter(DATA_PARAM, "formData".getBytes(), APPLICATION_XML);
 		
 		underTest.doPost(request, response);
 		
@@ -411,6 +409,28 @@ class GeneratePdfOutputTest {
 		assertThat(statusMsg, containsStringIgnoringCase("Bad request parameter"));
 		assertThat(statusMsg, containsStringIgnoringCase("unable to find template"));
 		assertThat(statusMsg, containsString(badFormName));
+	}
+
+	@Test
+	void testDoPost_BadData() throws ServletException, IOException, NoSuchFieldException {
+		String templateData = TestUtils.SAMPLE_FORM.toString();
+		String resultData = "testDoPost Happy Path Result";
+		byte[] resultDataBytes = resultData.getBytes();
+		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
+
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+		
+		request.addRequestParameter(TEMPLATE_PARAM, templateData);
+		request.addRequestParameter(DATA_PARAM, "formData");
+		
+		underTest.doPost(request, response);
+		
+		// Validate the result
+		assertEquals(SlingHttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+		String statusMsg = response.getStatusMessage();
+		assertThat(statusMsg, containsStringIgnoringCase("only supports providing data by value"));
 	}
 
 	@Test
@@ -426,7 +446,7 @@ class GeneratePdfOutputTest {
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
-		request.addRequestParameter(DATA_PARAM, formData);
+		request.addRequestParameter(DATA_PARAM, formData.getBytes(), APPLICATION_XML);
 		
 		underTest.doPost(request, response);
 		
@@ -452,7 +472,7 @@ class GeneratePdfOutputTest {
 		
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
-		request.addRequestParameter(DATA_PARAM, formData);
+		request.addRequestParameter(DATA_PARAM, formData.getBytes(), APPLICATION_XML);
 		request.addHeader("Accept", TEXT_HTML);
 		
 		underTest.doPost(request, response);

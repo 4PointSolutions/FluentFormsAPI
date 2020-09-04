@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -46,41 +47,35 @@ public class OutputServiceImpl implements OutputService {
 	@Override
 	public Document generatePDFOutput(Path filename, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException, FileNotFoundException {
 		Objects.requireNonNull(filename, "template cannot be null.");
-
-		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
-		PathOrUrl contentRoot = Objects.requireNonNull(pdfOutputOptions, "pdfOutputOptions cannot be null!").getContentRoot();
-//		if (contentRoot != null && !contentRoot.isPath()) {
-//			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
-//		}
-		TemplateValues tvs = TemplateValues.determineTemplateValues(filename, contentRoot, this.usageContext);
-		
-		PathOrUrl finalContentRoot = tvs.getContentRoot();
-		pdfOutputOptions.setContentRoot(finalContentRoot != null ? finalContentRoot : null);
-		return this.generatePDFOutput(tvs.getTemplate().toString(), data, pdfOutputOptions);
+		return this.generatePDFOutput(PathOrUrl.from(filename), data, pdfOutputOptions);
 	}
 
 	@Override
 	public Document generatePDFOutput(URL url, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
 		Objects.requireNonNull(url, "url cannot be null.");
-		return this.generatePDFOutput(url.toString(), data, pdfOutputOptions);
+		try {
+			return this.generatePDFOutput(PathOrUrl.from(url), data, pdfOutputOptions);
+		} catch (FileNotFoundException e) {
+			// This should never happen because the exception is only thrown for Path objects.
+			throw new IllegalStateException("determineTemplateValues threw FileNotFoundException for URL.");
+		}
 	}
 
 	@Override
 	public Document generatePDFOutput(PathOrUrl template, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException, FileNotFoundException {
 		Objects.requireNonNull(template, "template cannot be null.");
-		if (template.isPath()) {
-			return generatePDFOutput(template.getPath(), data, pdfOutputOptions);
-		} else if (template.isUrl()) {
-			return generatePDFOutput(template.getUrl(), data, pdfOutputOptions);
-		} else if (template.isCrxUrl()) {
-			return generatePDFOutput(template.getCrxUrl(), data, pdfOutputOptions);
-		} else {
-			// This should never be thrown.
-			throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
+		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
+		PathOrUrl contentRoot = Objects.requireNonNull(pdfOutputOptions, "pdfOutputOptions cannot be null!").getContentRoot();
+		Optional<TemplateValues> otvs = TemplateValues.determineTemplateValues(template, contentRoot, this.usageContext);
+		if (otvs.isPresent()) {
+			TemplateValues tvs = otvs.get();
+			template = PathOrUrl.from(tvs.getTemplate());
+			pdfOutputOptions.setContentRoot(tvs.getContentRoot());
 		}
+		return internalGeneratePDFOutput(template.toString(), data, pdfOutputOptions);
 	}
 
-	private Document generatePDFOutput(String urlOrFileName, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
+	private Document internalGeneratePDFOutput(String urlOrFileName, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
 		return adobeOutputService.generatePDFOutput(urlOrFileName, data, pdfOutputOptions);
 	}
 
@@ -110,7 +105,7 @@ public class OutputServiceImpl implements OutputService {
 //		if (contentRoot != null && !contentRoot.isPath()) {
 //			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
 //		}
-		TemplateValues tvs = TemplateValues.determineTemplateValues(templateFilename, contentRoot, this.usageContext);
+		TemplateValues tvs = TemplateValues.determineTemplateValues(PathOrUrl.from(templateFilename), contentRoot, this.usageContext).get();
 		
 		PathOrUrl finalContentRoot = tvs.getContentRoot();
 		printedOutputOptions.setContentRoot(finalContentRoot != null ? finalContentRoot : null);

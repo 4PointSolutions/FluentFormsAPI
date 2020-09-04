@@ -27,6 +27,7 @@ import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.output.api.AcrobatVersion;
+import com.scene7.ipsapi.PDFOptions;
 
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 
@@ -56,9 +57,9 @@ class OutputServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(template, svc.getTemplateDocArg(), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(svc.getOptionsArg() == options, "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
-		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -93,20 +94,41 @@ class OutputServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Test GeneratePDFOutput(Path,...) Happy Path.")
-	void testGeneratePDFOutputPathDocumentPDFOutputOptions() throws Exception {
+	@DisplayName("Test GeneratePDFOutput(Path,...) Happy Path, No Context Root.")
+	void testGeneratePDFOutputPathDocumentDefaultPDFOutputOptions() throws Exception {
 		MockPdfOutputService svc = new MockPdfOutputService();
 		
 		Path filename = TestUtils.SAMPLE_FORM;
 		Document data = Mockito.mock(Document.class);
-		PDFOutputOptions options = Mockito.mock(PDFOutputOptions.class);
+		PDFOutputOptions options = new PDFOutputOptionsImpl();
 		Document result = underTest.generatePDFOutput(filename, data, options);
 		
 		// Verify that all the results are correct.
 		assertEquals(filename.getFileName(), Paths.get(svc.getTemplateStringArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(svc.getOptionsArg() == options, "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
-		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertEquals(filename.getParent(), Paths.get(svc.getOptionsArg().getContentRoot().toString()), "Expected the template filename passed to AEM would match the filename used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test GeneratePDFOutput(Path,...) Happy Path, with Context Root.")
+	void testGeneratePDFOutputPathDocumentNonDefaultPDFOutputOptions() throws Exception {
+		MockPdfOutputService svc = new MockPdfOutputService();
+		
+		Path filename = TestUtils.SAMPLE_FORM.getFileName();
+		Document data = Mockito.mock(Document.class);
+		PDFOutputOptions options = new PDFOutputOptionsImpl();
+		Path contextRoot = TestUtils.SAMPLE_FORMS_DIR;
+		options.setContentRoot(contextRoot);
+		Document result = underTest.generatePDFOutput(filename, data, options);
+		
+		// Verify that all the results are correct.
+		assertEquals(filename.getFileName(), Paths.get(svc.getTemplateStringArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(contextRoot, Paths.get(svc.getOptionsArg().getContentRoot().toString()), "Expected the template filename passed to AEM would match the filename used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -157,20 +179,44 @@ class OutputServiceImplTest {
 	}
 	
 	@Test
-	@DisplayName("Test GeneratePDFOutput(URL,...) Happy Path.")
-	void testGeneratePDFOutputUrlDocumentPDFOutputOptions() throws Exception {
+	@DisplayName("Test GeneratePDFOutput(URL,...) Happy Path, no contentRoot.")
+	void testGeneratePDFOutputUrlDocumentDefaultPDFOutputOptions() throws Exception {
 		MockPdfOutputService svc = new MockPdfOutputService();
 		
-		URL filename = new URL("http://www.example.com/foo/bar.xdp");
+		String expectedTemplateFilename = "bar.xdp";
+		String expectedContextRoot = "http://www.example.com/foo/";
+		URL filename = new URL(expectedContextRoot + expectedTemplateFilename);
 		Document data = Mockito.mock(Document.class);
-		PDFOutputOptions options = Mockito.mock(PDFOutputOptions.class);
+		PDFOutputOptions options = new PDFOutputOptionsImpl();
 		Document result = underTest.generatePDFOutput(filename, data, options);
 		
 		// Verify that all the results are correct.
-		assertEquals(filename, new URL(svc.getTemplateStringArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(svc.getOptionsArg() == options, "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
-		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertEquals(expectedTemplateFilename, svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContextRoot, svc.optionsArg.getValue().getContentRoot().toString(), "Expected the template contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test GeneratePDFOutput(URL,...) Happy Path, with contentRoot.")
+	void testGeneratePDFOutputUrlDocumentWithPDFOutputOptions() throws Exception {
+		MockPdfOutputService svc = new MockPdfOutputService();
+		
+		String expectedTemplateFilename = "http://www.example.com/foo/bar.xdp";
+		String expectedContextRoot = "http://www.otherexample.com/foo/";
+		URL filename = new URL(expectedTemplateFilename);
+		Document data = Mockito.mock(Document.class);
+		PDFOutputOptions options = new PDFOutputOptionsImpl();
+		options.setContentRoot(new URL(expectedContextRoot));
+		Document result = underTest.generatePDFOutput(filename, data, options);
+		
+		// Verify that all the results are correct.
+		assertEquals(expectedTemplateFilename, svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContextRoot, svc.optionsArg.getValue().getContentRoot().toString(), "Expected the template contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -191,7 +237,7 @@ class OutputServiceImplTest {
 		
 		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput(filename, data, null));
 		assertNotNull(ex1.getMessage());	// Exception should contain a message.
-		assertTrue(ex3.getMessage().contains("PDFOutputOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'PDFOutputOptions'");
+		assertTrue(ex3.getMessage().toLowerCase().contains("PDFOutputOptions".toLowerCase()), ()->"'" + ex3.getMessage() + "' does not contain 'PDFOutputOptions'");
 	}
 
 	@Test
@@ -207,37 +253,85 @@ class OutputServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Test GeneratePDFOutput(PathOrUrl,...) Happy Path.")
-	void testGeneratePDFOutputPathOrUrlDocumentPDFOutputOptions() throws Exception {
+	@DisplayName("Test GeneratePDFOutput(PathOrUrl,...) Happy Path with no contentRoot.")
+	void testGeneratePDFOutputPathOrUrlDocumentDefaultPDFOutputOptions() throws Exception {
 		MockPdfOutputService svc = new MockPdfOutputService();
 		
-		PathOrUrl filename = PathOrUrl.from("file:foo/bar.xdp");
+		String expectedTemplateFilename = "bar.xdp";
+		String expectedContextRoot = "file:foo/";
+		PathOrUrl filename = PathOrUrl.from(expectedContextRoot + expectedTemplateFilename);
 		Document data = Mockito.mock(Document.class);
-		PDFOutputOptions options = Mockito.mock(PDFOutputOptions.class);
+		PDFOutputOptions options = new PDFOutputOptionsImpl();
 		Document result = underTest.generatePDFOutput(filename, data, options);
 		
 		// Verify that all the results are correct.
-		assertEquals(filename.getUrl(), new URL(svc.getTemplateStringArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(svc.getOptionsArg() == options, "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
-		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertEquals(expectedTemplateFilename, svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContextRoot, svc.optionsArg.getValue().getContentRoot().toString(), "Expected the template contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
-	@DisplayName("Test GeneratePDFOutput(Crx PathOrUrl,...) Happy Path.")
-	void testGeneratePDFOutputCrxUrlDocumentPDFOutputOptions() throws Exception {
+	@DisplayName("Test GeneratePDFOutput(PathOrUrl,...) Happy Path with contentRoot.")
+	void testGeneratePDFOutputPathOrUrlDocumentWithPDFOutputOptions() throws Exception {
 		MockPdfOutputService svc = new MockPdfOutputService();
 		
-		PathOrUrl filename = PathOrUrl.from("crx:/content/dam/formsanddocuments/foo/bar.xdp");
+		String expectedTemplateFilename = "file:foo/bar.xdp";
+		String expectedContextRoot = "file:notfoo/";
+		PathOrUrl filename = PathOrUrl.from(expectedTemplateFilename);
 		Document data = Mockito.mock(Document.class);
-		PDFOutputOptions options = Mockito.mock(PDFOutputOptions.class);
+		PDFOutputOptions options = new PDFOutputOptionsImpl();
+		options.setContentRoot(PathOrUrl.from(expectedContextRoot));
 		Document result = underTest.generatePDFOutput(filename, data, options);
 		
 		// Verify that all the results are correct.
-		assertEquals(filename.toString(), svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(svc.getOptionsArg() == options, "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
-		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertEquals(expectedTemplateFilename, svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContextRoot, svc.optionsArg.getValue().getContentRoot().toString(), "Expected the template contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test GeneratePDFOutput(Crx PathOrUrl,...) Happy Path with no contextRoot.")
+	void testGeneratePDFOutputCrxUrlDocumentDefaultPDFOutputOptions() throws Exception {
+		MockPdfOutputService svc = new MockPdfOutputService();
+		
+		String expectedTemplateFilename = "bar.xdp";
+		String expectedContextRoot = "crx:/content/dam/formsanddocuments/foo/";
+		PathOrUrl filename = PathOrUrl.from(expectedContextRoot + expectedTemplateFilename);
+		Document data = Mockito.mock(Document.class);
+		PDFOutputOptions options = new PDFOutputOptionsImpl();
+		Document result = underTest.generatePDFOutput(filename, data, options);
+		
+		// Verify that all the results are correct.
+		assertEquals(expectedTemplateFilename, svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContextRoot, svc.optionsArg.getValue().getContentRoot().toString(), "Expected the template contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test GeneratePDFOutput(Crx PathOrUrl,...) Happy Path with contextRoot.")
+	void testGeneratePDFOutputCrxUrlDocumentWithPDFOutputOptions() throws Exception {
+		MockPdfOutputService svc = new MockPdfOutputService();
+		
+		String expectedTemplateFilename = "crx:/content/dam/formsanddocuments/foo/bar.xdp";
+		String expectedContextRoot = "crx:/othercontent/dam/foo/bar/";
+		PathOrUrl filename = PathOrUrl.from(expectedTemplateFilename);
+		Document data = Mockito.mock(Document.class);
+		PDFOutputOptions options = new PDFOutputOptionsImpl();
+		options.setContentRoot(PathOrUrl.from(expectedContextRoot));
+		Document result = underTest.generatePDFOutput(filename, data, options);
+		
+		// Verify that all the results are correct.
+		assertEquals(expectedTemplateFilename, svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContextRoot, svc.optionsArg.getValue().getContentRoot().toString(), "Expected the template contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
@@ -258,7 +352,7 @@ class OutputServiceImplTest {
 		
 		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput(filename, data, null));
 		assertNotNull(ex1.getMessage());	// Exception should contain a message.
-		assertTrue(ex3.getMessage().contains("PDFOutputOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'PDFOutputOptions'");
+		assertTrue(ex3.getMessage().toLowerCase().contains("PDFOutputOptions".toLowerCase()), ()->"'" + ex3.getMessage() + "' does not contain 'PDFOutputOptions'");
 
 	}
 
@@ -284,7 +378,7 @@ class OutputServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(template, svc.getTemplateDocArg(), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
 		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 		PDFOutputOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
@@ -313,8 +407,8 @@ class OutputServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(filename.getFileName(), Paths.get(svc.getTemplateStringArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 		PDFOutputOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 
@@ -340,8 +434,8 @@ class OutputServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(filename.getUrl(), new URL(svc.getTemplateStringArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 		PDFOutputOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 
@@ -367,8 +461,8 @@ class OutputServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(filename.getUrl(), new URL(svc.getTemplateStringArg()), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 		PDFOutputOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 
@@ -394,8 +488,8 @@ class OutputServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(filename.toString(), svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
-		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Docyment used.");
-		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 		PDFOutputOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 

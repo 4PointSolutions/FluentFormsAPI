@@ -29,9 +29,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
+import com._4point.aem.fluentforms.api.TestUtils;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
+import com._4point.aem.fluentforms.impl.forms.PDFFormRenderOptionsImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com._4point.aem.fluentforms.impl.forms.ValidationOptionsImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
@@ -159,17 +161,38 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Test RenderPDFForm(Path,...) Happy Path.")
-	void testRenderPDFFormPathDocumentPDFFormRenderOptions() throws FormsServiceException, FileNotFoundException {
+	@DisplayName("Test RenderPDFForm(Path,...) Happy Path, no contextRoot supplied.")
+	void testRenderPDFFormPathDocumentDefaultPDFFormRenderOptions() throws FormsServiceException, FileNotFoundException {
 		MockPdfRenderService svc = new MockPdfRenderService();
 		
 		Path filePath = SAMPLE_FORM;
 		Document data = Mockito.mock(Document.class);
-		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
+		PDFFormRenderOptions pdfFormRenderOptions = new PDFFormRenderOptionsImpl();
 		Document pdfResult = underTest.renderPDFForm(filePath, data, pdfFormRenderOptions);
 		
 		// Verify that all the results are correct.
 		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(filePath.getParent(), Paths.get(svc.getOptionsArg().getContentRoot().toString()), "Expected the template parent passed to AEM would match the contextRoot used.");
+		assertSame(svc.getDataArg(), data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test RenderPDFForm(Path,...) Happy Path, with contextRoot supplied.")
+	void testRenderPDFFormPathDocumentWithPDFFormRenderOptions() throws FormsServiceException, FileNotFoundException {
+		MockPdfRenderService svc = new MockPdfRenderService();
+		
+		Path filePath = SAMPLE_FORM.getFileName();
+		Document data = Mockito.mock(Document.class);
+		PDFFormRenderOptions pdfFormRenderOptions = new PDFFormRenderOptionsImpl();
+		Path contextRoot = TestUtils.SAMPLE_FORMS_DIR;
+		pdfFormRenderOptions.setContentRoot(contextRoot);
+		Document pdfResult = underTest.renderPDFForm(filePath, data, pdfFormRenderOptions);
+		
+		// Verify that all the results are correct.
+		assertEquals(filePath, Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(contextRoot, Paths.get(svc.getOptionsArg().getContentRoot().toString()), "Expected the template parent passed to AEM would match the contextRoot used.");
 		assertSame(svc.getDataArg(), data, "Expected the data Document passed to AEM would match the data Document used.");
 		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
 		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
@@ -221,18 +244,41 @@ class FormsServiceImplTest {
 	}
 	
 	@Test
-	@DisplayName("Test RenderPDFForm(URL,...) Happy Path.")
-	void testRenderPDFFormURLDocumentPDFFormRenderOptions() throws Exception {
+	@DisplayName("Test RenderPDFForm(URL,...) Happy Path, no contextRoot.")
+	void testRenderPDFFormURLDocumentDefaultPDFFormRenderOptions() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
-		String filename = "file:foo/bar.xdp";
-		URL fileUrl = new URL(filename);
+		String expectedContentRoot = "file:foo/";
+		String expectedFilename = "bar.xdp";
+		URL fileUrl = new URL(expectedContentRoot + expectedFilename);
 		Document data = Mockito.mock(Document.class);
-		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
+		PDFFormRenderOptions pdfFormRenderOptions = new PDFFormRenderOptionsImpl();
 		Document pdfResult = underTest.renderPDFForm(fileUrl, data, pdfFormRenderOptions);
 		
 		// Verify that all the results are correct.
-		assertEquals(fileUrl, new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedFilename, svc.getTemplateArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContentRoot, svc.getOptionsArg().getContentRoot().toString(), "Expected the contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Docyment used.");
+		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test RenderPDFForm(URL,...) Happy Path, with contextRoot.")
+	void testRenderPDFFormURLDocumentNonDefaultPDFFormRenderOptions() throws Exception {
+		MockPdfRenderService svc = new MockPdfRenderService();
+
+		String expectedFilename = "http://www.example.com/foo/bar.xdp";
+		String expectedContentRoot = "http://www.otherexample.com/foo/";
+		URL fileUrl = new URL(expectedFilename);
+		Document data = Mockito.mock(Document.class);
+		PDFFormRenderOptions pdfFormRenderOptions = new PDFFormRenderOptionsImpl();
+		pdfFormRenderOptions.setContentRoot(new URL(expectedContentRoot));
+		Document pdfResult = underTest.renderPDFForm(fileUrl, data, pdfFormRenderOptions);
+		
+		// Verify that all the results are correct.
+		assertEquals(expectedFilename, svc.getTemplateArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContentRoot, svc.getOptionsArg().getContentRoot().toString(), "Expected the contextRoot passed to AEM would match the contextRoot used.");
 		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Docyment used.");
 		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
 		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
@@ -270,17 +316,41 @@ class FormsServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Test RenderPDFForm(PathOrUrl,...) Happy Path.")
-	void testRenderPDFFormPathOrUrlDocumentPDFFormRenderOptions() throws Exception {
+	@DisplayName("Test RenderPDFForm(PathOrUrl,...) Happy Path, no contentRoot.")
+	void testRenderPDFFormPathOrUrlDocumentDefaultPDFFormRenderOptions() throws Exception {
 		MockPdfRenderService svc = new MockPdfRenderService();
 
-		PathOrUrl filename = PathOrUrl.from("file:foo/bar.xdp");
+		String expectedFilename = "bar.xdp";
+		String expectedContentRoot = "file:foo/";
+		PathOrUrl filename = PathOrUrl.from(expectedContentRoot + expectedFilename);
 		Document data = Mockito.mock(Document.class);
-		PDFFormRenderOptions pdfFormRenderOptions = Mockito.mock(PDFFormRenderOptions.class);
+		PDFFormRenderOptions pdfFormRenderOptions = new PDFFormRenderOptionsImpl();
 		Document pdfResult = underTest.renderPDFForm(filename, data, pdfFormRenderOptions);
 		
 		// Verify that all the results are correct.
-		assertEquals(filename.getUrl(), new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedFilename, svc.getTemplateArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContentRoot, svc.getOptionsArg().getContentRoot().toString(), "Expected the contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Docyment used.");
+		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
+		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test RenderPDFForm(PathOrUrl,...) Happy Path, with contentRoot.")
+	void testRenderPDFFormPathOrUrlDocumentNonDefaultPDFFormRenderOptions() throws Exception {
+		MockPdfRenderService svc = new MockPdfRenderService();
+
+		String expectedFilename = "file:foo/bar.xdp";
+		String expectedContentRoot = "file:foobarbar/";
+		PathOrUrl filename = PathOrUrl.from(expectedFilename);
+		Document data = Mockito.mock(Document.class);
+		PDFFormRenderOptions pdfFormRenderOptions = new PDFFormRenderOptionsImpl();
+		pdfFormRenderOptions.setContentRoot(PathOrUrl.from(expectedContentRoot));
+		Document pdfResult = underTest.renderPDFForm(filename, data, pdfFormRenderOptions);
+		
+		// Verify that all the results are correct.
+		assertEquals(expectedFilename, svc.getTemplateArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContentRoot, svc.getOptionsArg().getContentRoot().toString(), "Expected the contextRoot passed to AEM would match the contextRoot used.");
 		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Docyment used.");
 		assertSame(pdfFormRenderOptions, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfRenderOptions used.");
 		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");

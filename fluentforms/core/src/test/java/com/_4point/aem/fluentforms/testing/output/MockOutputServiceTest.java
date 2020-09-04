@@ -18,7 +18,9 @@ class MockOutputServiceTest {
 		Document expectedResultDoc = mockDocumentFactory.create(expectedResultString.getBytes());
 		MockOutputService underTest = MockOutputService.createGeneratePdfOutputMock(expectedResultDoc);
 		
-		PathOrUrl template = PathOrUrl.from("crx:/test/form");
+		String expectedFilename = "form";
+		String expectedContentRoot = "crx:/test/";
+		PathOrUrl template = PathOrUrl.from(expectedContentRoot + expectedFilename);
 		Document data = mockDocumentFactory.create(expectedResultString.getBytes());
 		
 		Document result = underTest.generatePDFOutput()
@@ -27,7 +29,8 @@ class MockOutputServiceTest {
 		assertEquals(result, expectedResultDoc);
 		GeneratePdfArgs capturedArgs = underTest.getGeneratePdfArgs();
 		assertEquals(data, capturedArgs.getData());
-		assertEquals(template.getCrxUrl(), capturedArgs.getUrlOrFilename());
+		assertEquals(expectedFilename, capturedArgs.getUrlOrFilename());
+		assertEquals(expectedContentRoot, capturedArgs.getPdfOutputOptions().getContentRoot().toString());
 	}
 //
 //  The following code is commented out because the associates implementations have not yet been developed.

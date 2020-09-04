@@ -45,7 +45,7 @@ class TemplateValuesTest {
 		Path template = SAMPLE_FORM.toAbsolutePath();
 		PathOrUrl templatesDir = PathOrUrl.from(SAMPLE_FORMS_DIR.getParent().toAbsolutePath());
 		
-		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.SERVER_SIDE).get();
 		
 		// Content Root should be ignored.
 		assertEquals(template.getParent(), resultTv.getContentRoot().getPath(), "Content Root wasn't what was expected.");
@@ -58,7 +58,7 @@ class TemplateValuesTest {
 		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
 		PathOrUrl templatesDir = PathOrUrl.from(SAMPLE_FORMS_DIR.getParent());
 		
-		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.SERVER_SIDE).get();
 		
 		assertEquals(SAMPLE_FORMS_DIR, resultTv.getContentRoot().getPath(), "Content Root wasn't what was expected.");
 		assertEquals(SAMPLE_FORM.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
@@ -71,7 +71,7 @@ class TemplateValuesTest {
 		Path template = SAMPLE_FORM.toAbsolutePath();
 		PathOrUrl templatesDir = PathOrUrl.from(new URL(urlString));
 		
-		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.SERVER_SIDE).get();
 		
 		// Content Root should be ignored. (i.e. it will be the parent dir of the template)
 		assertEquals(SAMPLE_FORMS_DIR.toAbsolutePath(), resultTv.getContentRoot().getPath(), "Content Root wasn't what was expected.");
@@ -86,7 +86,7 @@ class TemplateValuesTest {
 		String urlString = "http://foo/bar";
 		PathOrUrl templatesDir = PathOrUrl.from(new URL(urlString + scenario.getEndCharacter()));
 		
-		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.SERVER_SIDE).get();
 		
 		assertEquals(urlString + URL_SEPARATOR + SAMPLE_FORMS_DIR.getFileName().toString(), resultTv.getContentRoot().getUrl().toString(), "Content Root wasn't what was expected.");
 		assertEquals(SAMPLE_FORM.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
@@ -99,7 +99,7 @@ class TemplateValuesTest {
 		Path template = SAMPLE_FORM.toAbsolutePath();
 		PathOrUrl templatesDir = PathOrUrl.from(urlString);
 		
-		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.SERVER_SIDE).get();
 		
 		// Content Root should be ignored. (i.e. it will be the parent dir of the template)
 		assertEquals(SAMPLE_FORMS_DIR.toAbsolutePath(), resultTv.getContentRoot().getPath(), "Content Root wasn't what was expected.");
@@ -114,7 +114,7 @@ class TemplateValuesTest {
 		String urlString = "crx://foo/bar";
 		PathOrUrl templatesDir = PathOrUrl.from(urlString + scenario.getEndCharacter());
 		
-		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.SERVER_SIDE).get();
 		
 		assertEquals(urlString + URL_SEPARATOR + SAMPLE_FORMS_DIR.getFileName().toString(), resultTv.getContentRoot().getCrxUrl(), "Content Root wasn't what was expected.");
 		assertEquals(SAMPLE_FORM.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
@@ -126,7 +126,7 @@ class TemplateValuesTest {
 		Path template = SAMPLE_FORM;
 		PathOrUrl templatesDir = null;
 		
-		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE);
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.SERVER_SIDE).get();
 		
 		assertEquals(template.getParent(), resultTv.getContentRoot().getPath(), "Content Root wasn't what was expected.");
 		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
@@ -138,7 +138,7 @@ class TemplateValuesTest {
 		Path template = SAMPLE_FORM.getFileName();
 		PathOrUrl templatesDir = null;
 		
-		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.CLIENT_SIDE);
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.CLIENT_SIDE).get();
 		
 		assertNull(resultTv.getContentRoot(), "Content Root wasn't what was expected.");
 		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
@@ -150,7 +150,7 @@ class TemplateValuesTest {
 		Path template = Paths.get(BAD_TEMPLATE);
 		PathOrUrl templatesDir = PathOrUrl.from(SAMPLE_FORMS_DIR.toAbsolutePath());
 		
-		TemplateValues resultTv = TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.CLIENT_SIDE);
+		TemplateValues resultTv = TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.CLIENT_SIDE).get();
 		assertEquals(templatesDir, resultTv.getContentRoot(), "Content Root wasn't what was expected.");
 		assertEquals(template.getFileName(), resultTv.getTemplate(), "Template wasn't what was expected.");
 	}
@@ -161,7 +161,7 @@ class TemplateValuesTest {
 		Path template = Paths.get(BAD_TEMPLATE);
 		PathOrUrl templatesDir = PathOrUrl.from(SAMPLE_FORMS_DIR.toAbsolutePath());
 
-		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
+		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.SERVER_SIDE));
 		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
 		assertTrue(e.getMessage().contains(BAD_TEMPLATE), "Expected template name to be in the message.");
 		assertTrue(e.getMessage().contains(SAMPLE_FORMS_DIR.toString()), "Expected content root to be in the message.");
@@ -173,7 +173,7 @@ class TemplateValuesTest {
 		Path template = SAMPLE_FORM.getFileName();
 		PathOrUrl templatesDir = PathOrUrl.from(Paths.get(BAD_CONTENT_ROOT));
 
-		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
+		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.SERVER_SIDE));
 		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
 		assertTrue(e.getMessage().contains(template.toString()), "Expected template name to be in the message.");
 		assertTrue(e.getMessage().contains(BAD_CONTENT_ROOT), "Expected content root to be in the message.");
@@ -185,7 +185,7 @@ class TemplateValuesTest {
 		Path template = SAMPLE_FORM.getParent().getFileName().resolve(SAMPLE_FORM.getFileName());
 		PathOrUrl templatesDir = PathOrUrl.from(Paths.get(BAD_CONTENT_ROOT));
 
-		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(template, templatesDir, UsageContext.SERVER_SIDE));
+		FileNotFoundException e = assertThrows(FileNotFoundException.class, ()->TemplateValues.determineTemplateValues(PathOrUrl.from(template), templatesDir, UsageContext.SERVER_SIDE));
 		assertTrue(e.getMessage().contains("Unable to find template"), "Expected 'Unable to find template' to be in the message.");
 		assertTrue(e.getMessage().contains(template.toString()), "Expected template name to be in the message.");
 		assertTrue(e.getMessage().contains(BAD_CONTENT_ROOT), "Expected content root to be in the message.");

@@ -50,38 +50,33 @@ public class FormsServiceImpl implements FormsService {
 			throws FormsServiceException, FileNotFoundException {
 		Objects.requireNonNull(filename, "template cannot be null.");
 
-		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
-		PathOrUrl contentRoot = Objects.requireNonNull(pdfFormRenderOptions, "pdfFormRenderOptions cannot be null!").getContentRoot();
-//		if (contentRoot != null && !contentRoot.isPath()) {
-//			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
-//		}
-		TemplateValues tvs = TemplateValues.determineTemplateValues(filename, contentRoot, this.usageContext);
-		
-		PathOrUrl finalContentRoot = tvs.getContentRoot();
-		pdfFormRenderOptions.setContentRoot(finalContentRoot != null ? finalContentRoot : null);
-		return this.internalRenderPDFForm(tvs.getTemplate().toString(), data, pdfFormRenderOptions);
+		return this.renderPDFForm(PathOrUrl.from(filename), data, pdfFormRenderOptions);
 	}
 
 	@Override
 	public Document renderPDFForm(URL url, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException {
 		Objects.requireNonNull(url, "url cannot be null.");
-		return this.internalRenderPDFForm(url.toString(), data, pdfFormRenderOptions);
+		try {
+			return this.renderPDFForm(PathOrUrl.from(url), data, pdfFormRenderOptions);
+		} catch (FileNotFoundException e) {
+			// This should never happen because the exception is only thrown for Path objects.
+			throw new IllegalStateException("determineTemplateValues threw FileNotFoundException for URL.");
+		}
 	}
 
 	@Override
 	public Document renderPDFForm(PathOrUrl template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException, FileNotFoundException {
-		if (template.isPath()) {
-			return renderPDFForm(template.getPath(), data, pdfFormRenderOptions);
-		} else if (template.isUrl()) {
-			return renderPDFForm(template.getUrl(), data, pdfFormRenderOptions);
-		} else if (template.isCrxUrl()) {
-			return internalRenderPDFForm(template.getCrxUrl(), data, pdfFormRenderOptions);
-		} else {
-			// This should never be thrown.
-			throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
+		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
+		PathOrUrl contentRoot = Objects.requireNonNull(pdfFormRenderOptions, "pdfFormRenderOptions cannot be null!").getContentRoot();
+		Optional<TemplateValues> otvs = TemplateValues.determineTemplateValues(template, contentRoot, this.usageContext);
+		if (otvs.isPresent()) {
+			TemplateValues tvs = otvs.get();
+			template = PathOrUrl.from(tvs.getTemplate());
+			pdfFormRenderOptions.setContentRoot(tvs.getContentRoot());
 		}
+		return internalRenderPDFForm(template.toString(), data, pdfFormRenderOptions);
 	}
 
 	@Override

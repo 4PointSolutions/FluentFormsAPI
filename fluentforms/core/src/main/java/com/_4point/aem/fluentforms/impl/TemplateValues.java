@@ -3,6 +3,8 @@ package com._4point.aem.fluentforms.impl;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
 
 import com._4point.aem.fluentforms.api.PathOrUrl;
 
@@ -28,7 +30,7 @@ public class TemplateValues {
 	// Move any parent on the template to the provided content root (i.e. templates dir).  This is because all fragments in a template
 	// are relative to that template in Designer but relative to the content root when rendering.  We need to make sure the content root
 	// points to the directory where the template resides so that fragments are found.
-	public static TemplateValues determineTemplateValues(Path template, PathOrUrl templatesDir, UsageContext usageContext) throws FileNotFoundException {
+	private static TemplateValues determineTemplateValues(Path template, PathOrUrl templatesDir, UsageContext usageContext) throws FileNotFoundException {
 		Path templateParentDir = template.getParent();
 		PathOrUrl contentRoot;
 		if (templatesDir == null && templateParentDir != null) {
@@ -68,6 +70,44 @@ public class TemplateValues {
 			}
 		}
 		return new TemplateValues(contentRoot, templateFilenamePath);
+	}
+
+	/**
+	 * Reconcile the template and context root provided by the user.
+	 * 
+	 * The references in XDPs are typically relative to the location of the form.  Therefore, the context root should be set to the
+	 * directory where the form resides.  Sometimes however, the template is provided with one or more parent directories.  We need to
+	 * shift those parent directories over into the contextRoot and remove them from the template name (so that the relative links inside
+	 * the template work).  Also, sometimes no contentRoot is supplied.  In this case, if the template path is absolute, then again,
+	 * the absolute path to the template parent directory should be placed in the context root and only the filename passed in the 
+	 * template parameter.
+	 * 
+	 * This routine compares the values of template parameter and the templatesDir (original context root) and reconciles them.  If there
+	 * needs to be an adjustment, then it returns a TemplateValues object that contains the adjusted values.
+	 * 
+	 *  Note: When a Path is passed in (i.e. <code>PathOrUrl.isPath == true</code>) as the template value, there will always
+	 *        be a return (although the values may remain unchanged). 
+	 * 
+	 * @param template			original template value
+	 * @param templatesDir		original context root value
+	 * @param usageContext 		whether this is server or cient side processing
+	 * @return 					the revised template and contextRoot values (if they can be reconciled), otherwise Optional.empty().
+	 * @throws FileNotFoundException thrown when a Path is passed in for both template and templatesDir but the resulting template/context root does not exist on the server.
+	 */
+	public static Optional<TemplateValues> determineTemplateValues(PathOrUrl template, PathOrUrl templatesDir, UsageContext usageContext) throws FileNotFoundException {
+		if (template.isPath()) {
+			return Optional.of(determineTemplateValues(template.getPath(), templatesDir, usageContext));
+		} else {
+			Optional<String> templateFilename = template.getFilename();
+			if (templatesDir == null && templateFilename.isPresent()) {
+				// Since template is not a Path, it must be absolute and with no templates dir, we can treat the filename of the URL or CRXURL like a file path.     
+				return Optional.of(determineTemplateValues(Paths.get(templateFilename.get()), template.getParent().orElse(null), usageContext));
+			} else {
+				// Since the templatesDir (contextRoot) is not empty and templates is not a Path (and therefore absolute),
+				// no reconciliation is possible
+				return Optional.empty();
+			}
+		}
 	}
 
 	public PathOrUrl getContentRoot() {

@@ -21,6 +21,11 @@
 	|   The testing instance must have the SampleForm.xdp uploaded into a directory named sample-forms that resides directly under the
 	|   FormsAndDocuments within the CRX repository.  Without this, all the crx-related tests will fail.
 	|
+	|   The testing instance must have the sample0002test.zip package uploaded into CRX an adaptive form that resides directly under the
+	|   FormsAndDocuments called sample0002test.  Without this, all the adaptive forms tests will fail.
+	|
+	|	Protected mode must be turned off, per this: https://helpx.adobe.com/ca/experience-manager/6-3/forms/using/preview-xdp-forms-html.html
+	|
 	|   Also, the testing instance must have a ReaderExtensions credential installed under admin using an alias of "recred" in order for
 	|   all the SecureDocument/testReaderExtendPDF tests to pass.
 	 -->
@@ -63,6 +68,11 @@
 		<dependency>	<!-- PDF Library for examining PDFs we generate -->
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

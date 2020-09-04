@@ -14,6 +14,10 @@ import org.xml.sax.SAXException;
 
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 
+/**
+ * Utility functions relating to incoming form request parameters that are part of a multipart/form-data post to a servlet.
+ *
+ */
 public class FormParameters {
 
 	/**
@@ -119,7 +123,5 @@ public class FormParameters {
 			String msg = "Input XML payload invalid: " + e.getMessage();
 			throw new BadRequestException(msg, e);
 		}
-	}
-
-
+	}	
 }

@@ -71,7 +71,6 @@ class RestServicesOutputServiceAdapterTest {
 	@Captor ArgumentCaptor<Entity> entity;
 	@Captor ArgumentCaptor<String> correlationId;
 
-	RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder().build();
 	
 	@BeforeEach
 	void setUp() throws Exception {
@@ -79,6 +78,8 @@ class RestServicesOutputServiceAdapterTest {
 
 	@Test
 	void testGeneratePDFOutput_NullArguments() throws Exception {
+		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder().build();
+		
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput((Document)null, null, null));
 		assertThat(ex1.getMessage(), containsStringIgnoringCase("template"));
 		assertThat(ex1.getMessage(), containsStringIgnoringCase("cannot be null"));
@@ -169,8 +170,7 @@ class RestServicesOutputServiceAdapterTest {
 			adapterBuilder.correlationId(()->CORRELATION_ID);
 		}
 
-		underTest = adapterBuilder
-				.build();
+		RestServicesOutputServiceAdapter underTest = adapterBuilder.build();
 
 		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
 
