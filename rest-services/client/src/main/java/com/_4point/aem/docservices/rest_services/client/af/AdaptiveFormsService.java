@@ -99,7 +99,7 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 	public Document renderAdaptiveForm(PathOrUrl template, Document data) throws AdaptiveFormsServiceException {
 		Objects.requireNonNull(template, "Template parameter cannot be null.");
 		Objects.requireNonNull(data, "Data parameter cannot be null.");
-		if (!isRelative(template)) {
+		if (!template.isRelative()) {
 			throw new AdaptiveFormsServiceException("Only relative paths are supported");
 		}
 		
@@ -153,21 +153,6 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		}
 	}
 
-	private static boolean isRelative(PathOrUrl pathOrUrl) {
-		if (!pathOrUrl.isPath()) { 	// If it's an URL or a CRX: path, then it's absolute
-			return false; 
-		}
-		Path path = pathOrUrl.getPath();
-		if (path.isAbsolute()) { 	// If Path thinks it's absolute, then it is
-			return false;
-		}
-		Path root = path.getRoot();
-		if (root != null && root.toString().equals("\\")) {	// If we're on windows and it starts with \, then Path doesn't consider it to be absolute, but we do.
-			return false;
-		}
-		return true;
-	}
-	
 	private String constructAfPath(String formName) {
 		return "/content/forms/af/" + formName + ".html";
 	}

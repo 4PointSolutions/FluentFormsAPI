@@ -193,7 +193,34 @@ public class PathOrUrl {
 			return Optional.of(this);
 		}
 	}
+
+	/**
+	 * Indicates whether the PathOrUrl is relative or absolute?
+	 * 
+	 * This routine returns true if the location in the PathOrUrl is relative.
+	 * 
+	 * In general, CRX and URLs are always absolute while paths are relative if they do not start with a file separator.
+	 * 
+	 * NOTE: Unlike the java.nio.file.Path, this routine treats a Windows path that starts with / as an absolute path. 
+	 * 
+	 * @return
+	 */
+	public boolean isRelative() {
+		if (!this.isPath()) { 	// If it's an URL or a CRX: path, then it's absolute
+			return false; 
+		}
+		Path path = this.getPath();
+		if (path.isAbsolute()) { 	// If Path thinks it's absolute, then it is
+			return false;
+		}
+		Path root = path.getRoot();
+		if (root != null && root.toString().equals("\\")) {	// If we're on windows and it starts with \, then Path doesn't consider it to be absolute, but we do.
+			return false;
+		}
+		return true;
+	}
 	
+
 	/**
 	 * Static constructor
 	 * 
