@@ -55,6 +55,8 @@ public class TemplateParameter {
 			return new TemplateParameter(templateRef);
 		} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_XDP)) {
 			return new TemplateParameter(templateParameter.get());
+		} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_PDF)) {
+			return new TemplateParameter(templateParameter.get());
 		} else {
 			throw new IllegalArgumentException("Template parmameter has invalid content type. (" + templateContentType.getContentTypeStr() + ").");
 		}
