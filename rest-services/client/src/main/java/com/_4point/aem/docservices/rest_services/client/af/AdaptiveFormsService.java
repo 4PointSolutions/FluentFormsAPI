@@ -103,7 +103,7 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 			throw new AdaptiveFormsServiceException("Only relative paths are supported");
 		}
 		
-		WebTarget target = baseTarget.path(constructAfPath(template.toString()))
+		WebTarget target = baseTarget.path(constructAfPath(template.convertRelativePathToRelativeUrl()))
 									 .queryParam("wcmmode", "disabled");
 		
 		if (!data.isEmpty()) {

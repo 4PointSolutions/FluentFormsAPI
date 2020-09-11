@@ -220,6 +220,12 @@ public class PathOrUrl {
 		return true;
 	}
 	
+	public String convertRelativePathToRelativeUrl() {
+		if (!isRelative()) {
+			throw new IllegalStateException("Path must be relative in order to convert to relative URL.");
+		}
+		return this.getPath().toString().replace('\\', '/');
+	}	
 
 	/**
 	 * Static constructor
