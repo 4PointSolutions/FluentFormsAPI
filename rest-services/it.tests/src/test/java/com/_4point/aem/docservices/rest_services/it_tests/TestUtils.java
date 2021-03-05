@@ -22,8 +22,9 @@ import org.junit.jupiter.api.function.Executable;
 import com._4point.aem.docservices.rest_services.it_tests.Pdf.PdfException;
 
 public class TestUtils {
-
+	
 	public static final String TEST_MACHINE_NAME = "localhost";
+	public static final AemServerType TEST_MACHINE_AEM_TYPE = AemServerType.OSGI;
 	public static final int TEST_MACHINE_PORT = 4502;
 	public static final String TEST_MACHINE_PORT_STR = Integer.toString(TEST_MACHINE_PORT);
 	public static final String TEST_USER = "admin";

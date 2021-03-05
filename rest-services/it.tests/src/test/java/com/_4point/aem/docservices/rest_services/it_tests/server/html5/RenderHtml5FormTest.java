@@ -1,19 +1,9 @@
 package com._4point.aem.docservices.rest_services.it_tests.server.html5;
 
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT_STR;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_DATA_XML;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_XDP;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SERVER_FORMS_DIR;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.anyOf;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,8 +33,8 @@ public class RenderHtml5FormTest {
 	private static final String TEMPLATE_PARAM_NAME = "template";
 	private static final String CONTEXT_ROOT_PARAM_NAME = "contentRoot";
 	private static final String DATA_PARAM_NAME = "data";
-	private static final String RENDER_HTML5_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/Html5/RenderHtml5Form";
-	private static final String AEM_RENDER_HTML5_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/content/xfaforms/profiles/default.html";
+	private static final String RENDER_HTML5_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/Html5/RenderHtml5Form";
+	private static final String AEM_RENDER_HTML5_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/content/xfaforms/profiles/default.html";
 	private static final String APPLICATION_XDP = "application/vnd.adobe.xdp+xml";
 
 	private static final boolean SAVE_RESULTS = false;

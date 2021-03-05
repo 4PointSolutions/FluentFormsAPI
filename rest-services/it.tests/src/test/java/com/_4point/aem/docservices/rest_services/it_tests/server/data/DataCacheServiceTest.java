@@ -1,5 +1,6 @@
 package com._4point.aem.docservices.rest_services.it_tests.server.data;
 
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_AEM_TYPE;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT_STR;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
@@ -34,7 +35,7 @@ import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 public class DataCacheServiceTest {
 	private static final String DATA_KEY_PARAM = "DataKey";
 	private static final String DATA_PARAM = "Data";
-	private static final String DATA_CACHE_SERVICE_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/DataServices/DataCache";
+	private static final String DATA_CACHE_SERVICE_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/DataServices/DataCache";
 
 	private static final boolean SAVE_RESULTS = false;
 

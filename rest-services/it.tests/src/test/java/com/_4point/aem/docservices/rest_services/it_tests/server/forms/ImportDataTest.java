@@ -30,7 +30,7 @@ class ImportDataTest {
 
 	private static final String PDF_PARAM_NAME = "pdf";
 	private static final String DATA_PARAM_NAME = "data";
-	private static final String IMPORT_DATA_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/FormsService/ImportData";
+	private static final String IMPORT_DATA_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/FormsService/ImportData";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	
 	private static final boolean SAVE_RESULTS = false;

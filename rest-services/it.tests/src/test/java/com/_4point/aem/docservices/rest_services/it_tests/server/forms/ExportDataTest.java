@@ -1,6 +1,7 @@
 
 package com._4point.aem.docservices.rest_services.it_tests.server.forms;
 
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_AEM_TYPE;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT_STR;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
@@ -38,7 +39,7 @@ import com.adobe.fd.forms.api.DataFormat;
 public class ExportDataTest{
 
 
-	private static final String EXPORT_DATA_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/FormsService/ExportData";
+	private static final String EXPORT_DATA_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/FormsService/ExportData";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	protected static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	private static final MediaType APPLICATION_XML = new MediaType("application", "xml");

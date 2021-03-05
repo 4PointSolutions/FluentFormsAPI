@@ -2,6 +2,7 @@ package com._4point.aem.docservices.rest_services.it_tests.server.af;
 
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_XDP;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SERVER_FORMS_DIR;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_AEM_TYPE;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT_STR;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
@@ -48,7 +49,7 @@ public class RenderAdaptiveFormTest {
 //	private static final String RENDER_ADAPTIVE_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/AdaptiveForms/RenderAdaptiveForm";
 //	private static final String RENDER_ADAPTIVE_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/AdaptiveForms/RenderAdaptiveForm";
 	// 
-	private static final String DATA_CACHE_SERVICE_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/DataServices/DataCache";
+	private static final String DATA_CACHE_SERVICE_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/DataServices/DataCache";
 	private static final String SAMPLE_AF_NAME = "sample00002test";
 	private static final boolean SAVE_RESULTS = false;
 	

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
 public class SecureDocumentTest {
-	private static final String SECURE_DOCUMENT_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/DocAssuranceService/SecureDocument";
+	private static final String SECURE_DOCUMENT_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/DocAssuranceService/SecureDocument";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 
 	private static final String DOCUMENT_PARAM = "inDoc";

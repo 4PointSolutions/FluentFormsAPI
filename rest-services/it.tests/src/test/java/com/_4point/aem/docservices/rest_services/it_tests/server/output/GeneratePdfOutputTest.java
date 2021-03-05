@@ -26,7 +26,7 @@ import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
 class GeneratePdfOutputTest {
 
-	private static final String GENERATE_PDF_OUTPUT_PATH = "/services/OutputService/GeneratePdfOutput";
+	private static final String GENERATE_PDF_OUTPUT_PATH = TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/OutputService/GeneratePdfOutput";
 	private static final String GENERATE_PDF_OUTPUT_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + GENERATE_PDF_OUTPUT_PATH;
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");

@@ -1,6 +1,7 @@
 package com._4point.aem.docservices.rest_services.it_tests.server.generatePDF;
 
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_DOCX;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_AEM_TYPE;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT_STR;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
@@ -32,7 +33,7 @@ import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
 import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 
 public class GeneratePDFTest {
-	private static final String GENERATE_PDF_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/GeneratePDFService/CreatePDF";
+	private static final String GENERATE_PDF_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/GeneratePDFService/CreatePDF";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private static final MediaType APPLICATION_XML = new MediaType("application", "xml");
 	private static final String DATA_PARAM_NAME = "data";

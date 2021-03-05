@@ -39,7 +39,7 @@ class RenderPdfFormTest {
 	private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
 	private static final String TAGGED_PDF_PARAM = "renderOptions.taggedPdf";
 	private static final String XCI_PARAM = "renderOptions.xci";
-	private static final String RENDER_PDF_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/services/FormsService/RenderPdfForm";
+	private static final String RENDER_PDF_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/FormsService/RenderPdfForm";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 
