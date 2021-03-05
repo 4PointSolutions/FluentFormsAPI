@@ -13,10 +13,12 @@ import org.apache.sling.servlets.annotations.SlingServletPaths;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
+
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.Validate Service",
 											"sling.servlet.methods=" + HttpConstants.METHOD_POST})
-@SlingServletPaths("/services/FormsService/Validate")
+@SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/FormsService/Validate")
 
 public class Validate extends SlingAllMethodsServlet {
 

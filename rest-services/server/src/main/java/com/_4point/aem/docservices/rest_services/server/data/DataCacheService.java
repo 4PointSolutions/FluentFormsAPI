@@ -22,12 +22,13 @@ import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestExc
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
 import com._4point.aem.docservices.rest_services.server.FormParameters;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.data.DataCache.Entry;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=DataServices.DataCache Service",
 											"sling.servlet.methods=" + HttpConstants.METHOD_GET})
-@SlingServletPaths("/services/DataServices/DataCache")
+@SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/DataServices/DataCache")
 public class DataCacheService extends SlingAllMethodsServlet {
 	private static final Logger log = LoggerFactory.getLogger(DataCacheService.class);
 

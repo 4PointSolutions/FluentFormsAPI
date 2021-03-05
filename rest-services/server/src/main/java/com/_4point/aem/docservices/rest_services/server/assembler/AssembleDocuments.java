@@ -62,7 +62,7 @@ import com.adobe.fd.assembler.client.OperationException;
 @Component(service = Servlet.class, property = {
 		Constants.SERVICE_DESCRIPTION + "=FormsService.AssembleDocuments Service",
 		"sling.servlet.methods=" + HttpConstants.METHOD_POST })
-@SlingServletPaths("/services/AssemblerService/AssembleDocuments")
+@SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/AssemblerService/AssembleDocuments")
 public class AssembleDocuments extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(AssembleDocuments.class);

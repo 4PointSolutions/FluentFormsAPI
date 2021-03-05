@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.DataParameter;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
@@ -35,7 +36,7 @@ import com._4point.aem.fluentforms.impl.UsageContext;
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=Html5 Service",
 		"sling.servlet.methods=" + HttpConstants.METHOD_POST})
-@SlingServletPaths("/services/Html5/RenderHtml5Form")
+@SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/Html5/RenderHtml5Form")
 public class RenderHtml5Form extends SlingAllMethodsServlet {
 	private static final String DATA_REF_ATTRIBUTE_NAME = "dataRef";
 	private static final String DATA_ATTRIBUTE_NAME = "data";

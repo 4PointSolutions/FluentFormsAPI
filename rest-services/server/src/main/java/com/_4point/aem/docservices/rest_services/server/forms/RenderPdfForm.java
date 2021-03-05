@@ -55,7 +55,7 @@ import com.adobe.fd.forms.api.RenderAtClient;
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.RenderPdfForm Service",
 											"sling.servlet.methods=" + HttpConstants.METHOD_POST})
-@SlingServletPaths("/services/FormsService/RenderPdfForm")
+@SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/FormsService/RenderPdfForm")
 
 public class RenderPdfForm extends SlingAllMethodsServlet {
 

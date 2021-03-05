@@ -40,7 +40,7 @@ import com.adobe.fd.forms.api.DataFormat;
 
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.ExportData Service",
 											"sling.servlet.methods=" + HttpConstants.METHOD_POST})
-@SlingServletPaths("/services/FormsService/ExportData")
+@SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/FormsService/ExportData")
 public class ExportData extends SlingAllMethodsServlet {
 	
 	

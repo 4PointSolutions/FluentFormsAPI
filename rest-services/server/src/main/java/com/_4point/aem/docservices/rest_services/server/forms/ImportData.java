@@ -39,7 +39,7 @@ import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.ImportData Service",
 											"sling.servlet.methods=" + HttpConstants.METHOD_POST})
-@SlingServletPaths("/services/FormsService/ImportData")
+@SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/FormsService/ImportData")
 public class ImportData extends SlingAllMethodsServlet {
 
 	private static final String PDF_PARAM_NAME = "pdf";

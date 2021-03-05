@@ -38,6 +38,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com._4point.aem.docservices.rest_services.server.ContentType;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
@@ -52,7 +53,7 @@ import com.adobe.forms.common.service.FileAttachmentWrapper;
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=DocumentOfRecord.Generate Service",
 											"sling.servlet.methods=" + HttpConstants.METHOD_POST})
-@SlingServletPaths("/services/DorService/Generate")
+@SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/DorService/Generate")
 public class DocumentOfRecord extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(DocumentOfRecord.class);

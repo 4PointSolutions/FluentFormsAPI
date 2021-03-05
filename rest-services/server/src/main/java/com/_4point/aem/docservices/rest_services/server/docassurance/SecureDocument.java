@@ -37,7 +37,7 @@ import com._4point.aem.fluentforms.impl.docassurance.TraditionalDocAssuranceServ
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=DocAssuranceService.SecureDocument Service",
 											"sling.servlet.methods=" + HttpConstants.METHOD_POST})
-@SlingServletPaths("/services/DocAssuranceService/SecureDocument")
+@SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/DocAssuranceService/SecureDocument")
 public class SecureDocument extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(SecureDocument.class);

@@ -14,6 +14,8 @@ public class ServletUtils {
 	private ServletUtils() {
 	}
 	
+	public static final String SERVICES_PREFIX = "/services";
+	
 	public static void validateAcceptHeader(String acceptHeaderStr, String generatedContentType) throws NotAcceptableException {
 		if ( acceptHeaderStr != null) {
 			// If we've been supplied with an accept header, make sure it is correct.

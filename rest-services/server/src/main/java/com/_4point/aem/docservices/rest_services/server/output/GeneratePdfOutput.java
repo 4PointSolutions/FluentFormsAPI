@@ -49,7 +49,7 @@ import com.adobe.fd.output.api.AcrobatVersion;
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.RenderPdfForm Service",
 		"sling.servlet.methods=" + HttpConstants.METHOD_POST})
-@SlingServletPaths("/services/OutputService/GeneratePdfOutput")
+@SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/OutputService/GeneratePdfOutput")
 public class GeneratePdfOutput extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(GeneratePdfOutput.class);
