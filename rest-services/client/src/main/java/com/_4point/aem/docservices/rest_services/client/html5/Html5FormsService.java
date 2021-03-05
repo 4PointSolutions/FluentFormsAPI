@@ -217,6 +217,11 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 			return renderResultFilter;
 		}
 
+		@Override
+		public Builder aemServerType(AemServerType serverType) {
+			return builder.aemServerType(serverType);
+		}
+		
 		public Html5FormsService build() {
 			return new Html5FormsService(this.createLocalTarget(), this.getCorrelationIdFn(), this.getRenderResultFilter());
 		}

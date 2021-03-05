@@ -298,6 +298,11 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 			return renderResultFilter;
 		}
 
+		@Override
+		public Builder aemServerType(AemServerType serverType) {
+			return builder.aemServerType(serverType);
+		}
+		
 		public AdaptiveFormsService build() {
 			return new AdaptiveFormsService(this.createLocalTarget(), this.getCorrelationIdFn(), this.getRenderResultFilter());
 		}

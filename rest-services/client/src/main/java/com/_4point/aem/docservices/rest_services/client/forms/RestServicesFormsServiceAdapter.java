@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
@@ -324,6 +325,11 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			return builder.createLocalTarget();
 		}
 
+		@Override
+		public Builder aemServerType(AemServerType serverType) {
+			return builder.aemServerType(serverType);
+		}
+		
 		public RestServicesFormsServiceAdapter build() {
 			return new RestServicesFormsServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
 		}

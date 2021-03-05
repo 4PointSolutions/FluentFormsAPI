@@ -199,6 +199,11 @@ public class RestServicesGeneratePDFServiceAdapter extends RestServicesServiceAd
 			return builder.createLocalTarget();
 		}
 
+		@Override
+		public Builder aemServerType(AemServerType serverType) {
+			return builder.aemServerType(serverType);
+		}
+		
 		public RestServicesGeneratePDFServiceAdapter build() {
 			return new RestServicesGeneratePDFServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
 		}

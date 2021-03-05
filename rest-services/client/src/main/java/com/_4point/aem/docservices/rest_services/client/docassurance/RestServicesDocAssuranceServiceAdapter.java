@@ -348,6 +348,11 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 			return builder.createLocalTarget();
 		}
 
+		@Override
+		public Builder aemServerType(AemServerType serverType) {
+			return builder.aemServerType(serverType);
+		}
+		
 		public RestServicesDocAssuranceServiceAdapter build() {
 			return new RestServicesDocAssuranceServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
 		}

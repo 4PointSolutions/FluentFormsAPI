@@ -238,6 +238,11 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 		public WebTarget createLocalTarget() {
 			return builder.createLocalTarget();
 		}
+
+		@Override
+		public Builder aemServerType(AemServerType serverType) {
+			return builder.aemServerType(serverType);
+		}
 		
 		public RestServicesOutputServiceAdapter build() {
 			return new RestServicesOutputServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());

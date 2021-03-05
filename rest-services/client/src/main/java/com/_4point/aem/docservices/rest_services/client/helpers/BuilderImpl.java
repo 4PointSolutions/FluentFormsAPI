@@ -27,6 +27,7 @@ public class BuilderImpl implements Builder {
 	private boolean useSsl = false;
 	private Supplier<Client> clientFactory = defaultClientFactory;
 	private Supplier<String> correlationIdFn = null;
+	private AemServerType aemServerType = AemServerType.OSGI;	// Defaults to OSGi but can be overridden.
 
 	public BuilderImpl() {
 		super();
@@ -80,8 +81,14 @@ public class BuilderImpl implements Builder {
 		if (this.authFeature != null) {
 			client.register(authFeature);
 		}
-		WebTarget localTarget = client.target("http" + (useSsl ? "s" : "") + "://" + machineName + ":" + Integer.toString(port));
+		WebTarget localTarget = client.target("http" + (useSsl ? "s" : "") + "://" + machineName + ":" + Integer.toString(port) + this.aemServerType.pathPrefix());
 		return localTarget;
+	}
+
+	@Override
+	public Builder aemServerType(AemServerType serverType) {
+		this.aemServerType = serverType;
+		return this;
 	}
 
 }
