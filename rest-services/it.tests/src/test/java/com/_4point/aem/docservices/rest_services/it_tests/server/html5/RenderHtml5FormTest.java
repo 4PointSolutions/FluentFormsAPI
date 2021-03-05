@@ -82,14 +82,16 @@ public class RenderHtml5FormTest {
 		}
 	}
 		
-	private enum FormType { BY_VALUE, BY_REFERENCE };
+	private enum FormType { BY_VALUE, BY_REFERENCE, BY_CRX_REFERENCE };
 	private enum DataType { NO_DATA, BY_VALUE, BY_REFERENCE };
 	
 	private enum HappyPathScenario {
 		FORM_REF_ONLY(FormType.BY_REFERENCE, DataType.NO_DATA),
+//		FORM_CRX_REF_ONLY(FormType.BY_CRX_REFERENCE, DataType.NO_DATA),
 //		FORM_VAL_ONLY(FormType.BY_VALUE, DataType.NO_DATA),		// Not supported at this time
 //		FORM_REF_DATA_REF(FormType.BY_REFERENCE, DataType.BY_REFERENCE),	// Doesn't work for some reason.  Isn't needed at this time.
 		FORM_REF_DATA_VAL(FormType.BY_REFERENCE, DataType.BY_VALUE),
+//		FORM_CRX_REF_DATA_VAL(FormType.BY_CRX_REFERENCE, DataType.BY_VALUE),
 //		FORM_VAL_DATA_REF(FormType.BY_VALUE, DataType.BY_REFERENCE),		// Not supported at this time
 //		FORM_VAL_DATA_VAL(FormType.BY_VALUE, DataType.BY_VALUE)		// Not supported at this time
 		;
@@ -111,6 +113,10 @@ public class RenderHtml5FormTest {
 			switch (scenario.formType) {
 			case BY_REFERENCE:
 				multipart.field(TEMPLATE_PARAM_NAME, SAMPLE_FORM_XDP.toAbsolutePath().toString());
+				break;
+			case BY_CRX_REFERENCE:
+				multipart.field(TEMPLATE_PARAM_NAME, "sample-forms/ " + SAMPLE_FORM_XDP.getFileName().toString());
+				multipart.field(CONTEXT_ROOT_PARAM_NAME, "crx:/content/dam/formsanddocuments");
 				break;
 			case BY_VALUE:
 				multipart.field(TEMPLATE_PARAM_NAME, SAMPLE_FORM_XDP.toFile(), MediaType.valueOf(APPLICATION_XDP));
