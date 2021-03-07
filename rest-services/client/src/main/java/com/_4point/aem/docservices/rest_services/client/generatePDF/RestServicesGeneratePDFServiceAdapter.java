@@ -20,6 +20,7 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
@@ -44,13 +45,13 @@ public class RestServicesGeneratePDFServiceAdapter extends RestServicesServiceAd
 	private static final String SETTING_DOC = "settingDoc";
 	private static final String XMP_DOC = "xmpDoc";
 
-	protected RestServicesGeneratePDFServiceAdapter(WebTarget baseTarget) {
-		super(baseTarget);
-	}
-
+//	protected RestServicesGeneratePDFServiceAdapter(WebTarget baseTarget) {
+//		super(baseTarget);
+//	}
+//
 	// Only callable from Builder
-	private RestServicesGeneratePDFServiceAdapter(WebTarget target, Supplier<String> correlationId) {
-		super(target, correlationId);
+	private RestServicesGeneratePDFServiceAdapter(WebTarget target, Supplier<String> correlationId, AemServerType aemServerType) {
+		super(target, correlationId, aemServerType);
 	}
 
 	@Override
@@ -204,8 +205,13 @@ public class RestServicesGeneratePDFServiceAdapter extends RestServicesServiceAd
 			return builder.aemServerType(serverType);
 		}
 		
+		@Override
+		public AemServerType getAemServerType() {
+			return builder.getAemServerType();
+		}
+
 		public RestServicesGeneratePDFServiceAdapter build() {
-			return new RestServicesGeneratePDFServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
+			return new RestServicesGeneratePDFServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType());
 		}
 
 	}

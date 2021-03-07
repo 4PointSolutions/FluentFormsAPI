@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
@@ -33,13 +34,8 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 
 	private final Function<InputStream, InputStream> responseFilter; 
 
-	protected Html5FormsService(WebTarget baseTarget, Function<InputStream, InputStream> responseFilter) {
-		super(baseTarget);
-		this.responseFilter = responseFilter != null ? responseFilter : Function.identity();
-	}
-
-	protected Html5FormsService(WebTarget baseTarget, Supplier<String> correlationIdFn, Function<InputStream, InputStream> responseFilter) {
-		super(baseTarget, correlationIdFn);
+	protected Html5FormsService(WebTarget baseTarget, Supplier<String> correlationIdFn, AemServerType aemServerType, Function<InputStream, InputStream> responseFilter) {
+		super(baseTarget, correlationIdFn, aemServerType);
 		this.responseFilter = responseFilter != null ? responseFilter : Function.identity();
 	}
 	
@@ -222,8 +218,13 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 			return builder.aemServerType(serverType);
 		}
 		
+		@Override
+		public AemServerType getAemServerType() {
+			return builder.getAemServerType();
+		}
+
 		public Html5FormsService build() {
-			return new Html5FormsService(this.createLocalTarget(), this.getCorrelationIdFn(), this.getRenderResultFilter());
+			return new Html5FormsService(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType(), this.getRenderResultFilter());
 		}
 		
 	}

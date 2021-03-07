@@ -28,7 +28,7 @@ class RestServicesServiceAdapterTest {
 										.register(MultiPartFeature.class)
 										.target(expectedUri)
 										.path(expectedPath);
-		RestServicesServiceAdapter underTest = new RestServicesServiceAdapter(target) {
+		RestServicesServiceAdapter underTest = new RestServicesServiceAdapter(target, ()->"correlationId", AemServerType.StandardType.OSGI) {
 		};
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {

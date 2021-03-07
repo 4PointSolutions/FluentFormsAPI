@@ -31,20 +31,7 @@ public interface Builder {
 
 	public WebTarget createLocalTarget();
 
-	public enum AemServerType {
-		JEE("/lc"), 
-		OSGI("");
-		
-		private final String pathPrefix;
-
-		private AemServerType(String pathPrefix) {
-			this.pathPrefix = pathPrefix;
-		}
-
-		public final String pathPrefix() {
-			return this.pathPrefix;
-		}
-	}
-
 	public Builder aemServerType(AemServerType serverType);
+
+	public AemServerType getAemServerType();
 }

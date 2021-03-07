@@ -19,17 +19,19 @@ public abstract class RestServicesServiceAdapter {
 	protected static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	protected final WebTarget baseTarget;				// used by subclasses
 	protected final Supplier<String> correlationIdFn;
+	protected final AemServerType aemServerType;
 	//protected static final MediaType APPLICATION_OCTET_STREAM_TYPE=new MediaType("application","octet-stream");
-	protected RestServicesServiceAdapter(WebTarget baseTarget) {
-		super();
-		this.baseTarget = baseTarget;
-		this.correlationIdFn = null;
-	}
+//	protected RestServicesServiceAdapter(WebTarget baseTarget) {
+//		super();
+//		this.baseTarget = baseTarget;
+//		this.correlationIdFn = null;
+//	}
 
-	protected RestServicesServiceAdapter(WebTarget baseTarget, Supplier<String> correlationIdFn) {
+	protected RestServicesServiceAdapter(WebTarget baseTarget, Supplier<String> correlationIdFn, AemServerType aemServerType) {
 		super();
 		this.baseTarget = baseTarget;
 		this.correlationIdFn = correlationIdFn;
+		this.aemServerType = aemServerType;
 	}
 
 	protected Response postToServer(WebTarget localTarget, final FormDataMultiPart multipart, final MediaType acceptType) throws RestServicesServiceException  {

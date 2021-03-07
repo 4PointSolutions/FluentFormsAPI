@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
@@ -56,13 +57,8 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 	private static final String XCI_PARAM = "renderOptions.xci";
 	
 	// Only callable from Builder
-	private RestServicesFormsServiceAdapter(WebTarget target) {
-		super(target);
-	}
-
-	// Only callable from Builder
-	private RestServicesFormsServiceAdapter(WebTarget target, Supplier<String> correlationId) {
-		super(target, correlationId);
+	private RestServicesFormsServiceAdapter(WebTarget target, Supplier<String> correlationId, AemServerType aemServerType) {
+		super(target, correlationId, aemServerType);
 	}
 
 	@Override
@@ -330,8 +326,13 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			return builder.aemServerType(serverType);
 		}
 		
+		@Override
+		public AemServerType getAemServerType() {
+			return builder.getAemServerType();
+		}
+
 		public RestServicesFormsServiceAdapter build() {
-			return new RestServicesFormsServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
+			return new RestServicesFormsServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType());
 		}
 	}
 }

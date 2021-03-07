@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
@@ -63,13 +64,8 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 	private static final String ENABLED_SUBMIT_STANDALONE_PARAM = "usageRights.enabledSubmitStandalone";
 
 	// Only callable from Builder
-	private RestServicesDocAssuranceServiceAdapter(WebTarget target) {
-		super(target);
-	}
-
-	// Only callable from Builder
-	private RestServicesDocAssuranceServiceAdapter(WebTarget target, Supplier<String> correlationId) {
-		super(target, correlationId);
+	private RestServicesDocAssuranceServiceAdapter(WebTarget target, Supplier<String> correlationId, AemServerType aemServerType) {
+		super(target, correlationId, aemServerType);
 	}
 
 	@Override
@@ -353,8 +349,13 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 			return builder.aemServerType(serverType);
 		}
 		
+		@Override
+		public AemServerType getAemServerType() {
+			return builder.getAemServerType();
+		}
+
 		public RestServicesDocAssuranceServiceAdapter build() {
-			return new RestServicesDocAssuranceServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
+			return new RestServicesDocAssuranceServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType());
 		}
 	}
 }

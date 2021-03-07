@@ -27,7 +27,7 @@ public class BuilderImpl implements Builder {
 	private boolean useSsl = false;
 	private Supplier<Client> clientFactory = defaultClientFactory;
 	private Supplier<String> correlationIdFn = null;
-	private AemServerType aemServerType = AemServerType.OSGI;	// Defaults to OSGi but can be overridden.
+	private AemServerType aemServerType = AemServerType.StandardType.OSGI;	// Defaults to OSGi but can be overridden.
 
 	public BuilderImpl() {
 		super();
@@ -89,6 +89,11 @@ public class BuilderImpl implements Builder {
 	public Builder aemServerType(AemServerType serverType) {
 		this.aemServerType = serverType;
 		return this;
+	}
+
+	@Override
+	public AemServerType getAemServerType() {
+		return this.aemServerType;
 	}
 
 }

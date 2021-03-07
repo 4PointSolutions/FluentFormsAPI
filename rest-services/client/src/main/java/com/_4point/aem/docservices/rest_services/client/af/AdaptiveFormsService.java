@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
@@ -40,13 +41,8 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 
 	private final Function<InputStream, InputStream> responseFilter; 
 
-	public AdaptiveFormsService(WebTarget baseTarget, Supplier<String> correlationIdFn, Function<InputStream, InputStream> responseFilter) {
-		super(baseTarget, correlationIdFn);
-		this.responseFilter = responseFilter;
-	}
-
-	public AdaptiveFormsService(WebTarget baseTarget, Function<InputStream, InputStream> responseFilter) {
-		super(baseTarget);
+	public AdaptiveFormsService(WebTarget baseTarget, Supplier<String> correlationIdFn, AemServerType aemServerType, Function<InputStream, InputStream> responseFilter) {
+		super(baseTarget, correlationIdFn, aemServerType);
 		this.responseFilter = responseFilter;
 	}
 
@@ -303,8 +299,13 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 			return builder.aemServerType(serverType);
 		}
 		
+		@Override
+		public AemServerType getAemServerType() {
+			return builder.getAemServerType();
+		}
+
 		public AdaptiveFormsService build() {
-			return new AdaptiveFormsService(this.createLocalTarget(), this.getCorrelationIdFn(), this.getRenderResultFilter());
+			return new AdaptiveFormsService(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType(), this.getRenderResultFilter());
 		}
 	}
 

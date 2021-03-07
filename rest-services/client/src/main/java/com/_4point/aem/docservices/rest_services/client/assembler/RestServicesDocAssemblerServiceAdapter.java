@@ -28,6 +28,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
@@ -56,13 +57,8 @@ implements TraditionalDocAssemblerService {
 	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
 
 	// Only callable from Builder
-	private RestServicesDocAssemblerServiceAdapter(WebTarget target) {
-		super(target);
-	}
-
-	// Only callable from Builder
-	private RestServicesDocAssemblerServiceAdapter(WebTarget target, Supplier<String> correlationId) {
-		super(target, correlationId);
+	private RestServicesDocAssemblerServiceAdapter(WebTarget target, Supplier<String> correlationId, AemServerType aemServerType) {
+		super(target, correlationId, aemServerType);
 	}
 
 	@Override
@@ -293,8 +289,13 @@ implements TraditionalDocAssemblerService {
 			return builder.aemServerType(serverType);
 		}
 		
+		@Override
+		public AemServerType getAemServerType() {
+			return builder.getAemServerType();
+		}
+
 		public RestServicesDocAssemblerServiceAdapter build() {
-			return new RestServicesDocAssemblerServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn());
+			return new RestServicesDocAssemblerServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType());
 		}
 	}
 
