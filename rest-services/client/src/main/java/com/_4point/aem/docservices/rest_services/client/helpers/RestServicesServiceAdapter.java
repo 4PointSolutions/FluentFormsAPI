@@ -17,6 +17,7 @@ public abstract class RestServicesServiceAdapter {
 	protected static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	protected static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	protected static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
+	private static final String SERVICES_URL_PREFIX = "/services";
 	protected final WebTarget baseTarget;				// used by subclasses
 	protected final Supplier<String> correlationIdFn;
 	protected final AemServerType aemServerType;
@@ -57,6 +58,10 @@ public abstract class RestServicesServiceAdapter {
 		    result.write(buffer, 0, length);
 		}
 		return result.toString(StandardCharsets.UTF_8.name());
+	}
+
+	protected String constructStandardPath(String serviceName, String methodName) {
+		return this.aemServerType.pathPrefix() + SERVICES_URL_PREFIX + "/" + serviceName + "/" + methodName;
 	}
 
 	@SuppressWarnings("serial")

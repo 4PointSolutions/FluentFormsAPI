@@ -45,7 +45,8 @@ import com.adobe.fd.signatures.pki.client.types.common.RevocationCheckStyle;
 
 public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceAdapter implements TraditionalDocAssuranceService {
 
-	private static final String SECURE_DOCUMENT_PATH = "/services/DocAssuranceService/SecureDocument";
+	private static final String SECURE_DOCUMENT_SERVICE_NAME = "DocAssuranceService";
+	private static final String SECURE_DOCUMENT_METHOD_NAME = "SecureDocument";
 
 	private static final String CREDENTIAL_ALIAS_PARAM = "credentialAlias";
 	private static final String DOCUMENT_PARAM = "inDoc";
@@ -71,7 +72,7 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 	@Override
 	public Document secureDocument(Document inDocument, EncryptionOptions encryptionOptions, SignatureOptions signatureOptions, ReaderExtensionOptions readerExtensionOptions,
 			UnlockOptions unlockOptions) throws DocAssuranceServiceException {
-		WebTarget secureDocTarget = baseTarget.path(SECURE_DOCUMENT_PATH);
+		WebTarget secureDocTarget = baseTarget.path(constructStandardPath(SECURE_DOCUMENT_SERVICE_NAME, SECURE_DOCUMENT_METHOD_NAME));
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			if (encryptionOptions != null) {

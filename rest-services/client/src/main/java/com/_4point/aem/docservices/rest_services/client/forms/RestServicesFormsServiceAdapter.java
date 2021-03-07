@@ -39,9 +39,10 @@ import com.adobe.fd.forms.api.RenderAtClient;
 
 public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter implements TraditionalFormsService {
 
-	private static final String IMPORT_DATA_PATH = "/services/FormsService/ImportData";
-	private static final String RENDER_PDF_FORM_PATH = "/services/FormsService/RenderPdfForm";
-	private static final String EXPORT_DATA_PATH="/services/FormsService/ExportData";
+	private static final String FORM_SERVICE_NAME = "FormsService";
+	private static final String IMPORT_DATA_METHOD_NAME = "ImportData";
+	private static final String RENDER_PDF_FORM_METHOD_NAME = "RenderPdfForm";
+	private static final String EXPORT_DATA_METHOD_NAME="ExportData";
 	private static final String PDF_PARAM = "pdf";
 	private static final String DATA_PARAM = "data";
 	private static final String TEMPLATE_PARAM = "template";
@@ -66,7 +67,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 		if (pdfOrXdp == null &&dataFormat == null) {
 			throw new FormsServiceException("Internal Error, must provide document and its dataformat");
 		}
-		WebTarget exportDataTarget = baseTarget.path(EXPORT_DATA_PATH);
+		WebTarget exportDataTarget = baseTarget.path(constructStandardPath(FORM_SERVICE_NAME, EXPORT_DATA_METHOD_NAME));
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field("pdforxdp", pdfOrXdp.getInputStream(), APPLICATION_PDF)
 			 .field("dataformat", DataFormat.XmlData.name());
@@ -113,7 +114,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 
 	@Override
 	public Document importData(Document pdf, Document data) throws FormsServiceException {
-		WebTarget importDataTarget = baseTarget.path(IMPORT_DATA_PATH);
+		WebTarget importDataTarget = baseTarget.path(constructStandardPath(FORM_SERVICE_NAME, IMPORT_DATA_METHOD_NAME));
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE)
@@ -162,7 +163,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 		if ((urlOrfilename == null && template == null) || (urlOrfilename != null && template != null)) {
 			throw new FormsServiceException("Internal Error, must provide one or the other of template String or Document.");
 		}
-		WebTarget renderPdfTarget = baseTarget.path(RENDER_PDF_FORM_PATH);
+		WebTarget renderPdfTarget = baseTarget.path(constructStandardPath(FORM_SERVICE_NAME, RENDER_PDF_FORM_METHOD_NAME));
 		
 		AcrobatVersion acrobatVersion = pdfFormRenderOptions.getAcrobatVersion();
 		CacheStrategy cacheStrategy = pdfFormRenderOptions.getCacheStrategy();

@@ -36,7 +36,8 @@ import com._4point.aem.fluentforms.impl.generatePDF.TraditionalGeneratePDFServic
 
 public class RestServicesGeneratePDFServiceAdapter extends RestServicesServiceAdapter
 		implements TraditionalGeneratePDFService {
-	private static final String GENERATE_PDF_PATH = "/services/GeneratePDFService/CreatePDF";
+	private static final String GENERATE_PDF_SERVICE_NAME = "GeneratePDFService";
+	private static final String CREATE_PDF_METHOD_NAME = "CreatePDF";
 	private static final String DATA_PARAM_NAME = "data";
 	private static final String FILE_EXTENSION = "fileExtension";
 	private static final String FILE_TYPE_SETTINGS = "fileTypeSettings";
@@ -58,7 +59,7 @@ public class RestServicesGeneratePDFServiceAdapter extends RestServicesServiceAd
 	public CreatePDFResult createPDF2(Document inputDoc, String inputFileExtension, String fileTypeSettings,
 			PDFSettings pdfSettings, SecuritySettings securitySettings, Document settingsDoc, Document xmpDoc)
 			throws GeneratePDFServiceException {
-		WebTarget geneWebTarget = baseTarget.path(GENERATE_PDF_PATH);
+		WebTarget geneWebTarget = baseTarget.path(constructStandardPath(GENERATE_PDF_SERVICE_NAME, CREATE_PDF_METHOD_NAME));
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM_NAME,

@@ -28,7 +28,8 @@ import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 
 public class Html5FormsService extends RestServicesServiceAdapter {
 
-	private static final String RENDER_HTML5_PATH = "/services/Html5/RenderHtml5Form";
+	private static final String HTML5_SERVICE_NAME = "Html5";
+	private static final String RENDER_HTML5_METHOD_NAME = "RenderHtml5Form";
 	private static final String TEMPLATE_PARAM = "template";
 	private static final String DATA_PARAM = "data";
 
@@ -59,7 +60,7 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 		Objects.requireNonNull(template, "Template parameter cannot be null.");
 		Objects.requireNonNull(data, "Data parameter cannot be null.");
 		
-		WebTarget renderHtml5Target = baseTarget.path(RENDER_HTML5_PATH);
+		WebTarget renderHtml5Target = baseTarget.path(constructStandardPath(HTML5_SERVICE_NAME, RENDER_HTML5_METHOD_NAME));
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(TEMPLATE_PARAM, template.toString());

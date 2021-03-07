@@ -35,8 +35,9 @@ import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 public class AdaptiveFormsService extends RestServicesServiceAdapter {
 	// private static final String RENDER_ADAPTIVE_FORM_PATH = "/services/AdaptiveForms/RenderAdaptiveForm";  // Not currently being used.
 	// private static final String TEMPLATE_PARAM = "template";
+	private static final String DATA_CACHE_SERVICE_NAME = "DataServices";
+	private static final String DATA_CACHE_METHOD_NAME = "DataCache";
 	private static final String DATA_REF_PARAM = "dataRef";
-	private static final String DATA_CACHE_SERVICE_PATH = "/services/DataServices/DataCache";
 	private static final String DATA_SERVICE_DATA_PARAM = "Data";
 
 	private final Function<InputStream, InputStream> responseFilter; 
@@ -150,15 +151,16 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 	}
 
 	private String constructAfPath(String formName) {
-		return "/content/forms/af/" + formName + ".html";
+		return this.aemServerType.pathPrefix() + "/content/forms/af/" + formName + ".html";
 	}
 	
 	private String generateDataRefParam(String uuid) {
 		return "service://FFPrefillService/" + uuid;
 	}
 	
-	private String postDataToDataCacheService(Document data) throws AdaptiveFormsServiceException { 
-		WebTarget dataCacheServiceTarget = baseTarget.path(DATA_CACHE_SERVICE_PATH);
+	private String postDataToDataCacheService(Document data) throws AdaptiveFormsServiceException {
+
+		WebTarget dataCacheServiceTarget = baseTarget.path(constructStandardPath(DATA_CACHE_SERVICE_NAME, DATA_CACHE_METHOD_NAME));
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_SERVICE_DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE);

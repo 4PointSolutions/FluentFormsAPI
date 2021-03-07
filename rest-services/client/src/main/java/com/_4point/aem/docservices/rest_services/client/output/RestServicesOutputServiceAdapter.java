@@ -36,7 +36,8 @@ import com.adobe.fd.output.api.AcrobatVersion;
 
 public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter implements TraditionalOutputService {
 
-	private static final String GENERATE_PDF_OUTPUT_PATH = "/services/OutputService/GeneratePdfOutput";
+	private static final String OUTPUT_SERVICE_NAME = "OutputService";
+	private static final String GENERATE_PDF_OUTPUT_METHOD_NAME = "GeneratePdfOutput";
 
 	private static final String TEMPLATE_PARAM = "template";
 	private static final String DATA_PARAM = "data";
@@ -67,7 +68,7 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 	}
 
 	private Document internalGeneratePDFOutput(Document template, String templateStr, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
-		WebTarget renderPdfTarget = baseTarget.path(GENERATE_PDF_OUTPUT_PATH);
+		WebTarget renderPdfTarget = baseTarget.path(constructStandardPath(OUTPUT_SERVICE_NAME, GENERATE_PDF_OUTPUT_METHOD_NAME));
 
 		if (template == null && templateStr == null) {
 			throw new NullPointerException("template parameter cannot be null.");

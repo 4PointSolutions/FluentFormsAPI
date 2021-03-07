@@ -45,7 +45,8 @@ import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService
 public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceAdapter
 implements TraditionalDocAssemblerService {
 
-	private static final String ASSEMBLE_DOCUMENT_PATH = "/services/AssemblerService/AssembleDocuments";
+	private static final String ASSEMBLE_DOCUMENT_SERVICE_NAME = "AssemblerService";
+	private static final String ASSEMBLE_DOCUMENT_METHOD_NAME = "AssembleDocuments";
 	private static final String DATA_PARAM_NAME = "ddx";
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
 	private static final String IS_VALIDATE_ONLY = "isValidateOnly";
@@ -64,7 +65,7 @@ implements TraditionalDocAssemblerService {
 	@Override
 	public AssemblerResult invoke(Document ddx, Map<String, Object> sourceDocuments,
 			AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException {
-		WebTarget assembleDocTarget = baseTarget.path(ASSEMBLE_DOCUMENT_PATH);
+		WebTarget assembleDocTarget = baseTarget.path(constructStandardPath(ASSEMBLE_DOCUMENT_SERVICE_NAME, ASSEMBLE_DOCUMENT_METHOD_NAME));
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM_NAME, Objects.requireNonNull(ddx, "ddx can not be null").getInputStream(), MediaType.APPLICATION_XML_TYPE);					
