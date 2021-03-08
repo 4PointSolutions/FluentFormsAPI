@@ -81,7 +81,7 @@ public class BuilderImpl implements Builder {
 		if (this.authFeature != null) {
 			client.register(authFeature);
 		}
-		WebTarget localTarget = client.target("http" + (useSsl ? "s" : "") + "://" + machineName + ":" + Integer.toString(port) + this.aemServerType.pathPrefix());
+		WebTarget localTarget = client.target("http" + (useSsl ? "s" : "") + "://" + machineName + ":" + Integer.toString(port));
 		return localTarget;
 	}
 

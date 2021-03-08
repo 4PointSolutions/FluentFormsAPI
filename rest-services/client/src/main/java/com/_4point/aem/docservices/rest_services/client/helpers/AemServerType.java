@@ -1,5 +1,7 @@
 package com._4point.aem.docservices.rest_services.client.helpers;
 
+import java.util.Optional;
+
 /**
  * This interface can be implemented by client code if the standard types are not suitable.
  */
@@ -27,6 +29,17 @@ public interface AemServerType {
 
 		public final String pathPrefix() {
 			return this.pathPrefix;
+		}
+		
+		public static Optional<StandardType> from(String typeString) {
+			if (typeString != null && !typeString.isEmpty()) {
+				for (StandardType st : values()) {
+					if (typeString.equalsIgnoreCase(st.name())) {
+						return Optional.of(st);
+					}
+				}
+			}
+			return Optional.empty();
 		}
 	}
 }
