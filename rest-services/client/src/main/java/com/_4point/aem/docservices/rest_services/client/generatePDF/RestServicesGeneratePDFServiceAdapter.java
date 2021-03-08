@@ -202,8 +202,9 @@ public class RestServicesGeneratePDFServiceAdapter extends RestServicesServiceAd
 		}
 
 		@Override
-		public Builder aemServerType(AemServerType serverType) {
-			return builder.aemServerType(serverType);
+		public GeneratePDFServiceBuilder aemServerType(AemServerType serverType) {
+			builder.aemServerType(serverType);
+			return this;
 		}
 		
 		@Override

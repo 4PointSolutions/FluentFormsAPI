@@ -215,8 +215,9 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 		}
 
 		@Override
-		public Builder aemServerType(AemServerType serverType) {
-			return builder.aemServerType(serverType);
+		public Html5FormsServiceBuilder aemServerType(AemServerType serverType) {
+			builder.aemServerType(serverType);
+			return this;
 		}
 		
 		@Override

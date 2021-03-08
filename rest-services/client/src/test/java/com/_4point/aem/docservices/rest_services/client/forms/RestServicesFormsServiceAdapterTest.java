@@ -40,6 +40,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
@@ -104,6 +105,7 @@ class RestServicesFormsServiceAdapterTest {
 						.port(TEST_MACHINE_PORT)
 						.basicAuthentication("username", "password")
 						.useSsl(codePath.useSsl)
+						.aemServerType(AemServerType.StandardType.JEE)
 						.clientFactory(()->client);
 		if (codePath.useCorrelationId) {
 			adapterBuilder.correlationId(()->CORRELATION_ID);

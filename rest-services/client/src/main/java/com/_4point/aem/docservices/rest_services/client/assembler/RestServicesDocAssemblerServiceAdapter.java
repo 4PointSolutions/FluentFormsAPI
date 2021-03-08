@@ -286,8 +286,9 @@ implements TraditionalDocAssemblerService {
 		}
 
 		@Override
-		public Builder aemServerType(AemServerType serverType) {
-			return builder.aemServerType(serverType);
+		public AssemblerServiceBuilder aemServerType(AemServerType serverType) {
+			builder.aemServerType(serverType);
+			return this;
 		}
 		
 		@Override

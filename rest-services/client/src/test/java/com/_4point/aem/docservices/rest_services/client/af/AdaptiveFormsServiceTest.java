@@ -49,6 +49,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService.AdaptiveFormsServiceBuilder;
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService.AdaptiveFormsServiceException;
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -191,6 +192,7 @@ class AdaptiveFormsServiceTest {
 															   .port(TEST_MACHINE_PORT)
 															   .basicAuthentication("username", "password")
 															   .useSsl(useSSL)
+															   .aemServerType(AemServerType.StandardType.JEE)
 															   .clientFactory(()->afClient);
 		if (useCorrelationId) {
 			svcBuilder.correlationId(()->CORRELATION_ID);

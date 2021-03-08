@@ -44,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDocAssemblerServiceAdapter.AssemblerServiceBuilder;
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
@@ -151,6 +152,7 @@ class RestServicesDocAssemblerServiceAdapterTest {
 								.port(TEST_MACHINE_PORT)
 								.basicAuthentication("username", "password")
 								.useSsl(false)
+								.aemServerType(AemServerType.StandardType.JEE)
 								.correlationId(()->CORRELATION_ID)
 								.clientFactory(()->client);
 		

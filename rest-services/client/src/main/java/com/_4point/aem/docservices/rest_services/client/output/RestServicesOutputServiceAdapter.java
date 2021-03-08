@@ -237,8 +237,9 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 		}
 
 		@Override
-		public Builder aemServerType(AemServerType serverType) {
-			return builder.aemServerType(serverType);
+		public OutputServiceBuilder aemServerType(AemServerType serverType) {
+			builder.aemServerType(serverType);
+			return this;
 		}
 		
 		@Override

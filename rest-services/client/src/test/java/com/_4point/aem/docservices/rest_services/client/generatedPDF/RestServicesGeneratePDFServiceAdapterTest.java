@@ -43,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.docservices.rest_services.client.generatePDF.RestServicesGeneratePDFServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.generatePDF.RestServicesGeneratePDFServiceAdapter.GeneratePDFServiceBuilder;
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService.GeneratePDFServiceException;
@@ -99,8 +100,13 @@ public class RestServicesGeneratePDFServiceAdapterTest {
 		setupRestClientMocks(true, responseData, APPLICATION_XML);
 
 		GeneratePDFServiceBuilder generatePDFServiceBuilder = RestServicesGeneratePDFServiceAdapter.builder()
-				.machineName(TEST_MACHINE_NAME).port(TEST_MACHINE_PORT).basicAuthentication("username", "password")
-				.useSsl(false).correlationId(() -> CORRELATION_ID).clientFactory(() -> client);
+				.machineName(TEST_MACHINE_NAME)
+				.port(TEST_MACHINE_PORT)
+				.basicAuthentication("username", "password")
+				.useSsl(false)
+				.aemServerType(AemServerType.StandardType.OSGI)
+				.correlationId(() -> CORRELATION_ID)
+				.clientFactory(() -> client);
 
 		underTest = generatePDFServiceBuilder.build();
 		byte[] doc = "document Data".getBytes();

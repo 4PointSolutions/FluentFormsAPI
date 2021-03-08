@@ -43,6 +43,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService.Html5FormsServiceBuilder;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService.Html5FormsServiceException;
@@ -267,6 +268,7 @@ class Html5FormsServiceTest {
 													   .port(TEST_MACHINE_PORT)
 													   .basicAuthentication("username", "password")
 													   .useSsl(false)
+													   .aemServerType(AemServerType.StandardType.OSGI)
 													   .clientFactory(()->client)
 													   .addRenderResultFilter(is->new ReplacingInputStream(is, "Document", "tnemucoD"))
 													   .build();

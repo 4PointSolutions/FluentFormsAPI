@@ -346,8 +346,9 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 		}
 
 		@Override
-		public Builder aemServerType(AemServerType serverType) {
-			return builder.aemServerType(serverType);
+		public DocAssuranceServiceBuilder aemServerType(AemServerType serverType) {
+			builder.aemServerType(serverType);
+			return this;
 		}
 		
 		@Override

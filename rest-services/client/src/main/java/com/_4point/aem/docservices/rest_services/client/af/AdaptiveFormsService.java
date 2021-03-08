@@ -297,8 +297,9 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		}
 
 		@Override
-		public Builder aemServerType(AemServerType serverType) {
-			return builder.aemServerType(serverType);
+		public AdaptiveFormsServiceBuilder aemServerType(AemServerType serverType) {
+			builder.aemServerType(serverType);
+			return this;
 		}
 		
 		@Override

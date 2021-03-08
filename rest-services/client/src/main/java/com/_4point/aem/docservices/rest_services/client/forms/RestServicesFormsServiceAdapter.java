@@ -323,8 +323,9 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 		}
 
 		@Override
-		public Builder aemServerType(AemServerType serverType) {
-			return builder.aemServerType(serverType);
+		public FormsServiceBuilder aemServerType(AemServerType serverType) {
+			builder.aemServerType(serverType);
+			return this;
 		}
 		
 		@Override
