@@ -116,7 +116,7 @@ public class RenderAdaptiveFormTest {
 	}
 	
 	private String constructAfUrl(String formName) {
-		return "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + "/content/forms/af/" + formName + ".html";
+		return "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/content/forms/af/" + formName + ".html";
 	}
 	
 	private String postDataToDataCacheService(Path sampleFormDataPath) throws IOException {
