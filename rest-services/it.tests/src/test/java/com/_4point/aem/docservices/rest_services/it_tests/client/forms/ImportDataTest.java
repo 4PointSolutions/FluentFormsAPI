@@ -33,6 +33,7 @@ class ImportDataTest {
 														.port(TEST_MACHINE_PORT)
 														.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
 														.useSsl(false)
+														.aemServerType(TEST_MACHINE_AEM_TYPE)
 														.build();
 
 		underTest = new FormsServiceImpl(adapter, UsageContext.CLIENT_SIDE);

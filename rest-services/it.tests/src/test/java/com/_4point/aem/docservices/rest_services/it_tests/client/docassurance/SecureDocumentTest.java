@@ -1,11 +1,6 @@
 package com._4point.aem.docservices.rest_services.it_tests.client.docassurance;
 
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_DATA_XML;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_PDF;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -32,6 +27,7 @@ public class SecureDocumentTest {
 		                                                     .port(TEST_MACHINE_PORT)
 		                                                     .basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
 		                                                     .useSsl(false)
+		                                                     .aemServerType(TEST_MACHINE_AEM_TYPE)
 		                                                     .build();
 
 		underTest = new DocAssuranceServiceImpl(adapter);

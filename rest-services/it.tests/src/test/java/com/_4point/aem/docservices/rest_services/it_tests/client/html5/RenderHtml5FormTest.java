@@ -31,6 +31,7 @@ class RenderHtml5FormTest {
 				.port(TestUtils.TEST_MACHINE_PORT)
 				.basicAuthentication(TestUtils.TEST_USER, TestUtils.TEST_USER_PASSWORD)
 				.useSsl(false)
+				.aemServerType(TestUtils.TEST_MACHINE_AEM_TYPE)
 				.build();
 
 	}

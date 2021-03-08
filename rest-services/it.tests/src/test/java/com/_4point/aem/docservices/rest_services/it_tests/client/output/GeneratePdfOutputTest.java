@@ -1,11 +1,6 @@
 package com._4point.aem.docservices.rest_services.it_tests.client.output;
 
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_DATA_XML;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_XDP;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 
 import java.nio.file.Path;
 import java.util.Locale;
@@ -37,6 +32,7 @@ class GeneratePdfOutputTest {
 				.port(TEST_MACHINE_PORT)
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
 				.useSsl(false)
+				.aemServerType(TEST_MACHINE_AEM_TYPE)
 				.build();
 
 		underTest = new OutputServiceImpl(adapter, UsageContext.CLIENT_SIDE);

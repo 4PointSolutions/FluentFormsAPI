@@ -1,17 +1,7 @@
 package com._4point.aem.docservices.rest_services.it_tests.client.forms;
 
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_PDF;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_WITH_DATA_PDF;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_WITHOUT_DATA_PDF;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -52,8 +42,12 @@ class ExportDataTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		RestServicesFormsServiceAdapter adapter = RestServicesFormsServiceAdapter.builder()
-				.machineName(TEST_MACHINE_NAME).port(TEST_MACHINE_PORT)
-				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD).useSsl(false).build();
+				.machineName(TEST_MACHINE_NAME)
+				.port(TEST_MACHINE_PORT)
+				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
+				.useSsl(false)
+				.aemServerType(TEST_MACHINE_AEM_TYPE)
+				.build();
 
 		underTest = new FormsServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 	}

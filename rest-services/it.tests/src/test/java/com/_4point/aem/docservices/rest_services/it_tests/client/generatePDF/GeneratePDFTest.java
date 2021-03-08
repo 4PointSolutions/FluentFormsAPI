@@ -1,14 +1,7 @@
 package com._4point.aem.docservices.rest_services.it_tests.client.generatePDF;
 
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.SAMPLE_FORM_DOCX;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_NAME;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_MACHINE_PORT;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.TEST_USER_PASSWORD;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import javax.ws.rs.core.MediaType;
 
@@ -17,7 +10,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.generatePDF.RestServicesGeneratePDFServiceAdapter;
-import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService.GeneratePDFServiceException;
@@ -33,8 +25,12 @@ public class GeneratePDFTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		RestServicesGeneratePDFServiceAdapter adapter = RestServicesGeneratePDFServiceAdapter.builder()
-				.machineName(TEST_MACHINE_NAME).port(TEST_MACHINE_PORT)
-				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD).useSsl(false).build();
+				.machineName(TEST_MACHINE_NAME)
+				.port(TEST_MACHINE_PORT)
+				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
+				.useSsl(false)
+				.aemServerType(TEST_MACHINE_AEM_TYPE)
+				.build();
 
 		underTest = new GeneratePDFServiceImpl(adapter);
 	}
