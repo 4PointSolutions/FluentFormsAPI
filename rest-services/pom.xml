@@ -48,9 +48,25 @@
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- Project dependencies -->
 		<jersey.version>2.29.1</jersey.version>
-		<mockito.version>3.7.0</mockito.version>
 		<jaxb.version>2.3.3</jaxb.version>
+		<commons-io.version>2.6</commons-io.version>
+		<sling.servlet-helpers.version>1.2.0</sling.servlet-helpers.version>
+		<fluentforms.version>0.0.2-SNAPSHOT</fluentforms.version>
+		<rest-services.version>0.0.2-SNAPSHOT</rest-services.version>
+
+		<!-- Testing dependencies -->
+        <mockito.version>3.8.0</mockito.version>
+        <junit.version>5.7.1</junit.version>
+        <wcm.mocks.version>3.0.0</wcm.mocks.version> <!-- Versions later than this produce a org.reflections.ReflectionsException: Scanner TypeAnnotationsScanner was not configured error -->
+        <slf4j-test.version>1.2.0</slf4j-test.version>
+        <slf4j.version>1.7.26</slf4j.version>
+        <hamcrest.version>2.2</hamcrest.version>
+        <junit-addons.version>1.4</junit-addons.version>
+        <pdfbox.version>2.0.23</pdfbox.version>
+        <jsoup.version>1.13.1</jsoup.version>
 	</properties>
 
 	<build>
@@ -552,20 +568,20 @@
 			<dependency>
 				<groupId>org.junit</groupId>
 				<artifactId>junit-bom</artifactId>
-				<version>5.6.0</version>
+				<version>${junit.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest-library</artifactId>
-				<version>2.2</version>
+				<version>${hamcrest.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-simple</artifactId>
-				<version>1.7.26</version>
+                <version>${slf4j.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -583,53 +599,53 @@
 			<dependency>
 				<groupId>junit-addons</groupId>
 				<artifactId>junit-addons</artifactId>
-				<version>1.4</version>
+				<version>${junit-addons.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.wcm</groupId>
 				<artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
-				<version>2.7.2</version>
+				<version>${wcm.mocks.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>uk.org.lidalia</groupId>
 				<artifactId>slf4j-test</artifactId>
-				<version>1.0.1</version>
+				<version>${slf4j-test.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>	<!-- PDF Library for examining PDFs we generate -->
 				<groupId>org.apache.pdfbox</groupId>
 				<artifactId>pdfbox</artifactId>
-				<version>2.0.18</version>
+				<version>${pdfbox.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.jsoup</groupId>
 				<artifactId>jsoup</artifactId>
-				<version>1.13.1</version>
+				<version>${jsoup.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<!-- Other dependencies -->
 			<dependency>
 				<groupId>com._4point.aem</groupId>
 				<artifactId>fluentforms.core</artifactId>
-				<version>0.0.2-SNAPSHOT</version>
+				<version>${fluentforms.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com._4point.aem.docservices</groupId>
 				<artifactId>rest-services.client</artifactId>
-				<version>0.0.2-SNAPSHOT</version>
+				<version>${rest-services.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.6</version>
+				<version>${commons-io.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.sling</groupId>
 				<artifactId>org.apache.sling.servlet-helpers</artifactId>
-				<version>1.2.0</version>
+				<version>${sling.servlet-helpers.version}</version>
 			</dependency>
 			<!-- Jersey Dependencies -->
 			<dependency>
