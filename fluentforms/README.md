@@ -64,9 +64,20 @@ class OutputServiceExample {
 }
 ```
 
+## Architecture
+
+This project consists of several sub-projects with each subproject representing a layer in the architecture (i.e. each layer depends on the layers beneath it).
+
+Here is an overview of the layers:
+* _FluentForms API_  – This is a wrapper around the Adobe Document Services APIs.  It provides a fluent interface (which reduces the code required to use Adobe APIs and improves readability) and additional validations that the Adobe APIs do not.  It is deployed as a bundle on an AEM instance.
+* _FluentForms REST Services_  – This is layered on top of the  _FluentForms API_  and it makes the Adobe APIs available as REST service endpoints.  It is deployed as a bundle on the AEM instance as well.
+* _FluentForms REST Services client_  – This is a client-side API that wraps calls to the  _FluentForms REST Services_ .  You include this as a dependency in your Java application.  Your Java application then makes API calls and this layer turns them into REST calls to the AEM server running the  _FluentForms REST Services_ .
+
+Client code that utilizes this project can access whatever layer is appropriate for their needs, for example, a .NET shop might write .NET code that makes REST calls to the  _FluentForms REST Services_  layer directly, bypassing the Java client code.  Likewise a user with OSGi experience might choose to leverage just the  _FluentForms API_  in an OSGi Java bundle in order to make the calls to AEM more concise.
+
 ## API Implementation Status
 
-The AEM Forms API consists of a series of smaller APIs that are targeted at specific functions.  The plan is to eventually support the entire AEM Forms API.  This section outlines the progress towards that goal. 
+The AEM Forms API consists of a series of smaller APIs that are targeted at specific functions.  The plan is to eventually support the entire AEM Forms API.  This section outlines the progress towards that goal.  Each column is part of one of the architectural layers (above).  The first two columns are part of the first layer and each of the other two columns represents components within the last two layers outlined above.
 
 | AEM Forms API | Fluent API Implemented | Servlet Implemented | Client side adapter implemented |
 | ------------- | ---------------------- | ------------------- | ------------------------------- |
