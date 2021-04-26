@@ -52,7 +52,7 @@
 		<!-- Project dependencies -->
 		<jersey.version>2.29.1</jersey.version>
 		<jaxb.version>2.3.3</jaxb.version>
-		<commons-io.version>2.6</commons-io.version>
+		<commons-io.version>2.7</commons-io.version>
 		<sling.servlet-helpers.version>1.2.0</sling.servlet-helpers.version>
 		<fluentforms.version>0.0.2-SNAPSHOT</fluentforms.version>
 		<rest-services.version>0.0.2-SNAPSHOT</rest-services.version>
