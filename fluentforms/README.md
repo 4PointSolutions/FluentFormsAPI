@@ -89,4 +89,3 @@ The AEM Forms API consists of a series of smaller APIs that are targeted at spec
 | Barcoded Forms | No | No | No |
 | Convert PDF | No | No | No |
 | Send To Printer | No | No | No |
-
