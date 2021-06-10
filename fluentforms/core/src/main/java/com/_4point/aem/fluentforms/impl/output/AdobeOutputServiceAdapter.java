@@ -52,6 +52,7 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 	@Override
 	public Document generatePDFOutput(String urlOrFileName, Document data, PDFOutputOptions pdfOutputOptions) throws OutputServiceException {
 		try {
+			log.info("generatePDFOutput form='" + urlOrFileName + "', contentRoot='" + pdfOutputOptions.getContentRoot() + "'");
 			Document resultDoc = documentFactory.create(adobeOutputService.generatePDFOutput(urlOrFileName, AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePDFOutputOptions(pdfOutputOptions)));
 			resultDoc.setContentType(Document.CONTENT_TYPE_PDF);	// Originally we were doing a setContentTypeIfEmpty() but that fails because of FluentFormsAPI Issue #15
 			return resultDoc;
@@ -79,6 +80,7 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 	@Override
 	public Document generatePrintedOutput(String urlOrFileName, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
 		try {
+			log.info("generatePrintedOutput form='" + urlOrFileName + "', contentRoot='" + printedOutputOptions.getContentRoot() + "'");
 			return documentFactory.create(adobeOutputService.generatePrintedOutput(urlOrFileName, AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePrintedOutputOptions(printedOutputOptions)));
 		} catch (com.adobe.fd.output.api.OutputServiceException e) {
 			throw new OutputServiceException(e);
