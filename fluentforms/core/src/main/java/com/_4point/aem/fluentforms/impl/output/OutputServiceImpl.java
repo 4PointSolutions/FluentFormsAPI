@@ -88,7 +88,7 @@ public class OutputServiceImpl implements OutputService {
 	public BatchResult generatePDFOutputBatch(Map<String, PathOrUrl> templates, Map<String, Document> data, PDFOutputOptions pdfOutputOptions, BatchOptions batchOptions)
 			throws OutputServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
 	@Override
@@ -139,14 +139,14 @@ public class OutputServiceImpl implements OutputService {
 	@Override
 	public GeneratePrintedOutputArgumentBuilder generatePrintedOutput() {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
 	@Override
 	public BatchResult generatePrintedOutputBatch(Map<String, PathOrUrl> templates, Map<String, Document> data, PrintedOutputOptions printedOutputOptions,
 			BatchOptions batchOptions) throws OutputServiceException {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
 	protected TraditionalOutputService getAdobeOutputService() {
@@ -251,21 +251,21 @@ public class OutputServiceImpl implements OutputService {
 		public BatchArgumentBuilder addTemplate(PathOrUrl template) {
 			// TODO Auto-generated method stub
 			// Call getName(template) to get name and then add both to the list of templates
-			return null;
+			throw new UnsupportedOperationException("Not implemented yet.");
 		}
 
 		@Override
 		public BatchArgumentBuilder addTemplate(String templateName, PathOrUrl template) {
 			// TODO Auto-generated method stub
 			// Call getName(template) to get name and then add both to the list of templates
-			return null;
+			throw new UnsupportedOperationException("Not implemented yet.");
 		}
 
 		@Override
 		public BatchArgumentBuilder addTemplates(List<PathOrUrl> templates) {
 			// TODO Auto-generated method stub
 			// Call getName(template) to get name and then add both to the list of templates
-			return null;
+			throw new UnsupportedOperationException("Not implemented yet.");
 		}
 
 		@Override
@@ -278,21 +278,21 @@ public class OutputServiceImpl implements OutputService {
 		public BatchArgumentBuilder addData(Document data) {
 			// TODO Auto-generated method stub
 			// Call getName(template) to get name and then add both to the list of dataDocs
-			return null;
+			throw new UnsupportedOperationException("Not implemented yet.");
 		}
 
 		@Override
 		public BatchArgumentBuilder addData(String dataName, Document data) {
 			// TODO Auto-generated method stub
 			// Call getName(template) to get name and then add both to the list of dataDocs
-			return null;
+			throw new UnsupportedOperationException("Not implemented yet.");
 		}
 
 		@Override
 		public BatchArgumentBuilder addDataDocuments(List<Document> data) {
 			// TODO Auto-generated method stub
 			// Call getName(template) to get name and then add both to the list of dataDocs
-			return null;
+			throw new UnsupportedOperationException("Not implemented yet.");
 		}
 
 		@Override
@@ -303,12 +303,12 @@ public class OutputServiceImpl implements OutputService {
 		
 		private static String getName(PathOrUrl location) {
 			// TODO: Implement getName() for PathOrUrl
-			return null;		
+			throw new UnsupportedOperationException("Not implemented yet.");
 		}
 		
 		private static String getName(Document doc) {
 			// TODO: Implement getName() for Document objects
-			return null;		
+			throw new UnsupportedOperationException("Not implemented yet.");
 		}
 
 	}
