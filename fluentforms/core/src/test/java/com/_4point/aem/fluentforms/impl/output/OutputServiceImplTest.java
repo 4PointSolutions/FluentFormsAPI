@@ -27,7 +27,6 @@ import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.output.api.AcrobatVersion;
-import com.scene7.ipsapi.PDFOptions;
 
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 

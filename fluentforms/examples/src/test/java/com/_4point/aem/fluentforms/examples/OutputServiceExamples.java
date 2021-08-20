@@ -1,5 +1,7 @@
 package com._4point.aem.fluentforms.examples;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -39,6 +41,7 @@ class OutputServiceExamples {
 		
 		byte[] pdfBytes = result.getInlineData();	// you can do either of these but not both.
 //		InputStream pdfStream = result.getInputStream();
+		assertNotNull(pdfBytes);
 	}
 
 	@Test
@@ -64,6 +67,7 @@ class OutputServiceExamples {
 		
 //		byte[] pdfBytes = result.getInlineData();	// you can do either of these but not both.
 		InputStream pdfStream = result.getInputStream();
+		assertNotNull(pdfStream);
 	}
 
 	@Test
@@ -80,6 +84,7 @@ class OutputServiceExamples {
 		
 		byte[] pdfBytes = result.getInlineData();	// you can do either of these but not both.
 //		InputStream pdfStream = result.getInputStream();
+		assertNotNull(pdfBytes);
 	}
 
 	@Test
@@ -96,6 +101,7 @@ class OutputServiceExamples {
 		
 //		byte[] pdfBytes = result.getInlineData();	// you can do either of these but not both.
 		InputStream pdfStream = result.getInputStream();
+		assertNotNull(pdfStream);
 	}
 
 

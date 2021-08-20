@@ -51,6 +51,7 @@ class ImportDataTest {
 
 	private final AemContext aemContext = new AemContext();
 
+	@SuppressWarnings("unused")
 	private TestLogger loggerCapture = TestLoggerFactory.getTestLogger(ImportData.class);
 
 	private MockDocumentFactory mockDocumentFactory = new MockDocumentFactory();
@@ -158,7 +159,7 @@ class ImportDataTest {
 
 	@Test
 	void testDoPost_NoPdfArg(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
-		MockTraditionalFormsService importDataMock = mockImportData(new byte[0]);
+		mockImportData(new byte[0]);
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
@@ -178,7 +179,7 @@ class ImportDataTest {
 	
 	@Test
 	void testDoPost_NoDataArg(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
-		MockTraditionalFormsService importDataMock = mockImportData(new byte[0]);
+		mockImportData(new byte[0]);
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
@@ -200,7 +201,7 @@ class ImportDataTest {
 	void testDoPost_BadAcceptHeader(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
 		String resultData = "testDoPost Bad Accept Header Result";
 		byte[] resultDataBytes = resultData.getBytes();
-		MockTraditionalFormsService importDataMock = mockImportData(resultDataBytes);
+		mockImportData(resultDataBytes);
 
 		
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
