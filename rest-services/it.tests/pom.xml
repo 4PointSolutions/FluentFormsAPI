@@ -75,6 +75,11 @@
 			<artifactId>jsoup</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.jcabi</groupId>
+			<artifactId>jcabi-xml</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>
