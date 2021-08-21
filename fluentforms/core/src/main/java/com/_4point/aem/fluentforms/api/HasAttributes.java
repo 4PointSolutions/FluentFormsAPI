@@ -12,7 +12,7 @@ public interface HasAttributes {
 
 	Object getAttribute(String name);
 
-	void setAttribute(String name, Object val);
+	HasAttributes setAttribute(String name, Object val);
 
 	// TODO: Should make this private but that requires Java 11
 	static final BiFunction<String, String, ? extends NoSuchElementException> exceptionSupplier = (name, type)->new NoSuchElementException("No such attribute found (" + name + ") of type '" + type + "'.");

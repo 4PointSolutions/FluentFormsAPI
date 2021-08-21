@@ -255,8 +255,9 @@ class ImportDataTest {
 		}
 
 		@Override
-		public void copyToFile(File arg0) throws IOException {
+		public Document copyToFile(File arg0) throws IOException {
 			this.importDataResult.copyToFile(arg0);
+			return this;
 		}
 
 		@Override
@@ -295,28 +296,33 @@ class ImportDataTest {
 		}
 
 		@Override
-		public void passivate() throws IOException {
+		public Document passivate() throws IOException {
 			this.importDataResult.passivate();
+			return this;
 		}
 
 		@Override
-		public void removeAttribute(String name) {
+		public Document removeAttribute(String name) {
 			this.importDataResult.removeAttribute(name);
+			return this;
 		}
 
 		@Override
-		public void setAttribute(String name, Object val) {
+		public Document setAttribute(String name, Object val) {
 			this.importDataResult.setAttribute(name, val);
+			return this;
 		}
 
 		@Override
-		public void setContentType(String contentType) {
+		public Document setContentType(String contentType) {
 			this.importDataResult.setContentType(contentType);
+			return this;
 		}
 
 		@Override
-		public void setMaxInlineSize(int maxInlineSize) {
+		public Document setMaxInlineSize(int maxInlineSize) {
 			this.importDataResult.setMaxInlineSize(maxInlineSize);
+			return this;
 		}
 
 	}

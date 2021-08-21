@@ -158,7 +158,7 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 		}
 
 		@Override
-		public void copyToFile(File arg0) throws IOException {
+		public Document copyToFile(File arg0) throws IOException {
 			// TODO: Implement this at some future date.
 			throw new UnsupportedOperationException("copyToFile is not supported at this time.");
 		}
@@ -199,28 +199,33 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 		}
 
 		@Override
-		public void passivate() throws IOException {
+		public Document passivate() throws IOException {
 			// Do nothing.
+			return this;
 		}
 
 		@Override
-		public void removeAttribute(String name) {
+		public Document removeAttribute(String name) {
 			this.attributes.remove(name);
+			return this;
 		}
 
 		@Override
-		public void setAttribute(String name, Object val) {
+		public Document setAttribute(String name, Object val) {
 			this.attributes.put(name, val);
+			return this;
 		}
 
 		@Override
-		public void setContentType(String contentType) {
+		public Document setContentType(String contentType) {
 			this.contentType = contentType;
+			return this;
 		}
 
 		@Override
-		public void setMaxInlineSize(int maxInlineSize) {
+		public Document setMaxInlineSize(int maxInlineSize) {
 			this.maxInlineSize = maxInlineSize;
+			return this;
 		}
 
 		private static byte[] readToByteArray(InputStream is) {
@@ -260,22 +265,22 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 
 		// Override and disable any methods that modify the state of this document in order to make it immutable.
 		@Override
-		public void setAttribute(String name, Object val) {
+		public Document setAttribute(String name, Object val) {
 			throw new UnsupportedOperationException("Changes to the Empty Document Object are not allowed!");
 		}
 
 		@Override
-		public void removeAttribute(String name) {
+		public Document removeAttribute(String name) {
 			throw new UnsupportedOperationException("Changes to the Empty Document Object are not allowed!");
 		}
 
 		@Override
-		public void setContentType(String contentType) {
+		public Document setContentType(String contentType) {
 			throw new UnsupportedOperationException("Changes to the Empty Document Object are not allowed!");
 		}
 
 		@Override
-		public void setMaxInlineSize(int maxInlineSize) {
+		public Document setMaxInlineSize(int maxInlineSize) {
 			throw new UnsupportedOperationException("Changes to the Empty Document Object are not allowed!");
 		}
 	}

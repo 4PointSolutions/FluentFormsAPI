@@ -116,8 +116,9 @@ public class MockDocumentFactory implements DocumentFactory {
 		}
 
 		@Override
-		public void copyToFile(File arg0) throws IOException {
+		public Document copyToFile(File arg0) throws IOException {
 			// NO-OP
+			return this;
 		}
 
 		@Override
@@ -156,29 +157,34 @@ public class MockDocumentFactory implements DocumentFactory {
 		}
 
 		@Override
-		public void passivate() throws IOException {
+		public Document passivate() throws IOException {
 			// NO-OP
+			return this;
 		}
 
 		@Override
-		public void removeAttribute(String name) {
+		public Document removeAttribute(String name) {
 			attributes.remove(name);
+			return this;
 		}
 
 		@Override
-		public void setAttribute(String name, Object val) {
+		public Document setAttribute(String name, Object val) {
 			attributes.put(name, val);
+			return this;
 		}
 
 		@Override
-		public void setContentType(String contentType) {
+		public Document setContentType(String contentType) {
 			// TODO: Convert this to use the attributes Map with the correct key
 			this.contentType = contentType;
+			return this;
 		}
 
 		@Override
-		public void setMaxInlineSize(int maxInlineSize) {
+		public Document setMaxInlineSize(int maxInlineSize) {
 			this.maxInlineSize = maxInlineSize;
+			return this;
 		}
 
 	}

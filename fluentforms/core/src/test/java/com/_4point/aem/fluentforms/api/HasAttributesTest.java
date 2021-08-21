@@ -1,9 +1,6 @@
 package com._4point.aem.fluentforms.api;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -30,9 +27,10 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				assertTrue(val instanceof Boolean);
 				curValue = (Boolean)val;
+				return this;
 			}
 			
 		};
@@ -46,7 +44,7 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				throw new IllegalStateException("This method should never be called.");
 			}
 			
@@ -97,9 +95,10 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				assertTrue(val instanceof Byte);
 				curValue = (Byte)val;
+				return this;
 			}
 			
 		};
@@ -113,7 +112,7 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				throw new IllegalStateException("This method should never be called.");
 			}
 			
@@ -164,9 +163,10 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				assertTrue(val instanceof Character);
 				curValue = (Character)val;
+				return this;
 			}
 			
 		};
@@ -180,7 +180,7 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				throw new IllegalStateException("This method should never be called.");
 			}
 			
@@ -231,9 +231,10 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				assertTrue(val instanceof Float);
 				curValue = (Float)val;
+				return this;
 			}
 			
 		};
@@ -247,7 +248,7 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				throw new IllegalStateException("This method should never be called.");
 			}
 			
@@ -298,9 +299,10 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				assertTrue(val instanceof Integer);
 				curValue = (Integer)val;
+				return this;
 			}
 			
 		};
@@ -314,7 +316,7 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				throw new IllegalStateException("This method should never be called.");
 			}
 			
@@ -365,9 +367,10 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				assertTrue(val instanceof Long);
 				curValue = (Long)val;
+				return this;
 			}
 			
 		};
@@ -381,7 +384,7 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				throw new IllegalStateException("This method should never be called.");
 			}
 			
@@ -432,9 +435,10 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				assertTrue(val instanceof Short);
 				curValue = (Short)val;
+				return this;
 			}
 			
 		};
@@ -448,7 +452,7 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				throw new IllegalStateException("This method should never be called.");
 			}
 			
@@ -499,9 +503,10 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				assertTrue(val instanceof String);
 				curValue = (String)val;
+				return this;
 			}
 			
 		};
@@ -515,7 +520,7 @@ class HasAttributesTest {
 			}
 
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
 				throw new IllegalStateException("This method should never be called.");
 			}
 			
@@ -558,7 +563,9 @@ class HasAttributesTest {
 		HasAttributes nullStub = new HasAttributes() {
 			
 			@Override
-			public void setAttribute(String name, Object val) {
+			public HasAttributes setAttribute(String name, Object val) {
+				// NO-OP
+				return this;
 			}
 			
 			@Override

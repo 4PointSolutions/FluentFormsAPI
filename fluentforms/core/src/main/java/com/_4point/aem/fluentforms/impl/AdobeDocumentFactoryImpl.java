@@ -158,8 +158,9 @@ public enum AdobeDocumentFactoryImpl implements DocumentFactory {
 		 * @see com._4point.aem.fluentforms.api.Document#copyToFile(java.io.File)
 		 */
 		@Override
-		public void copyToFile(File arg0) throws IOException {
+		public Document copyToFile(File arg0) throws IOException {
 			doc.copyToFile(arg0);
+			return this;
 		}
 
 		/* (non-Javadoc)
@@ -222,41 +223,46 @@ public enum AdobeDocumentFactoryImpl implements DocumentFactory {
 		 * @see com._4point.aem.fluentforms.api.Document#passivate()
 		 */
 		@Override
-		public void passivate() throws IOException {
+		public Document passivate() throws IOException {
 			doc.passivate();
+			return this;
 		}
 
 		/* (non-Javadoc)
 		 * @see com._4point.aem.fluentforms.api.Document#removeAttribute(java.lang.String)
 		 */
 		@Override
-		public void removeAttribute(String name) {
+		public Document removeAttribute(String name) {
 			doc.removeAttribute(name);
+			return this;
 		}
 
 		/* (non-Javadoc)
 		 * @see com._4point.aem.fluentforms.api.Document#setAttribute(java.lang.String, java.lang.Object)
 		 */
 		@Override
-		public void setAttribute(String name, Object val) {
+		public Document setAttribute(String name, Object val) {
 			doc.setAttribute(name, val);
+			return this;
 		}
 
 		/* (non-Javadoc)
 		 * @see com._4point.aem.fluentforms.api.Document#setContentType(java.lang.String)
 		 */
 		@Override
-		public void setContentType(String contentType) {
+		public Document setContentType(String contentType) {
 			this.contentType = contentType;
 			doc.setContentType(contentType);
+			return this;
 		}
 
 		/* (non-Javadoc)
 		 * @see com._4point.aem.fluentforms.api.Document#setMaxInlineSize(int)
 		 */
 		@Override
-		public void setMaxInlineSize(int maxInlineSize) {
+		public Document setMaxInlineSize(int maxInlineSize) {
 			doc.setMaxInlineSize(maxInlineSize);
+			return this;
 		}
 
 	}

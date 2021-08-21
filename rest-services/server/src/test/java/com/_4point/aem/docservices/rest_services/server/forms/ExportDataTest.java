@@ -18,7 +18,6 @@ import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,7 +28,6 @@ import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService;
 import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.ExportDataArgs;
-import com._4point.aem.fluentforms.testing.forms.MockTraditionalFormsService.ImportDataArgs;
 import com.adobe.fd.forms.api.DataFormat;
 import com.adobe.fd.forms.api.FormsServiceException;
 
@@ -51,6 +49,7 @@ class ExportDataTest {
 
 	private final AemContext aemContext = new AemContext();
 
+	@SuppressWarnings("unused")
 	private TestLogger loggerCapture = TestLoggerFactory.getTestLogger(ExportData.class);
 
 	private MockDocumentFactory mockDocumentFactory = new MockDocumentFactory();
@@ -148,7 +147,7 @@ class ExportDataTest {
 	
 	@Test
 	void testDoPost_NoDataArg(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
-		MockTraditionalFormsService exportDataMock = mockExportData(new byte[0]);
+		mockExportData(new byte[0]);
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
@@ -170,7 +169,7 @@ class ExportDataTest {
 	void testDoPost_BadAcceptHeader(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
 		String resultData = "testDoPost Bad Accept Header Result";
 		byte[] resultDataBytes = resultData.getBytes();
-		MockTraditionalFormsService exportDataMock = mockExportData(resultDataBytes);
+		mockExportData(resultDataBytes);
 
 		
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
@@ -221,8 +220,9 @@ class ExportDataTest {
 		
 
 		@Override
-		public void copyToFile(File arg0) throws IOException {
+		public Document copyToFile(File arg0) throws IOException {
 			this.exportDataResult.copyToFile(arg0);
+			return this;
 		}
 
 		@Override
@@ -262,28 +262,33 @@ class ExportDataTest {
 		}
 
 		@Override
-		public void passivate() throws IOException {
+		public Document passivate() throws IOException {
 			this.exportDataResult.passivate();
+			return this;
 		}
 
 		@Override
-		public void removeAttribute(String name) {
+		public Document removeAttribute(String name) {
 			this.exportDataResult.removeAttribute(name);
+			return this;
 		}
 
 		@Override
-		public void setAttribute(String name, Object val) {
+		public Document setAttribute(String name, Object val) {
 			this.exportDataResult.setAttribute(name, val);
+			return this;
 		}
 
 		@Override
-		public void setContentType(String contentType) {
+		public Document setContentType(String contentType) {
 			this.exportDataResult.setContentType(contentType);
+			return this;
 		}
 
 		@Override
-		public void setMaxInlineSize(int maxInlineSize) {
+		public Document setMaxInlineSize(int maxInlineSize) {
 			this.exportDataResult.setMaxInlineSize(maxInlineSize);
+			return this;
 		}
 
 

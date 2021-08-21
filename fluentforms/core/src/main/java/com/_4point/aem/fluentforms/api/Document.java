@@ -9,7 +9,7 @@ public interface Document extends AutoCloseable, Closeable, HasAttributes {
 
 	void close() throws IOException;
 
-	void copyToFile(File arg0) throws IOException;
+	Document copyToFile(File arg0) throws IOException;
 
 	void dispose();
 
@@ -25,15 +25,15 @@ public interface Document extends AutoCloseable, Closeable, HasAttributes {
 
 	long length() throws IOException;
 
-	void passivate() throws IOException;
+	Document passivate() throws IOException;
 
-	void removeAttribute(String name);
+	Document removeAttribute(String name);
 
 //	void setAttribute(String name, Object val); 		// moved to HasAttributes interface
 
-	void setContentType(String contentType);
+	Document setContentType(String contentType);
 
-	void setMaxInlineSize(int maxInlineSize);
+	Document setMaxInlineSize(int maxInlineSize);
 	
 	public default Document setContentTypeIfEmpty(String contentType) throws IOException {
 		if (this.getContentType() == null || this.getContentType().isEmpty()) {
@@ -51,5 +51,60 @@ public interface Document extends AutoCloseable, Closeable, HasAttributes {
 		}
 	}
 	
+	@Override
+	default Document setAttribute(String name, Object val) {
+		this.setAttribute(name, val);
+		return this;
+	}
+
+	@Override
+	default Document setAttributeAsBoolean(String name, Boolean val) {
+		HasAttributes.super.setAttributeAsBoolean(name, val);
+		return this;
+	}
+
+	@Override
+	default Document setAttributeAsByte(String name, Byte val) {
+		HasAttributes.super.setAttributeAsByte(name, val);
+		return this;
+	}
+
+	@Override
+	default Document setAttributeAsCharacter(String name, Character val) {
+		HasAttributes.super.setAttributeAsCharacter(name, val);
+		return this;
+	}
+
+	@Override
+	default Document setAttributeAsFloat(String name, Float val) {
+		HasAttributes.super.setAttributeAsFloat(name, val);
+		return this;
+	}
+
+	@Override
+	default Document setAttributeAsInteger(String name, Integer val) {
+		HasAttributes.super.setAttributeAsInteger(name, val);
+		return this;
+	}
+
+	@Override
+	default Document setAttributeAsLong(String name, Long val) {
+		HasAttributes.super.setAttributeAsLong(name, val);
+		return this;
+	}
+
+	@Override
+	default Document setAttributeAsShort(String name, Short val) {
+		HasAttributes.super.setAttributeAsShort(name, val);
+		return this;
+	}
+
+	@Override
+	default Document setAttributeAsString(String name, String val) {
+		HasAttributes.super.setAttributeAsString(name, val);
+		return this;
+	}
+
 	public static String CONTENT_TYPE_PDF = "application/pdf";
+	public static String CONTENT_TYPE_XDP = "application/vnd.adobe.xdp+xml";
 }
