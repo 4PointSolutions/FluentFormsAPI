@@ -1,4 +1,4 @@
-package com._4point.aem.fluentforms.api.forms;
+package com._4point.aem.fluentforms.impl.forms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -11,6 +11,7 @@ import java.util.Locale;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
 import com._4point.aem.fluentforms.impl.forms.PDFFormRenderOptionsImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;

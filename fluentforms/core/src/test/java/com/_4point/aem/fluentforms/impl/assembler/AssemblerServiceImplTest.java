@@ -1,4 +1,4 @@
-package com._4point.aem.fluentforms.api.assembler;
+package com._4point.aem.fluentforms.impl.assembler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,6 +16,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
+import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
+import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;

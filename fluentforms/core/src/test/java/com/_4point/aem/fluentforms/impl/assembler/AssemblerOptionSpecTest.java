@@ -1,4 +1,4 @@
-package com._4point.aem.fluentforms.api.assembler;
+package com._4point.aem.fluentforms.impl.assembler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.impl.assembler.AdobeAssemblerServiceAdapter;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerOptionsSpecImpl;
 import com._4point.aem.fluentforms.impl.assembler.LogLevel;

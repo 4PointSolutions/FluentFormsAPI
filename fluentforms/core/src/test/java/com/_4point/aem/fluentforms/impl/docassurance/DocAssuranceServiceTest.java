@@ -1,4 +1,4 @@
-package com._4point.aem.fluentforms.api.docassurance;
+package com._4point.aem.fluentforms.impl.docassurance;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -20,6 +20,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
+import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
+import com._4point.aem.fluentforms.api.docassurance.ReaderExtensionOptions;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
 import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl;
 import com._4point.aem.fluentforms.impl.docassurance.TraditionalDocAssuranceService;

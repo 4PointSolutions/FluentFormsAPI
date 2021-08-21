@@ -1,4 +1,4 @@
-package com._4point.aem.fluentforms.api.forms;
+package com._4point.aem.fluentforms.impl.forms;
 
 import static com._4point.aem.fluentforms.api.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.impl.forms.ValidationOptionsImpl;
 
 class ValidationOptionsImplTest {
