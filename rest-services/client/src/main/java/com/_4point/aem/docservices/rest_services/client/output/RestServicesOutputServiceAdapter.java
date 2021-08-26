@@ -155,27 +155,23 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 	@Override
 	public BatchResult generatePDFOutputBatch(Map<String, String> templates, Map<String, Document> data, PDFOutputOptions pdfOutputOptions, BatchOptions batchOptions)
 			throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("generatePDFOutputBatch is not implemented yet.");
 	}
 
 	@Override
 	public Document generatePrintedOutput(Document template, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("generatePrintedOutput is not implemented yet.");
 	}
 
 	@Override
 	public Document generatePrintedOutput(String urlOrFileName, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("generatePrintedOutput is not implemented yet.");
 	}
 
 	@Override
 	public BatchResult generatePrintedOutputBatch(Map<String, String> templates, Map<String, Document> data, PrintedOutputOptions printedOutputOptions, BatchOptions batchOptions)
 			throws OutputServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("generatePrintedOutputBatch is not implemented yet.");
 	}
 
 	/**

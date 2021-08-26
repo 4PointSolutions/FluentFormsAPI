@@ -165,22 +165,19 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 	@Override
 	public GetUsageRightsResult getDocumentUsageRights(Document inDocument, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getDocumentUsageRights is not implemented yet.");
 	}
 
 	@Override
 	public GetUsageRightsResult getCredentialUsageRights(String credentialAlias) throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getCredentialUsageRights is not implemented yet.");
 	}
 
 	@Override
 	public Document addInvisibleSignatureField(Document inDoc, String signatureFieldName,
 			FieldMDPOptionSpec fieldMDPOptionsSpec, PDFSeedValueOptionSpec seedValueOptionsSpec,
 			UnlockOptions unlockOptions) throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addInvisibleSignatureField is not implemented yet.");
 	}
 
 	@Override
@@ -188,98 +185,84 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 			PositionRectangle positionRectangle, FieldMDPOptionSpec fieldMDPOptionsSpec,
 			PDFSeedValueOptionSpec seedValueOptionsSpec, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("addSignatureField is not implemented yet.");
 	}
 
 	@Override
 	public Document clearSignatureField(Document inDoc, String signatureFieldName, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("clearSignatureField is not implemented yet.");
 	}
 
 	@Override
 	public PDFSignatureField getCertifyingSignatureField(Document inDoc, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getCertifyingSignatureField is not implemented yet.");
 	}
 
 	@Override
 	public PDFSignature getSignature(Document inDoc, String signatureFieldName, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getSignature is not implemented yet.");
 	}
 
 	@Override
 	public List<PDFSignatureField> getSignatureFieldList(Document inDoc, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getSignatureFieldList is not implemented yet.");
 	}
 
 	@Override
 	public Document modifySignatureField(Document inDoc, String signatureFieldName,
 			PDFSignatureFieldProperties pdfSignatureFieldProperties, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("modifySignatureField is not implemented yet.");
 	}
 
 	@Override
 	public Document removeSignatureField(Document inDoc, String signatureFieldName, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("removeSignatureField is not implemented yet.");
 	}
 
 	@Override
 	public PDFSignatureVerificationInfo verify(Document inDoc, String signatureFieldName,
 			RevocationCheckStyle revocationCheckStyle, VerificationTime verificationTime,
 			ValidationPreferences dssPrefs) throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("verify is not implemented yet.");
 	}
 
 	@Override
 	public EncryptionTypeResult getPDFEncryption(Document inDoc) throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getPDFEncryption is not implemented yet.");
 	}
 
 	@Override
 	public Document removePDFCertificateSecurity(Document inDoc, String alias) throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("removePDFCertificateSecurity is not implemented yet.");
 	}
 
 	@Override
 	public Document removePDFPasswordSecurity(Document inDoc, String password) throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("removePDFPasswordSecurity is not implemented yet.");
 	}
 
 	@Override
 	public PDFDocumentVerificationInfo verifyDocument(Document inDoc, RevocationCheckStyle revocationCheckStyle,
 			VerificationTime verificationTime, ValidationPreferences prefStore) throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("verifyDocument is not implemented yet.");
 	}
 
 	@Override
 	public Document removeUsageRights(Document inDoc, UnlockOptions unlockOptions) throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("removeUsageRights is not implemented yet.");
 	}
 
 	@Override
 	public Document applyDocumentTimeStamp(Document inDoc, VerificationTime verificationTime,
 			ValidationPreferences validationPreferences, UnlockOptions unlockOptions)
 			throws DocAssuranceServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("applyDocumentTimeStamp is not implemented yet.");
 	}
 
 	/**

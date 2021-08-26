@@ -2,12 +2,14 @@ package com._4point.aem.docservices.rest_services.client.output;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,6 +24,7 @@ import javax.ws.rs.core.Response.StatusType;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.allOf;
 
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
@@ -38,13 +41,20 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.client.docassurance.RestServicesDocAssuranceServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter.OutputServiceBuilder;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
+import com._4point.aem.fluentforms.api.output.BatchOptions;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
+import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.output.api.AcrobatVersion;
+import com.adobe.fd.signatures.client.types.FieldMDPOptionSpec;
+import com.adobe.fd.signatures.client.types.PDFSeedValueOptionSpec;
+import com.adobe.fd.signatures.client.types.PositionRectangle;
+import com.adobe.fd.signatures.pdf.inputs.UnlockOptions;
 
 @ExtendWith(MockitoExtension.class)
 class RestServicesOutputServiceAdapterTest {
@@ -264,5 +274,41 @@ class RestServicesOutputServiceAdapterTest {
 		assertEquals(expectedMediaType, pdfPart.getMediaType());
 		byte[] pdfBytes = IOUtils.toByteArray((InputStream) pdfPart.getEntity());
 		assertArrayEquals(expectedData, pdfBytes);  // TODO: Need to figure out how to test for entity.
+	}
+	
+	@Test
+	void testGeneratePDFOutputBatch() {
+		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder().build();
+		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.generatePDFOutputBatch(Collections.emptyMap(), Collections.emptyMap(), mock(PDFOutputOptions.class), mock(BatchOptions.class)));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		assertThat(msg, allOf(containsString("generatePDFOutputBatch"), containsString("is not implemented yet")));
+	}
+
+	@Test
+	void testGeneratePrintedOutputDocumentDocumentPrintedOutputOptions() {
+		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder().build();
+		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.generatePrintedOutput(mock(Document.class), mock(Document.class), mock(PrintedOutputOptions.class)));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		assertThat(msg, allOf(containsString("generatePrintedOutput"), containsString("is not implemented yet")));
+	}
+
+	@Test
+	void testGeneratePrintedOutputStringDocumentPrintedOutputOptions() {
+		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder().build();
+		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.generatePrintedOutput("TemplateLocation", mock(Document.class), mock(PrintedOutputOptions.class)));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		assertThat(msg, allOf(containsString("generatePrintedOutput"), containsString("is not implemented yet")));
+	}
+
+	@Test
+	void testGeneratePrintedOutputBatch() {
+		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder().build();
+		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.generatePrintedOutputBatch(Collections.emptyMap(), Collections.emptyMap(), mock(PrintedOutputOptions.class), mock(BatchOptions.class)));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		assertThat(msg, allOf(containsString("generatePrintedOutputBatch"), containsString("is not implemented yet")));
 	}
 }

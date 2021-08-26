@@ -2,13 +2,16 @@ package com._4point.aem.docservices.rest_services.client.docassurance;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.allOf;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -22,12 +25,15 @@ import javax.ws.rs.core.Response.StatusType;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -37,11 +43,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
 import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
 import com._4point.aem.fluentforms.api.docassurance.ReaderExtensionOptions;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.docassurance.client.api.SignatureOptions;
+import com.adobe.fd.signatures.client.types.FieldMDPOptionSpec;
+import com.adobe.fd.signatures.client.types.PDFSeedValueOptionSpec;
+import com.adobe.fd.signatures.client.types.PDFSignatureFieldProperties;
+import com.adobe.fd.signatures.client.types.PositionRectangle;
+import com.adobe.fd.signatures.client.types.VerificationTime;
 import com.adobe.fd.signatures.pdf.inputs.UnlockOptions;
+import com.adobe.fd.signatures.pki.client.types.common.RevocationCheckStyle;
 
 @ExtendWith(MockitoExtension.class)
 public class RestServicesDocAssuranceServiceAdapterTest {
@@ -224,5 +237,119 @@ public class RestServicesDocAssuranceServiceAdapterTest {
 		assertThat(ex.getMessage(), containsString(HTML_CONTENT_TYPE));
 	}
 
+	@FunctionalInterface
+	public interface Consumer_WithExceptions<T, E extends Exception> {
+		void accept(T t) throws E;
+	}
+	   
+	private void testForNotImplementedYetException(String fnName, 
+			Consumer_WithExceptions<RestServicesDocAssuranceServiceAdapter, DocAssuranceServiceException> fn) {
+		testForUnsupportedException(fn, allOf(containsString(fnName), containsString("is not implemented yet")));
+	}
 
+	private void testForUnsupportedException(
+			Consumer_WithExceptions<RestServicesDocAssuranceServiceAdapter, DocAssuranceServiceException> fn,
+			Matcher<String> matcher) {
+		RestServicesDocAssuranceServiceAdapter underTest = RestServicesDocAssuranceServiceAdapter.builder().build();
+		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->fn.accept(underTest));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		assertThat(msg, matcher);
+	}
+
+	@Test
+	void testGetDocumentUsageRights() {
+		testForNotImplementedYetException("getDocumentUsageRights", underTest->underTest.getDocumentUsageRights(mock(Document.class), mock(UnlockOptions.class)));
+	}
+
+	@Test
+	void testGetCredentialUsageRights() {
+		testForNotImplementedYetException("getCredentialUsageRights", underTest->underTest.getCredentialUsageRights("credential"));
+	}
+
+	@Test
+	void testAddInvisibleSignatureField() {
+		testForNotImplementedYetException("addInvisibleSignatureField", underTest->underTest.addInvisibleSignatureField(mock(Document.class), "FieldName", mock(FieldMDPOptionSpec.class), mock(PDFSeedValueOptionSpec.class), mock(UnlockOptions.class)));
+	}
+
+	void testAddSignatureField() {
+		testForNotImplementedYetException("addSignatureField", underTest->underTest.addSignatureField(mock(Document.class), "FieldName", 2, mock(PositionRectangle.class), mock(FieldMDPOptionSpec.class), mock(PDFSeedValueOptionSpec.class), mock(UnlockOptions.class)));
+	}
+
+	@Test
+	void testClearSignatureField() {
+		testForNotImplementedYetException("clearSignatureField", underTest->underTest.clearSignatureField(mock(Document.class), "FieldName", mock(UnlockOptions.class)));
+	}
+
+	@Test
+	void testGetCertifyingSignatureField() {
+		testForNotImplementedYetException("getCertifyingSignatureField", underTest->underTest.getCertifyingSignatureField(mock(Document.class), mock(UnlockOptions.class)));
+	}
+
+	@Test
+	void testGetSignature() {
+		testForNotImplementedYetException("getSignature", underTest->underTest.getSignature(mock(Document.class), "FieldName", mock(UnlockOptions.class)));
+	}
+
+	@Test
+	void testGetSignatureFieldList() {
+		testForNotImplementedYetException("getSignatureFieldList", underTest->underTest.getSignatureFieldList(mock(Document.class), mock(UnlockOptions.class) ));
+	}
+
+	@Test
+	void testModifySignatureField() {
+		testForNotImplementedYetException("modifySignatureField", underTest->underTest.modifySignatureField(mock(Document.class), "FieldName", mock(PDFSignatureFieldProperties.class), mock(UnlockOptions.class)));
+	}
+
+	@Test
+	void testRemoveSignatureField() {
+		testForNotImplementedYetException("removeSignatureField", underTest->underTest.removeSignatureField(mock(Document.class), "FieldName", mock(UnlockOptions.class)));
+	}
+
+	@ParameterizedTest
+	@MethodSource("verifyEnums")
+	void testVerify(RevocationCheckStyle revocationCheckStyle, VerificationTime verificationTime) {
+		testForNotImplementedYetException("verify", underTest->underTest.verify(mock(Document.class), "FieldName",  revocationCheckStyle, verificationTime, null ));
+	}
+
+	@Test
+	void testGetPDFEncryption() {
+		testForNotImplementedYetException("getPDFEncryption", underTest->underTest.getPDFEncryption(mock(Document.class)));
+	}
+
+	@Test
+	void testRemovePDFCertificateSecurity() {
+		testForNotImplementedYetException("removePDFCertificateSecurity", underTest->underTest.removePDFCertificateSecurity(mock(Document.class), "alias"));
+	}
+
+	@Test
+	void testRemovePDFPasswordSecurity() {
+		testForNotImplementedYetException("removePDFPasswordSecurity", underTest->underTest.removePDFPasswordSecurity(mock(Document.class), "password" ));
+	}
+
+	@ParameterizedTest
+	@MethodSource("verifyEnums")
+	void testVerifyDocument(RevocationCheckStyle revocationCheckStyle, VerificationTime verificationTime) {
+		testForNotImplementedYetException("verifyDocument", underTest->underTest.verifyDocument(mock(Document.class), revocationCheckStyle, verificationTime, null));
+	}
+
+	@Test
+	void testRemoveUsageRights() {
+		testForNotImplementedYetException("removeUsageRights", underTest->underTest.removeUsageRights(mock(Document.class), mock(UnlockOptions.class)));
+	}
+
+	@Test
+	void testApplyDocumentTimeStamp() {
+		testForNotImplementedYetException("applyDocumentTimeStamp", underTest->underTest.applyDocumentTimeStamp(mock(Document.class), VerificationTime.SIGNING_TIME, null, mock(UnlockOptions.class)));
+	}
+
+	static Stream<Arguments> verifyEnums() {
+		java.util.stream.Stream.Builder<Arguments> builder = Stream.builder();
+		for (RevocationCheckStyle rcs : RevocationCheckStyle.values()) {
+			for (VerificationTime vt: VerificationTime.values()) {
+				builder.accept(arguments(rcs, vt));
+			}
+		}
+		return builder.build();
+	}	
 }
