@@ -45,4 +45,4 @@ jobs:
       - name: Deploy to Github Package Registry
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: mvn -B deploy --file fluentforms --settings fluentforms/settings.xml
+        run: mvn -B deploy --file fluentforms
