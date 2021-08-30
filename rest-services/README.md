@@ -14,7 +14,7 @@ The goals of this project are:
 The rest-services code relies on the FluentForms API to wrap the AEM interfaces and provide a fluent interface to clients that are leveraging the rest-services library’s functionality.
 
 
-## API Implementation Status
+## API Implementation Status  
 
 The AEM Forms API consists of a series of smaller APIs that are targeted at specific functions.  The plan is to eventually support all the entire AEM Forms API.  This section outlines the progress towards that goal. 
 
