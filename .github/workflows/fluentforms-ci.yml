@@ -44,6 +44,5 @@ jobs:
           java-version: '11'
       - name: Deploy to Github Package Registry
         env:
-          GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: mvn -B deploy --file fluentforms --settings fluentforms/settings.xml
