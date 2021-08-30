@@ -17,3 +17,6 @@ API calls and a Java client library (.jar) that makes it easy to call the rest-s
 Eventually, we would like to add a third project which is a server bundle that produces HTML pages that can be used to call the 
 rest-services APIs.  This would allow a user to invoke AEM APIs from a browser and would provide equivilent functionality to
 the AEM Forms for JEE IVS applications.
+
+# rest-services CLI
+Eventually, we would like to also add a CLI, similar to the FormsFeeder CLI that allows you to execute from the command line.

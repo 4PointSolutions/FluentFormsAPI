@@ -52,7 +52,7 @@ Or to deploy only the bundle to the author, run
 
     mvn clean install -PautoInstallBundle
 
-## Maven settings
+## Maven settings   
 
 The project comes with the adobe-public repository configured. To setup the repository in your Maven settings, refer to:
 
