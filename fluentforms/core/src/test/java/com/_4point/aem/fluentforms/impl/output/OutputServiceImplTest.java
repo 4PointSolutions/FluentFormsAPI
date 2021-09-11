@@ -527,6 +527,12 @@ class OutputServiceImplTest {
 		fail("Not yet implemented");
 	}
 
+	/**
+	 * This class sets up the adobeOutputService member variable.
+	 * 
+	 * It sets up the responses to adobeOutputService method calls and stores the arguments passed in.
+	 *
+	 */
 	private class MockPdfOutputService {
 		private final Document result = Mockito.mock(Document.class);
 		private final ArgumentCaptor<String> templateStringArg = ArgumentCaptor.forClass(String.class);
