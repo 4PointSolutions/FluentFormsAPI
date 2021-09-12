@@ -6,6 +6,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +16,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 
+import com.adobe.cq.social.srp.internal.SocialResourceUtils;
 import com.adobe.granite.workflow.WorkflowException;
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.event.WorkflowEvent;
@@ -26,8 +29,9 @@ import com.adobe.granite.workflow.model.WorkflowModel;
 		Constants.SERVICE_DESCRIPTION + "=FluentForms Workflow Completed Event Listener",
 		EventConstants.EVENT_TOPIC + "=" + WorkflowEvent.EVENT_TOPIC // WORKFLOW_COMPLETED_EVENT
 		})
-public class WorkflowMonitor implements EventHandler {
-	
+public class AdobeWorkflowMonitor implements EventHandler {
+	private static final Logger log = LoggerFactory.getLogger(AdobeWorkflowMonitor.class);
+	   
 	Map<String, WorkflowImpl<?>> registry = new HashMap<>();
 
 	@Override
@@ -37,9 +41,11 @@ public class WorkflowMonitor implements EventHandler {
 		String eventType = wfevent.getEventType();
 		String workflowName = (String) event.getProperty("WorkflowName");
 		if (eventType.equals(WorkflowEvent.WORKFLOW_COMPLETED_EVENT)) {
+			log.info("workflow completed (" + workflowName + "/" + workflowInstanceId + ").");
 			synchronized (registry) {
 				WorkflowImpl<?> workflowImpl = registry.get(workflowInstanceId);
 				if (workflowImpl != null) {
+					log.info("worflow marked as complete (" + workflowName + "/" + workflowInstanceId + ").");
 					// Complete the workflow
 					workflowImpl.complete(null); // get the payload and complete the Future
 				}

@@ -1,6 +1,8 @@
 package com._4point.aem.docservices.rest_services.server.workflow;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.servlet.Servlet;
@@ -8,6 +10,7 @@ import javax.servlet.ServletException;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.servlets.annotations.SlingServletPaths;
@@ -22,7 +25,12 @@ import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServe
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
 import com._4point.aem.docservices.rest_services.server.output.GeneratePdfOutput;
 import com._4point.aem.fluentforms.api.DocumentFactory;
+import com._4point.aem.fluentforms.api.workflow.Workflow;
+import com._4point.aem.fluentforms.api.workflow.WorkflowService;
+import com._4point.aem.fluentforms.api.workflow.WorkflowService.WorkflowServiceException;
+import com._4point.aem.fluentforms.impl.workflow.AdobeWorkflowServiceAdapter;
 import com._4point.aem.fluentforms.impl.workflow.WorkflowServiceAdapter;
+import com._4point.aem.fluentforms.impl.workflow.WorkflowServiceImpl;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=WorkflowService.StartWorkflow Service",
@@ -32,7 +40,7 @@ public class StartWorkflow extends SlingAllMethodsServlet {
 	private static final Logger log = LoggerFactory.getLogger(GeneratePdfOutput.class);
 
 	private final DocumentFactory docFactory = DocumentFactory.getDefault();
-	private final Supplier<WorkflowServiceAdapter> workflowServiceFactory = this::getAdobeWorkflowService;
+	private final Function<SlingHttpServletRequest, WorkflowServiceAdapter> workflowServiceFactory = this::getAdobeWorkflowService;
 	
 	@Override
 	protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -55,11 +63,50 @@ public class StartWorkflow extends SlingAllMethodsServlet {
 	}
 
 	private void processInput(SlingHttpServletRequest request, SlingHttpServletResponse response) throws BadRequestException, InternalServerErrorException, NotAcceptableException {
-		// TODO:  Fill this in.
+		StartWorkflowParameters<?, ?> startWorkflowParameters = StartWorkflowParameters.readWorkflowParameters(request);
+		// TODO: Initialize the variables below from startWorkflowParameters
+		String modelPath = null;
+		String payloadType = null;
+		Object payload = null;
+		Map metadata = null;
+		Class resultClass = null;
+		try {
+			WorkflowService workflowService = new WorkflowServiceImpl(workflowServiceFactory.apply(request));
+			Workflow workflow = workflowService.startWorkflow(modelPath, payloadType, payload, metadata, resultClass);
+			// Return the ID to the client
+		} catch (WorkflowServiceException e) {
+			throw new InternalServerErrorException(e);
+		}
 	}
 	
-	private WorkflowServiceAdapter getAdobeWorkflowService() {
-		// TODO: Fill this in.
-		return null;
+	private WorkflowServiceAdapter getAdobeWorkflowService(SlingHttpServletRequest request) {
+		return AdobeWorkflowServiceAdapter.from(request.getResourceResolver());
+	}
+	
+	static class StartWorkflowParameters<T, R> {
+		private final String MODEL_PATH_PARAM = "modelPath";
+		private final String PAYLOAD_TYPE_PARAM = "payloadType";
+		private final String PAYLOAD_PARAM = "payload";
+		private final String PAYLOAD_CLASS_PARAM = "payloadClass";
+		private final String METADATA_PARAM = "metadata";
+		private final String RESULT_CLASS_PARAM = "resultClass";
+		
+		private final String modelPath;
+		private final String payloadType;
+		private final T payload;
+		private final Map<String, ?> metadata;
+		private final Class<R> resultClass;
+
+		private StartWorkflowParameters(String modelPath, String payloadType, T payload, Map<String, ?> metadata, Class<R> resultClass) {
+			this.modelPath = modelPath;
+			this.payloadType = payloadType;
+			this.payload = payload;
+			this.metadata = metadata;
+			this.resultClass = resultClass;
+		}
+		
+		public static StartWorkflowParameters<?, ?> readWorkflowParameters(SlingHttpServletRequest request) throws BadRequestException {
+			return null;
+		}
 	}
 }

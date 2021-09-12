@@ -47,7 +47,7 @@ class AdobeWorkflowServiceAdapterTest {
 	void testStartWorkflow() throws Exception {
 		when(workflowSession.startWorkflow(model.capture(), payload.capture())).thenReturn(adobeWorkflow);
 		String expectedId = "Expected Id";
-		Instant expectedTimeStarted = Instant.now();
+		Instant expectedTimeStarted = new Date().toInstant();
 		setupAdobeWorkflowMock(expectedId, expectedTimeStarted);
 		
 		String expectedModelPath = "Expected Model Path";
@@ -56,6 +56,12 @@ class AdobeWorkflowServiceAdapterTest {
 		Map<String, String> expectedMetadata = Collections.emptyMap();
 		com._4point.aem.fluentforms.api.workflow.Workflow<Object> result = underTest.startWorkflow(expectedModelPath, expectedPayloadType, expectedPayload, expectedMetadata);
 		assertNotNull(result);
+		// Check the result
+		assertAll(
+				()->assertEquals(expectedId, result.getId()),
+				()->assertEquals(expectedTimeStarted, result.getTimeStarted()),
+				()->assertFalse(result.getTimeEnded().isPresent())
+				);
 	}
 
 	void setupAdobeWorkflowMock(String id, Instant timeStarted) {
