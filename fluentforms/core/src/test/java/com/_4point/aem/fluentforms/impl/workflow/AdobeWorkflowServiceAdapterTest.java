@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.fluentforms.api.workflow.WorkflowService.WorkflowPayloadType;
 import com._4point.aem.fluentforms.api.workflow.WorkflowService.WorkflowServiceException;
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.Workflow;
@@ -51,7 +52,7 @@ class AdobeWorkflowServiceAdapterTest {
 		setupAdobeWorkflowMock(expectedId, expectedTimeStarted);
 		
 		String expectedModelPath = "Expected Model Path";
-		String expectedPayloadType = "Expected Payload Type";
+		WorkflowPayloadType expectedPayloadType = WorkflowPayloadType.BINARY;
 		Object expectedPayload = "Expected Payload";
 		Map<String, String> expectedMetadata = Collections.emptyMap();
 		com._4point.aem.fluentforms.api.workflow.Workflow<Object> result = underTest.startWorkflow(expectedModelPath, expectedPayloadType, expectedPayload, expectedMetadata);

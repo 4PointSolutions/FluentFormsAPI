@@ -16,7 +16,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	@Override
-	public <T, R> Workflow<R> startWorkflow(String modelPath, String payloadType, T payload, Map<String, ?> metadata, Class<R> resultClass) throws WorkflowServiceException {
+	public <T, R> Workflow<R> startWorkflow(String modelPath, WorkflowPayloadType payloadType, T payload, Map<String, ?> metadata, Class<R> resultClass) throws WorkflowServiceException {
 		Workflow<R> workflow = workflowServiceAdapter.startWorkflow(modelPath, payloadType, payload, metadata);
 		return workflow;
 	}

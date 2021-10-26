@@ -8,6 +8,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._4point.aem.fluentforms.api.workflow.WorkflowService.WorkflowPayloadType;
 import com._4point.aem.fluentforms.api.workflow.WorkflowService.WorkflowServiceException;
 import com.adobe.granite.workflow.WorkflowException;
 import com.adobe.granite.workflow.WorkflowSession;
@@ -26,7 +27,7 @@ public class AdobeWorkflowServiceAdapter implements WorkflowServiceAdapter {
 	}
 
 	@Override
-	public <T, R> com._4point.aem.fluentforms.api.workflow.Workflow<R> startWorkflow(String modelPath, String payloadType, T payload, Map<String, ?> metadata) throws WorkflowServiceException {
+	public <T, R> com._4point.aem.fluentforms.api.workflow.Workflow<R> startWorkflow(String modelPath, WorkflowPayloadType payloadType, T payload, Map<String, ?> metadata) throws WorkflowServiceException {
 		// TODO: Fill this in to do more...
 		// Find the WorkflowMonitor
 		// Lock the registry
@@ -39,9 +40,9 @@ public class AdobeWorkflowServiceAdapter implements WorkflowServiceAdapter {
 		return workflowInstance;
 	}
 
-	private <T,R> com._4point.aem.fluentforms.api.workflow.Workflow<R> createWorkflowInstance(String modelPath, String payloadType, T payload, Map<String, ?> metadata) throws WorkflowServiceException {
+	private <T,R> com._4point.aem.fluentforms.api.workflow.Workflow<R> createWorkflowInstance(String modelPath, WorkflowPayloadType payloadType, T payload, Map<String, ?> metadata) throws WorkflowServiceException {
 		try {
-			WorkflowData wfData = workflowSession.newWorkflowData( payloadType, payload ); 
+			WorkflowData wfData = workflowSession.newWorkflowData( payloadType.toString(), payload ); 
 			@SuppressWarnings("unchecked")
 			Workflow workflow = metadata.isEmpty()
 									? workflowSession.startWorkflow( workflowSession.getModel( modelPath ), wfData )

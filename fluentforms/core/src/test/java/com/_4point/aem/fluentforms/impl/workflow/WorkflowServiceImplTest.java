@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.fluentforms.api.workflow.Workflow;
 import com._4point.aem.fluentforms.api.workflow.WorkflowService;
+import com._4point.aem.fluentforms.api.workflow.WorkflowService.WorkflowPayloadType;
 
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 
@@ -28,14 +29,14 @@ class WorkflowServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		underTest = new WorkflowServiceImpl(workflowServiceAdapter);
-		when(workflowServiceAdapter.startWorkflow(anyString(), anyString(), anyString(), anyMap())).thenReturn(workflow);
+		when(workflowServiceAdapter.startWorkflow(anyString(), any(WorkflowPayloadType.class), anyString(), anyMap())).thenReturn(workflow);
 	}
 
 
 	@Test
 	void testStartWorkflow() throws Exception {
 		String modelPath = "ModelPath";
-		String payloadType = "String";
+		WorkflowPayloadType payloadType = WorkflowPayloadType.BINARY;
 		String payload = "Payload";
 		CompletableFuture<String> result = underTest.startWorkflow(modelPath, payloadType, payload);
 		assertNotNull(result);
