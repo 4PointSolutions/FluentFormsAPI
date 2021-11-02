@@ -54,7 +54,7 @@ import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 import com._4point.aem.fluentforms.impl.generatePDF.TraditionalGeneratePDFService;
 
 @SuppressWarnings("serial")
-@Component(service = Servlet.class, property = { Constants.SERVICE_DESCRIPTION + "=FormsService.CreatePDF Service",
+@Component(service = Servlet.class, property = { Constants.SERVICE_DESCRIPTION + "=GeneratePdfService.CreatePDF Service",
 		"sling.servlet.methods=" + HttpConstants.METHOD_POST })
 @SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/GeneratePDFService/CreatePDF")
 public class CreatePDF extends SlingAllMethodsServlet {

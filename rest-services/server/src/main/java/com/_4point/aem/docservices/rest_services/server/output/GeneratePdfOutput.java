@@ -47,7 +47,7 @@ import com._4point.aem.fluentforms.impl.output.TraditionalOutputService;
 import com.adobe.fd.output.api.AcrobatVersion;
 
 @SuppressWarnings("serial")
-@Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=FormsService.RenderPdfForm Service",
+@Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=OutputService.GeneratePdfOutput Service",
 		"sling.servlet.methods=" + HttpConstants.METHOD_POST})
 @SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/OutputService/GeneratePdfOutput")
 public class GeneratePdfOutput extends SlingAllMethodsServlet {

@@ -60,7 +60,7 @@ import com.adobe.fd.assembler.client.OperationException;
 
 @SuppressWarnings("serial")
 @Component(service = Servlet.class, property = {
-		Constants.SERVICE_DESCRIPTION + "=FormsService.AssembleDocuments Service",
+		Constants.SERVICE_DESCRIPTION + "=AssembleService.AssembleDocuments Service",
 		"sling.servlet.methods=" + HttpConstants.METHOD_POST })
 @SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/AssemblerService/AssembleDocuments")
 public class AssembleDocuments extends SlingAllMethodsServlet {
