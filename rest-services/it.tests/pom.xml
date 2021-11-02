@@ -24,7 +24,7 @@
 	|   The testing instance must have the sample0002test.zip package uploaded into CRX an adaptive form that resides directly under the
 	|   FormsAndDocuments called sample0002test.  Without this, all the adaptive forms tests will fail.
 	|
-	|	Protected mode must be turned off, per this: https://helpx.adobe.com/ca/experience-manager/6-3/forms/using/preview-xdp-forms-html.html
+	|	Protected mode must be turned off, per this: https://experienceleague.adobe.com/docs/experience-manager-65/forms/html5-forms/preview-xdp-forms-html.html?lang=en#disable-protected-mode
 	|
 	|   Also, the testing instance must have a ReaderExtensions credential installed under admin using an alias of "recred" in order for
 	|   all the SecureDocument/testReaderExtendPDF tests to pass.
