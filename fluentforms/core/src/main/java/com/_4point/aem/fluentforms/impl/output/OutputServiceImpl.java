@@ -17,10 +17,12 @@ import com._4point.aem.fluentforms.api.output.BatchOptions;
 import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
+import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.TemplateValues;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.output.api.AcrobatVersion;
+import com.adobe.fd.output.api.PaginationOverride;
 
 /**
  * Output Service implementation.
@@ -139,7 +141,8 @@ public class OutputServiceImpl implements OutputService {
 	@Override
 	public GeneratePrintedOutputArgumentBuilder generatePrintedOutput() {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Not implemented yet.");
+		//throw new UnsupportedOperationException("Not implemented yet.");
+		return new GeneratePrintedOutputArgumentBuilderImpl();
 	}
 
 	@Override
@@ -237,7 +240,72 @@ public class OutputServiceImpl implements OutputService {
 			return generatePDFOutput(template, data, this.pdfOutputOptions);
 		}
 	}
-	
+
+	private class GeneratePrintedOutputArgumentBuilderImpl implements GeneratePrintedOutputArgumentBuilder {
+
+		PrintedOutputOptions printedOutputOptions = new PrintedOutputOptionsImpl();
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setContentRoot(PathOrUrl pathOrUrl) {
+			this.printedOutputOptions.setContentRoot(pathOrUrl);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setCopies(int copies) {
+			this.printedOutputOptions.setCopies(copies);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setDebugDir(Path debugDir) {
+			this.printedOutputOptions.setDebugDir(debugDir);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setLocale(Locale locale) {
+			this.printedOutputOptions.setLocale(locale);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setPaginationOverride(PaginationOverride paginationOverride) {
+			this.printedOutputOptions.setPaginationOverride(paginationOverride);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setPrintConfig(PrintConfig printConfig) {
+			this.printedOutputOptions.setPrintConfig(printConfig);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setXci(Document xci) {
+			this.printedOutputOptions.setXci(xci);
+			return this;
+		}
+
+		@Override
+		public Document executeOn(PathOrUrl template, Document data)
+				throws OutputServiceException, FileNotFoundException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+		@Override
+		public Document executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+		@Override
+		public Document executeOn(URL template, Document data) throws OutputServiceException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+	}
+
+
 	/**
 	 * This class could (and should) be replaced by private methods in the OutputService.BatchArgumentBuilder interface
 	 * however that would require Java 11 and for now we're stuck in Java 8 land.  Hopefully someone will move this class'

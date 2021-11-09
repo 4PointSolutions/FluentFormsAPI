@@ -497,9 +497,39 @@ class OutputServiceImplTest {
 		fail("Not yet implemented");
 	}
 
-	@Disabled
-	void testGeneratePrintedOutputDocumentDocumentPrintedOutputOptions() {
-		fail("Not yet implemented");
+	@Test
+	void testGeneratePrintedOutputDocumentDocumentPrintedOutputOptions() throws Exception {
+		MockPrintedOutputService svc = new MockPrintedOutputService();
+		
+		Document template = Mockito.mock(Document.class);
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions options = Mockito.mock(PrintedOutputOptions.class);
+		Document result = underTest.generatePrintedOutput(template, data, options);
+		
+		// Verify that all the results are correct.
+		assertEquals(template, svc.getTemplateDocArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+
+	@Test
+	@DisplayName("Test GeneratePDFOutput(Document,...) null arguments.")
+	void testRenderPrintedOutputDocument_nullArguments() throws Exception {
+		Document template = Mockito.mock(Document.class);
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions pdfFormRenderOptions = Mockito.mock(PrintedOutputOptions.class);
+		Document nullDocument = null;
+		
+		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput(nullDocument, data, pdfFormRenderOptions));
+		assertTrue(ex1.getMessage().contains("Template"), ()->"'" + ex1.getMessage() + "' does not contain 'Template'");
+
+		// Null Data is allowed.
+//		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
+//		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
+		
+		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput(template, data, null));
+		assertTrue(ex3.getMessage().contains("PrintedOutputOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'PDFOutputOptions'");
 	}
 
 	@Disabled
@@ -507,14 +537,49 @@ class OutputServiceImplTest {
 		fail("Not yet implemented");
 	}
 
-	@Disabled
-	void testGeneratePrintedOutputURLDocumentPrintedOutputOptions() {
-		fail("Not yet implemented");
+	//@Disabled
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(URL,...) Happy Path, with contentRoot.")
+	void testGeneratePrintedOutputURLDocumentPrintedOutputOptions() throws Exception {
+		//fail("Not yet implemented");
+		MockPrintedOutputService svc = new MockPrintedOutputService();
+		
+		String expectedTemplateFilename = "http://www.example.com/foo/bar.xdp";
+		String expectedContextRoot = "http://www.otherexample.com/foo/";
+		URL filename = new URL(expectedTemplateFilename);
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions options = new PrintedOutputOptionsImpl();
+		options.setContentRoot(new URL(expectedContextRoot));
+		Document result = underTest.generatePrintedOutput(filename, data, options);
+		
+		// Verify that all the results are correct.
+		assertEquals(expectedTemplateFilename, svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContextRoot, svc.optionsArg.getValue().getContentRoot().toString(), "Expected the template contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+
 	}
 
 	@Disabled
-	void testGeneratePrintedOutputPathOrUrlDocumentPrintedOutputOptions() {
-		fail("Not yet implemented");
+	void testGeneratePrintedOutputPathOrUrlDocumentPrintedOutputOptions() throws Exception {
+		//fail("Not yet implemented");
+		MockPrintedOutputService svc = new MockPrintedOutputService();
+		
+		String expectedTemplateFilename = "bar.xdp";
+		String expectedContextRoot = "file:foo/";
+		PathOrUrl filename = PathOrUrl.from(expectedContextRoot + expectedTemplateFilename);
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions options = new PrintedOutputOptionsImpl();
+		Document result = underTest.generatePrintedOutput(filename, data, options);
+		
+		// Verify that all the results are correct.
+		assertEquals(expectedTemplateFilename, svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContextRoot, svc.optionsArg.getValue().getContentRoot().toString(), "Expected the template contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+
 	}
 
 	@Disabled
@@ -565,21 +630,27 @@ class OutputServiceImplTest {
 
 	private class MockPrintedOutputService {
 		private final Document result = Mockito.mock(Document.class);
-		private final ArgumentCaptor<String> templateArg = ArgumentCaptor.forClass(String.class);
+		private final ArgumentCaptor<String> templateStringArg = ArgumentCaptor.forClass(String.class);
+		private final ArgumentCaptor<Document> templateDocArg = ArgumentCaptor.forClass(Document.class);
 		private final ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
 		private final ArgumentCaptor<PrintedOutputOptions> optionsArg = ArgumentCaptor.forClass(PrintedOutputOptions.class);
 		
 		protected MockPrintedOutputService() throws OutputServiceException {
 			super();
-			Mockito.lenient().when(adobeOutputService.generatePrintedOutput(templateArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
+			Mockito.lenient().when(adobeOutputService.generatePrintedOutput(templateDocArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
+			Mockito.lenient().when(adobeOutputService.generatePrintedOutput(templateStringArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
 		}
 
 		protected Document getResult() {
 			return result;
 		}
 
-		protected String getTemplateArg() {
-			return templateArg.getValue();
+		protected String getTemplateStringArg() {
+			return templateStringArg.getValue();
+		}
+
+		protected Document getTemplateDocArg() {
+			return templateDocArg.getValue();
 		}
 
 		protected Document getDataArg() {

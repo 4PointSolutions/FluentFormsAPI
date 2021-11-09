@@ -8,6 +8,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com._4point.aem.fluentforms.testing.output.MockTraditionalOutputService.GeneratePdfArgs;
+import com._4point.aem.fluentforms.testing.output.MockTraditionalOutputService.GeneratePrintedOutputArgs;
 
 class MockOutputServiceTest {
 
@@ -71,24 +72,24 @@ class MockOutputServiceTest {
 //		assertEquals(template.getCrxUrl(), capturedArgs.getUrlOrFilename());
 //	}
 
-//	@Test
-//	void testCreateGeneratePrintedOutputMock() throws Exception {
-//		String expectedResultString = "Test Result";
-//		MockDocumentFactory mockDocumentFactory = new MockDocumentFactory();
-//		Document expectedResultDoc = mockDocumentFactory.create(expectedResultString.getBytes());
-//		MockOutputService underTest = MockOutputService.createGeneratePrintedOutputMock(expectedResultDoc);
-//		
-//		PathOrUrl template = PathOrUrl.from("crx:/test/form");
-//		Document data = mockDocumentFactory.create(expectedResultString.getBytes());
-//		
-//		Document result = underTest.generatePrintedOutput()
-//						 .executeOn(template, data);
-//		
-//		assertEquals(result, expectedResultDoc);
-//		GeneratePdfArgs capturedArgs = underTest.getGeneratePdfArgs();
-//		assertEquals(data, capturedArgs.getData());
-//		assertEquals(template.getCrxUrl(), capturedArgs.getUrlOrFilename());
-//	}
+	@Test
+	void testCreateGeneratePrintedOutputMock() throws Exception {
+		String expectedResultString = "Test Result";
+		MockDocumentFactory mockDocumentFactory = new MockDocumentFactory();
+		Document expectedResultDoc = mockDocumentFactory.create(expectedResultString.getBytes());
+		MockOutputService underTest = MockOutputService.createGeneratePrintedOutputMock(expectedResultDoc);
+		
+		PathOrUrl template = PathOrUrl.from("crx:/test/form");
+		Document data = mockDocumentFactory.create(expectedResultString.getBytes());
+		
+		Document result = underTest.generatePrintedOutput()
+						 .executeOn(template, data);
+		
+		assertEquals(result, expectedResultDoc);
+		GeneratePrintedOutputArgs capturedArgs = underTest.getGeneratePrintedOutputArgs();
+		assertEquals(data, capturedArgs.getData());
+		assertEquals(template.getCrxUrl(), capturedArgs.getUrlOrFilename());
+	}
 
 //	@Test
 //	void testCreateGeneratePrintedOutputBatchMock() {
