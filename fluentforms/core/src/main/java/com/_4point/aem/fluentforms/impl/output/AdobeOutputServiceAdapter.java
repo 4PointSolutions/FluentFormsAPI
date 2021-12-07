@@ -98,7 +98,12 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 	/* package */ static com.adobe.fd.output.api.PDFOutputOptions toAdobePDFOutputOptions(PDFOutputOptions options) {
 		com.adobe.fd.output.api.PDFOutputOptions adobeOptions = new com.adobe.fd.output.api.PDFOutputOptions();
 		setIfNotNull(adobeOptions::setAcrobatVersion, options.getAcrobatVersion());
-		setIfNotNull((cr)->adobeOptions.setContentRoot(cr.toString()), options.getContentRoot());
+		setIfNotNull((cr)->adobeOptions.setContentRoot(
+				// Compensate for the fact that AEM doesn't handle relative URLs in the content root because XMLForm.exe uses a different cwd than AEM.
+				// See issue #31 for details.
+				cr.isPath() ? cr.getPath().toAbsolutePath().toString() : cr.toString()), 
+				options.getContentRoot())
+		;
 		setIfNotNull((dd)->adobeOptions.setDebugDir(dd.toString()), options.getDebugDir());
 		setIfNotNull(adobeOptions::setEmbedFonts, options.getEmbedFonts());
 		setIfNotNull(adobeOptions::setLinearizedPDF, options.getLinearizedPDF());
@@ -124,7 +129,12 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 	// Package visibility so that it can be used in unit testing.
 	/* package */ static com.adobe.fd.output.api.PrintedOutputOptions toAdobePrintedOutputOptions(PrintedOutputOptions options) {
 		com.adobe.fd.output.api.PrintedOutputOptions adobeOptions = new com.adobe.fd.output.api.PrintedOutputOptions();
-		setIfNotNull((cr)->adobeOptions.setContentRoot(cr.toString()), options.getContentRoot());
+		setIfNotNull((cr)->adobeOptions.setContentRoot(
+				// Compensate for the fact that AEM doesn't handle relative URLs in the content root because XMLForm.exe uses a different cwd than AEM.
+				// See issue #31 for details.
+				cr.isPath() ? cr.getPath().toAbsolutePath().toString() : cr.toString()), 
+				options.getContentRoot()
+				);
 		setIfNotNull(adobeOptions::setCopies, options.getCopies());
 		setIfNotNull((dd)->adobeOptions.setDebugDir(dd.toString()), options.getDebugDir());
 		setIfNotNull((l)->adobeOptions.setLocale(l.toLanguageTag()), options.getLocale());

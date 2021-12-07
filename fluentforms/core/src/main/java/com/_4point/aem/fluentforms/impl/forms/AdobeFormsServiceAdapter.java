@@ -102,7 +102,12 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 		com.adobe.fd.forms.api.PDFFormRenderOptions adobeOptions = new com.adobe.fd.forms.api.PDFFormRenderOptions();
 		setIfNotNull(adobeOptions::setAcrobatVersion, options.getAcrobatVersion());
 		setIfNotNull(adobeOptions::setCacheStrategy, options.getCacheStrategy());
-		setIfNotNull((cr)->adobeOptions.setContentRoot(cr.toString()), options.getContentRoot());
+		setIfNotNull((cr)->adobeOptions.setContentRoot(
+				// Compensate for the fact that AEM doesn't handle relative URLs in the content root because XMLForm.exe uses a different cwd than AEM.
+				// See issue #31 for details.
+				cr.isPath() ? cr.getPath().toAbsolutePath().toString() : cr.toString()), 
+				options.getContentRoot()
+				);
 		setIfNotNull((dd)->adobeOptions.setDebugDir(dd.toString()), options.getDebugDir());
 		setIfNotNull(adobeOptions::setEmbedFonts, options.getEmbedFonts());
 		setIfNotNull((l)->adobeOptions.setLocale(l.toLanguageTag()), options.getLocale());

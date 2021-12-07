@@ -2,10 +2,14 @@ package com._4point.aem.fluentforms.impl.output;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.nio.file.Paths;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.fluentforms.api.PathOrUrl;
+import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
+import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.output.AdobeOutputServiceAdapter.PrintConfigMapping;
 import com.adobe.fd.output.api.RenderType;
 
@@ -53,5 +57,24 @@ class AdobeOutputServiceAdapterTest {
 	void testToAdobePrintConfigOptions_Null() {
 		assertNull(AdobeOutputServiceAdapter.toAdobePrintConfig(null));
 	}
+	
+	// Test the the code converts local FileSystem locations from relative to absolute
+	// See issue #31 for why we did this.
+	@Test
+	void testtoAdobePDFOutputOptions_RelPath() {
+		PDFOutputOptions options = new PDFOutputOptionsImpl();
+		options.setContentRoot(Paths.get("foo", "bar"));
+		final com.adobe.fd.output.api.PDFOutputOptions result = AdobeOutputServiceAdapter.toAdobePDFOutputOptions(options);
+		assertFalse(PathOrUrl.from(result.getContentRoot()).isRelative());	// Make sure the result is no longer relative
+	}
 
+	// Test the the code converts local FileSystem locations from relative to absolute
+	// See issue #31 for why we did this.
+	@Test
+	void testtoAdobePrintedOutputOptions_RelPath() {
+		PrintedOutputOptions options = new PrintedOutputOptionsImpl();
+		options.setContentRoot(Paths.get("foo", "bar"));
+		final com.adobe.fd.output.api.PrintedOutputOptions result = AdobeOutputServiceAdapter.toAdobePrintedOutputOptions(options);
+		assertFalse(PathOrUrl.from(result.getContentRoot()).isRelative());	// Make sure the result is no longer relative
+	}
 }

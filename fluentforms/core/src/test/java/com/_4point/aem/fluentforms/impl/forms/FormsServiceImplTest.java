@@ -605,7 +605,7 @@ class FormsServiceImplTest {
 		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
 		assertSame(pdfResult, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 
-		PDFFormRenderOptionsImplTest.assertEmpty(svc.getOptionsArg(), filePath.getParent().toString());
+		PDFFormRenderOptionsImplTest.assertEmpty(svc.getOptionsArg(), filePath.getParent().toAbsolutePath().toString());
 	}
 
 	@Test
