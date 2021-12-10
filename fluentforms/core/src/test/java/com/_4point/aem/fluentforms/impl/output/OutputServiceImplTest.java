@@ -498,6 +498,7 @@ class OutputServiceImplTest {
 	}
 
 	@Test
+	
 	void testGeneratePrintedOutputDocumentDocumentPrintedOutputOptions() throws Exception {
 		MockPrintedOutputService svc = new MockPrintedOutputService();
 		
@@ -514,34 +515,217 @@ class OutputServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Test GeneratePDFOutput(Document,...) null arguments.")
-	void testRenderPrintedOutputDocument_nullArguments() throws Exception {
-		Document template = Mockito.mock(Document.class);
+	@DisplayName("Test GeneratePrintedOutput(Path,Document,Options) null arguments.")
+	void testRenderPrintedOutputDocumentPath_nullArguments() throws Exception {
+		//Document template = Mockito.mock(Document.class);
+		Path filename = TestUtils.SAMPLE_FORM;
 		Document data = Mockito.mock(Document.class);
-		PrintedOutputOptions pdfFormRenderOptions = Mockito.mock(PrintedOutputOptions.class);
-		Document nullDocument = null;
+		PrintedOutputOptions printedFormRenderOptions = Mockito.mock(PrintedOutputOptions.class);
+		Path nullPath = null;
 		
-		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput(nullDocument, data, pdfFormRenderOptions));
-		assertTrue(ex1.getMessage().contains("Template"), ()->"'" + ex1.getMessage() + "' does not contain 'Template'");
+		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput(nullPath, data, printedFormRenderOptions));
+		assertTrue(ex1.getMessage().contains("Path"), ()->"'" + ex1.getMessage() + "' does not contain 'Path'");
 
 		// Null Data is allowed.
 //		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.renderPDFForm(filename, null, pdfFormRenderOptions));
 //		assertTrue(ex2.getMessage().contains("data"), ()->"'" + ex2.getMessage() + "' does not contain 'data'");
 		
-		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput(template, data, null));
-		assertTrue(ex3.getMessage().contains("PrintedOutputOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'PDFOutputOptions'");
+		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput(filename, data, null));
+		assertTrue(ex3.getMessage().contains("printedOutputOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'printedOutputOptions'");
 	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Document,...) throws OutputServiceException.")
+	void testRenderPrintedOutputDocument__OutputServiceExceptionThrown() throws Exception {
+		Mockito.when(adobeOutputService.generatePrintedOutput(Mockito.any(Document.class), Mockito.any(), Mockito.any())).thenThrow(OutputServiceException.class);
 
+		Document template = Mockito.mock(Document.class);
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions pdfFormRenderOptions = Mockito.mock(PrintedOutputOptions.class);
+		
+		assertThrows(OutputServiceException.class, ()->underTest.generatePrintedOutput(template, data, pdfFormRenderOptions));
+	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Path,...) Happy Path, No Context Root.")
+	void testGeneratePrintedOutputPathDocumentDefaultPrintedOutputOptions() throws Exception {
+		MockPrintedOutputService svc = new MockPrintedOutputService();
+		
+		Path filename = TestUtils.SAMPLE_FORM;
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions options = new PrintedOutputOptionsImpl();
+		Document result = underTest.generatePrintedOutput(filename, data, options);
+		
+		// Verify that all the results are correct.
+		assertEquals(filename.getFileName(), Paths.get(svc.getTemplateStringArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(filename.getParent(), Paths.get(svc.getOptionsArg().getContentRoot().toString()), "Expected the template filename passed to AEM would match the filename used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Path,...) Happy Path, with Context Root.")
+	void testGeneratePrintedOutputPathDocumentNonDefaultPrintedOutputOptions() throws Exception {
+		MockPrintedOutputService svc = new MockPrintedOutputService();
+		
+		Path filename = TestUtils.SAMPLE_FORM.getFileName();
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions options = new PrintedOutputOptionsImpl();
+		Path contextRoot = TestUtils.SAMPLE_FORMS_DIR;
+		options.setContentRoot(contextRoot);
+		Document result = underTest.generatePrintedOutput(filename, data, options);
+		
+		// Verify that all the results are correct.
+		assertEquals(filename.getFileName(), Paths.get(svc.getTemplateStringArg()), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(contextRoot, Paths.get(svc.getOptionsArg().getContentRoot().toString()), "Expected the template filename passed to AEM would match the filename used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Path,...) null arguments.")
+	void testGeneratePrintedOutputPath_nullArguments() throws Exception {
+		Path filename = TestUtils.SAMPLE_FORM;
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions printedFormRenderOptions = Mockito.mock(PrintedOutputOptions.class);
+		Path nullFilename = null;
+		
+		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput(nullFilename, data, printedFormRenderOptions));
+		assertNotNull(ex1.getMessage());	// Exception should contain a message.
+		assertTrue(ex1.getMessage().contains("template"), ()->"'" + ex1.getMessage() + "' does not contain 'template'");
+		
+		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput(filename, data, null));
+		assertNotNull(ex1.getMessage());	// Exception should contain a message.
+		assertTrue(ex3.getMessage().contains("printedOutputOptions"), ()->"'" + ex3.getMessage() + "' does not contain 'printedOutputOptions'");
+	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Document,...) null arguments.")
+	void testRenderPrintedOutputDocument_nullArguments() throws Exception {
+		//MockPrintedOutputService svc = new MockPrintedOutputService();
+		
+		Document template = Mockito.mock(Document.class);
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions printedFormRenderOptions = Mockito.mock(PrintedOutputOptions.class);
+		Document nullDocument = null;
+		
+		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput(nullDocument, data, printedFormRenderOptions));
+		assertTrue(ex1.getMessage().contains("Template"), ()->"'" + ex1.getMessage() + "' does not contain 'Template'");
+		
+		NullPointerException ex3 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput(template, data, null));
+		assertTrue(ex3.getMessage().contains("Options"), ()->"'" + ex1.getMessage() + "' does not contain 'Options'");
+		
+	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Path,...) path argument.")
+	void testRenderPrintedOutputDocumentPathOrUrl_PathInput() throws Exception {
+		MockPrintedOutputService svc = new MockPrintedOutputService();
+		
+		PathOrUrl pathOrUrl = Mockito.mock(PathOrUrl.class);
+		Path filename = TestUtils.SAMPLE_FORM;
+		
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions printedOutputOptions = Mockito.mock(PrintedOutputOptions.class);
+		
+		Document resultPath = underTest.generatePrintedOutput(filename, data, printedOutputOptions);
+		
+		IllegalArgumentException ex1 = assertThrows
+				(IllegalArgumentException.class, ()->underTest.generatePrintedOutput(pathOrUrl, data, printedOutputOptions));
+		assertSame(resultPath, svc.getResult(), "Expected the document to be the same - path input.");
+
+	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Url,...) path argument.")
+	void testRenderPrintedOutputDocumentPathOrUrl_URLInput() throws Exception {
+		MockPrintedOutputService svc = new MockPrintedOutputService();
+		String expectedTemplateFilename = "bar.xdp";
+		String expectedContextRoot = "http://www.example.com/foo/";
+		URL url = new URL(expectedContextRoot + expectedTemplateFilename);
+		
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions printedOutputOptions = Mockito.mock(PrintedOutputOptions.class);
+		
+		Document resultURL = underTest.generatePrintedOutput(url, data, printedOutputOptions);
+		
+		assertSame(resultURL, svc.getResult(), "Expected the document to be the same - Url input.");
+	}
+	
+	@Test
+	void testGeneratePrintedOutputCrxUrl() throws Exception {
+		MockPrintedOutputService svc = new MockPrintedOutputService();
+		
+		PathOrUrl filename = PathOrUrl.from("crx:/content/dam/formsanddocuments/foo/bar.xdp");
+		Document data = Mockito.mock(Document.class);
+		
+		PrintedOutputOptions printedOutputOptions = Mockito.mock(PrintedOutputOptions.class);
+		
+		Document resultCrx = underTest.generatePrintedOutput(filename, data, printedOutputOptions);
+		
+		// Verify that all the results are correct.
+		assertEquals(filename.toString(), svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(resultCrx, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Path,...) throws FileNotFoundException.")
+	void testGeneratePrintedOutputPath__BadTemplate() throws Exception {
+		String filename = "foo/bar.xdp";
+		Path filePath = Paths.get(filename);
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions printedOutputOptions = Mockito.mock(PrintedOutputOptions.class);
+		
+		FileNotFoundException ex1 = assertThrows(FileNotFoundException.class, ()->underTest.generatePrintedOutput(filePath, data, printedOutputOptions));
+		String message = ex1.getMessage();
+		assertTrue(message.contains("template"), ()->"Expected exception message to contain a mention of the template. (" + message + ").");
+		assertTrue(message.contains(filePath.toString()), "Expected exception message to contain the filepath provided. (" + message + ").");
+	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Path,...) throws OutputServiceException.")
+	void testGeneratePrintedOutputPath__FormsServiceExceptionThrown() throws Exception {
+		Mockito.when(adobeOutputService.generatePrintedOutput(Mockito.any(String.class), Mockito.any(), Mockito.any())).thenThrow(OutputServiceException.class);
+
+		Path filename = TestUtils.SAMPLE_FORM;
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions printedFormRenderOptions = Mockito.mock(PrintedOutputOptions.class);
+		
+		assertThrows(OutputServiceException.class, ()->underTest.generatePrintedOutput(filename, data, printedFormRenderOptions));
+	}
+	
 	@Disabled
 	void testGeneratePrintedOutputPathDocumentPrintedOutputOptions() {
 		fail("Not yet implemented");
+	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(PathOrUrl,...) Happy Path with no contentRoot.")
+	void testGeneratePrintedOutputPathOrUrlDocumentDefaultPrintedOutputOptions() throws Exception {
+		MockPrintedOutputService svc = new MockPrintedOutputService();
+		
+		String expectedTemplateFilename = "bar.xdp";
+		String expectedContextRoot = "file:foo/";
+		PathOrUrl filename = PathOrUrl.from(expectedContextRoot + expectedTemplateFilename);
+		Document data = Mockito.mock(Document.class);
+		PrintedOutputOptions options = new PrintedOutputOptionsImpl();
+		Document result = underTest.generatePrintedOutput(filename, data, options);
+		
+		// Verify that all the results are correct.
+		assertEquals(expectedTemplateFilename, svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(expectedContextRoot, svc.optionsArg.getValue().getContentRoot().toString(), "Expected the template contextRoot passed to AEM would match the contextRoot used.");
+		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
+		assertSame(options, svc.getOptionsArg(), "Expected the pdfRenderOptions passed to AEM would match the pdfOutputOptions used.");
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	//@Disabled
 	@Test
 	@DisplayName("Test GeneratePrintedOutput(URL,...) Happy Path, with contentRoot.")
 	void testGeneratePrintedOutputURLDocumentPrintedOutputOptions() throws Exception {
-		//fail("Not yet implemented");
 		MockPrintedOutputService svc = new MockPrintedOutputService();
 		
 		String expectedTemplateFilename = "http://www.example.com/foo/bar.xdp";
@@ -561,7 +745,7 @@ class OutputServiceImplTest {
 
 	}
 
-	@Disabled
+	@Test
 	void testGeneratePrintedOutputPathOrUrlDocumentPrintedOutputOptions() throws Exception {
 		//fail("Not yet implemented");
 		MockPrintedOutputService svc = new MockPrintedOutputService();
