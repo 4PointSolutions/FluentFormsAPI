@@ -17,10 +17,12 @@ import com._4point.aem.fluentforms.api.output.BatchOptions;
 import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
+import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.TemplateValues;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.output.api.AcrobatVersion;
+import com.adobe.fd.output.api.PaginationOverride;
 
 /**
  * Output Service implementation.
@@ -99,47 +101,41 @@ public class OutputServiceImpl implements OutputService {
 	@Override
 	public Document generatePrintedOutput(Path templateFilename, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException, FileNotFoundException {
 		Objects.requireNonNull(templateFilename, "template cannot be null.");
-
-		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
-		PathOrUrl contentRoot = Objects.requireNonNull(printedOutputOptions, "pdfOutputOptions cannot be null!").getContentRoot();
-//		if (contentRoot != null && !contentRoot.isPath()) {
-//			throw new FormsServiceException("Content Root must be Path object if template is a Path. contentRoot='" + contentRoot.toString() + "', template='" + filename + "'.");
-//		}
-		TemplateValues tvs = TemplateValues.determineTemplateValues(PathOrUrl.from(templateFilename), contentRoot, this.usageContext).get();
-		
-		PathOrUrl finalContentRoot = tvs.getContentRoot();
-		printedOutputOptions.setContentRoot(finalContentRoot != null ? finalContentRoot : null);
-		return this.generatePrintedOutput(tvs.getTemplate().toString(), data, printedOutputOptions);
+		return this.generatePrintedOutput(PathOrUrl.from(templateFilename), data, printedOutputOptions);
 	}
 
 	@Override
 	public Document generatePrintedOutput(URL templateUrl, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
 		Objects.requireNonNull(templateUrl, "url cannot be null.");
-		return this.generatePrintedOutput(templateUrl.toString(), data, printedOutputOptions);
+		try {
+			return this.generatePrintedOutput(PathOrUrl.from(templateUrl), data, printedOutputOptions);
+		} catch (FileNotFoundException e) {
+			// This should never happen because the exception is only thrown for Path objects.
+			throw new IllegalStateException("determineTemplateValues threw FileNotFoundException for URL.");
+		}
 	}
 
 	@Override
 	public Document generatePrintedOutput(PathOrUrl template, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException, FileNotFoundException {
-		if (template.isPath()) {
-			return generatePrintedOutput(template.getPath(), data, printedOutputOptions);
-		} else if (template.isUrl()) {
-			return generatePrintedOutput(template.getUrl(), data, printedOutputOptions);
-		} else if (template.isCrxUrl()) {
-			return generatePrintedOutput(template.getCrxUrl(), data, printedOutputOptions);
-		} else {
-			// This should never be thrown.
-			throw new IllegalArgumentException("Template must be either Path or URL. (This should never be thrown.)");
+		Objects.requireNonNull(template, "template cannot be null.");
+		// Fix up the content root and filename.  If the filename has a directory in front, move it to the content root.
+		PathOrUrl contentRoot = Objects.requireNonNull(printedOutputOptions, "printedOutputOptions cannot be null!").getContentRoot();
+		Optional<TemplateValues> otvs = TemplateValues.determineTemplateValues(template, contentRoot, this.usageContext);
+		if (otvs.isPresent()) {
+			TemplateValues tvs = otvs.get();
+			template = PathOrUrl.from(tvs.getTemplate());
+			printedOutputOptions.setContentRoot(tvs.getContentRoot());
 		}
+		return internalGeneratePrintedOutput(template.toString(), data, printedOutputOptions);
 	}
 
-	private Document generatePrintedOutput(String urlOrFileName, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
-		return this.adobeOutputService.generatePrintedOutput(urlOrFileName, data, printedOutputOptions);
+	private Document internalGeneratePrintedOutput(String urlOrFileName, Document data, PrintedOutputOptions pdfOutputOptions) throws OutputServiceException {
+		return adobeOutputService.generatePrintedOutput(urlOrFileName, data, pdfOutputOptions);
 	}
 
 	@Override
 	public GeneratePrintedOutputArgumentBuilder generatePrintedOutput() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Not implemented yet.");
+		return new GeneratePrintedOutputArgumentBuilderImpl();
 	}
 
 	@Override
@@ -238,6 +234,70 @@ public class OutputServiceImpl implements OutputService {
 		}
 	}
 	
+	private class GeneratePrintedOutputArgumentBuilderImpl implements GeneratePrintedOutputArgumentBuilder {
+
+		PrintedOutputOptions printedOutputOptions = new PrintedOutputOptionsImpl();
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setContentRoot(PathOrUrl pathOrUrl) {
+			this.printedOutputOptions.setContentRoot(pathOrUrl);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setCopies(int copies) {
+			this.printedOutputOptions.setCopies(copies);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setDebugDir(Path debugDir) {
+			this.printedOutputOptions.setDebugDir(debugDir);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setLocale(Locale locale) {
+			this.printedOutputOptions.setLocale(locale);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setPaginationOverride(PaginationOverride paginationOverride) {
+			this.printedOutputOptions.setPaginationOverride(paginationOverride);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setPrintConfig(PrintConfig printConfig) {
+			this.printedOutputOptions.setPrintConfig(printConfig);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder setXci(Document xci) {
+			this.printedOutputOptions.setXci(xci);
+			return this;
+		}
+
+		@Override
+		public Document executeOn(PathOrUrl template, Document data)
+				throws OutputServiceException, FileNotFoundException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+		@Override
+		public Document executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+		@Override
+		public Document executeOn(URL template, Document data) throws OutputServiceException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+	}
+
 	/**
 	 * This class could (and should) be replaced by private methods in the OutputService.BatchArgumentBuilder interface
 	 * however that would require Java 11 and for now we're stuck in Java 8 land.  Hopefully someone will move this class'
