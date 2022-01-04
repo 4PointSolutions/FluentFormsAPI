@@ -47,7 +47,7 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 			assemblerResult = adobeDocAssemblerService.invoke(AdobeDocumentFactoryImpl.getAdobeDocument(ddx), toAdobeDocumentMap(sourceDocuments),
 					toAdobeAssemblerOptionSpec(adobAssemblerOptionSpec));
 		} catch (OperationException e) {
-			 throw new AssemblerServiceException("Error while aasembling the documents ",e);
+			 throw new AssemblerServiceException("Error while assembling the documents.", e);
 		}
 		return toAssemblerResult(assemblerResult);
 	}
