@@ -1,9 +1,10 @@
 package com._4point.aem.fluentforms.impl.assembler;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat; 
+import static org.hamcrest.Matchers.*;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,9 +22,6 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.UsageContext;
-import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
-import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 import com.adobe.fd.assembler.client.OperationException;
 
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -95,10 +93,11 @@ public class AssemblerServiceImplTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	void testAssembleDocument() throws Exception {
+	void testAssembleDocument_deprecated() throws Exception {
 	    MockPdfAssemblerService svc = new MockPdfAssemblerService();
 		Document ddx = Mockito.mock(Document.class);
 		Map<String, Object> sourceDocuments = Mockito.mock(Map.class);
+		@SuppressWarnings("deprecation")
 		AssemblerResult result = underTest.invoke().setFailOnError(false)
 				                                   .setDefaultStyle("abc")
 				                                   .setLogLevel(LogLevel.CONFIG)
@@ -110,8 +109,42 @@ public class AssemblerServiceImplTest {
 		
 		// Verify that all the results are correct.
 		assertEquals(ddx, svc.getDdxOrg(), "Expected the ddx passed to AEM would match the ddx used.");
-		assertTrue(svc.getSourceDocs() == sourceDocuments, "Expected the SourceDocuments passed to AEM would match the SourceDocuments used.");
-		assertTrue(result == svc.getAssemblerResult(), "Expected the AssemblerResult returned by AEM would match the AssemblerResult.");
+		assertSame(sourceDocuments, svc.getSourceDocs(), "Expected the SourceDocuments passed to AEM would match the SourceDocuments used.");
+		assertSame(result, svc.getAssemblerResult(), "Expected the AssemblerResult returned by AEM would match the AssemblerResult.");
+		AssemblerOptionSpecTest.assertNotEmpty(svc.getOptionsArg());
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	void testAssembleDocument() throws Exception {
+	    MockPdfAssemblerService svc = new MockPdfAssemblerService();
+		Document ddx = Mockito.mock(Document.class);
+		String sourceDocument1Name = "Name1";
+		Document sourceDocument1 = Mockito.mock(Document.class);
+		String sourceDocument2Name = "Name2";
+		Document sourceDocument2 = Mockito.mock(Document.class);
+		String sourceList1Name = "Name3";
+		List<Document> sourceList1 = Mockito.mock(List.class);
+		AssemblerResult result = underTest.invoke().setFailOnError(false)
+				                                   .setDefaultStyle("abc")
+				                                   .setLogLevel(LogLevel.CONFIG)
+				                                   .setFirstBatesNumber(0)
+				                                   .setTakeOwnership(true)
+				                                   .setValidateOnly(true)
+				                                   .add(sourceDocument1Name, sourceDocument1)
+				                                   .add(sourceDocument2Name, sourceDocument2)
+				                                   .add(sourceList1Name, sourceList1)
+				                                   .executeOn(ddx);
+		
+		
+		// Verify that all the results are correct.
+		assertEquals(ddx, svc.getDdxOrg(), "Expected the ddx passed to AEM would match the ddx used.");
+		Map<String, Object> sourceDocs = svc.getSourceDocs();
+		assertThat(sourceDocs, hasEntry(sourceDocument1Name, sourceDocument1));
+		assertThat(sourceDocs, hasEntry(sourceDocument2Name, sourceDocument2));
+		assertThat(sourceDocs, hasEntry(sourceList1Name, sourceList1));
+		assertThat(sourceDocs, aMapWithSize(3));	// Ensure those are the only entries.
+		assertSame(result, svc.getAssemblerResult(), "Expected the AssemblerResult returned by AEM would match the AssemblerResult.");
 		AssemblerOptionSpecTest.assertNotEmpty(svc.getOptionsArg());
 	}
 	

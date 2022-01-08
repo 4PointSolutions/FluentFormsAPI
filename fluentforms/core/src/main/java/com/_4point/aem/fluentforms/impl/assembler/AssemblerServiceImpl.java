@@ -1,6 +1,9 @@
 package com._4point.aem.fluentforms.impl.assembler;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
@@ -45,8 +48,10 @@ public class AssemblerServiceImpl implements AssemblerService {
 
 
 	private class AssemblerArgumentBuilderImpl implements AssemblerArgumentBuilder {
-
+		
 		AssemblerOptionsSpec assemblerOptionsSpec = new AssemblerOptionsSpecImpl();
+		Map<String, EitherDocumentOrDocumentList> sourceDocumentMap = new HashMap<>();;
+		
 
 		@Override
 		public AssemblerArgumentBuilder setFailOnError(Boolean isFailOnError) {
@@ -54,10 +59,13 @@ public class AssemblerServiceImpl implements AssemblerService {
 			return this;
 		}
 
+		/**
+		 * Deprecated because it is not typesafe, use add() or executeOn2 instead.
+		 */
+		@Deprecated
 		@Override
 		public AssemblerResult executeOn(Document ddx, Map<String, Object> sourceDocuments) throws AssemblerServiceException, OperationException {
 			return invoke(ddx, sourceDocuments, this.assemblerOptionsSpec);
-
 		}
 
 		@Override
@@ -88,6 +96,35 @@ public class AssemblerServiceImpl implements AssemblerService {
 		public AssemblerArgumentBuilder setValidateOnly(Boolean validateOnly) {
 			this.assemblerOptionsSpec.setValidateOnly(validateOnly);
 			return this;
+		}
+
+		@Override
+		public AssemblerArgumentBuilder add(String name, Document document) {
+			this.sourceDocumentMap.put(name, EitherDocumentOrDocumentList.from(document));
+			return this;
+		}
+
+		@Override
+		public AssemblerArgumentBuilder add(String name, List<Document> documentList) {
+			this.sourceDocumentMap.put(name, EitherDocumentOrDocumentList.from(documentList));
+			return this;
+		}
+
+		@Override
+		public AssemblerResult executeOn2(Document ddx, Map<String, EitherDocumentOrDocumentList> sourceDocuments)
+				throws AssemblerServiceException, OperationException {
+			Map<String, Object> docMap = sourceDocuments.entrySet()
+	        			   							    .stream()
+	        			   							    .collect(Collectors.toMap(Map.Entry::getKey,
+	        			   							    						  e -> e.getValue().toObject()
+	        			   							    						 )
+	        			   							    		);
+			return invoke(ddx, docMap, this.assemblerOptionsSpec);
+		}
+
+		@Override
+		public AssemblerResult executeOn(Document ddx) throws AssemblerServiceException, OperationException {
+			return this.executeOn2(ddx, sourceDocumentMap);
 		}       
 
 	}

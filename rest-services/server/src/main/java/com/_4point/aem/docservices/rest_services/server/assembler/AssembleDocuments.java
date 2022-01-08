@@ -140,7 +140,8 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 							: b.setFirstBatesNumber(Integer.parseInt(firstBatesNumber.toString())))
 					.transform(b -> defaultStyle == null ? b : b.setDefaultStyle(defaultStyle.toString()));
 
-			try (AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
+			try (@SuppressWarnings("deprecation")
+			AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
 				String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
 				String contentType = ContentType.APPLICATION_XML.toString();	// We know the result is always XML.
 				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
