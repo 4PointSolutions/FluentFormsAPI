@@ -21,6 +21,7 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
+import com._4point.aem.fluentforms.api.assembler.AssemblerService.EitherDocumentOrDocumentList;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.assembler.client.OperationException;
 
@@ -125,6 +126,9 @@ public class AssemblerServiceImplTest {
 		Document sourceDocument2 = Mockito.mock(Document.class);
 		String sourceList1Name = "Name3";
 		List<Document> sourceList1 = Mockito.mock(List.class);
+		String sourceDocOrList1Name = "Name4";
+		Document sourceDocument3 = Mockito.mock(Document.class);
+		EitherDocumentOrDocumentList sourceDocOrList1 = EitherDocumentOrDocumentList.from(sourceDocument3);
 		AssemblerResult result = underTest.invoke().setFailOnError(false)
 				                                   .setDefaultStyle("abc")
 				                                   .setLogLevel(LogLevel.CONFIG)
@@ -134,6 +138,7 @@ public class AssemblerServiceImplTest {
 				                                   .add(sourceDocument1Name, sourceDocument1)
 				                                   .add(sourceDocument2Name, sourceDocument2)
 				                                   .add(sourceList1Name, sourceList1)
+				                                   .add(sourceDocOrList1Name, sourceDocOrList1)
 				                                   .executeOn(ddx);
 		
 		
@@ -143,7 +148,8 @@ public class AssemblerServiceImplTest {
 		assertThat(sourceDocs, hasEntry(sourceDocument1Name, sourceDocument1));
 		assertThat(sourceDocs, hasEntry(sourceDocument2Name, sourceDocument2));
 		assertThat(sourceDocs, hasEntry(sourceList1Name, sourceList1));
-		assertThat(sourceDocs, aMapWithSize(3));	// Ensure those are the only entries.
+		assertThat(sourceDocs, hasEntry(sourceDocOrList1Name, sourceDocument3));
+		assertThat(sourceDocs, aMapWithSize(4));	// Ensure those are the only entries.
 		assertSame(result, svc.getAssemblerResult(), "Expected the AssemblerResult returned by AEM would match the AssemblerResult.");
 		AssemblerOptionSpecTest.assertNotEmpty(svc.getOptionsArg());
 	}

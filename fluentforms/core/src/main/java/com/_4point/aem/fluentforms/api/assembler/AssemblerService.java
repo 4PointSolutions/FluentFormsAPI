@@ -3,6 +3,7 @@ package com._4point.aem.fluentforms.api.assembler;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.Transformable;
@@ -107,6 +108,8 @@ public interface AssemblerService {
 		
 		AssemblerArgumentBuilder add(String name, List<Document> documentList);
 		
+		AssemblerArgumentBuilder add(String name, EitherDocumentOrDocumentList docOrList);
+		
 		/**
 		 * This is deprecated because it is not typesafe.  As alternatives use:
 		 * add() for each document or document list
@@ -125,7 +128,21 @@ public interface AssemblerService {
 		public AssemblerResult executeOn2(Document ddx, Map<String,EitherDocumentOrDocumentList>sourceDocuments) throws AssemblerServiceException, OperationException;
 
 		public AssemblerResult executeOn(Document ddx) throws AssemblerServiceException, OperationException;
+		
+		default AssemblerArgumentBuilder addAllDocs(Stream<Map.Entry<String, Document>> pairs) {
+			pairs.forEach(e->add(e.getKey(), e.getValue()));
+			return this;
+		}
 
+		default AssemblerArgumentBuilder addAllLists(Stream<Map.Entry<String, List<Document>>> pairs) {
+			pairs.forEach(e->add(e.getKey(), e.getValue()));
+			return this;
+		}
+
+		default AssemblerArgumentBuilder addAll(Stream<Map.Entry<String, EitherDocumentOrDocumentList>> pairs) {
+			pairs.forEach(e->add(e.getKey(), e.getValue()));
+			return this;
+		}
 	}
 
 }

@@ -111,6 +111,12 @@ public class AssemblerServiceImpl implements AssemblerService {
 		}
 
 		@Override
+		public AssemblerArgumentBuilder add(String name, EitherDocumentOrDocumentList docOrList) {
+			this.sourceDocumentMap.put(name, docOrList);
+			return this;
+		}
+
+		@Override
 		public AssemblerResult executeOn2(Document ddx, Map<String, EitherDocumentOrDocumentList> sourceDocuments)
 				throws AssemblerServiceException, OperationException {
 			Map<String, Object> docMap = sourceDocuments.entrySet()
