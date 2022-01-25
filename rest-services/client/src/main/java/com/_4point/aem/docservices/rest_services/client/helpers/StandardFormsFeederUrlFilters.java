@@ -19,8 +19,6 @@ public class StandardFormsFeederUrlFilters {
 			"/apps/"
 	};
 	
-	private static final String FORMSFEEDER_URL_PREFIX = "/aem";
-	
 	public static OutputStream replaceAemUrls(OutputStream outputStream) {
 		return replaceAemUrls(outputStream, AemServerType.StandardType.OSGI.pathPrefix());
 	}
@@ -30,10 +28,9 @@ public class StandardFormsFeederUrlFilters {
 	}
 
 	public static OutputStream replaceAemUrls(OutputStream outputStream, String prefix) {
-		for (String url : replacedUrls) {
-			outputStream = new ReplacingOutputStream(outputStream, prefix + url, FORMSFEEDER_URL_PREFIX + prefix + url);
-		}
-		return outputStream;
+		return getUrlFilterBuilder().appPrefix(prefix)
+									.buildOutputStreamFn()
+									.apply(outputStream);
 	}
 
 	public static InputStream replaceAemUrls(InputStream inputStream) {
@@ -47,9 +44,20 @@ public class StandardFormsFeederUrlFilters {
 	}
 	
 	public static InputStream replaceAemUrls(InputStream inputStream, String prefix) {
-		for (String url : replacedUrls) {
-			inputStream = new ReplacingInputStream(inputStream, prefix + url, FORMSFEEDER_URL_PREFIX + prefix + url);
-		}
-		return inputStream;
+		return getUrlFilterBuilder().appPrefix(prefix)
+				.buildInputStreamFn()
+				.apply(inputStream);
+	}
+
+	public static FormsFeederUrlFilterBuilder getUrlFilterBuilder() {
+		return new FormsFeederUrlFilterBuilder(replacedUrls);
+	}
+	
+	public static FormsFeederUrlFilterBuilder getUrlFilterBuilder(AemServerType aemServerType) {
+		return new FormsFeederUrlFilterBuilder(replacedUrls).appPrefix(aemServerType.pathPrefix());
+	}
+
+	public static FormsFeederUrlFilterBuilder getUrlFilterBuilder(String prefix) {
+		return new FormsFeederUrlFilterBuilder(replacedUrls).appPrefix(prefix);
 	}
 }

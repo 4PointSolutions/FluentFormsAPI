@@ -15,27 +15,22 @@ class StandardFormsFeederUrlFiltersTest {
 	private static final int BUFFER_SIZE = 2048;
 	private static final String FF_PREFIX = "/aem";
 
-	private static final String testInput = 
-			  "--</etc.clientlibs/>--\n"
-			+ "--</libs/wcm/>--\n"
-			+ "--</etc/clientlibs/>--\n"
-			+ "--</libs/fd/>--\n"
-			+ "--</content/forms/>--\n"
-			+ "--</content/xfaforms/>--\n"
-			+ "--</libs/granite/>--\n"
-			+ "--</apps/>--\n"
-			;
-			
-	private static final String expectedOutput = 
-			  "--<" + FF_PREFIX + "/etc.clientlibs/>--\n"
-			+ "--<" + FF_PREFIX + "/libs/wcm/>--\n"
-			+ "--<" + FF_PREFIX + "/etc/clientlibs/>--\n"
-			+ "--<" + FF_PREFIX + "/libs/fd/>--\n"
-			+ "--<" + FF_PREFIX + "/content/forms/>--\n"
-			+ "--<" + FF_PREFIX + "/content/xfaforms/>--\n"
-			+ "--<" + FF_PREFIX + "/libs/granite/>--\n"
-			+ "--<" + FF_PREFIX + "/apps/>--\n"
-			;
+
+	private static final String createData(String expectedPrefix) {
+		return 
+				"--<" + expectedPrefix + "/etc.clientlibs/>--\n"
+				+ "--<" + expectedPrefix + "/libs/wcm/>--\n"
+				+ "--<" + expectedPrefix + "/etc/clientlibs/>--\n"
+				+ "--<" + expectedPrefix + "/libs/fd/>--\n"
+				+ "--<" + expectedPrefix + "/content/forms/>--\n"
+				+ "--<" + expectedPrefix + "/content/xfaforms/>--\n"
+				+ "--<" + expectedPrefix + "/libs/granite/>--\n"
+				+ "--<" + expectedPrefix + "/apps/>--\n"
+				;
+	}
+
+	private static final String testInput = createData(""); 
+	private static final String expectedOutput = createData(FF_PREFIX);
 
 	@Test
 	void testReplaceAemUrlsOutputStream() throws Exception {
@@ -68,27 +63,8 @@ class StandardFormsFeederUrlFiltersTest {
 	}
 
 	private static final String testPrefix = "/lc";
-	private static final String testPrefixInput = 
-			  "--<" + testPrefix + "/etc.clientlibs/>--\n"
-			+ "--<" + testPrefix + "/libs/wcm/>--\n"
-			+ "--<" + testPrefix + "/etc/clientlibs/>--\n"
-			+ "--<" + testPrefix + "/libs/fd/>--\n"
-			+ "--<" + testPrefix + "/content/forms/>--\n"
-			+ "--<" + testPrefix + "/content/xfaforms/>--\n"
-			+ "--<" + testPrefix + "/libs/granite/>--\n"
-			+ "--<" + testPrefix + "/apps/>--\n"
-			;
-			
-	private static final String expectedPrefixOutput = 
-			  "--<" + FF_PREFIX + testPrefix + "/etc.clientlibs/>--\n"
-			+ "--<" + FF_PREFIX + testPrefix + "/libs/wcm/>--\n"
-			+ "--<" + FF_PREFIX + testPrefix + "/etc/clientlibs/>--\n"
-			+ "--<" + FF_PREFIX + testPrefix + "/libs/fd/>--\n"
-			+ "--<" + FF_PREFIX + testPrefix + "/content/forms/>--\n"
-			+ "--<" + FF_PREFIX + testPrefix + "/content/xfaforms/>--\n"
-			+ "--<" + FF_PREFIX + testPrefix + "/libs/granite/>--\n"
-			+ "--<" + FF_PREFIX + testPrefix + "/apps/>--\n"
-			;
+	private static final String testPrefixInput = createData(testPrefix);
+	private static final String expectedPrefixOutput = createData(FF_PREFIX + testPrefix); 
 
 	@Test
 	void testReplaceAemUrlsOutputStreamWithPrefix() throws Exception {
