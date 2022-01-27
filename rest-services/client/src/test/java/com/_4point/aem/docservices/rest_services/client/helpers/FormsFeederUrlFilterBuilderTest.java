@@ -258,7 +258,7 @@ class FormsFeederUrlFilterBuilderTest {
 		InputStream underTest =  new FormsFeederUrlFilterBuilder()
 										.addReplacementUrls(replacedUrls)
 										.appPrefix(expectedPrefix)
-										.absoluteLocation(new Location(Protocol.HTTPS, MACHINE_NAME, PORT_NO))
+										.absoluteLocation(Location.from(Protocol.HTTPS, MACHINE_NAME, PORT_NO))
 										.buildInputStreamFn()
 										.apply(is);
 		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(readAllBytes(underTest), StandardCharsets.UTF_8));
@@ -273,7 +273,40 @@ class FormsFeederUrlFilterBuilderTest {
 		OutputStream underTest = new FormsFeederUrlFilterBuilder()
 											.addReplacementUrls(replacedUrls)
 											.appPrefix(expectedPrefix)
-											.absoluteLocation(new Location(Protocol.HTTPS, MACHINE_NAME, PORT_NO))
+											.absoluteLocation(Location.from(Protocol.HTTPS, MACHINE_NAME, PORT_NO))
+											.buildOutputStreamFn()
+											.apply(os);
+
+		underTest.write(createData(expectedPrefix).getBytes(StandardCharsets.UTF_8));
+		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(os.toByteArray(), StandardCharsets.UTF_8));
+	}
+
+	
+	@DisplayName("All parameters should add prefix. AbsoluteLocation using Location object with no port. (InputStream)")
+	@Test
+	void testBuildInputStreamFn_AllParameters_LocationObjectNoPort() throws Exception {
+		String expectedPrefix = "/foo";
+		String expectedLocation = "https://" + MACHINE_NAME;
+		final InputStream is = new ByteArrayInputStream(createData(expectedPrefix).getBytes(StandardCharsets.UTF_8));
+		InputStream underTest =  new FormsFeederUrlFilterBuilder()
+										.addReplacementUrls(replacedUrls)
+										.appPrefix(expectedPrefix)
+										.absoluteLocation(Location.from(Protocol.HTTPS, MACHINE_NAME))
+										.buildInputStreamFn()
+										.apply(is);
+		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(readAllBytes(underTest), StandardCharsets.UTF_8));
+	}
+
+	@DisplayName("All parameters should add prefix. AbsoluteLocation using Location object with no port. (OutputStream)")
+	@Test
+	void testBuildOutputStreamFn_AllParameters_LocationObjectNoPort() throws Exception {
+		String expectedPrefix = "/foo";
+		String expectedLocation = "https://" + MACHINE_NAME;
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		OutputStream underTest = new FormsFeederUrlFilterBuilder()
+											.addReplacementUrls(replacedUrls)
+											.appPrefix(expectedPrefix)
+											.absoluteLocation(Location.from(Protocol.HTTPS, MACHINE_NAME))
 											.buildOutputStreamFn()
 											.apply(os);
 

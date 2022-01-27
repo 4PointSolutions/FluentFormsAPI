@@ -92,7 +92,7 @@ public class FormsFeederUrlFilterBuilder {
 	 * @return this builder
 	 */
 	public FormsFeederUrlFilterBuilder absoluteLocation(Protocol protocol, String machineName, int port) {
-		return absoluteLocation(new Location(Objects.requireNonNull(protocol), Objects.requireNonNull(machineName), port));
+		return absoluteLocation(Location.from(Objects.requireNonNull(protocol), Objects.requireNonNull(machineName), port));
 	}
 
 	/**
@@ -174,37 +174,49 @@ public class FormsFeederUrlFilterBuilder {
 			return  location.toString() + prefix;
 		}
 	}
-	
-	public static class Location {
-		private final Protocol protocol;
-		private final String machineName;
-		private final int port;
 
-		public Location(Protocol protocol, String machineName, int port) {
-			super();
-			this.protocol = protocol;
-			this.machineName = machineName;
-			this.port = port;
-		}
-
-		public Location(Protocol protocol, String machineName) {
-			super();
-			this.protocol = protocol;
-			this.machineName = machineName;
-			this.port = 80;
-		}
-
-		@Override
-		public String toString() {
-			return protocol.toString().toLowerCase() + "://" + machineName + (port != 80 ? ":" + port : "");
-		}
+	/**
+	 * Interface for a machine location.  Must implement it's own toString() method.
+	 *
+	 */
+	public interface Location {
 		
+		// Constructors for Default implementations of this interface.
+		public static Location from(Protocol protocol, String machineName, int port) {
+			return new LocationImpl(protocol, machineName, port);
+		}
+
+		public static Location from(Protocol protocol, String machineName) {
+			return new LocationImpl(protocol, machineName);
+		}
+
 		public static Location from(String locationStr) throws MalformedURLException {
 			URL url = new URL(locationStr);
 			Protocol protocol = Protocol.valueOf(url.getProtocol().toUpperCase());
 			String host = url.getHost();
 			int port = url.getPort();
-			return port == -1 ? new Location(protocol, host) : new Location(protocol, host, port);
+			return port == -1 ? new LocationImpl(protocol, host) : new LocationImpl(protocol, host, port);
+		}
+	}
+	
+	private static class LocationImpl implements Location {
+		private final Protocol protocol;
+		private final String machineName;
+		private final int port;
+
+		private LocationImpl(Protocol protocol, String machineName, int port) {
+			this.protocol = protocol;
+			this.machineName = machineName;
+			this.port = port;
+		}
+
+		private LocationImpl(Protocol protocol, String machineName) {
+			this(protocol, machineName, 80);
+		}
+
+		@Override
+		public String toString() {
+			return protocol.toString().toLowerCase() + "://" + machineName + (port != 80 ? ":" + port : "");
 		}
 	}
 }
