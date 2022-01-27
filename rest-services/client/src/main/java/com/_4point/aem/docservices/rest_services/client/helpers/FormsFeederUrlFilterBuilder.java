@@ -12,11 +12,14 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * @author rob.mcdougall
- *
- */
-/**
- * @author rob.mcdougall
+ * Class that can be used to build a filter function that prepends necessary prefix (/aem) in from of URLs so that the
+ * FormsFeeder server can reverse-proxy resources required by HTML5 and Adaptive Forms.
+ * 
+ * The filter can be customized to replace a specific set of URLs.  If you are looking to just use the standard set of URLs,
+ * use the {@link StandardFormsFeederUrlFilters#getStandardInputStreamFilter()} and 
+ * {@link StandardFormsFeederUrlFilters#getStandardOutputStreamFilter()} instead.  
+ * 
+ * The replacement function can also add an absolute location to the front of the URL as well using {@link #absoluteLocation()}.
  *
  */
 public class FormsFeederUrlFilterBuilder {

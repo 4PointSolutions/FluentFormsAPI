@@ -62,6 +62,37 @@ class StandardFormsFeederUrlFiltersTest {
 		assertEquals(expectedOutput, new String(readAllBytes(underTest), StandardCharsets.UTF_8));
 	}
 
+	@Test
+	void testGetStandardOutputStreamFilter() throws Exception {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		OutputStream underTest = StandardFormsFeederUrlFilters.getStandardOutputStreamFilter().apply(os);
+		underTest.write(testInput.getBytes(StandardCharsets.UTF_8));
+		assertEquals(expectedOutput, new String(os.toByteArray(), StandardCharsets.UTF_8));
+	}
+
+	@Test
+	void testGetStandardInputStreamFilter() throws Exception {
+		final InputStream is = new ByteArrayInputStream(testInput.getBytes(StandardCharsets.UTF_8));
+		InputStream underTest =  StandardFormsFeederUrlFilters.getStandardInputStreamFilter().apply(is);
+		assertEquals(expectedOutput, new String(readAllBytes(underTest), StandardCharsets.UTF_8));
+	}
+
+	@Test
+	void testGetStandardOutputStreamFilterOsgi() throws Exception {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		OutputStream underTest = StandardFormsFeederUrlFilters.getStandardOutputStreamFilter(AemServerType.StandardType.OSGI).apply(os);
+		underTest.write(testInput.getBytes(StandardCharsets.UTF_8));
+		assertEquals(expectedOutput, new String(os.toByteArray(), StandardCharsets.UTF_8));
+	}
+
+	@Test
+	void testGetStandardInputStreamFilterOsgi() throws Exception {
+		final InputStream is = new ByteArrayInputStream(testInput.getBytes(StandardCharsets.UTF_8));
+		InputStream underTest =  StandardFormsFeederUrlFilters.getStandardInputStreamFilter(AemServerType.StandardType.OSGI).apply(is);
+		assertEquals(expectedOutput, new String(readAllBytes(underTest), StandardCharsets.UTF_8));
+	}
+
+
 	private static final String testPrefix = "/lc";
 	private static final String testPrefixInput = createData(testPrefix);
 	private static final String expectedPrefixOutput = createData(FF_PREFIX + testPrefix); 
@@ -93,6 +124,37 @@ class StandardFormsFeederUrlFiltersTest {
 	void testReplaceAemUrlsInputStreamJee() throws Exception {
 		final InputStream is = new ByteArrayInputStream(testPrefixInput.getBytes(StandardCharsets.UTF_8));
 		InputStream underTest =  StandardFormsFeederUrlFilters.replaceAemUrls(is, AemServerType.StandardType.JEE);
+		assertEquals(expectedPrefixOutput, new String(readAllBytes(underTest), StandardCharsets.UTF_8));
+	}
+
+	//
+	@Test
+	void testGetStandardOutputStreamFilterWithPrefix() throws Exception {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		OutputStream underTest = StandardFormsFeederUrlFilters.getStandardOutputStreamFilter(testPrefix).apply(os);
+		underTest.write(testPrefixInput.getBytes(StandardCharsets.UTF_8));
+		assertEquals(expectedPrefixOutput, new String(os.toByteArray(), StandardCharsets.UTF_8));
+	}
+
+	@Test
+	void testGetStandardInputStreamFilterWithPrefix() throws Exception {
+		final InputStream is = new ByteArrayInputStream(testPrefixInput.getBytes(StandardCharsets.UTF_8));
+		InputStream underTest =  StandardFormsFeederUrlFilters.getStandardInputStreamFilter(testPrefix).apply(is);
+		assertEquals(expectedPrefixOutput, new String(readAllBytes(underTest), StandardCharsets.UTF_8));
+	}
+
+	@Test
+	void testGetStandardOutputStreamFilterJee() throws Exception {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		OutputStream underTest = StandardFormsFeederUrlFilters.getStandardOutputStreamFilter(AemServerType.StandardType.JEE).apply(os);
+		underTest.write(testPrefixInput.getBytes(StandardCharsets.UTF_8));
+		assertEquals(expectedPrefixOutput, new String(os.toByteArray(), StandardCharsets.UTF_8));
+	}
+
+	@Test
+	void testGetStandardInputStreamFilterJee() throws Exception {
+		final InputStream is = new ByteArrayInputStream(testPrefixInput.getBytes(StandardCharsets.UTF_8));
+		InputStream underTest =  StandardFormsFeederUrlFilters.getStandardInputStreamFilter(AemServerType.StandardType.JEE).apply(is);
 		assertEquals(expectedPrefixOutput, new String(readAllBytes(underTest), StandardCharsets.UTF_8));
 	}
 
