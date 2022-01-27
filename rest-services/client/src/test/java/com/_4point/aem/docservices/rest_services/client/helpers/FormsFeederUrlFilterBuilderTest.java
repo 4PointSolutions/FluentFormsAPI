@@ -13,6 +13,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.docservices.rest_services.client.helpers.FormsFeederUrlFilterBuilder.Location;
 import com._4point.aem.docservices.rest_services.client.helpers.FormsFeederUrlFilterBuilder.Protocol;
 
 class FormsFeederUrlFilterBuilderTest {
@@ -152,6 +153,136 @@ class FormsFeederUrlFilterBuilderTest {
 		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(os.toByteArray(), StandardCharsets.UTF_8));
 	}
 
+	@DisplayName("All parameters should add prefix. AbsolouteLocation without port. (InputStream)")
+	@Test
+	void testBuildInputStreamFn_AllParameters_NoPort() throws Exception {
+		String expectedPrefix = "/foo";
+		String expectedLocation = "https://" + MACHINE_NAME;
+		final InputStream is = new ByteArrayInputStream(createData(expectedPrefix).getBytes(StandardCharsets.UTF_8));
+		InputStream underTest =  new FormsFeederUrlFilterBuilder()
+										.addReplacementUrls(replacedUrls)
+										.appPrefix(expectedPrefix)
+										.absoluteLocation(Protocol.HTTPS, MACHINE_NAME)
+										.buildInputStreamFn()
+										.apply(is);
+		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(readAllBytes(underTest), StandardCharsets.UTF_8));
+	}
+
+	@DisplayName("All parameters should add prefix. AbsolouteLocation without port. (OutputStream)")
+	@Test
+	void testBuildOutputStreamFn_AllParameters_NoPort() throws Exception {
+		String expectedPrefix = "/foo";
+		String expectedLocation = "https://" + MACHINE_NAME;
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		OutputStream underTest = new FormsFeederUrlFilterBuilder()
+											.addReplacementUrls(replacedUrls)
+											.appPrefix(expectedPrefix)
+											.absoluteLocation(Protocol.HTTPS, MACHINE_NAME)
+											.buildOutputStreamFn()
+											.apply(os);
+
+		underTest.write(createData(expectedPrefix).getBytes(StandardCharsets.UTF_8));
+		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(os.toByteArray(), StandardCharsets.UTF_8));
+	}
+
+	@DisplayName("All parameters should add prefix. AbsoluteLocation using String. (InputStream)")
+	@Test
+	void testBuildInputStreamFn_AllParameters_LocationString() throws Exception {
+		String expectedPrefix = "/foo";
+		String expectedLocation = "http://" + MACHINE_NAME + ":" + PORT_NO;
+		final InputStream is = new ByteArrayInputStream(createData(expectedPrefix).getBytes(StandardCharsets.UTF_8));
+		InputStream underTest =  new FormsFeederUrlFilterBuilder()
+										.addReplacementUrls(replacedUrls)
+										.appPrefix(expectedPrefix)
+										.absoluteLocation(expectedLocation + "/")	// Make sure trailing slash is removed.
+										.buildInputStreamFn()
+										.apply(is);
+		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(readAllBytes(underTest), StandardCharsets.UTF_8));
+	}
+
+	@DisplayName("All parameters should add prefix. AbsoluteLocation using String. (OutputStream)")
+	@Test
+	void testBuildOutputStreamFn_AllParameters_LocationString() throws Exception {
+		String expectedPrefix = "/foo";
+		String expectedLocation = "https://" + MACHINE_NAME + ":" + PORT_NO;
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		OutputStream underTest = new FormsFeederUrlFilterBuilder()
+											.addReplacementUrls(replacedUrls)
+											.appPrefix(expectedPrefix)
+											.absoluteLocation(expectedLocation)
+											.buildOutputStreamFn()
+											.apply(os);
+
+		underTest.write(createData(expectedPrefix).getBytes(StandardCharsets.UTF_8));
+		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(os.toByteArray(), StandardCharsets.UTF_8));
+	}
+
+	@DisplayName("All parameters should add prefix. AbsoluteLocation using String with no port. (InputStream)")
+	@Test
+	void testBuildInputStreamFn_AllParameters_LocationStringNoPort() throws Exception {
+		String expectedPrefix = "/foo";
+		String expectedLocation = "http://" + MACHINE_NAME;
+		final InputStream is = new ByteArrayInputStream(createData(expectedPrefix).getBytes(StandardCharsets.UTF_8));
+		InputStream underTest =  new FormsFeederUrlFilterBuilder()
+										.addReplacementUrls(replacedUrls)
+										.appPrefix(expectedPrefix)
+										.absoluteLocation(expectedLocation + "/")	// Make sure trailing slash is removed.
+										.buildInputStreamFn()
+										.apply(is);
+		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(readAllBytes(underTest), StandardCharsets.UTF_8));
+	}
+
+	@DisplayName("All parameters should add prefix. AbsoluteLocation using String with no port. (OutputStream)")
+	@Test
+	void testBuildOutputStreamFn_AllParameters_LocationStringNoPort() throws Exception {
+		String expectedPrefix = "/foo";
+		String expectedLocation = "https://" + MACHINE_NAME;
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		OutputStream underTest = new FormsFeederUrlFilterBuilder()
+											.addReplacementUrls(replacedUrls)
+											.appPrefix(expectedPrefix)
+											.absoluteLocation(expectedLocation)
+											.buildOutputStreamFn()
+											.apply(os);
+
+		underTest.write(createData(expectedPrefix).getBytes(StandardCharsets.UTF_8));
+		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(os.toByteArray(), StandardCharsets.UTF_8));
+	}
+
+	@DisplayName("All parameters should add prefix. AbsoluteLocation using Location object. (InputStream)")
+	@Test
+	void testBuildInputStreamFn_AllParameters_LocationObject() throws Exception {
+		String expectedPrefix = "/foo";
+		String expectedLocation = "https://" + MACHINE_NAME + ":" + PORT_NO;
+		final InputStream is = new ByteArrayInputStream(createData(expectedPrefix).getBytes(StandardCharsets.UTF_8));
+		InputStream underTest =  new FormsFeederUrlFilterBuilder()
+										.addReplacementUrls(replacedUrls)
+										.appPrefix(expectedPrefix)
+										.absoluteLocation(new Location(Protocol.HTTPS, MACHINE_NAME, PORT_NO))
+										.buildInputStreamFn()
+										.apply(is);
+		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(readAllBytes(underTest), StandardCharsets.UTF_8));
+	}
+
+	@DisplayName("All parameters should add prefix. AbsoluteLocation using Location object. (OutputStream)")
+	@Test
+	void testBuildOutputStreamFn_AllParameters_LocationObject() throws Exception {
+		String expectedPrefix = "/foo";
+		String expectedLocation = "https://" + MACHINE_NAME + ":" + PORT_NO;
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		OutputStream underTest = new FormsFeederUrlFilterBuilder()
+											.addReplacementUrls(replacedUrls)
+											.appPrefix(expectedPrefix)
+											.absoluteLocation(new Location(Protocol.HTTPS, MACHINE_NAME, PORT_NO))
+											.buildOutputStreamFn()
+											.apply(os);
+
+		underTest.write(createData(expectedPrefix).getBytes(StandardCharsets.UTF_8));
+		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(os.toByteArray(), StandardCharsets.UTF_8));
+	}
+
+	
+	
 	private static final String[] replacedUrls = {
 			"/etc/clientlibs/",
 			"/libs/fd/",

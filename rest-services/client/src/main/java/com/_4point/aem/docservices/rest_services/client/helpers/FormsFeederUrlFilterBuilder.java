@@ -2,6 +2,8 @@ package com._4point.aem.docservices.rest_services.client.helpers;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,9 +26,7 @@ public class FormsFeederUrlFilterBuilder {
 
 	private final List<String> replacedUrls;
 	private String appPrefix = "";
-	private Protocol protocol = null;
-	private String machineName = null;
-	private int port;
+	private Location location = null;
 
 	/**
 	 * Constructor 
@@ -92,10 +92,46 @@ public class FormsFeederUrlFilterBuilder {
 	 * @return this builder
 	 */
 	public FormsFeederUrlFilterBuilder absoluteLocation(Protocol protocol, String machineName, int port) {
-		this.protocol = Objects.requireNonNull(protocol);
-		this.machineName = Objects.requireNonNull(machineName);
-		this.port = port;
+		return absoluteLocation(new Location(Objects.requireNonNull(protocol), Objects.requireNonNull(machineName), port));
+	}
+
+	/**
+	 * Add absolute location to the prefix added to the URls.
+	 * 
+	 * For example http://example.com would be appended if absoluteLocation(Protocol.HTTP, "example.com") were called.
+	 * 
+	 * @param protocol protocol - either HTTP or HTTPS
+	 * @param machineName machinename to be added
+	 * @return this builder
+	 */
+	public FormsFeederUrlFilterBuilder absoluteLocation(Protocol protocol, String machineName) {
+		return absoluteLocation(protocol, machineName, 80);
+	}
+
+	/**
+	 * Add absolute location to the prefix added to the URls.
+	 * 
+	 * For example http://example.com:5050 would be appended if absoluteLocation(Protocol.HTTP, "example.com", 5050) were called.
+	 * 
+	 * @param location Location object
+	 * @return this builder
+	 */
+	public FormsFeederUrlFilterBuilder absoluteLocation(Location location) {
+		this.location = location;
 		return this;
+	}
+
+	/**
+	 * Add absolute location to the prefix added to the URls.
+	 * 
+	 * For example http://example.com:5050 would be appended if absoluteLocation(Protocol.HTTP, "example.com", 5050) were called.
+	 * 
+	 * @param location Location String (e.g. "http://example.com:8090" or "http://example.com/" - it can contain trailing slash.
+	 * @return this builder
+	 * @throws MalformedURLException 
+	 */
+	public FormsFeederUrlFilterBuilder absoluteLocation(String location) throws MalformedURLException {
+		return absoluteLocation(Location.from(location));
 	}
 
 	/**
@@ -130,14 +166,46 @@ public class FormsFeederUrlFilterBuilder {
 
 	private String constructTargetPrefix() {
 		String prefix = FORMSFEEDER_URL_PREFIX + appPrefix;
-		if (protocol == null) {
+		if (location == null) {
 			// The URL does not have a machine name
 			return prefix;
 		} else {
 			// The URL has a machine name
-			return protocol.toString().toLowerCase() + "://" + machineName + ":" + port + prefix;
+			return  location.toString() + prefix;
 		}
 	}
 	
+	public static class Location {
+		private final Protocol protocol;
+		private final String machineName;
+		private final int port;
+
+		public Location(Protocol protocol, String machineName, int port) {
+			super();
+			this.protocol = protocol;
+			this.machineName = machineName;
+			this.port = port;
+		}
+
+		public Location(Protocol protocol, String machineName) {
+			super();
+			this.protocol = protocol;
+			this.machineName = machineName;
+			this.port = 80;
+		}
+
+		@Override
+		public String toString() {
+			return protocol.toString().toLowerCase() + "://" + machineName + (port != 80 ? ":" + port : "");
+		}
+		
+		public static Location from(String locationStr) throws MalformedURLException {
+			URL url = new URL(locationStr);
+			Protocol protocol = Protocol.valueOf(url.getProtocol().toUpperCase());
+			String host = url.getHost();
+			int port = url.getPort();
+			return port == -1 ? new Location(protocol, host) : new Location(protocol, host, port);
+		}
+	}
 }
 
