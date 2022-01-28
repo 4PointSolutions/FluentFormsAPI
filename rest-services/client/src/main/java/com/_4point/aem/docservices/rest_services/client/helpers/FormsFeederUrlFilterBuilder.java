@@ -131,9 +131,8 @@ public class FormsFeederUrlFilterBuilder {
 	 * 
 	 * @param location Location String (e.g. "http://example.com:8090" or "http://example.com/" - it can contain trailing slash.
 	 * @return this builder
-	 * @throws MalformedURLException 
 	 */
-	public FormsFeederUrlFilterBuilder absoluteLocation(URL location) throws MalformedURLException {
+	public FormsFeederUrlFilterBuilder absoluteLocation(URL location) {
 		return absoluteLocation(Location.from(location));
 	}
 
