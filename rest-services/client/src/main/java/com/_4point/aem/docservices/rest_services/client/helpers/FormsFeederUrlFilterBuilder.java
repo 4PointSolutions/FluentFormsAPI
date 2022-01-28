@@ -133,7 +133,7 @@ public class FormsFeederUrlFilterBuilder {
 	 * @return this builder
 	 * @throws MalformedURLException 
 	 */
-	public FormsFeederUrlFilterBuilder absoluteLocation(String location) throws MalformedURLException {
+	public FormsFeederUrlFilterBuilder absoluteLocation(URL location) throws MalformedURLException {
 		return absoluteLocation(Location.from(location));
 	}
 
@@ -193,11 +193,10 @@ public class FormsFeederUrlFilterBuilder {
 			return new LocationImpl(protocol, machineName);
 		}
 
-		public static Location from(String locationStr) throws MalformedURLException {
-			URL url = new URL(locationStr);
-			Protocol protocol = Protocol.valueOf(url.getProtocol().toUpperCase());
-			String host = url.getHost();
-			int port = url.getPort();
+		public static Location from(URL locationStr) {
+			Protocol protocol = Protocol.valueOf(locationStr.getProtocol().toUpperCase());
+			String host = locationStr.getHost();
+			int port = locationStr.getPort();
 			return port == -1 ? new LocationImpl(protocol, host) : new LocationImpl(protocol, host, port);
 		}
 	}

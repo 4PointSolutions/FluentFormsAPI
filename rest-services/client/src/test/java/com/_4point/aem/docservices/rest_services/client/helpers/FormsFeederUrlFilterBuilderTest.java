@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -194,7 +195,7 @@ class FormsFeederUrlFilterBuilderTest {
 		InputStream underTest =  new FormsFeederUrlFilterBuilder()
 										.addReplacementUrls(replacedUrls)
 										.appPrefix(expectedPrefix)
-										.absoluteLocation(expectedLocation + "/")	// Make sure trailing slash is removed.
+										.absoluteLocation(new URL(expectedLocation + "/"))	// Make sure trailing slash is removed.
 										.buildInputStreamFn()
 										.apply(is);
 		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(readAllBytes(underTest), StandardCharsets.UTF_8));
@@ -209,7 +210,7 @@ class FormsFeederUrlFilterBuilderTest {
 		OutputStream underTest = new FormsFeederUrlFilterBuilder()
 											.addReplacementUrls(replacedUrls)
 											.appPrefix(expectedPrefix)
-											.absoluteLocation(expectedLocation)
+											.absoluteLocation(new URL(expectedLocation))
 											.buildOutputStreamFn()
 											.apply(os);
 
@@ -226,7 +227,7 @@ class FormsFeederUrlFilterBuilderTest {
 		InputStream underTest =  new FormsFeederUrlFilterBuilder()
 										.addReplacementUrls(replacedUrls)
 										.appPrefix(expectedPrefix)
-										.absoluteLocation(expectedLocation + "/")	// Make sure trailing slash is removed.
+										.absoluteLocation(new URL(expectedLocation + "/"))	// Make sure trailing slash is removed.
 										.buildInputStreamFn()
 										.apply(is);
 		assertEquals(createData(expectedLocation + FF_PREFIX + expectedPrefix), new String(readAllBytes(underTest), StandardCharsets.UTF_8));
@@ -241,7 +242,7 @@ class FormsFeederUrlFilterBuilderTest {
 		OutputStream underTest = new FormsFeederUrlFilterBuilder()
 											.addReplacementUrls(replacedUrls)
 											.appPrefix(expectedPrefix)
-											.absoluteLocation(expectedLocation)
+											.absoluteLocation(new URL(expectedLocation))
 											.buildOutputStreamFn()
 											.apply(os);
 
