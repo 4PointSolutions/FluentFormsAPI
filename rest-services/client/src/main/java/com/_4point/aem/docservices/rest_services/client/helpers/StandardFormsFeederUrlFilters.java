@@ -16,6 +16,8 @@ import java.util.function.Function;
  *
  */
 public class StandardFormsFeederUrlFilters {
+	public static final String FORMSFEEDER_AF_BASE_LOCATION = "formsfeeder.af-base-location";
+
 	private static final String[] replacedUrls = {
 			"/etc.clientlibs/",
 			"/libs/wcm/",
@@ -24,6 +26,7 @@ public class StandardFormsFeederUrlFilters {
 			"/content/forms/",
 			"/content/xfaforms/",
 			"/libs/granite/",
+			"/libs/cq/",
 			"/apps/"
 	};
 	
