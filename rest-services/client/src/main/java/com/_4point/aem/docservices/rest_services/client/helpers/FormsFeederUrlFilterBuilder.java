@@ -2,7 +2,6 @@ package com._4point.aem.docservices.rest_services.client.helpers;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
