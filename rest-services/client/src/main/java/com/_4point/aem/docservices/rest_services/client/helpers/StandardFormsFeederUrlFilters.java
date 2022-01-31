@@ -16,7 +16,7 @@ import java.util.function.Function;
  *
  */
 public class StandardFormsFeederUrlFilters {
-	public static final String FORMSFEEDER_AF_BASE_LOCATION = "formsfeeder.af-base-location";
+	public static final String FORMSFEEDER_AF_BASE_LOCATION_PROP = "formsfeeder.af-base-location";
 
 	private static final String[] replacedUrls = {
 			"/etc.clientlibs/",
