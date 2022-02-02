@@ -26,6 +26,7 @@ public class StandardFormsFeederUrlFilters {
 			"/content/forms/",
 			"/content/xfaforms/",
 			"/libs/granite/",
+			"/libs/clientlibs/granite",
 			"/libs/cq/",
 			"/apps/"
 	};
