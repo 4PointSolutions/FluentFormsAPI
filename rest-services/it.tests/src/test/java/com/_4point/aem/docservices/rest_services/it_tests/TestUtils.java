@@ -24,7 +24,7 @@ import com._4point.aem.docservices.rest_services.it_tests.Pdf.PdfException;
 
 public class TestUtils {
 	
-	public static final String TEST_MACHINE_NAME = "localhost";
+	public static final String TEST_MACHINE_NAME = "localhost"; //"172.22.132.85";
 	public static final AemServerType TEST_MACHINE_AEM_TYPE = AemServerType.StandardType.OSGI;
 	public static final int TEST_MACHINE_PORT = 4502;
 	public static final String TEST_MACHINE_PORT_STR = Integer.toString(TEST_MACHINE_PORT);
