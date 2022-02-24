@@ -1,6 +1,7 @@
 package com._4point.aem.fluentforms.impl.convertPdf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -72,10 +73,10 @@ public class ConvertPdfServiceImplTest {
 		ToImageOptionsSpec imageOptions = Mockito.mock(ToImageOptionsSpec.class);
 		
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.toImage(null, imageOptions));
-		assertTrue(ex1.getMessage().contains("inPdfDoc parameter cannot be null"));
+		assertTrue(ex1.getMessage().contains("inPdfDoc cannot be null"));
 		
 		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.toImage(pdfDoc, null));
-		assertTrue(ex2.getMessage().contains("ToImageOptionsSpec parameter cannot be null"));
+		assertTrue(ex2.getMessage().contains("toImageOptionsSpec cannot be null"));
 	}
 
 	@Test
@@ -137,14 +138,17 @@ public class ConvertPdfServiceImplTest {
 		ToPSOptionsSpec psOptions = Mockito.mock(ToPSOptionsSpec.class);
 		
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.toPS(null, psOptions));
-		assertTrue(ex1.getMessage().contains("inPdfDoc parameter cannot be null"));
+		assertTrue(ex1.getMessage().contains("inPdfDoc cannot be null"));
 		
-		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.toPS(pdfDoc, null));
-		assertTrue(ex2.getMessage().contains("ToPSOptionsSpec parameter cannot be null"));
+		MockConvertPdfToPSService svc = new MockConvertPdfToPSService();
+		Document result = underTest.toPS(pdfDoc, null);
+		assertEquals(pdfDoc, svc.getInputDoc(), "Expected the PDF passed to AEM would match the PDF used.");
+		assertNull(svc.getPSOptions());
+		assertSame(result, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 	}
 
 	@Test
-	@DisplayName("Test ToImage(Document, ToImageOptionsSpec) throws ConvertPdfServiceException.")
+	@DisplayName("Test ToPS(Document, ToImageOptionsSpec) throws ConvertPdfServiceException.")
 	void testToPS_ConvertPdfServiceExceptionThrown() throws Exception {
 		Mockito.when(adobeConvertPdfService.toPS(Mockito.any(Document.class), Mockito.any())).thenThrow(ConvertPdfServiceException.class);
 		Document pdfDoc = Mockito.mock(Document.class);

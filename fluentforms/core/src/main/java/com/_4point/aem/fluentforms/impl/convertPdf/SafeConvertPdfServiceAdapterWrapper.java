@@ -27,7 +27,6 @@ public class SafeConvertPdfServiceAdapterWrapper implements TraditionalConvertPd
 	@Override
 	public Document toPS(Document inPdfDoc, ToPSOptionsSpec toPSOptionsSpec) throws ConvertPdfServiceException {
 		Objects.requireNonNull(inPdfDoc, "inPdfDoc parameter cannot be null.");
-		Objects.requireNonNull(toPSOptionsSpec, "ToPSOptionsSpec parameter cannot be null.");
 		return convertPdfService.toPS(inPdfDoc, toPSOptionsSpec);
 	}
 

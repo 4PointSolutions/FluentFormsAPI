@@ -1,6 +1,7 @@
 package com._4point.aem.fluentforms.impl.convertPdf;
 
 import java.util.List;
+import java.util.Objects;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService;
@@ -35,11 +36,14 @@ public class ConvertPdfServiceImpl implements ConvertPdfService {
 	
 	@Override
 	public List<Document> toImage(Document inPdfDoc, ToImageOptionsSpec toImageOptionsSpec) throws ConvertPdfServiceException {
+		Objects.requireNonNull(inPdfDoc, "inPdfDoc cannot be null.");
+		Objects.requireNonNull(toImageOptionsSpec, "toImageOptionsSpec cannot be null.");
 		return adobeConvertPdfService.toImage(inPdfDoc, toImageOptionsSpec);
 	}
 
 	@Override
 	public Document toPS(Document inPdfDoc, ToPSOptionsSpec toPSOptionsSpec) throws ConvertPdfServiceException {
+		Objects.requireNonNull(inPdfDoc, "inPdfDoc cannot be null.");
 		return adobeConvertPdfService.toPS(inPdfDoc, toPSOptionsSpec);
 	}
 

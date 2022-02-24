@@ -36,6 +36,14 @@ public class MockTraditionalConvertPdfService implements TraditionalConvertPdfSe
 		this.DUMMY_DOCUMENT_LIST = Collections.singletonList(documentFactory.create(new byte[0]));
 	}
 	
+	public static MockTraditionalConvertPdfService createDocumentListMock(List<Document> convertResult) {
+		return new MockTraditionalConvertPdfService().setResultList(convertResult);
+	}
+	
+	public static MockTraditionalConvertPdfService createDocumentListMock(DocumentFactory documentFactory, List<Document> convertResult) {
+		return new MockTraditionalConvertPdfService(documentFactory).setResultList(convertResult);
+	}
+	
 	public static MockTraditionalConvertPdfService createDocumentMock(Document convertResult) {
 		return new MockTraditionalConvertPdfService().setResult(convertResult);
 	}
