@@ -1,5 +1,6 @@
 package com._4point.aem.fluentforms.impl.output;
 
+import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com.adobe.fd.output.api.RenderType;
@@ -42,6 +43,26 @@ public class PrintConfigImpl implements PrintConfig {
 	@Override
 	public PathOrUrl getXdcUri() {
 		return xdc;
+	}
+	
+	@Override
+	public String getContentType() {
+		switch(this.renderType) {
+		case DPL:
+			return Document.CONTENT_TYPE_DPL;
+		case IPL:
+			return Document.CONTENT_TYPE_IPL;
+		case PCL:
+			return Document.CONTENT_TYPE_PCL;
+		case PostScript:
+			return Document.CONTENT_TYPE_PS;
+		case TPCL:
+			return Document.CONTENT_TYPE_TPCL;
+		case ZPL:
+			return Document.CONTENT_TYPE_ZPL;
+		default:
+			return "application/octet-stream";	
+		}
 	}
 
 	public static PrintConfigImpl custom(PathOrUrl xdcUri, RenderType renderType) {

@@ -156,6 +156,8 @@ public interface OutputService {
 		public Document executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException;
 		
 		public Document executeOn(URL template, Document data) throws OutputServiceException;
+
+		public Document executeOn(Document template, Document data) throws OutputServiceException;
 	}
 
 	public static interface GeneratePdfOutputBatchArgumentBuilder extends PDFOutputOptionsSetter, BatchArgumentBuilder, Transformable<GeneratePdfOutputArgumentBuilder> {

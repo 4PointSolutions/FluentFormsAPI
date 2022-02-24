@@ -71,7 +71,9 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 	@Override
 	public Document generatePrintedOutput(Document template, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
 		try {
-			return documentFactory.create(adobeOutputService.generatePrintedOutput(AdobeDocumentFactoryImpl.getAdobeDocument(template), AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePrintedOutputOptions(printedOutputOptions)));
+			Document resultDoc = documentFactory.create(adobeOutputService.generatePrintedOutput(AdobeDocumentFactoryImpl.getAdobeDocument(template), AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePrintedOutputOptions(printedOutputOptions)));
+			resultDoc.setContentType(printedOutputOptions.getPrintConfig().getContentType());
+			return resultDoc;
 		} catch (com.adobe.fd.output.api.OutputServiceException e) {
 			throw new OutputServiceException(e);
 		}
@@ -81,7 +83,9 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 	public Document generatePrintedOutput(String urlOrFileName, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException {
 		try {
 			log.info("generatePrintedOutput form='" + urlOrFileName + "', contentRoot='" + printedOutputOptions.getContentRoot() + "'");
-			return documentFactory.create(adobeOutputService.generatePrintedOutput(urlOrFileName, AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePrintedOutputOptions(printedOutputOptions)));
+			Document resultDoc = documentFactory.create(adobeOutputService.generatePrintedOutput(urlOrFileName, AdobeDocumentFactoryImpl.getAdobeDocument(data), toAdobePrintedOutputOptions(printedOutputOptions)));
+			resultDoc.setContentType(printedOutputOptions.getPrintConfig().getContentType());
+			return resultDoc;
 		} catch (com.adobe.fd.output.api.OutputServiceException e) {
 			throw new OutputServiceException(e);
 		}

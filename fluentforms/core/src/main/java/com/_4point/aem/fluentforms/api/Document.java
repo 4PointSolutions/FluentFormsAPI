@@ -107,4 +107,10 @@ public interface Document extends AutoCloseable, Closeable, HasAttributes {
 
 	public static String CONTENT_TYPE_PDF = "application/pdf";
 	public static String CONTENT_TYPE_XDP = "application/vnd.adobe.xdp+xml";
+	public static String CONTENT_TYPE_DPL = "application/vnd.datamax-dpl";
+	public static String CONTENT_TYPE_IPL = "application/vnd.intermec-ipl";
+	public static String CONTENT_TYPE_PCL = "application/vnd.hp-pcl";
+	public static String CONTENT_TYPE_PS = "application/postscript";
+	public static String CONTENT_TYPE_TPCL = "application/vnd.toshiba-tpcl";
+	public static String CONTENT_TYPE_ZPL = "x-application/zpl";
 }

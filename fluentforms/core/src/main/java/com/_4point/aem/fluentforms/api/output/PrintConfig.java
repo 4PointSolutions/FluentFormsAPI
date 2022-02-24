@@ -24,6 +24,8 @@ public interface PrintConfig {
 
 	PathOrUrl getXdcUri();
 
+	String getContentType();
+
 	public static PrintConfig custom(PathOrUrl xdcUri, RenderType renderType) {
 		return PrintConfigImpl.custom(xdcUri, renderType);
 	}

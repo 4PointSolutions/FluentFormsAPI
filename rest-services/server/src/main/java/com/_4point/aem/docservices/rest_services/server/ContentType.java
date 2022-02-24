@@ -9,6 +9,12 @@ public class ContentType {
 	public static final ContentType APPLICATION_XML = new ContentType("application/xml");
 	public static final ContentType APPLICATION_PDF = new ContentType("application/pdf");
 	public static final ContentType APPLICATION_XDP = new ContentType("application/vnd.adobe.xdp+xml");
+	public static final ContentType APPLICATION_DPL = new ContentType("application/vnd.datamax-dpl");
+	public static final ContentType APPLICATION_IPL = new ContentType("application/vnd.intermec-ipl");
+	public static final ContentType APPLICATION_PCL = new ContentType("application/vnd.hp-pcl");
+	public static final ContentType APPLICATION_PS = new ContentType("application/postscript");
+	public static final ContentType APPLICATION_TPCL = new ContentType("application/vnd.toshiba-tpcl");
+	public static final ContentType APPLICATION_ZPL = new ContentType("x-application/zpl");
 	public static final ContentType MULTIPART_FORMDATA = new ContentType("multipart/form-data");
 	public static final ContentType TEXT_HTML = new ContentType("text/html");
 	public static final ContentType TEXT_PLAIN = new ContentType("text/plain");

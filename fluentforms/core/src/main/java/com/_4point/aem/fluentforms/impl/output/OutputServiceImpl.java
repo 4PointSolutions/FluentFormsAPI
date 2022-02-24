@@ -296,6 +296,11 @@ public class OutputServiceImpl implements OutputService {
 			return generatePrintedOutput(template, data, this.printedOutputOptions);
 		}
 
+		@Override
+		public Document executeOn(Document template, Document data) throws OutputServiceException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
 	}
 
 	/**
