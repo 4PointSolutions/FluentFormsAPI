@@ -29,11 +29,10 @@ public class OutputServiceCommands {
 		try {
 			Document result = outputService.generatePDFOutput()
 						 .executeOn(docFactory.create(template), docFactory.create(data));
+			return "Document generated";
 		} catch (OutputServiceException e) {
-			
 			return "Document generation failed (" + e.getMessage() + ").";
 		}
-        return "Document generated";
     }
 	
 	@ShellMethod("Generate a PDF using a templer on the aem server.")
@@ -41,10 +40,10 @@ public class OutputServiceCommands {
 		try {
 			Document result = outputService.generatePDFOutput()
 						 .executeOn(template, docFactory.create(data));
+			return "Document generated";
 		} catch (OutputServiceException | FileNotFoundException e) {
 			return "Document generation failed (" + e.getMessage() + ").";
 		}
-        return "Document generated";
     }
 	
 }
