@@ -10,7 +10,7 @@ import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.output.OutputServiceImpl;
 import com._4point.aem.fluentforms.impl.output.TraditionalOutputService;
 
-@Configuration
+//@Configuration
 public class ApplicationConfig {
 
 	// Need to figure out how we will get this information.

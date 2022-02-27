@@ -16,10 +16,4 @@ public class Application {
 		SpringApplication.run(Application.class, args);
 	}
 
-	@Bean
-	ApplicationRunner applicationRunner(@Value("${operation}") String operation) {
-		return args -> {
-			logger.info("operation=(" + operation + ")");
-		};
-	}
 }
