@@ -112,11 +112,11 @@ public class GeneratePrintedOutput extends SlingAllMethodsServlet {
 				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
 			}
 		} catch (FileNotFoundException fnfex) {
-			throw new BadRequestException("Bad request parameter while rendering PDF (" + fnfex.getMessage() + ").", fnfex);
+			throw new BadRequestException("Bad request parameter while rendering print output (" + fnfex.getMessage() + ").", fnfex);
 		} catch (OutputServiceException | IOException ex1) {
-			throw new InternalServerErrorException("Internal Error while rendering PDF. (" + ex1.getMessage() + ").", ex1);
+			throw new InternalServerErrorException("Internal Error while rendering print output. (" + ex1.getMessage() + ").", ex1);
 		} catch (IllegalArgumentException ex2) {
-			throw new BadRequestException("Bad arguments while rendering PDF", ex2);
+			throw new BadRequestException("Bad arguments while rendering print output", ex2);
 		}
 	}
 
