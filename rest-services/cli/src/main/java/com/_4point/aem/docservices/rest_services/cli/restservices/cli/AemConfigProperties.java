@@ -29,7 +29,7 @@ public class AemConfigProperties implements AemConfig {
 	private final Protocol protocol;
 	private final AemServerType serverType;
 	
-	private AemConfigProperties(@Value("${" + AEM_HOST_ENV_PARAM + ":}") String host, 
+	private AemConfigProperties(@Value("${" + AEM_HOST_ENV_PARAM + ":localhost}") String host, 
 								@Value("${" + AEM_PORT_ENV_PARAM + ":4502}") int port, 
 								@Value("${" + AEM_USERNAME_ENV_PARAM + ":admin}") String username, 
 								@Value("${" + AEM_SECRET_ENV_PARAM + ":admin}") String secret, 

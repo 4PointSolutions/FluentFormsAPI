@@ -1,8 +1,11 @@
 package com._4point.aem.docservices.rest_services.cli.restservices.cli.output;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 
 import com._4point.aem.docservices.rest_services.cli.restservices.cli.AemConfig;
+import com._4point.aem.docservices.rest_services.cli.restservices.cli.AemConfigProperties;
 import com._4point.aem.docservices.rest_services.cli.restservices.cli.AemConfig.Protocol;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
@@ -17,6 +20,7 @@ import com._4point.aem.fluentforms.impl.output.TraditionalOutputService;
  */
 @Configuration
 public class OutputServiceAdapterFactoryImpl implements OutputServiceAdapterFactory {
+	private final static Logger log = LoggerFactory.getLogger(OutputServiceAdapterFactoryImpl.class);
 	private final AemConfig aemConfig;
 	
 	public OutputServiceAdapterFactoryImpl(AemConfig aemConfig) {
@@ -25,6 +29,7 @@ public class OutputServiceAdapterFactoryImpl implements OutputServiceAdapterFact
 	}
 
 	public TraditionalOutputService getAdapter() {
+		log.info("Creating adapter for '" + aemConfig.url() + "'.");
 		return RestServicesOutputServiceAdapter.builder()
 				.machineName(aemConfig.host())
 				.port(aemConfig.port())
