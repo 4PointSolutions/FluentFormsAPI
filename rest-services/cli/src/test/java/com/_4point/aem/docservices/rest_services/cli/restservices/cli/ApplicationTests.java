@@ -99,6 +99,6 @@ class ApplicationTests {
 
 	@Test
 	void testGeneratePdfOutputRemote() {
-		assertThat(runShellCommand("generate-pdfoutput-remote"), containsStringIgnoringCase("Document generated"));
+		assertThat(runShellCommand("generate-pdfoutput-remote --template sampleFiles/SampleForm.xdp --data src/test/resources/sampleFiles/SampleForm_data.xml"), containsStringIgnoringCase("Document generated"));
 	}
 }
