@@ -68,5 +68,17 @@ class ResultCommandsTest {
 		assertThat(result, allOf(containsString("Unexpected error occurred while saving"), containsString(badPath.toString()), containsString("Did not save results")));
 	}
 
+	@Test
+	void testResultsDisplay() throws Exception {
+		String result = underTest.resultsDisplay();
+		
+		assertNotNull(result);
+
+		String lines[] = result.split("\\r?\\n");
+		assertEquals(2, lines.length, "Expected two lines in result.");
+		assertThat(lines[0], allOf(startsWith("1"), containsString(operation), containsString(Results.MediaType.APPLICATION_PDF.toString())));
+		assertThat(lines[1], allOf(startsWith("2"), containsString(secondaryOperation), containsString(Results.MediaType.TEXT_PLAIN.toString())));
+	}
+
 
 }

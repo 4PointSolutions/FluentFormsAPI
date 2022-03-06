@@ -3,9 +3,11 @@ package com._4point.aem.docservices.rest_services.cli.restservices.cli;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -53,7 +55,12 @@ public class ResultCommands {
 
 	@ShellMethod("Display the results of the last operation.")
 	public String resultsDisplay() {
-		return null;
+		List<String> resultsList = getResults().display();
+		String display = IntStream.range(0, resultsList.size())									// Iterate over the individual results
+				 				  .mapToObj(i->String.format("%d %s", i+1, resultsList.get(i)))	// Format each result with result number in front
+				 				  .collect(Collectors.joining("\n"));							// Concat into multi-line String
+		
+		return display;
 	}
 
 }
