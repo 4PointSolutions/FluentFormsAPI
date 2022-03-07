@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -37,12 +38,12 @@ public class ResultCommands {
 	}
 	
 	@ShellMethod("Save the results of the last operation to your local filesystem.")
-	public String resultsSave(@ShellOption(value={"-o", "--output"}, defaultValue="") Path saveLocationParameter) {
+	public String resultsSave(@ShellOption(value={"-n", "--number"}, defaultValue="1") int resultNumber, @ShellOption(value={"-o", "--output"}, defaultValue="") Path saveLocationParameter) {
 		try {
-			Result primary = getResults().primary();
-			Path saveLocation =  !saveLocationParameter.toString().isBlank() ? saveLocationParameter : primary.filename().orElseThrow();
+			Result targetResult = getResults().getResult(resultNumber);
+			Path saveLocation =  determineLocation(saveLocationParameter, targetResult.filename());
 			
-			Files.write(saveLocation, primary.data());
+			Files.write(saveLocation, targetResult.data());
 			
 			return "Saved to " + saveLocation.toString() + ".";
 		} catch (NoSuchElementException e) {
@@ -51,6 +52,10 @@ public class ResultCommands {
 			String msg = e.getMessage();
 			return "Unexpected error occurred while saving " + (msg != null ? msg : "") + " (" + e.getClass().getName() + "). Did not save results.";
 		}
+	}
+
+	private Path determineLocation(Path saveLocationParameter, Optional<Path> resultFilename) {
+		return !saveLocationParameter.toString().isBlank() ? saveLocationParameter : resultFilename.orElseThrow();
 	}
 
 	@ShellMethod("Display the results of the last operation.")

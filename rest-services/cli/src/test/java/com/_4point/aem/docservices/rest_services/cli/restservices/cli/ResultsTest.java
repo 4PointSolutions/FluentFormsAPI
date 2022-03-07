@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -61,6 +62,49 @@ class ResultsTest {
 				()->assertThat(result.get(0), allOf(containsString(operation), containsString(Results.MediaType.APPLICATION_PDF.toString()))),
 				()->assertThat(result.get(1), allOf(containsString(secondaryOperation), containsString(Results.MediaType.TEXT_PLAIN.toString())))
 				);
+	}
+
+	@Test
+	void testGetResult_PrimaryResult() {
+		String operation = "testGetResult_PrimaryResult";
+		byte[] data = "Data Bytes".getBytes();		
+		Results underTest = Results.ofPdf(operation, data);
+
+		Result result = underTest.getResult(1);
+
+		assertNotNull(result);
+		assertAll(
+				()->assertEquals(Results.MediaType.APPLICATION_PDF, result.mediaType()),
+				()->assertArrayEquals(data, result.data())
+				);
+	}
+	
+	@Test
+	void testGetResult_SecondaryResult() {
+		String operation = "testGetResult_SecondaryResult_PrimaryResult";
+		byte[] data = "Data Bytes".getBytes();
+		String secondaryOperation = "testGetResult_SecondaryResult_SecondaryResult";
+		String secondaryData = "Secondary Data Bytes";
+		Results underTest = Results.builder(operation, Result.ofPdf(data))
+								   .addSecondary(secondaryOperation, Result.ofText(secondaryData))
+								   .build();
+
+		Result result = underTest.getResult(2);
+
+		assertNotNull(result);
+		assertAll(
+				()->assertEquals(Results.MediaType.TEXT_PLAIN, result.mediaType()),
+				()->assertArrayEquals(secondaryData.getBytes(StandardCharsets.UTF_8), result.data())
+				);
+	}
+
+	@Test
+	void testGetResult_NoSecondaryResult() {
+		String operation = "testGetResult_NoSecondaryResult";
+		byte[] data = "Data Bytes".getBytes();
+		Results underTest = Results.ofPdf(operation, data);
+		
+		ArrayIndexOutOfBoundsException ex = assertThrows(ArrayIndexOutOfBoundsException.class, ()->underTest.getResult(2));
 	}
 
 }

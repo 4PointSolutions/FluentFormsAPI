@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com._4point.aem.docservices.rest_services.cli.restservices.cli.Results.Result;
+
 /**
  * This class is a generic class for storing the results of an AEM operation.  All commends store their results in
  * a global results object.  The user can then perform commands to on those results afterwards (like list/save)
@@ -83,6 +85,16 @@ public record Results(String operation, Result primary, Map<String, Result> seco
 	
 	private static String formatResult(String operation, Result result) {
 		return "'" + operation + "' -> " + result.summary();
+	}
+	
+	public Result getResult(int resultNumber) {
+		return resultNumber == 1 ? primary : getSecondaryResult(resultNumber - 2);
+	}
+
+	private Result getSecondaryResult(int i) {
+		// Using a for loop would be more efficient (it would shortcut reading the whole map) but this approach is
+		// more succinct (and less error prone).  Since the results are typically small, I chose to do it this way.
+		return secondary.values().toArray(new Result[0])[i];
 	}
 	
 	public static ResultsBuilder builder(String operation, Result primary) {
