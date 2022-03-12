@@ -25,7 +25,9 @@ public class ResultCommands {
 		mostRecentResults.set(latestResults);
 	}
 	
-	private static Results getResults() {
+	// This was originally private but is now package private so that unit tests can use ResultUtils to access it.
+	// It should not be used outside of ResultUtils.
+	static Results getResults() {
 		return mostRecentResults.get();
 	}
 

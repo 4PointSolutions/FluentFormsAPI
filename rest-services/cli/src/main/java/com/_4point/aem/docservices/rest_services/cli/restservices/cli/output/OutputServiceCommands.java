@@ -40,10 +40,12 @@ public class OutputServiceCommands {
 		try {
 			Document result = outputService.generatePDFOutput()
 						 .executeOn(docFactory.create(template), docFactory.create(data));
+
+			byte[] resultBytes = result.getInputStream().readAllBytes();
 			if (!output.toString().isBlank()) {
-				result.getInputStream().transferTo(Files.newOutputStream(output));
+				Files.write(output, resultBytes);
 			}
-			ResultCommands.setResults(Results.ofPdf("generate-pdf-output", result.getInputStream().readAllBytes()));
+			ResultCommands.setResults(Results.ofPdf("generate-pdf-output", resultBytes));
 			return "Document generated";
 		} catch (OutputServiceException e) {
 			String msg = "Document generation failed (" + e.getMessage() + ").";

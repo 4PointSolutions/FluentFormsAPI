@@ -24,12 +24,11 @@ public class OutputServiceAdapterFactoryImpl implements OutputServiceAdapterFact
 	private final AemConfig aemConfig;
 	
 	public OutputServiceAdapterFactoryImpl(AemConfig aemConfig) {
-		super();
 		this.aemConfig = aemConfig;
 	}
 
 	public TraditionalOutputService getAdapter() {
-		log.info("Creating adapter for '" + aemConfig.url() + "'.");
+		log.info("Creating OutputService adapter for '" + aemConfig.url() + "'.");
 		return RestServicesOutputServiceAdapter.builder()
 				.machineName(aemConfig.host())
 				.port(aemConfig.port())

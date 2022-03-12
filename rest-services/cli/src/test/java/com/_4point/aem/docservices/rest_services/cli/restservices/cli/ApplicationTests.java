@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -101,4 +102,16 @@ class ApplicationTests {
 	void testGeneratePdfOutputRemote() {
 		assertThat(runShellCommand("generate-pdfoutput-remote --template sampleFiles/SampleForm.xdp --data src/test/resources/sampleFiles/SampleForm_data.xml"), containsStringIgnoringCase("Document generated"));
 	}
+	
+	@Test
+	void testCreatePdf() {
+		assertThat(runShellCommand("create-pdf --document src/test/resources/sampleFiles/Sample1.docx"), containsStringIgnoringCase("Document converted to pdf"));
+	}
+
+	@Disabled("Not implemented yet")
+	@Test
+	void testCreatePdfRemote() {
+		assertThat(runShellCommand("create-pdf-remote --document sampleFiles/Sample1.docx"), containsStringIgnoringCase("Document converted to pdf"));
+	}
+
 }
