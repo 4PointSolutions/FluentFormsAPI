@@ -119,6 +119,11 @@ class GeneratePdfServiceCommandsTest {
 				()->ExceptionalMockTraditionalGeneratePDFService.create(MOCK_EXCEPTION_MESSAGE)
 				);
 
+		@BeforeEach
+		void setup() {
+			ResultUtils.clearResults();
+		}
+
 		@Test
 		void testCreatePdf() {
 			Path testDoc = SAMPLE_FILES_DIR.resolve("Sample1.docx");

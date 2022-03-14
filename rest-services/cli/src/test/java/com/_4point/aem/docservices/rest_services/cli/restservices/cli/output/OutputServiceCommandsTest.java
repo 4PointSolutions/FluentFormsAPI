@@ -92,13 +92,18 @@ class OutputServiceCommandsTest {
 				() -> ExceptionalMockTraditionalOutputService.create(MOCK_EXCEPTION_MESSAGE)
 				);
 
+		@BeforeEach
+		void setup() {
+			ResultUtils.clearResults();
+		}
+
 		@Test
 		void testGeneratePDFOutput() {
 			Path template = SAMPLE_FILES_DIR.resolve("SampleForm.xdp");
 			Path data = SAMPLE_FILES_DIR.resolve("SampleForm_data.xml");
 			String result = underTest.generatePDFOutput(template, data, Path.of(""));
 			assertThat(result, allOf(containsString(MOCK_EXCEPTION_MESSAGE), containsStringIgnoringCase("Document generation failed")));
-			assertTrue(ResultUtils.getResults().isEmpty());
+			assertTrue(ResultUtils.getResults().isEmpty(), "Expected results to be empty but they were not.");
 		}
 
 		@Test
@@ -107,7 +112,7 @@ class OutputServiceCommandsTest {
 			Path data = SAMPLE_FILES_DIR.resolve("SampleForm_data.xml");
 			String result = underTest.generatePDFOutputRemote(PathOrUrl.from(template), data, Path.of(""));
 			assertThat(result, allOf(containsString(MOCK_EXCEPTION_MESSAGE), containsStringIgnoringCase("Document generation failed")));
-			assertTrue(ResultUtils.getResults().isEmpty());
+			assertTrue(ResultUtils.getResults().isEmpty(), "Expected results to be empty but they were not.");
 		}
 	}
 }
