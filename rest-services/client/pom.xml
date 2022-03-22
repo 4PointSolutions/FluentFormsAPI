@@ -82,6 +82,7 @@
                             <!-- Allow the processing of SCR annotations via a bnd plugin -->
                             org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory}
                         </_plugin>
+                        <Include-Resource>${project.build.outputDirectory}/git.properties</Include-Resource>
                     </instructions>
                 </configuration>
                 <dependencies>

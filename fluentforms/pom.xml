@@ -65,6 +65,7 @@
         
         <!-- Project dependecies -->
         <aemfd.client.sdk.version>6.0.122</aemfd.client.sdk.version> <!-- fluentforms requires AEM 6.5 SP3 or later -->
+		<git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
     </properties>
 
     <build>
@@ -170,6 +171,22 @@
 					</execution>
 				</executions>
             </plugin>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>${git-commit-id-plugin.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<verbose>true</verbose>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+				</configuration>
+			</plugin>
         </plugins>
         <pluginManagement>
             <plugins>
