@@ -12,6 +12,8 @@ import org.springframework.shell.standard.ShellOption;
 
 import com._4point.aem.docservices.rest_services.cli.restservices.cli.ResultCommands;
 import com._4point.aem.docservices.rest_services.cli.restservices.cli.Results;
+import com._4point.aem.docservices.rest_services.cli.restservices.cli.validations.Exists;
+import com._4point.aem.docservices.rest_services.cli.restservices.cli.validations.FileExists;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -33,8 +35,8 @@ public class OutputServiceCommands {
 
 	@ShellMethod("Generate a PDF using a template from the local system.")
     public String generatePDFOutput(
-    		@ShellOption({"-t", "--template"}) Path template, 
-    		@ShellOption({"-d", "--data"}) Path data, 
+    		@ShellOption({"-t", "--template"}) @FileExists Path template, 
+    		@ShellOption({"-d", "--data"}) @FileExists Path data, 
     		@ShellOption(value={"-o", "--output"}, defaultValue="") Path output
     		) {
 		try {
