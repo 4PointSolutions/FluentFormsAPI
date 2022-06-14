@@ -2,10 +2,10 @@ package com._4point.aem.docservices.rest_services.server.data;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -27,7 +27,7 @@ import com._4point.aem.docservices.rest_services.server.data.DataCache.Entry;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=DataServices.DataCache Service",
-											"sling.servlet.methods=" + HttpConstants.METHOD_GET})
+											"sling.servlet.methods=" + HttpConstants.METHOD_POST})
 @SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/DataServices/DataCache")
 public class DataCacheService extends SlingAllMethodsServlet {
 	private static final Logger log = LoggerFactory.getLogger(DataCacheService.class);
@@ -93,7 +93,13 @@ public class DataCacheService extends SlingAllMethodsServlet {
 	private void processPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws BadRequestException, InternalServerErrorException, NotAcceptableException {
 		DataCachePostParameters dataCacheParameters = DataCachePostParameters.from(request);
 
-		String dataKey = DataCache.addDataToCache(dataCacheParameters.getData(), dataCacheParameters.getContentType());
+		byte[] data = dataCacheParameters.getData();
+		String contentType = dataCacheParameters.getContentType();
+		String dataKey = DataCache.addDataToCache(data, contentType);
+
+		log.info("Stored {} bytes of content-type '{}' using key '{}'", data.length, contentType, dataKey);
+		log.debug("Existing Keys='{}'", DataCache.getKeys().stream().collect(Collectors.joining(",")));
+
 		try {
 			response.setContentType("text/plain");
 			response.setContentLength(dataKey.length());
