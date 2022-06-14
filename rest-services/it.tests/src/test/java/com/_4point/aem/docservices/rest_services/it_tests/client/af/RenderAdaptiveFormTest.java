@@ -25,6 +25,7 @@ import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 class RenderAdaptiveFormTest {
 
 	private static final String SAMPLE_AF_NAME = "sample00002test";
+	private static final String SAMPLE_JSON_AF_NAME = "sample-json-adaptive-form--1";
 
 	private AdaptiveFormsService underTest;
 	
@@ -126,6 +127,23 @@ class RenderAdaptiveFormTest {
 		Path template = Paths.get(SAMPLE_AF_NAME);
 		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML.toFile());
 		data.setContentTypeIfEmpty("application/xml");
+		
+		Document result = underTest.renderAdaptiveForm(template, data);
+
+		// Verify the result;
+		byte[] resultBytes = IOUtils.toByteArray(result.getInputStream());
+
+		if (SAVE_RESULTS) {
+			IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testRenderAdaptiveForm_FormRefAndData_result.html")));
+		}
+		assertThat(new String(resultBytes, StandardCharsets.UTF_8), allOf(containsString("Text Field1 Data"), containsString("Text Field2 Data")));
+	}
+	
+	@Test
+	void testRenderAdaptiveFormStringJsonDocument() throws Exception {
+		String template = SAMPLE_JSON_AF_NAME;
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_JSON.toFile());
+		data.setContentTypeIfEmpty("application/json");
 		
 		Document result = underTest.renderAdaptiveForm(template, data);
 

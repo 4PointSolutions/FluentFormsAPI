@@ -7,6 +7,7 @@ public class ContentType {
 	private static final String SEPARATOR_CHAR = "/";
 	
 	public static final ContentType APPLICATION_XML = new ContentType("application/xml");
+	public static final ContentType APPLICATION_JSON = new ContentType("application/json");
 	public static final ContentType APPLICATION_PDF = new ContentType("application/pdf");
 	public static final ContentType APPLICATION_XDP = new ContentType("application/vnd.adobe.xdp+xml");
 	public static final ContentType APPLICATION_DPL = new ContentType("application/vnd.datamax-dpl");

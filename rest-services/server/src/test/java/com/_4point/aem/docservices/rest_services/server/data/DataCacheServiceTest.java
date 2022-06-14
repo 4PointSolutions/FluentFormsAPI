@@ -8,6 +8,8 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com._4point.aem.docservices.rest_services.server.data.DataCache.Entry;
 
@@ -17,15 +19,16 @@ class DataCacheServiceTest {
 	private static final String DATA_KEY_PARAM = "DataKey";
 	private static final String DATA_PARAM = "Data";
 	private static final String APPLICATION_XML = "application/xml";
+	private static final String APPLICATION_JSON = "application/json";
 
 	private final AemContext aemContext = new AemContext();
 	
 	private final DataCacheService underTest = new DataCacheService();
 
-	@Test
-	void testDoGet_HappyPath() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {APPLICATION_XML, APPLICATION_JSON})
+	void testDoGet_HappyPath(String expectedContentType) throws Exception {
 		String expectedResultData = "testDoGet Happy Path Result";
-		String expectedContentType = APPLICATION_XML;
 		byte[] resultDataBytes = expectedResultData.getBytes();
 		
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
@@ -43,9 +46,6 @@ class DataCacheServiceTest {
 
 	@Test
 	void testDoGet_BadKey() throws Exception {
-		String expectedResultData = "testDoGet Happy Path Result";
-		String expectedContentType = APPLICATION_XML;
-		byte[] resultDataBytes = expectedResultData.getBytes();
 		String badRequestKey = "BadRequestKey";
 		
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
@@ -62,10 +62,6 @@ class DataCacheServiceTest {
 
 	@Test
 	void testDoGet_NoKey() throws Exception {
-		String expectedResultData = "testDoGet Happy Path Result";
-		String expectedContentType = APPLICATION_XML;
-		byte[] resultDataBytes = expectedResultData.getBytes();
-		
 		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 

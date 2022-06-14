@@ -36,6 +36,7 @@ public class TestUtils {
 	private static final String SAMPLE_FORM_WITH_DATA_PDF_NAME = "SampleFormWithData.pdf";
 	private static final String SAMPLE_FORM_WITHOUT_DATA_PDF_NAME = "SampleFormNonInteractive.pdf";
 	private static final String SAMPLE_FORM_DATA_XML_NAME = "SampleForm_data.xml";
+	private static final String SAMPLE_FORM_DATA_JSON_NAME = "SampleForm_data.json";
 	private static final String SAMPLE_FORM_DATA_DOCX_NAME = "SampleForm.docx";
 	private static final String SAMPLE_FORM_DDX_NAME = "SampleForm_DDX.xml";
 	private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
@@ -45,6 +46,7 @@ public class TestUtils {
 	public static final Path SAMPLE_FORM_WITHOUT_DATA_PDF = getPath(SAMPLE_FORM_WITHOUT_DATA_PDF_NAME);
 	public static final Path SAMPLE_FORM_XDP = getPath(SAMPLE_FORM_XDP_NAME);
 	public static final Path SAMPLE_FORM_DATA_XML = getPath(SAMPLE_FORM_DATA_XML_NAME);
+	public static final Path SAMPLE_FORM_DATA_JSON = getPath(SAMPLE_FORM_DATA_JSON_NAME);
 	public final static Path SAMPLE_FORM_DOCX =  getPath(SAMPLE_FORM_DATA_DOCX_NAME);
 	public static final Path SAMPLE_FORM_DDX = getPath(SAMPLE_FORM_DDX_NAME);
 	
