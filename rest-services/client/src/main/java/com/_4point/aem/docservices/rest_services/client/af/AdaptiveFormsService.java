@@ -163,7 +163,8 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		WebTarget dataCacheServiceTarget = baseTarget.path(constructStandardPath(DATA_CACHE_SERVICE_NAME, DATA_CACHE_METHOD_NAME));
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_SERVICE_DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE);
+			String contentType = data.getContentType();
+			multipart.field(DATA_SERVICE_DATA_PARAM, data.getInputStream(), contentType != null ? MediaType.valueOf(contentType) : MediaType.APPLICATION_XML_TYPE);
 	
 			Response result = postToServer(dataCacheServiceTarget, multipart, MediaType.TEXT_PLAIN_TYPE);
 			

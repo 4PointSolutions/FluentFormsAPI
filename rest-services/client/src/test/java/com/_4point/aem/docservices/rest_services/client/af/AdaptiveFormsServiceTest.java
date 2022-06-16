@@ -58,14 +58,20 @@ import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 
 @ExtendWith(MockitoExtension.class)
 class AdaptiveFormsServiceTest {
+	private static final String APPLICATION_XML = "application/xml";
+	private static final String APPLICATION_JSON = "application/json";
 	private static final Document EMPTY_DOCUMENT = SimpleDocumentFactoryImpl.emptyDocument();
 	private final static String DUMMY_TEMPLATE_STR = "TemplateString";
-	private final static Document DUMMY_DATA = MockDocumentFactory.GLOBAL_INSTANCE.create("Dummy Data".getBytes());
-
+	private final static byte[] DUMMY_DATA = "Dummy Data".getBytes();
+	private final static Document DUMMY_DATA_XML_DOC = createDataDocument(DUMMY_DATA, APPLICATION_XML);
+	private final static Document DUMMY_DATA_JSON_DOC = createDataDocument(DUMMY_DATA, APPLICATION_JSON);
+	private final static Document DUMMY_DATA_DOC = createDataDocument(DUMMY_DATA);
+	
 	private static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	private static final String CORRELATION_ID = "correlationId";
 	private static final String TEST_MACHINE_NAME = "testmachinename";
 	private static final int TEST_MACHINE_PORT = 8080;
+	
 
 	@Mock(answer = Answers.RETURNS_SELF) Client afClient;	// answers used to mock Client's fluent interface for the Adaptive Forms Service
 	@Mock WebTarget afTarget;
@@ -101,22 +107,45 @@ class AdaptiveFormsServiceTest {
 		R apply(T t, U u) throws E;
 	}
 
+	@FunctionalInterface
+	public interface Function_WithExceptions<T, R, E extends Exception> {
+		R apply(T t) throws E;
+	}
+
+	// A couple of functions for creating some dummy data Document objects.
+	private static Document createDataDocument(byte[] data) {
+		Document dataDoc = MockDocumentFactory.GLOBAL_INSTANCE.create(data);
+		return dataDoc;
+	}
+	private static Document createDataDocument(byte[] data, String contentType) {
+		try {
+			Document dataDoc = createDataDocument(data);
+			dataDoc.setContentTypeIfEmpty(contentType);
+			return dataDoc;
+		} catch (IOException e) {
+			throw new IllegalStateException("IO Error occurred whild create data Document.", e);
+		}
+	}
+
 	private enum HappyPath {
 
-		SSL_NODATA_STR(true, false, TemplateType.STRING),
-		SSL_DATA_STR(true, true, TemplateType.STRING),
-		SSL_NODATA_PATH(true, false, TemplateType.PATH),
-		SSL_DATA_PATH(true, true, TemplateType.PATH),
-		NOSSL_NODATA_PATHORURL(false, false, TemplateType.PATH_OR_URL),
-		NOSSL_DATA_PATHORURL(false, true, TemplateType.PATH_OR_URL);
+		SSL_NODATA_STR(true, null, TemplateType.STRING),
+		SSL_DATA_XML_STR(true, DUMMY_DATA_XML_DOC, TemplateType.STRING),
+		SSL_DATA_JSON_STR(true, DUMMY_DATA_JSON_DOC, TemplateType.STRING),
+		SSL_NODATA_PATH(true, null, TemplateType.PATH),
+		SSL_DATA_XML_PATH(true, DUMMY_DATA_XML_DOC, TemplateType.PATH),
+		SSL_DATA_JSON_PATH(true, DUMMY_DATA_JSON_DOC, TemplateType.PATH),
+		NOSSL_NODATA_PATHORURL(false, null, TemplateType.PATH_OR_URL),
+		NOSSL_DATA_XML_PATHORURL(false, DUMMY_DATA_XML_DOC, TemplateType.PATH_OR_URL),
+		NOSSL_DATA_JSON_PATHORURL(false, DUMMY_DATA_JSON_DOC, TemplateType.PATH_OR_URL);
 		
-		private final boolean ssl;
-		private final boolean hasData;
-		private final TemplateType templateType;
+		private final boolean ssl;					// Does the scenario use SSL?
+		private final Document data;				// Data used for this scenario
+		private final TemplateType templateType;	// Type of template parameter
 		
-		private HappyPath(boolean ssl, boolean hasData, TemplateType templateType) {
+		private HappyPath(boolean ssl, Document data, TemplateType templateType) {
 			this.ssl = ssl;
-			this.hasData = hasData;
+			this.data = data;
 			this.templateType = templateType;
 		}
 
@@ -125,42 +154,56 @@ class AdaptiveFormsServiceTest {
 		}
 
 		public boolean hasData() {
-			return hasData;
+			return this.data != null;
 		}
 		
-		public Document callRenderAdaptiveForm(Boolean hasData, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
-			return templateType.render(hasData, underTest);
+		public Document callRenderAdaptiveForm(AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
+			return hasData() ? templateType.render(this.data, underTest) : templateType.render(underTest);
 		}
 
 		private enum TemplateType {
-			STRING(TemplateType::renderAdaptiveFormWithString), 
-			PATH(TemplateType::renderAdaptiveFormWithPath),
-			PATH_OR_URL(TemplateType::renderAdaptiveFormWithPathOrUrl);
+			STRING(TemplateType::renderAdaptiveFormWithStringWithData, TemplateType::renderAdaptiveFormWithStringWithoutData), 
+			PATH(TemplateType::renderAdaptiveFormWithPathWithData, TemplateType::renderAdaptiveFormWithPathWithoutData),
+			PATH_OR_URL(TemplateType::renderAdaptiveFormWithPathOrUrlWithData, TemplateType::renderAdaptiveFormWithPathOrUrlWithoutData);
 			
-			private final BiFunction_WithExceptions<Boolean, AdaptiveFormsService, Document, AdaptiveFormsServiceException> renderAdaptiveFormFn;
+			private final BiFunction_WithExceptions<Document, AdaptiveFormsService, Document, AdaptiveFormsServiceException> renderAdaptiveFormWithDataFn;
+			private final Function_WithExceptions<AdaptiveFormsService, Document, AdaptiveFormsServiceException> renderAdaptiveFormWithoutDataFn;
 
-			private TemplateType(BiFunction_WithExceptions<Boolean, AdaptiveFormsService, Document, AdaptiveFormsServiceException> renderAdaptiveFormFn) {
-				this.renderAdaptiveFormFn = renderAdaptiveFormFn;
+			private TemplateType(BiFunction_WithExceptions<Document, AdaptiveFormsService, Document, AdaptiveFormsServiceException> renderAdaptiveFormWithDataFn,
+					Function_WithExceptions<AdaptiveFormsService, Document, AdaptiveFormsServiceException> renderAdaptiveFormWithoutDataFn) {
+				this.renderAdaptiveFormWithDataFn = renderAdaptiveFormWithDataFn;
+				this.renderAdaptiveFormWithoutDataFn = renderAdaptiveFormWithoutDataFn;
 			}
 
-			public Document render(Boolean hasData, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
-				return renderAdaptiveFormFn.apply(hasData, underTest);
+			public Document render(Document data, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
+				return renderAdaptiveFormWithDataFn.apply(data, underTest);
 			}
 
-			private static Document renderAdaptiveFormWithString(Boolean hasData, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
-				return hasData.booleanValue() ? underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA) 
-											  : underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR);
+			public Document render(AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
+				return renderAdaptiveFormWithoutDataFn.apply(underTest);
 			}
-			private static Document renderAdaptiveFormWithPath(Boolean hasData, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
+
+			private static Document renderAdaptiveFormWithStringWithData(Document data, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
+				return underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, data);
+			}
+			private static Document renderAdaptiveFormWithPathWithData(Document data, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
 				
-				return hasData.booleanValue() ? underTest.renderAdaptiveForm(Paths.get(DUMMY_TEMPLATE_STR), DUMMY_DATA) 
-											  : underTest.renderAdaptiveForm(Paths.get(DUMMY_TEMPLATE_STR));
+				return underTest.renderAdaptiveForm(Paths.get(DUMMY_TEMPLATE_STR), data);
 			}
-			private static Document renderAdaptiveFormWithPathOrUrl(Boolean hasData, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
-				return hasData.booleanValue() ? underTest.renderAdaptiveForm(PathOrUrl.from(DUMMY_TEMPLATE_STR), DUMMY_DATA) 
-								 			  : underTest.renderAdaptiveForm(PathOrUrl.from(DUMMY_TEMPLATE_STR));
+			private static Document renderAdaptiveFormWithPathOrUrlWithData(Document data, AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
+				return underTest.renderAdaptiveForm(PathOrUrl.from(DUMMY_TEMPLATE_STR), data);
 			}
 
+			private static Document renderAdaptiveFormWithStringWithoutData(AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
+				return underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR);
+			}
+			private static Document renderAdaptiveFormWithPathWithoutData(AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
+				
+				return underTest.renderAdaptiveForm(Paths.get(DUMMY_TEMPLATE_STR));
+			}
+			private static Document renderAdaptiveFormWithPathOrUrlWithoutData(AdaptiveFormsService underTest) throws AdaptiveFormsServiceException {
+				return underTest.renderAdaptiveForm(PathOrUrl.from(DUMMY_TEMPLATE_STR));
+			}
 		}
 	};
 	
@@ -202,7 +245,7 @@ class AdaptiveFormsServiceTest {
 		AdaptiveFormsService underTest = svcBuilder.build();
 		
 		
-		Document result = scenario.callRenderAdaptiveForm(scenario.hasData(), underTest);
+		Document result = scenario.callRenderAdaptiveForm(underTest);
 		
 		
 		// Make sure the correct URL is called.
@@ -211,7 +254,7 @@ class AdaptiveFormsServiceTest {
 				()->assertThat("Expected target url contains '" + expectedPrefix + "'", afMachineName.getValue(), containsString(expectedPrefix)),
 				()->assertThat("Expected target url contains TEST_MACHINE_NAME", afMachineName.getValue(), containsString(TEST_MACHINE_NAME)),
 				()->assertThat("Expected target url contains TEST_MACHINE_PORT", afMachineName.getValue(), containsString(Integer.toString(TEST_MACHINE_PORT))),
-				()->assertThat("Expected target url contains '/content/forms/af/'", scenario.hasData ? afPath.getAllValues().get(0) : afPath.getValue(), containsString("/content/forms/af/"))
+				()->assertThat("Expected target url contains '/content/forms/af/'", scenario.hasData() ? afPath.getAllValues().get(0) : afPath.getValue(), containsString("/content/forms/af/"))
 		);
 
 		// Make sure that the arguments we passed in are transmitted correctly.
@@ -222,7 +265,7 @@ class AdaptiveFormsServiceTest {
 			FormDataMultiPart postedData = postedEntity.getEntity();
 
 			assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
-			validateDocumentFormField(postedData, "Data", new MediaType("application", "xml"),DUMMY_DATA.getInlineData());
+			validateDocumentFormField(postedData, "Data", MediaType.valueOf(scenario.data.getContentType()),scenario.data.getInlineData());
 		}
 		
 		if (useCorrelationId) {
@@ -305,7 +348,7 @@ class AdaptiveFormsServiceTest {
 													   .addRenderResultFilter(is->new ReplacingInputStream(is, "Document", "tnemucoD"))
 													   .build();
 	
-		Document result = underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA);
+		Document result = underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA_DOC);
 		
 		assertEquals("response tnemucoD Data", new String(result.getInlineData()));
 		assertEquals(MediaType.TEXT_HTML_TYPE, MediaType.valueOf(result.getContentType()));
@@ -328,7 +371,7 @@ class AdaptiveFormsServiceTest {
 													   .addRenderResultFilter(is->new ReplacingInputStream(is, "coD", "rtm"))
 													   .build();
 	
-		Document result = underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA);
+		Document result = underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA_DOC);
 		
 		assertEquals("response tnemurtm Data", new String(result.getInlineData()));
 		assertEquals(MediaType.TEXT_HTML_TYPE, MediaType.valueOf(result.getContentType()));
@@ -350,7 +393,7 @@ class AdaptiveFormsServiceTest {
 
 		AdaptiveFormsService underTest = svcBuilder.build();
 
-		AdaptiveFormsServiceException ex = assertThrows(AdaptiveFormsServiceException.class, ()->underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA));
+		AdaptiveFormsServiceException ex = assertThrows(AdaptiveFormsServiceException.class, ()->underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA_DOC));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 		assertThat(msg, allOf(containsStringIgnoringCase("Call to server failed"),
@@ -402,7 +445,7 @@ class AdaptiveFormsServiceTest {
 
 		AdaptiveFormsService underTest = svcBuilder.build();
 
-		AdaptiveFormsServiceException ex = assertThrows(AdaptiveFormsServiceException.class, ()->underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA));
+		AdaptiveFormsServiceException ex = assertThrows(AdaptiveFormsServiceException.class, ()->underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA_DOC));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 		assertThat(msg, allOf(containsStringIgnoringCase("response from AEM server was not plain text"),
@@ -460,7 +503,7 @@ class AdaptiveFormsServiceTest {
 
 		AdaptiveFormsService underTest = svcBuilder.build();
 
-		AdaptiveFormsServiceException ex = assertThrows(AdaptiveFormsServiceException.class, ()->underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA));
+		AdaptiveFormsServiceException ex = assertThrows(AdaptiveFormsServiceException.class, ()->underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR, DUMMY_DATA_DOC));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 		assertAll(
