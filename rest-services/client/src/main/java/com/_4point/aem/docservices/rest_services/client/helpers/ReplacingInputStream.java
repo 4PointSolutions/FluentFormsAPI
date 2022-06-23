@@ -113,7 +113,7 @@ public class ReplacingInputStream extends FilterInputStream {
 			if (b == -1) return i == 0 ? -1 : i;	// If we haven't read anything, return -1 otherwise, return the number of bytes we have read.
 			ba[i] = (byte)b;
 		}
-		return ba.length;
+		return len;
 	}
 
 	@Override
