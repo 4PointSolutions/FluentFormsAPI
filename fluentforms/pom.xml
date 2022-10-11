@@ -56,8 +56,8 @@
         <maven.compiler.release>8</maven.compiler.release>
 
 		<!-- Testing dependencies -->
-        <mockito.version>4.6.1</mockito.version>
-        <junit.version>5.8.2</junit.version>
+        <mockito.version>4.8.0</mockito.version>
+        <junit.version>5.9.1</junit.version>
         <wcm.mocks.version>4.1.8</wcm.mocks.version>
         <slf4j-test.version>1.2.0</slf4j-test.version>
         <slf4j.version>1.7.32</slf4j.version>
