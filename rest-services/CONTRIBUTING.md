@@ -4,7 +4,7 @@ Contributions to this project are gratefully accepted however we do have to enfo
 amount of work required to maintain this project to a reasonable level.
 
 The main purpose of this project is to act as a shared codebase for 4Point AEM Forms customers however it is available for use
-by anyone else under the terms of the Apache 2.0 License.
+by anyone else under the terms of the Apache 2.0 License. 
 
 The maintainers of this project are full-time employees whose job duties do not necessarily entail maintaining the source code
 of this project.  Depending on their current duties and workload, it may take up to 10 working days to respond to project issues, pull requests, etc.  If you haven’t heard anything by then, feel free to ping the thread.
