@@ -58,8 +58,8 @@
 		<rest-services.version>0.0.2-SNAPSHOT</rest-services.version>
 
 		<!-- Testing dependencies -->
-        <mockito.version>3.11.1</mockito.version>
-        <junit.version>5.8.1</junit.version>
+        <mockito.version>4.8.0</mockito.version>
+        <junit.version>5.9.1</junit.version>
         <wcm.mocks.version>3.0.0</wcm.mocks.version> <!-- Versions later than this produce a org.reflections.ReflectionsException: Scanner TypeAnnotationsScanner was not configured error -->
         <slf4j-test.version>1.2.0</slf4j-test.version>
         <slf4j.version>1.7.26</slf4j.version>
