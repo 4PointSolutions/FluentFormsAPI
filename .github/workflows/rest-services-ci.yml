@@ -21,6 +21,8 @@ jobs:
 
     - name: Build with Maven
       run: mvn -B package -s $GITHUB_WORKSPACE/settings.xml --file rest-services -P adobe-public
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml --file rest-services
