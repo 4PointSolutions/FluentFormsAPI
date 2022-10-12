@@ -20,7 +20,7 @@
 	<!--
 	|   This project can be built with the following command line:
 	|   mvn clean install -P adobe-public
-	|  
+	| 
 	|   In order to automatically install the resulting rest-services.server bundle, add the autoInstallBundle profile:
 	|   mvn clean install -P adobe-public,autoInstallBundle
 	|
@@ -312,7 +312,7 @@
 		</repository>
 		<repository>
 			<id>github</id>
-			<url>https://maven.pkg.github.com/4PointSolutions</url>
+			<url>https://maven.pkg.github.com/4PointSolutions/*</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
