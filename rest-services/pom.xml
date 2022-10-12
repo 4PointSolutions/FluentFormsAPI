@@ -312,7 +312,7 @@
 		</repository>
 		<repository>
 			<id>github</id>
-			<url>https://maven.pkg.github.com/4PointSolutions/*</url>
+			<url>https://maven.pkg.github.com/4PointSolutions</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
