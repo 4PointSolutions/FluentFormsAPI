@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.function.Supplier;
 
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.xmlunit.matchers.CompareMatcher;
 
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.TestUtils;
@@ -58,6 +60,9 @@ public class CreatePDFTest {
 	private final AemContext aemContext = new AemContext();
 	private final CreatePDF underTest = new CreatePDF();
 	private MockDocumentFactory mockDocumentFactory = new MockDocumentFactory();
+	// Unix produces a different string than Windows, so we account for that here.
+	private final String createdDocValue = File.separatorChar == '/' ? "c3JjL3Rlc3QvcmVzb3VyY2VzL1NhbXBsZUZvcm1zL1NhbXBsZUZvcm0uZG9jeA==" 	// Unix
+																	 : "c3JjXHRlc3RccmVzb3VyY2VzXFNhbXBsZUZvcm1zXFNhbXBsZUZvcm0uZG9jeA==";	// Windows
 
 	@BeforeEach void setUp() throws Exception { 
 		junitx.util.PrivateAccessor.setField(underTest, "docFactory",
@@ -65,7 +70,7 @@ public class CreatePDFTest {
 
 	@Test
 	void testDoPost_HappyPath_JustForm() throws ServletException, IOException, NoSuchFieldException {
-		String resultData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><createPDFResult><createdDoc createdDocValue=\"c3JjXHRlc3RccmVzb3VyY2VzXFNhbXBsZUZvcm1zXFNhbXBsZUZvcm0uZG9jeA==\"/><logDoc/></createPDFResult>";
+		String resultData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><createPDFResult><createdDoc createdDocValue=\"" + createdDocValue + "\"/><logDoc/></createPDFResult>";
 		String templateData = TestUtils.SAMPLE_FORM_DOCX.toString();
 		String fileTypeSettings = "Filetype Settings";
 		PDFSettings pdfSettings = PDFSettings.High_Quality_Print;
@@ -89,7 +94,8 @@ public class CreatePDFTest {
 		underTest.doPost(request, response);
 		assertEquals(SlingHttpServletResponse.SC_OK, response.getStatus());
 		assertEquals(APPLICATION_XML, response.getContentType());
-		assertEquals(resultData.trim(), response.getOutputAsString().trim());
+		assertThat(response.getOutputAsString(), CompareMatcher.isIdenticalTo(resultData));
+//		assertEquals(resultData.trim(), response.getOutputAsString().trim());
 
 		GeneratePDFResultArgs generatePDFResultArgs = generatePDFResultMock.getGeneratePDFResultArgs();
 		assertNotNull(generatePDFResultArgs.getInputDoc());
@@ -102,7 +108,7 @@ public class CreatePDFTest {
 	@Test
 	void testDoPost_HappyPath_JustForm_Optionsal_Parameters_Null()
 			throws ServletException, IOException, NoSuchFieldException {
-		String resultData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><createPDFResult><createdDoc createdDocValue=\"c3JjXHRlc3RccmVzb3VyY2VzXFNhbXBsZUZvcm1zXFNhbXBsZUZvcm0uZG9jeA==\"/><logDoc/></createPDFResult>";
+		String resultData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><createPDFResult><createdDoc createdDocValue=\"" + createdDocValue + "\"/><logDoc/></createPDFResult>";
 		String templateData = TestUtils.SAMPLE_FORM_DOCX.toString();
 		CreatePDFResultImpl createResult = new CreatePDFResultImpl();
 		createResult.setCreatedDocument(mockDocumentFactory.create(templateData.getBytes()));
@@ -116,7 +122,8 @@ public class CreatePDFTest {
 		underTest.doPost(request, response);
 		assertEquals(SlingHttpServletResponse.SC_OK, response.getStatus());
 		assertEquals(APPLICATION_XML, response.getContentType());
-		assertEquals(resultData.trim(), response.getOutputAsString().trim());
+		assertThat(response.getOutputAsString(), CompareMatcher.isIdenticalTo(resultData.trim()));
+//		assertEquals(resultData.trim(), response.getOutputAsString().trim());
 
 		GeneratePDFResultArgs generatePDFResultArgs = generatePDFResultMock.getGeneratePDFResultArgs();
 		assertNotNull(generatePDFResultArgs.getInputDoc());
