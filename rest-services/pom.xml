@@ -68,6 +68,8 @@
         <pdfbox.version>2.0.24</pdfbox.version>
         <jsoup.version>1.15.3</jsoup.version>
         <jcabi-xml-version>0.21.5</jcabi-xml-version>
+        <xml-unit-version>2.9.0</xml-unit-version>
+        <xerces-version>2.12.2</xerces-version>
 	</properties>
 
 	<build>
@@ -565,6 +567,24 @@
 				<artifactId>jcabi-xml</artifactId>
 				<scope>test</scope>
 				<version>${jcabi-xml-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xmlunit</groupId>
+				<artifactId>xmlunit-core</artifactId>
+				<version>${xml-unit-version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.xmlunit</groupId>
+				<artifactId>xmlunit-matchers</artifactId>
+				<version>${xml-unit-version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>	<!-- required by xml-unit -->
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+				<version>${xerces-version}</version>
+				<scope>test</scope>
 			</dependency>
 			<!-- Other dependencies -->
 			<dependency>
