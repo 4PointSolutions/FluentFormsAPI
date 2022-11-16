@@ -27,19 +27,19 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.Callable;
 
-import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
-import com._4point.aem.fluentforms.impl.output.OutputServiceImpl;
-import com.adobe.fd.output.api.AcrobatVersion;
+import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
+import com.adobe.fd.forms.api.AcrobatVersion;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Command(name = "invoke_output", mixinStandardHelpOptions = true, version = "invoke_output 0.1",
-        description = "invoke_output invokes AEM OutputService via FluentForms")
+@Command(name = "invoke_forms", mixinStandardHelpOptions = true, version = "invoke_forms 0.1",
+        description = "invoke_forms invokes AEM FormsService via FluentForms")
 class invoke_aem implements Callable<Integer> {
 
     @Option(names = {"-f", "--form"}, description = "A filepath to the XDP.", required = true)
@@ -59,24 +59,23 @@ class invoke_aem implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
     	
-		var adapter = RestServicesOutputServiceAdapter.builder()
+		var adapter = RestServicesFormsServiceAdapter.builder()
 				.machineName("localhost")
 				.port(4502)
 				.basicAuthentication("admin", "admin")
 				.useSsl(false)
 				.build();
 
-		var underTest = new OutputServiceImpl(adapter, UsageContext.CLIENT_SIDE);
+		var underTest = new FormsServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 		
 		
-		var builder = underTest.generatePDFOutput()
-				.setAcrobatVersion(AcrobatVersion.Acrobat_10_1)
+		var builder = underTest.renderPDFForm()
+				.setAcrobatVersion(AcrobatVersion.Acrobat_11)
 				.setEmbedFonts(true)
 				// Less used parameters are commented out which leaves them at default.
-//				.setLinearizedPDF(true)
-//				.setLocale(Locale.CANADA_FRENCH)
-//				.setRetainPDFFormState(true)
-//				.setRetainUnsignedSignatureFields(true)
+//				.setCacheStrategy(strategy)
+//				.setLocale(locale)
+//				.setXci(xci)
 				.setTaggedPDF(true);
 
 		if (Files.exists(xdpLocation)) {
