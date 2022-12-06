@@ -1,6 +1,7 @@
 package com._4point.aem.fluentforms.api.output;
 
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.AbstractMap;
@@ -10,8 +11,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.Transformable;
+import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com.adobe.fd.output.api.AcrobatVersion;
 import com.adobe.fd.output.api.PaginationOverride;
 
@@ -114,6 +117,58 @@ public interface OutputService {
 		public Document executeOn(URL template, Document data) throws OutputServiceException;
 
 		public Document executeOn(Document template, Document data) throws OutputServiceException;
+		
+		default public Document executeOn(PathOrUrl template, byte[] data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Path template, byte[] data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public Document executeOn(URL template, byte[] data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Document template, byte[] data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(byte[] template, byte[] data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(InputStream template, byte[] data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(PathOrUrl template, InputStream data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Path template, InputStream data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public Document executeOn(URL template, InputStream data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Document template, InputStream data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(byte[] template, InputStream data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(InputStream template, InputStream data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
 	}
 
 	public static interface GeneratePrintedOutputArgumentBuilder extends PrintedOutputOptionsSetter, Transformable<GeneratePrintedOutputArgumentBuilder> {
@@ -158,6 +213,58 @@ public interface OutputService {
 		public Document executeOn(URL template, Document data) throws OutputServiceException;
 
 		public Document executeOn(Document template, Document data) throws OutputServiceException;
+		
+		default public Document executeOn(PathOrUrl template, byte[] data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Path template, byte[] data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public Document executeOn(URL template, byte[] data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Document template, byte[] data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(byte[] template, byte[] data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(InputStream template, byte[] data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(PathOrUrl template, InputStream data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Path template, InputStream data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public Document executeOn(URL template, InputStream data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Document template, InputStream data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(byte[] template, InputStream data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(InputStream template, InputStream data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
 	}
 
 	public static interface GeneratePdfOutputBatchArgumentBuilder extends PDFOutputOptionsSetter, BatchArgumentBuilder, Transformable<GeneratePdfOutputArgumentBuilder> {
@@ -210,6 +317,30 @@ public interface OutputService {
 		public BatchResult executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException;
 		
 		public BatchResult executeOn(URL template, Document data) throws OutputServiceException;
+		
+		default public BatchResult executeOn(PathOrUrl template, byte[] data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public BatchResult executeOn(Path template, byte[] data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public BatchResult executeOn(URL template, byte[] data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public BatchResult executeOn(PathOrUrl template, InputStream data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public BatchResult executeOn(Path template, InputStream data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public BatchResult executeOn(URL template, InputStream data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
 	}
 
 	public static interface GeneratePrintedOutputBatchArgumentBuilder extends PrintedOutputOptionsSetter, BatchArgumentBuilder, Transformable<GeneratePrintedOutputArgumentBuilder> {
@@ -253,6 +384,30 @@ public interface OutputService {
 		public BatchResult executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException;
 		
 		public BatchResult executeOn(URL template, Document data) throws OutputServiceException;
+
+		default public BatchResult executeOn(PathOrUrl template, byte[] data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public BatchResult executeOn(Path template, byte[] data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public BatchResult executeOn(URL template, byte[] data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public BatchResult executeOn(PathOrUrl template, InputStream data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public BatchResult executeOn(Path template, InputStream data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public BatchResult executeOn(URL template, InputStream data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
 	}
 
 	public static interface BatchArgumentBuilder {

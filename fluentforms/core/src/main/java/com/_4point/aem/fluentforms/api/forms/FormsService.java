@@ -1,6 +1,7 @@
 package com._4point.aem.fluentforms.api.forms;
 
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -10,8 +11,10 @@ import java.util.Optional;
 
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.Transformable;
+import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
@@ -140,6 +143,58 @@ public interface FormsService {
 		public Document executeOn(URL template, Document data) throws FormsServiceException;
 
 		public Document executeOn(Document template, Document data) throws FormsServiceException;
+
+		default public Document executeOn(PathOrUrl template, byte[] data) throws FormsServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Path template, byte[] data) throws FormsServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public Document executeOn(URL template, byte[] data) throws FormsServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Document template, byte[] data) throws FormsServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(byte[] template, byte[] data) throws FormsServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(InputStream template, byte[] data) throws FormsServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(PathOrUrl template, InputStream data) throws FormsServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Path template, InputStream data) throws FormsServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public Document executeOn(URL template, InputStream data) throws FormsServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Document template, InputStream data) throws FormsServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(byte[] template, InputStream data) throws FormsServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(InputStream template, InputStream data) throws FormsServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
 
 	}
 	
