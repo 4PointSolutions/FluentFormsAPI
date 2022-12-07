@@ -196,6 +196,21 @@ public interface FormsService {
 			return executeOn(factory.create(template), factory.create(data));
 		};
 
+		default public Document executeOn(PathOrUrl template) throws FormsServiceException, FileNotFoundException {
+			return executeOn(template, (Document)null);
+		};
+
+		default public Document executeOn(Path template) throws FormsServiceException, FileNotFoundException {
+			return executeOn(template, (Document)null);
+		};
+		
+		default public Document executeOn(URL template) throws FormsServiceException {
+			return executeOn(template, (Document)null);
+		};
+
+		default public Document executeOn(Document template) throws FormsServiceException {
+			return executeOn(template, (Document)null);
+		};
 	}
 	
 	public static interface ValidateArgumentBuilder extends ValidationOptionsSetter, Transformable<ValidateArgumentBuilder> {

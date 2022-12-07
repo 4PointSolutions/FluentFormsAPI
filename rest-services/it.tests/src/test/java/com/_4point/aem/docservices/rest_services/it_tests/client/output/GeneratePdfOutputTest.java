@@ -2,7 +2,9 @@ package com._4point.aem.docservices.rest_services.it_tests.client.output;
 
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 
+import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
+import com._4point.aem.docservices.rest_services.it_tests.Pdf;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -28,8 +31,8 @@ class GeneratePdfOutputTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		RestServicesOutputServiceAdapter adapter = RestServicesOutputServiceAdapter.builder()
-				.machineName(TEST_MACHINE_NAME)
-				.port(TEST_MACHINE_PORT)
+				.machineName("172.18.110.22")
+				.port(4502)
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
 				.useSsl(false)
 				.aemServerType(TEST_MACHINE_AEM_TYPE)
@@ -92,7 +95,7 @@ class GeneratePdfOutputTest {
 	@DisplayName("Test generatePdfOutput() Just Form Doc.  FluentFormsAPI Issue #15")
 	void testGeneratePdfOutput_JustFormDocIssue15() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()
-									   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf")), null);
+									   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf")));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
 	}
@@ -101,9 +104,37 @@ class GeneratePdfOutputTest {
 	@DisplayName("Test generatePdfOutput() Just Form.  FluentFormsAPI Issue #15")
 	void testGeneratePdfOutput_JustFormIssue15() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()
-									   .executeOn(TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf").toAbsolutePath(), null);
+									   .executeOn(TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf").toAbsolutePath());
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
+	}
+
+
+	@Test
+	@DisplayName("Test generatePdfOutput() Just Form.  From Windows Machine")
+	void testGeneratePdfOutput_JustForm() throws Exception {
+//		Path formPath = Paths.get("/home/aem_user/u000/AEM/Forms/RUNTIME/Invoices/EN/Invoice_GB_PD.xdp");
+		URL formPath = new URL("file:/home/aem_user/u000/AEM/Forms/RUNTIME/Invoices/EN/Invoice_GB_PD.xdp");
+		Document pdfResult =  underTest.generatePDFOutput()
+									   .executeOn(formPath);
+		
+		Pdf resultPdf = Pdf.from(pdfResult.getInputStream());
+		
+//		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
+	}
+
+	@Test
+	@DisplayName("Test generatePdfOutput() Just Form.  From Windows Machine")
+	void testGeneratePdfOutput_JustFormContentRoot() throws Exception {
+		Path contentPath = Paths.get("\\","home", "aem_user", "u000","AEM","Forms","RUNTIME","Invoices","EN");
+		Path formPath = Paths.get("Invoice_GB_PD.xdp");
+		Document pdfResult =  underTest.generatePDFOutput()
+									   .setContentRoot(contentPath)
+									   .executeOn(formPath);
+		
+		Pdf resultPdf = Pdf.from(pdfResult.getInputStream());
+		
+//		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
 	}
 
 

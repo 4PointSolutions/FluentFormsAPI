@@ -169,6 +169,22 @@ public interface OutputService {
 			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
 			return executeOn(factory.create(template), factory.create(data));
 		};
+		
+		default public Document executeOn(PathOrUrl template) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, (Document)null);
+		};
+
+		default public Document executeOn(Path template) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, (Document)null);
+		};
+		
+		default public Document executeOn(URL template) throws OutputServiceException {
+			return executeOn(template, (Document)null);
+		};
+
+		default public Document executeOn(Document template) throws OutputServiceException {
+			return executeOn(template, (Document)null);
+		};
 	}
 
 	public static interface GeneratePrintedOutputArgumentBuilder extends PrintedOutputOptionsSetter, Transformable<GeneratePrintedOutputArgumentBuilder> {
@@ -265,6 +281,23 @@ public interface OutputService {
 			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
 			return executeOn(factory.create(template), factory.create(data));
 		};
+
+		default public Document executeOn(PathOrUrl template) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, (Document)null);
+		};
+
+		default public Document executeOn(Path template) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, (Document)null);
+		};
+		
+		default public Document executeOn(URL template) throws OutputServiceException {
+			return executeOn(template, (Document)null);
+		};
+
+		default public Document executeOn(Document template) throws OutputServiceException {
+			return executeOn(template, (Document)null);
+		};
+
 	}
 
 	public static interface GeneratePdfOutputBatchArgumentBuilder extends PDFOutputOptionsSetter, BatchArgumentBuilder, Transformable<GeneratePdfOutputArgumentBuilder> {
@@ -341,6 +374,19 @@ public interface OutputService {
 		default public BatchResult executeOn(URL template, InputStream data) throws OutputServiceException {
 			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
 		};
+
+		default public BatchResult executeOn(PathOrUrl template) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, (Document) null);
+		};
+
+		default public BatchResult executeOn(Path template) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, (Document) null);
+		};
+		
+		default public BatchResult executeOn(URL template) throws OutputServiceException {
+			return executeOn(template, (Document) null);
+		};
+
 	}
 
 	public static interface GeneratePrintedOutputBatchArgumentBuilder extends PrintedOutputOptionsSetter, BatchArgumentBuilder, Transformable<GeneratePrintedOutputArgumentBuilder> {
@@ -408,6 +454,19 @@ public interface OutputService {
 		default public BatchResult executeOn(URL template, InputStream data) throws OutputServiceException {
 			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
 		};
+
+		default public BatchResult executeOn(PathOrUrl template) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, (Document)null);
+		};
+
+		default public BatchResult executeOn(Path template) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, (Document)null);
+		};
+		
+		default public BatchResult executeOn(URL template) throws OutputServiceException {
+			return executeOn(template, (Document)null);
+		};
+
 	}
 
 	public static interface BatchArgumentBuilder {
