@@ -309,4 +309,21 @@ public class PathOrUrl {
 		return  CRX_URL_PROTOCOL + url.toString().substring(CRX_URL_SUBSTITUTE_LENGTH);
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(isCrxUrl, path, url);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PathOrUrl other = (PathOrUrl) obj;
+		return isCrxUrl == other.isCrxUrl && Objects.equals(path, other.path) && Objects.equals(url, other.url);
+	}
+
 }

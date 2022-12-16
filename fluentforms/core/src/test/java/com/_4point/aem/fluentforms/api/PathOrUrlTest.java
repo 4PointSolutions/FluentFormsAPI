@@ -1,5 +1,7 @@
 package com._4point.aem.fluentforms.api;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.MalformedURLException;
@@ -227,4 +229,82 @@ class PathOrUrlTest {
 		);
 
 	}
+	
+	@Test
+	void test_hashCode_equals() throws Exception {
+		String filePrefix = "file://";
+		String crxPrefix = "crx://";
+		final String testLocation = "foo/bar";
+		PathOrUrl firstStr = PathOrUrl.from(testLocation);
+		PathOrUrl secondStr = PathOrUrl.from(testLocation);
+		PathOrUrl firstPath = PathOrUrl.from(Paths.get(testLocation));
+		PathOrUrl secondPath = PathOrUrl.from(Paths.get(testLocation));
+		PathOrUrl firstUrl = PathOrUrl.from(new URL(filePrefix + testLocation));
+		PathOrUrl secondUrl = PathOrUrl.from(new URL(filePrefix + testLocation));
+		PathOrUrl firstCrxUrl = PathOrUrl.from(crxPrefix + testLocation);
+		PathOrUrl secondCrxUrl = PathOrUrl.from(crxPrefix + testLocation);
+		
+		
+		assertAll(
+				// Validate the hashcodes
+				()->assertEquals(firstStr.hashCode(), secondStr.hashCode()),
+				()->assertEquals(firstPath.hashCode(), secondPath.hashCode()),
+				()->assertEquals(firstUrl.hashCode(), secondUrl.hashCode()),
+				()->assertEquals(firstCrxUrl.hashCode(), secondCrxUrl.hashCode()),
+				()->assertEquals(firstStr.hashCode(), firstPath.hashCode()),
+				
+				// Validate the equals
+				()->assertEquals(firstStr, secondStr),
+				()->assertEquals(firstPath, secondPath),
+				()->assertEquals(firstUrl, secondUrl),
+				()->assertEquals(firstCrxUrl, secondCrxUrl),
+				()->assertEquals(firstStr, firstPath),
+				()->assertEquals(firstStr, firstStr),
+				
+				// Validate non-cases
+				()->assertNotEquals(firstStr, null),
+				()->assertNotEquals(firstStr, testLocation)
+				);
+	}
+	
+	@Test
+	void test_isRelative() throws Exception {
+		final String filePrefix = "file://";
+		final String crxPrefix = "crx://";
+		final String testLocation = "foo/bar";		// Relative Location
+		PathOrUrl relStr = PathOrUrl.from(testLocation);
+		PathOrUrl absStr = PathOrUrl.from("/" + testLocation);
+		PathOrUrl relPath = PathOrUrl.from(Paths.get(testLocation));
+		PathOrUrl absPath = PathOrUrl.from(Paths.get("/" + testLocation));
+		// Urls are always absolute
+		PathOrUrl absUrl = PathOrUrl.from(new URL(filePrefix + testLocation));
+		PathOrUrl absCrxUrl = PathOrUrl.from(crxPrefix + testLocation);
+		
+		assertAll(
+				()->assertTrue(relStr.isRelative()),
+				()->assertFalse(absStr.isRelative()),
+				()->assertTrue(relPath.isRelative()),
+				()->assertFalse(absPath.isRelative()),
+				()->assertFalse(absUrl.isRelative()),
+				()->assertFalse(absCrxUrl.isRelative())
+				);
+	}
+	
+	@Test
+	void test_convertRelativePathToRelativeUrl() throws Exception {
+		final String testLocation = "foo\\bar";
+		PathOrUrl relStr = PathOrUrl.from(testLocation);
+		
+		assertEquals("foo/bar", relStr.convertRelativePathToRelativeUrl());
+	}
+
+	@Test
+	void test_convertRelativePathToRelativeUrl_Abs() throws Exception {
+		PathOrUrl absStr = PathOrUrl.from("/foo/bar");
+		final IllegalStateException ex = assertThrows(IllegalStateException.class, ()->absStr.convertRelativePathToRelativeUrl());
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		assertThat(msg, containsStringIgnoringCase("Path must be relative"));
+	}
+
 }
