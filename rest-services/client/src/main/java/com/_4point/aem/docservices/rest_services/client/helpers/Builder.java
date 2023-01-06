@@ -1,8 +1,8 @@
 package com._4point.aem.docservices.rest_services.client.helpers;
 
 import java.util.function.Supplier;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
 
 /**
  * This interface is is for a Builder object that assists in building a JAX-RS client.  It is shared between the following projects:

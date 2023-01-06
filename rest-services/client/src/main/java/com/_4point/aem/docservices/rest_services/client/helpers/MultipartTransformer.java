@@ -1,6 +1,6 @@
 package com._4point.aem.docservices.rest_services.client.helpers;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 

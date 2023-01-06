@@ -3,7 +3,7 @@ package com._4point.aem.docservices.rest_services.it_tests.client.generatePDF;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

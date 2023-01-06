@@ -6,10 +6,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
@@ -36,14 +36,14 @@ public abstract class RestServicesServiceAdapter {
 	}
 
 	protected Response postToServer(WebTarget localTarget, final FormDataMultiPart multipart, final MediaType acceptType) throws RestServicesServiceException  {
-		javax.ws.rs.client.Invocation.Builder invokeBuilder = localTarget.request().accept(acceptType);
+		jakarta.ws.rs.client.Invocation.Builder invokeBuilder = localTarget.request().accept(acceptType);
 		if (this.correlationIdFn != null) {
 			invokeBuilder.header(CORRELATION_ID_HTTP_HDR, this.correlationIdFn.get());
 		}
 		Response result;
 		try {
 			result = invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType()));
-		} catch (javax.ws.rs.ProcessingException e) {
+		} catch (jakarta.ws.rs.ProcessingException e) {
 			String msg = e.getMessage();
 			throw new RestServicesServiceException("Error when posting to '" + localTarget.getUri().toString() + "'" + (msg != null ? " (" + msg + ")" : "") + ".", e); 
 		}
