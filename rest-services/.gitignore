@@ -12,6 +12,7 @@ tmp/
 *~.nib
 local.properties
 .settings/
+.project
 .loadpath
 
 # Eclipse Core

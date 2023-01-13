@@ -83,7 +83,7 @@ class invoke_aem implements Callable<Integer> {
 		}
 		
 		Document pdfResult =  xmlLocation == null ? 
-				builder.executeOn(xdpLocation.getFileName(), null) :
+				builder.executeOn(xdpLocation.getFileName()) :
 				builder.executeOn(xdpLocation.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(xmlLocation.toFile()));
 
 		System.out.println("Writing output to " + outLocation);
