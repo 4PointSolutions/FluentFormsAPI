@@ -150,8 +150,9 @@ public class AdobeOutputServiceAdapter implements TraditionalOutputService {
 		log.info("DebugDir=" + adobeOptions.getDebugDir());
 		log.info("Locale=" + adobeOptions.getLocale());
 		log.info("PaginationOverride=" + adobeOptions.getPaginationOverride());
-		log.info("PrintConfig=" + adobeOptions.getPrintConfig());
+		log.info("PrintConfig.RenderType=" + (adobeOptions.getPrintConfig() != null && adobeOptions.getPrintConfig().getRenderType() != null ? adobeOptions.getPrintConfig().getRenderType().getText() : "null"));
 		log.info("Xci is null=" + Boolean.toString(adobeOptions.getXci() == null));
+		log.info("PrintConfig options contentType=" + (options.getPrintConfig() != null ? options.getPrintConfig().getContentType() : "null"));
 		
 		return adobeOptions;
 	}

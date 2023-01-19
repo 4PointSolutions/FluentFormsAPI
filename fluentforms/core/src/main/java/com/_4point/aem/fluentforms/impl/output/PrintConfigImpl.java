@@ -5,34 +5,33 @@ import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com.adobe.fd.output.api.RenderType;
 
-public class PrintConfigImpl implements PrintConfig {
+public enum PrintConfigImpl implements PrintConfig {
 
-	public static final PrintConfigImpl DPL300 = new PrintConfigImpl("DPL300", RenderType.DPL);
-	public static final PrintConfigImpl DPL406 = new PrintConfigImpl("DPL406", RenderType.DPL);
-	public static final PrintConfigImpl DPL600 = new PrintConfigImpl("DPL600", RenderType.DPL);
-	public static final PrintConfigImpl Generic_PS_L3 = new PrintConfigImpl("Generic_PS_L3", RenderType.PostScript);
-	public static final PrintConfigImpl GenericColor_PCL_5c = new PrintConfigImpl("GenericColor_PCL_5c", RenderType.PCL);
-	public static final PrintConfigImpl HP_PCL_5e = new PrintConfigImpl("HP_PCL_5e", RenderType.PCL);
-	public static final PrintConfigImpl IPL300 = new PrintConfigImpl("IPL300", RenderType.IPL);
-	public static final PrintConfigImpl IPL400 = new PrintConfigImpl("IPL400", RenderType.IPL);
-	public static final PrintConfigImpl PS_PLAIN = new PrintConfigImpl("PS_PLAIN", RenderType.PostScript);
-	public static final PrintConfigImpl TPCL305 = new PrintConfigImpl("TPCL305", RenderType.TPCL);
-	public static final PrintConfigImpl TPCL600 = new PrintConfigImpl("TPCL600", RenderType.TPCL);
-	public static final PrintConfigImpl ZPL300 = new PrintConfigImpl("ZPL300", RenderType.ZPL);
-	public static final PrintConfigImpl ZPL600 = new PrintConfigImpl("ZPL600", RenderType.ZPL);
-
+	DPL300("DPL300", RenderType.DPL),
+	DPL406("DPL406", RenderType.DPL),
+	DPL600("DPL600", RenderType.DPL),
+	Generic_PS_L3("Generic_PS_L3", RenderType.PostScript),
+	GenericColor_PCL_5c("GenericColor_PCL_5c", RenderType.PCL),
+	HP_PCL_5e("HP_PCL_5e", RenderType.PCL),
+	IPL300("IPL300", RenderType.IPL),
+	IPL400("IPL400", RenderType.IPL),
+	PS_PLAIN("PS_PLAIN", RenderType.PostScript),
+	TPCL305("TPCL305", RenderType.TPCL),
+	TPCL600("TPCL600", RenderType.TPCL),
+	ZPL300("ZPL300", RenderType.ZPL),
+	ZPL600("ZPL600", RenderType.ZPL)
+	;
 
 	private final RenderType renderType;
 	private final PathOrUrl xdc;
 
-	protected PrintConfigImpl(PathOrUrl xdcUri, RenderType renderType) {
+	private PrintConfigImpl(PathOrUrl xdcUri, RenderType renderType) {
 		this.xdc = xdcUri;
 		this.renderType = renderType;
 	}
 
-	protected PrintConfigImpl(String xdcUri, RenderType renderType) {
-		this.xdc = PathOrUrl.from(xdcUri);
-		this.renderType = renderType;
+	private PrintConfigImpl(String xdcUri, RenderType renderType) {
+		this(PathOrUrl.from(xdcUri), renderType);
 	}
 
 	@Override
@@ -47,7 +46,11 @@ public class PrintConfigImpl implements PrintConfig {
 	
 	@Override
 	public String getContentType() {
-		switch(this.renderType) {
+		return determineContentType(this.renderType);
+	}
+
+	private static String determineContentType(RenderType renderType) {
+		switch(renderType) {
 		case DPL:
 			return Document.CONTENT_TYPE_DPL;
 		case IPL:
@@ -65,7 +68,21 @@ public class PrintConfigImpl implements PrintConfig {
 		}
 	}
 
-	public static PrintConfigImpl custom(PathOrUrl xdcUri, RenderType renderType) {
-		return new PrintConfigImpl(xdcUri, renderType);
+	public static PrintConfig custom(PathOrUrl xdcUri, RenderType renderType) {
+		return new PrintConfig() {
+			@Override
+			public RenderType getRenderType() {
+				return renderType;
+			}
+
+			@Override
+			public PathOrUrl getXdcUri() {
+				return xdcUri;
+			}
+
+			@Override
+			public String getContentType() {
+				return determineContentType(getRenderType());
+			}};
 	}
 }

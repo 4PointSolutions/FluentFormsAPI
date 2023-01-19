@@ -104,7 +104,6 @@ public class GeneratePrintedOutput extends SlingAllMethodsServlet {
 													.transform(b->paginationOverride == null ? b : b.setPaginationOverride(paginationOverride))
 													.transform(b->b.setPrintConfig(printConfig))
 													.transform(b->xci == null ? b : b.setXci(docFactory.create(xci)));
-
 			try (Document result = executeOn(template, data, argBuilder)) {
 				String contentType = result.getContentType();
 				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
@@ -225,7 +224,7 @@ public class GeneratePrintedOutput extends SlingAllMethodsServlet {
 		}
 		
 		private GeneratePrintedOutputParameters setPrintConfig(String printConfigStr) {
-			log.error("PRINTCONFIG:  {}", printConfigStr);
+			log.info("PRINTCONFIG:  {}", printConfigStr);
 			switch (printConfigStr) {
 			case "DPL300":
 				this.printConfig = PrintConfig.DPL300;
@@ -267,6 +266,7 @@ public class GeneratePrintedOutput extends SlingAllMethodsServlet {
 				this.printConfig = PrintConfig.ZPL600;
 				break;
 			default:
+				log.warn("Custom Print Configurations are not supported ({}).  Assuming PS_PLAIN instead.", printConfigStr);
 				this.printConfig = PrintConfig.PS_PLAIN;
 			}
 			return this;
