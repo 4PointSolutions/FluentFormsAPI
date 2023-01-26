@@ -15,6 +15,7 @@
 		<java.version>17</java.version>
 		<jasypt.spring.boot.version>3.0.5</jasypt.spring.boot.version>
 		<jasypt.maven.plugin.version>3.0.3</jasypt.maven.plugin.version>
+		<fluentforms.version>0.0.2-SNAPSHOT</fluentforms.version>
 	</properties>
 	<dependencies>
 		<!-- Project Dependencies -->
@@ -36,7 +37,12 @@
 		<dependency>
 			<groupId>com._4point.aem</groupId>
 			<artifactId>fluentforms.core</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>${fluentforms.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com._4point.aem.docservices</groupId>
+			<artifactId>rest-services.client</artifactId>
+			<version>${fluentforms.version}</version>
 		</dependency>
 	</dependencies>
 	<build>
