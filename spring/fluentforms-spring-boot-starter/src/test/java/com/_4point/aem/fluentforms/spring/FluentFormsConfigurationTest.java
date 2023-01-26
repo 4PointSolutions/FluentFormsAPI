@@ -18,11 +18,10 @@ import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
-import com._4point.aem.fluentforms.spring.AemConfigurationTest.TestApplication;
 
 @SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsConfigurationTest.TestApplication.class, FluentFormsConfiguration.class}, 
 				properties = {
-						"fluentforms.aem.servername=localhos", 
+						"fluentforms.aem.servername=localhost", 
 						"fluentforms.aem.port=4502", 
 						"fluentforms.aem.user=admin",		 
 						"fluentforms.aem.password=admin)",
