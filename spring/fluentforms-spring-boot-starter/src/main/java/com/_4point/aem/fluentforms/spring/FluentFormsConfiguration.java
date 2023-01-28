@@ -13,12 +13,14 @@ import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.pdfUtility.RestServicesPdfUtilityServiceAdapter;
+import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
+import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
 import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl;
@@ -84,5 +86,10 @@ public class FluentFormsConfiguration {
 	public PdfUtilityService pdfUtilityService(AemConfiguration aemConfig) {
 		RestServicesPdfUtilityServiceAdapter adapter = setAemFields(RestServicesPdfUtilityServiceAdapter.builder(), aemConfig).build();
 		return new PdfUtilityServiceImpl(adapter);
+	}
+	
+	@Bean 
+	public DocumentFactory documentFactory() {
+		return SimpleDocumentFactoryImpl.getFactory();
 	}
 }
