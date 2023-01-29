@@ -7,6 +7,13 @@ While being useful in and of themselves, they also provide example code for how 
 
 ### Sample JBang Invocations
 
+###### Grab the latest bundles from the GitHub repository (settings.xml must be configured - see comments in the script for details)
+`jbang ./GrabBundles.java`
+
+The fluentforms and rest-services bundles must be deployed to AEM before the remaining scripts will work. 
+This is as easy as running the GrabBundles.java script and then copying the downloaded bundles to AEM's 
+quickstart/install directory.
+
 ###### Invoke AEM's Forms Service
 `jbang ./invoke_forms.java -f ./sampleFiles/SampleForm.xdp -d ./sampleFiles/SampleForm_data.xml -o result_forms.pdf`
 
