@@ -1,20 +1,20 @@
-RenderPdfForm Version 0.0.2-SNAPSHOT | cUrl command to render an interative PDF Form using fluentforms.rest-services
+GeneratePdfOutput Version 0.0.2-SNAPSHOT | cUrl command to render a non-interactive PDF Form using fluentforms.rest-services
 
 NAME
 ====
 
-**RenderPdfForm** — Renders an interactive PDF from an XDP Template (optionally with data)
+**GeneratePdfOutput** — Renders a non-interactive PDF from an XDP Template (optionally with data)
 
 SYNOPSIS
 ========
 
 | **curl** \[**-u** *username***:***password*] \[**-k**|**--insecure**] \[**-o**|**--output** *file*] \[*options*] 
-**http://***machine***:***port***/services/FormsService/RenderPdfForm**
+**http://***machine***:***port***/services/OutputService/GeneratePdfOutput**
 
 DESCRIPTION
 ===========
 
-Renders an interactive PDF form using AEM's Forms Service.
+Renders a non-interactive PDF form using AEM's Output Service.
 
 
 Options
@@ -49,45 +49,44 @@ The same parameter (template) is used for the three different types of templates
 
 :   Provides the data file to be used. *localDataPath* is an absolute or relative path to a XDP or PDF template on the local machine. This parameter is optional.
 
-**-F "renderOptions.acrobatVersion=**[ **Acrobat_10** | **Acrobat_10_1** | **Acrobat_11** ]**"**
+**-F "outputOptions.acrobatVersion=**[ **Acrobat_10** | **Acrobat_10_1** | **Acrobat_11** ]**"**
 
 :   Designates which version of Acrobat should be targeted. Acrobat_11 is the default. This parameter is optional.
 
-**-F "renderOptions.cacheStrategy=**[ **AGGRESSIVE** | **CONSERVATIVE** | **NONE** ]**"**
-
-:   Designates the cache strategy. It defaults to AGGRESSIVE. This parameter is optional.
-
-**-F "renderOptions.contentRoot=***serverPath***"**
+**-F "outputOptions.contentRoot=***serverPath***"**
 
 :   Designates the root location of the form. If a relative path is provided for the template, then it is 
 relative to this location. This parameter is optional.
 
-**-F "renderOptions.debugDir=***serverPath***"**
+**-F "outputOptions.debugDir=***serverPath***"**
 
 :   Designates directory on the server where debug information will be placed. This parameter is optional.
 
-**-F "renderOptions.embedFonts=**[ **true** | **false** ]**"**
+**-F "outputOptions.embedFonts=**[ **true** | **false** ]**"**
 
 :   Determines whether fonts used in the form are embedded in the PDF or not. This parameter is optional.
 
-**-F "renderOptions.locale=***languageString***"**
+**-F "outputOptions.linearizedPdf=**[ **true** | **false** ]**"**
+
+:   Determines whether the PDF is optimized for online viewing. This parameter is optional.
+
+**-F "outputOptions.locale=***languageString***"**
 
 :   Sets the language where language is an IETF BCP 47 language tag string. This parameter is optional.
 
-**-F "renderOptions.renderAtClient=**[ **YES** | **NO** | **AUTO** ]**"**
+**-F "outputOptions.retainPdfFormState=**[ **true** | **false** ]**"**
 
-:   Designates whether the PDF form's PDF layer is rendered on the server by AEM or by Acrobat on the client machine. This parameter is optional.
+:   Designates whether to retain the PDF Form state while flattening PDF Form. This parameter has an effect only when input is a XFA PDF Form and no input data is provided. This parameter is optional.
 
-**-F "renderOptions.submitUrl=***submissionUrl***"**
+**-F "outputOptions.retainUnsignedSignatureFields=**[ **true** | **false** ]**"**
 
-:   Designates the URL where the form data will be sent when the user submits the PDF. Can be specified multiple
-times (the Adobe API allows for multiple URLs), but typically is only used once. (We have no idea what happens if you specify multiple URLs). This parameter is optional.
+:   Designates whether to retain interactive unsigned signature fields in generated flat PDF so that the Flat PDF can be signed. This parameter is optional.
 
-**-F "renderOptions.taggedPdf=**[ **true** | **false** ]**"**
+**-F "outputOptions.taggedPdf=**[ **true** | **false** ]**"**
 
 :   Designates whether the PDF is rendered with or without tagging. This parameter is optional.
 
-**-F "renderOptions.xci=@***localPath***"**
+**-F "outputOptions.xci=@***localPath***"**
 
 :   Provides a custom XCI that is merged with the default XCI. This means that the custom XCI can be "sparse" (i.e. it only includes the options you wish to override from the default XCI). *localPath* is a path on the 
 client machine to the custom XCI. This parameter is optional.
@@ -96,9 +95,9 @@ client machine to the custom XCI. This parameter is optional.
 EXAMPLES
 ====
 
-`curl -u admin:admin --insecure -F "template=sample-forms/sample.xdp;type=text/plain" -F "data=@sample_data.xml" -F "renderOptions.contentRoot=crx:/content/dam/formsanddocuments" -o sample_pdf.pdf https://localhost:4502/services/FormsService/RenderPdfForm`
+`curl -u admin:admin --insecure -F "template=sample-forms/sample.xdp;type=text/plain" -F "data=@sample_data.xml" -F "outputOptions.contentRoot=crx:/content/dam/formsanddocuments" -o sample_pdf.pdf https://localhost:4502/services/OutputService/GeneratePdfOutput`
 
-Renders an interactive PDF using sample.xdp which is located in a sample-forms directory under "Forms And Documents" within CRX using a local data file (sample_data.xml).
+Renders a non-interactive PDF using sample.xdp which is located in a sample-forms directory under "Forms And Documents" within CRX using a local data file (sample_data.xml).
 
 BUGS
 ====
@@ -114,5 +113,5 @@ SEE ALSO
 ========
 
 [cUrl Man Page](https://curl.se/docs/manpage.html)  
-[AEM Forms Service API](https://developer.adobe.com/experience-manager/reference-materials/6-5/forms/javadocs/com/adobe/fd/forms/api/FormsService.html)  
-[PDF Form Render Options](https://developer.adobe.com/experience-manager/reference-materials/6-5/forms/javadocs/com/adobe/fd/forms/api/PDFFormRenderOptions.html)
+[AEM Output Service API](https://developer.adobe.com/experience-manager/reference-materials/6-4/forms/javadocs/com/adobe/fd/output/api/OutputService.html)  
+[PDF Form Output Options](https://developer.adobe.com/experience-manager/reference-materials/6-4/forms/javadocs/com/adobe/fd/output/api/PDFOutputOptions.html)
