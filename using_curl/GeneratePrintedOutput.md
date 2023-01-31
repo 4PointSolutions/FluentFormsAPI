@@ -102,4 +102,4 @@ SEE ALSO
 
 [cUrl Man Page](https://curl.se/docs/manpage.html)  
 [AEM Output Service API](https://developer.adobe.com/experience-manager/reference-materials/6-5/forms/javadocs/com/adobe/fd/output/api/OutputService.html)  
-[PDF Form Output Options](https://developer.adobe.com/experience-manager/reference-materials/6-5/forms/javadocs/com/adobe/fd/output/api/PDFOutputOptions.html)
+[Printed Form Output Options](https://developer.adobe.com/experience-manager/reference-materials/6-5/forms/javadocs/com/adobe/fd/output/api/PrintedOutputOptions.html)

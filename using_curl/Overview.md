@@ -21,3 +21,5 @@ DOCS
 [RenderPdfForm](./RenderPdfForm.md) - Render an interactive PDF form using the AEM Forms Service.
 
 [GeneratePdfOutput](./GeneratePdfOutput.md) - Render a non-interactive PDF form using the AEM Output Service.
+
+[GeneratePrintedOutput](./GeneratePrintedOutput.md) - Render a printed form using the AEM Output Service.
