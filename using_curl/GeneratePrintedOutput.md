@@ -1,20 +1,20 @@
-GeneratePdfOutput Version 0.0.2-SNAPSHOT | cUrl command to render a non-interactive PDF Form using fluentforms.rest-services
+GeneratePrintedOutput Version 0.0.2-SNAPSHOT | cUrl command to render a printed form using fluentforms.rest-services
 
 NAME
 ====
 
-**GeneratePdfOutput** — Renders a non-interactive PDF from an XDP Template (optionally with data)
+**GeneratePrintedOutput** — Renders a print stream from an XDP Template (optionally with data)
 
 SYNOPSIS
 ========
 
 | **curl** \[**-u** *username***:***password*] \[**-k**|**--insecure**] \[**-o**|**--output** *file*] \[*options*] 
-**http://***machine***:***port***/services/OutputService/GeneratePdfOutput**
+**http://***machine***:***port***/services/OutputService/GeneratePrintedOutput**
 
 DESCRIPTION
 ===========
 
-Renders a non-interactive PDF form using AEM's Output Service.
+Renders a printed form using AEM's Output Service.
 
 
 Options
@@ -49,42 +49,30 @@ The same parameter (template) is used for the three different types of templates
 
 :   Provides the data file to be used. *localDataPath* is an absolute or relative path to a XDP or PDF template on the local machine. This parameter is optional.
 
-**-F "outputOptions.acrobatVersion=**[ **Acrobat_10** | **Acrobat_10_1** | **Acrobat_11** ]**"**
-
-:   Designates which version of Acrobat should be targeted. Acrobat_11 is the default. This parameter is optional.
-
 **-F "outputOptions.contentRoot=***serverPath***"**
 
 :   Designates the root location of the form. If a relative path is provided for the template, then it is 
 relative to this location. This parameter is optional.
 
+**-F "outputOptions.copies=***numberOfCopies***"**
+
+:   Determines the number of times each page prints. This parameter is optional.
+
 **-F "outputOptions.debugDir=***serverPath***"**
 
 :   Designates directory on the server where debug information will be placed. This parameter is optional.
-
-**-F "outputOptions.embedFonts=**[ **true** | **false** ]**"**
-
-:   Determines whether fonts used in the form are embedded in the PDF or not. This parameter is optional.
-
-**-F "outputOptions.linearizedPdf=**[ **true** | **false** ]**"**
-
-:   Determines whether the PDF is optimized for online viewing. This parameter is optional.
 
 **-F "outputOptions.locale=***languageString***"**
 
 :   Sets the language where language is an IETF BCP 47 language tag string. This parameter is optional.
 
-**-F "outputOptions.retainPdfFormState=**[ **true** | **false** ]**"**
+**-F "outputOptions.paginationOverride=**[ **duplexLongEdge** | **duplexShortEdge**  | **simplex** ]**"**
 
-:   Designates whether to retain the PDF Form state while flattening PDF Form. This parameter has an effect only when input is a XFA PDF Form and no input data is provided. This parameter is optional.
+:   Designates whether to the output is printed in duplex mode or not and if it is duplex, the edge orientation. This parameter is optional.
 
-**-F "outputOptions.retainUnsignedSignatureFields=**[ **true** | **false** ]**"**
+**-F "outputOptions.printConfig=**[ **DPL300** | **DPL406**  | **DPL600** | **Generic_PS_L3** | **GenericColor_PCL_5c**  | **HP_PCL_5e** | **IPL300**  | **IPL400** | **PS_PLAIN** | **TPCL305**  | **TPCL600** | **ZPL300**  | **ZPL600** ]**"**
 
-:   Designates whether to retain interactive unsigned signature fields in generated flat PDF so that the Flat PDF can be signed. This parameter is optional.
-
-**-F "outputOptions.taggedPdf=**[ **true** | **false** ]**"**
-
-:   Designates whether the PDF is rendered with or without tagging. This parameter is optional.
+:   Designates the type of printer (i.e. the print configuration) to be targeted. This parameter is optional.
 
 **-F "outputOptions.xci=@***localPath***"**
 
@@ -95,9 +83,9 @@ client machine to the custom XCI. This parameter is optional.
 EXAMPLES
 ====
 
-`curl -u admin:admin --insecure -F "template=sample-forms/sample.xdp;type=text/plain" -F "data=@sample_data.xml" -F "outputOptions.contentRoot=crx:/content/dam/formsanddocuments" -o sample_pdf.pdf https://localhost:4502/services/OutputService/GeneratePdfOutput`
+`curl -u admin:admin --insecure -F "template=sample-forms/sample.xdp;type=text/plain" -F "data=@sample_data.xml" -F "outputOptions.contentRoot=crx:/content/dam/formsanddocuments" -F "outputOptions.printConfig=Generic_PS_L3" -o sample_print.ps https://localhost:4502/services/OutputService/GeneratePrintedOutput`
 
-Renders a non-interactive PDF using sample.xdp which is located in a sample-forms directory under "Forms And Documents" within CRX using a local data file (sample_data.xml).
+Renders a postscript version of the template (sample.xdp) which is located in a sample-forms directory under "Forms And Documents" within CRX using a local data file (sample_data.xml).
 
 BUGS
 ====
