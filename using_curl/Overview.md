@@ -23,3 +23,5 @@ DOCS
 [GeneratePdfOutput](./GeneratePdfOutput.md) - Render a non-interactive PDF form using the AEM Output Service.
 
 [GeneratePrintedOutput](./GeneratePrintedOutput.md) - Render a printed form using the AEM Output Service.
+
+[CreatePdf](./CreatePdf.md) - Create a PDF from a supported file format (mostly MS-Office formats) using AEM Generate PDF Service.
