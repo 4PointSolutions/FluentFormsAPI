@@ -25,3 +25,6 @@ DOCS
 [GeneratePrintedOutput](./GeneratePrintedOutput.md) - Render a printed form using the AEM Output Service.
 
 [CreatePdf](./CreatePdf.md) - Create a PDF from a supported file format (mostly MS-Office formats) using AEM Generate PDF Service.
+
+[AssembleDocument](./AssembleDocument.md) - Performs various operations on PDFs, like assembling-disassembling, 
+importing/exporting bookmarks, conversion/validation against PDF/A standards, etc..
