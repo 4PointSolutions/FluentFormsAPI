@@ -83,7 +83,10 @@ XML output is written to stdout.
 
 `curl -u admin:admin --insecure -F data=@SampleForm.docx -F fileExtension=docx http://172.18.110.21:4502/services/GeneratePDFService/CreatePDF | xmlstarlet sel -t -v "/createPDFResult/createdDoc/@createdDocValue" result.xml | base64 -d > result.pdf`
 
-You need to have xmlstarlet installed (easy on Ubuntu apt install xmlstarlet , but harder on Red Hat - you first need to yum install epel-release before doing yum install xmlstarlet).
+Renders a pdf version of a word document (SampleSpreadsheet.xslx) which is located on the local machine. 
+It then parses the resulting XML, extracts the created document, base64 decodes it and writes it to 
+result.pdf.  NOTE: You need to have xmlstarlet installed (easy on Ubuntu `apt install xmlstarlet`, but 
+harder on Red Hat - you first need to `yum install epel-release` before doing `yum install xmlstarlet`).
 
 BUGS
 ====

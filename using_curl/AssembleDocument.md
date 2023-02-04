@@ -104,7 +104,7 @@ Executes a DDX on a single input PDF and sends the result XML to stdout.
 `curl -u admin:admin --insecure -F data=@SampleDDX.ddx -F sourceDocumentMap.key=inDoc -F sourceDocumentMap.value=@Sampls.pdf  http://172.18.110.21:4502/services/AssemblerService/AssembleDocuments | xmlstarlet sel -t -v "/assemblerResult/resultDocument/mergedDoc" result.xml | base64 -d > result.pdf`
 
 Executes a DDX on a single input PDF, parses the result XML, base64 decodes and writes the result document to 
-result.pdf. You need to have xmlstarlet installed (easy on Ubuntu `apt install xmlstarlet`, 
+result.pdf.  NOTE: You need to have xmlstarlet installed (easy on Ubuntu `apt install xmlstarlet`, 
 but harder on Red Hat - you first need to `yum install epel-release` before doing `yum install xmlstarlet`).
 
 BUGS
