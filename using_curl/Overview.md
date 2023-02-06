@@ -28,3 +28,5 @@ DOCS
 
 [AssembleDocument](./AssembleDocument.md) - Performs various operations on PDFs, like assembling-disassembling, 
 importing/exporting bookmarks, conversion/validation against PDF/A standards, etc..
+
+[DocumentOfRecord](./DocumentOfRecord.md) - Render a non-interactive PDF form from an Adaptive Form.
