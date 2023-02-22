@@ -15,7 +15,6 @@ import javax.servlet.ServletException;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.servlets.annotations.SlingServletPaths;
@@ -26,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
-import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.DataParameter;
 import com._4point.aem.docservices.rest_services.server.DataParameter.ParameterType;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
@@ -84,7 +82,6 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 
 		GeneratePdfOutputParameters reqParameters = GeneratePdfOutputParameters.readFormParameters(request, false);	// TODO: Make the validation of XML a config parameter.
 		TemplateParameter template = reqParameters.getTemplate();
-		Document data = reqParameters.getData() != null ? docFactory.create(reqParameters.getData()) : null;
 		PathOrUrl contentRoot = reqParameters.getContentRoot();
 		AcrobatVersion acrobatVersion = reqParameters.getAcrobatVersion();
 		Path debugDir = reqParameters.getDebugDir();
@@ -96,7 +93,8 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 		Boolean taggedPDF = reqParameters.getTaggedPDF();
 		byte[] xci = reqParameters.getXci();
 		
-		try {
+		
+		try(Document data = reqParameters.getData() != null ? docFactory.create(reqParameters.getData()) : null) {
 			// In the following call to the formsService, we only set the parameters if they are not null.
 			GeneratePdfOutputArgumentBuilder argBuilder = outputService.generatePDFOutput()
 												.transform(b->contentRoot == null ? b : b.setContentRoot(contentRoot))

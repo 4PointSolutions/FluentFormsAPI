@@ -84,7 +84,6 @@ public class GeneratePrintedOutput extends SlingAllMethodsServlet {
 
 		GeneratePrintedOutputParameters reqParameters = GeneratePrintedOutputParameters.readFormParameters(request, false);	// TODO: Make the validation of XML a config parameter.
 		TemplateParameter template = reqParameters.getTemplate();
-		Document data = reqParameters.getData() != null ? docFactory.create(reqParameters.getData()) : null;
 		PathOrUrl contentRoot = reqParameters.getContentRoot();
 		Integer copies = reqParameters.getCopies();
 		Path debugDir = reqParameters.getDebugDir();
@@ -93,7 +92,8 @@ public class GeneratePrintedOutput extends SlingAllMethodsServlet {
 		PrintConfig printConfig = reqParameters.getPrintConfig();
 		byte[] xci = reqParameters.getXci();
 		
-		try {
+		
+		try(Document data = reqParameters.getData() != null ? docFactory.create(reqParameters.getData()) : null) {
 			// In the following call to the formsService, we only set the parameters if they are not null.
 			// PrintConfig is a required parameter.
 			GeneratePrintedOutputArgumentBuilder argBuilder = outputService.generatePrintedOutput()
