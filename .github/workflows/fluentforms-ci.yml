@@ -18,6 +18,7 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: '11'
+        cache: 'maven'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
@@ -25,6 +26,6 @@ jobs:
       run: mvn -B package --file fluentforms
 
     - name: Publish to GitHub Packages Apache Maven
-      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml --file fluentforms
+      run: mvn -B deploy -s $GITHUB_WORKSPACE/settings.xml --file fluentforms
       env:
         GITHUB_TOKEN: ${{ github.token }}
