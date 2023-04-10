@@ -4,6 +4,7 @@ on:
   push:
     paths:
     - 'fluentforms/**'
+    - '.github/workflows/fluentforms-ci.yml'
   workflow_dispatch:
     
 

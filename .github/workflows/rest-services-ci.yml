@@ -4,6 +4,8 @@ on:
   push:
     paths:
     - 'rest-services/**'
+    - '.github/workflows/rest-services-ci.yml'
+  workflow_dispatch:
 
 jobs:
   build:
