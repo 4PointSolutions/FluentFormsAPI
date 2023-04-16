@@ -46,17 +46,20 @@ public class TemplateParameter {
 	}
 
 	public static TemplateParameter readParameter(RequestParameter templateParameter) {
-		ContentType templateContentType = ContentType.valueOf(templateParameter.getContentType());
+		String contentType = templateParameter.getContentType();
+		byte[] templateBytes = templateParameter.get();
+		ContentType templateContentType = contentType != null ? ContentType.valueOf(contentType) 
+															  : ContentType.autoDetect(templateBytes).orElse(ContentType.TEXT_PLAIN);
 		if (templateContentType.isCompatibleWith(ContentType.TEXT_PLAIN)) {
-			PathOrUrl templateRef = PathOrUrl.from(templateParameter.getString());
+			PathOrUrl templateRef = PathOrUrl.from(new String(templateBytes));
 			if (!templateRef.getFilename().isPresent()) {
 				throw new IllegalArgumentException("Template Parameter must point to an XDP file (" + templateRef.toString() + ").");
 			}
 			return new TemplateParameter(templateRef);
 		} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_XDP)) {
-			return new TemplateParameter(templateParameter.get());
+			return new TemplateParameter(templateBytes);
 		} else if (templateContentType.isCompatibleWith(ContentType.APPLICATION_PDF)) {
-			return new TemplateParameter(templateParameter.get());
+			return new TemplateParameter(templateBytes);
 		} else {
 			throw new IllegalArgumentException("Template parmameter has invalid content type. (" + templateContentType.getContentTypeStr() + ").");
 		}
