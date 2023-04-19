@@ -197,7 +197,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 								.transform((t)->locale == null ? t : t.field(LOCALE_PARAM, locale.toString()))
 								.transform((t)->renderAtClient == null ? t : t.field(RENDER_AT_CLIENT_PARAM, renderAtClient.toString()))
 								.transform((t)->taggedPDF == null ? t : t.field(TAGGED_PDF_PARAM, taggedPDF.toString()))
-//								.transform((t)->submitUrls == null ? t : t.field(SUBMIT_URL_PARAM, submitUrls))
+								.transform((t)->submitUrls == null ? t : setSubmitUrls(t, SUBMIT_URL_PARAM, submitUrls))
 								.transform((t)->{
 									try {
 										return xci == null ? t : t.field(XCI_PARAM, xci.getInlineData(), MediaType.APPLICATION_XML_TYPE);
@@ -240,6 +240,13 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 			throw new FormsServiceException("Error while POSTing to server", e);
 		}
 		
+	}
+
+	private MultipartTransformer setSubmitUrls(MultipartTransformer t, String submitUrlParam, List<AbsoluteOrRelativeUrl> submitUrls) {
+		for (AbsoluteOrRelativeUrl submitUrl : submitUrls) {
+			t = t.field(SUBMIT_URL_PARAM, submitUrl.toString());
+		}
+		return t;
 	}
 
 	@Override

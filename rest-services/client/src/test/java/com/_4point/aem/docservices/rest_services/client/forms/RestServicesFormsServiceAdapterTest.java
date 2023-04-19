@@ -410,8 +410,7 @@ class RestServicesFormsServiceAdapterTest {
 			validateDocumentFormField(postedData, "renderOptions.embedFonts", MediaType.TEXT_PLAIN_TYPE, Boolean.valueOf(NON_DEFAULT_EMBED_FONTS).toString().getBytes());
 			validateDocumentFormField(postedData, "renderOptions.locale", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_LOCALE.toString().getBytes());
 			validateDocumentFormField(postedData, "renderOptions.renderAtClient", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_RENDER_AT_CLIENT.toString().getBytes());
-			// The submitUrl parameter is currently commented out in the class under test, so it is commented out here as well.
-//			validateDocumentFormField(postedData, "renderOptions.submitUrl", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_SUBMIT_URL.getBytes());
+			validateDocumentFormField(postedData, "renderOptions.submitUrl", MediaType.TEXT_PLAIN_TYPE, NON_DEFAULT_SUBMIT_URL.getBytes());
 			validateDocumentFormField(postedData, "renderOptions.taggedPdf", MediaType.TEXT_PLAIN_TYPE, Boolean.valueOf(NON_DEFAULT_TAGGED_PDF).toString().getBytes());
 		}
 
