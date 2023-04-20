@@ -7,6 +7,10 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationResult;
 
 
 public class SafeAssemblerServiceAdapterWrapper implements TraditionalDocAssemblerService {
@@ -18,31 +22,27 @@ public class SafeAssemblerServiceAdapterWrapper implements TraditionalDocAssembl
 	}
 
 	@Override
-	public AssemblerResult invoke(Document ddx, Map<String, Object> sourceDocuments,
-			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException {
+	public AssemblerResult invoke(Document ddx, Map<String, Object> sourceDocuments, AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException {
 		Objects.requireNonNull(ddx, "ddx Document cannot be null.");
 		Objects.requireNonNull(sourceDocuments, "sourceDocuments can not be null.");
 		return assemblerService.invoke(ddx, sourceDocuments, adobAssemblerOptionSpec);
 
 	}
 
-	/*
-	 * @Override public PDFAValidationResult isPDFA(Document inDoc,
-	 * PDFAValidationOptionSpec pdfaValidationOptionSpec) throws
-	 * AssemblerServiceException, ValidationException {
-	 * Objects.requireNonNull(inDoc, "inDoc Document cannot be null.");
-	 * Objects.requireNonNull(pdfaValidationOptionSpec,
-	 * "pdfaValidationOptionSpec ca not be null."); return
-	 * assemblerService.isPDFA(inDoc, pdfaValidationOptionSpec); }
-	 * 
-	 * @Override public PDFAConversionResult toPDFA(Document inDoc,
-	 * PDFAConversionOptionSpec pdfaConversionOptionSpec) throws
-	 * AssemblerServiceException, ConversionException {
-	 * Objects.requireNonNull(inDoc, "ddx Document cannot be null.");
-	 * Objects.requireNonNull(pdfaConversionOptionSpec,
-	 * "pdfaConversionOptionSpec can not be null."); return
-	 * assemblerService.toPDFA(inDoc, pdfaConversionOptionSpec); }
-	 */
+	@Override 
+	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec pdfaValidationOptionSpec) throws AssemblerServiceException {
+		Objects.requireNonNull(inDoc, "inDoc Document cannot be null.");
+		Objects.requireNonNull(pdfaValidationOptionSpec, "pdfaValidationOptionSpec ca not be null.");
+		return assemblerService.isPDFA(inDoc, pdfaValidationOptionSpec); 
+	}
+
+	@Override 
+	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec pdfaConversionOptionSpec) throws AssemblerServiceException {
+		Objects.requireNonNull(inDoc, "ddx Document cannot be null.");
+		Objects.requireNonNull(pdfaConversionOptionSpec, "pdfaConversionOptionSpec can not be null."); 
+		return assemblerService.toPDFA(inDoc, pdfaConversionOptionSpec); 
+	}
+
 	// This is required by the mock services.
     public TraditionalDocAssemblerService getAssemblerService() {
 			return assemblerService;

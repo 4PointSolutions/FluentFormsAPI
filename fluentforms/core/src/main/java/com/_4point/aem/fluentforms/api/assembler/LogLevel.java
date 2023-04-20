@@ -1,4 +1,4 @@
-package com._4point.aem.fluentforms.impl.assembler;
+package com._4point.aem.fluentforms.api.assembler;
 
 public enum LogLevel {
 	

@@ -7,9 +7,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
 import com._4point.aem.fluentforms.impl.assembler.AdobeAssemblerServiceAdapter;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerOptionsSpecImpl;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 
 public class AssemblerOptionSpecTest {
 	

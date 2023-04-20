@@ -1,7 +1,6 @@
 package com._4point.aem.fluentforms.testing.assembler;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 
@@ -11,8 +10,8 @@ import org.mockito.Mockito;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com._4point.aem.fluentforms.testing.assembler.MockTraditionalAssemblerService.GenerateAssemblerResultArgs;
 
@@ -59,7 +58,7 @@ public class MockAssemblerServiceTest {
 				                    .setValidateOnly(true)
 				    				.executeOn(ddx, sourceDocuments);
 		GenerateAssemblerResultArgs capturedArgs = underTest.getGenerateAssemblerResultArgs();
-		assertEquals(result, mockTraditionalAssemblerService.getDummyAssemblerResult());
+		assertSame(result, mockTraditionalAssemblerService.getDummyAssemblerResult());
 		assertEquals(ddx, capturedArgs.getDdx());
 		assertEquals(sourceDocuments, capturedArgs.getSourceDocuments());
 		assertNotEquals(assemblerOptionsSpec, capturedArgs.getAssemblerOptionsSpec());

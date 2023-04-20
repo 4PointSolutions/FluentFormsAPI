@@ -5,10 +5,16 @@ import com._4point.aem.fluentforms.api.assembler.PDFAValidationResult;
 
 public class PDFAValidationResultImpl implements PDFAValidationResult {
    
-	private Document getJobLog;
-	private Document getValidataionLog;
-	private Boolean isPDFA;
+	private final Document getJobLog;
+	private final Document getValidataionLog;
+	private final Boolean isPDFA;
 	
+	PDFAValidationResultImpl(Document getJobLog, Document getValidataionLog, Boolean isPDFA) {
+		this.getJobLog = getJobLog;
+		this.getValidataionLog = getValidataionLog;
+		this.isPDFA = isPDFA;
+	}
+
 	@Override
 	public Document getJobLog() {	
 		return this.getJobLog;

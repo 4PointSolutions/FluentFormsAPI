@@ -9,14 +9,23 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationResult;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.assembler.client.OperationException;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ColorSpace;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Compliance;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.OptionalContent;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ResultLevel;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Signatures;
 
 public class AssemblerServiceImpl implements AssemblerService {
 	private final TraditionalDocAssemblerService adobeDocAssemblerService;
 
 	public AssemblerServiceImpl(TraditionalDocAssemblerService adobDocAssemblerService, UsageContext usageContext) {
-		super();
 		this.adobeDocAssemblerService = new SafeAssemblerServiceAdapterWrapper(adobDocAssemblerService);
 	}
 
@@ -26,26 +35,35 @@ public class AssemblerServiceImpl implements AssemblerService {
 		return adobeDocAssemblerService.invoke(ddx, sourceDocuments, assemblerOptionSpec);
 	}
 
-	/*
-	 * @Override public PDFAValidationResult isPDFA(Document inDoc,
-	 * PDFAValidationOptionSpec options) throws AssemblerServiceException { try {
-	 * return adobDocAssemblerService.isPDFA(inDoc, options); } catch
-	 * (ValidationException e) { throw new
-	 * AssemblerServiceException("Erroer while Validating pdf ", e); } }
-	 * 
-	 * @Override public PDFAConversionResult toPDFA(Document inDoc,
-	 * PDFAConversionOptionSpec options) throws AssemblerServiceException { try {
-	 * return adobDocAssemblerService.toPDFA(inDoc, options); } catch
-	 * (AssemblerServiceException | ConversionException e) { throw new
-	 * AssemblerServiceException("Error while converting pdf ", e); }
-	 * 
-	 * }
-	 */
+	@Override 
+	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) throws AssemblerServiceException { 
+		return adobeDocAssemblerService.isPDFA(inDoc, options); 
+	}
+
+	@Override 
+	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) throws AssemblerServiceException{ 
+		return adobeDocAssemblerService.toPDFA(inDoc, options); 
+	}
 	
 	protected TraditionalDocAssemblerService getAdobeAssemblerService() {
 		return adobeDocAssemblerService;
 	}
 
+
+	@Override
+	public AssemblerArgumentBuilder invoke() {
+		return new AssemblerArgumentBuilderImpl();
+	}
+
+	@Override
+	public PDFAConversionArgumentBuilder toPDFA() {
+		return new PDFAConversionArgumentonBuilderImpl();
+	}
+
+	@Override
+	public PDFAValidationArgumentBuilder isPDFA() {
+		return new PDFAValidationArgumentBuilderImpl();
+	}
 
 	private class AssemblerArgumentBuilderImpl implements AssemblerArgumentBuilder {
 		
@@ -135,10 +153,110 @@ public class AssemblerServiceImpl implements AssemblerService {
 
 	}
 
-	@Override
-	public AssemblerArgumentBuilder invoke() {
-		return new AssemblerArgumentBuilderImpl();
+	private class PDFAConversionArgumentonBuilderImpl implements PDFAConversionArgumentBuilder {
+		private final PDFAConversionOptionSpecImpl options = new PDFAConversionOptionSpecImpl();
+		@Override
+		public PDFAConversionArgumentBuilder setColorSpace(ColorSpace colorSpace) {
+			options.setColorSpace(colorSpace);
+			return this;
+		}
+
+		@Override
+		public PDFAConversionArgumentBuilder setCompliance(Compliance compliance) {
+			options.setCompliance(compliance);
+			return this;
+		}
+
+		@Override
+		public PDFAConversionArgumentBuilder setLogLevel(LogLevel logLevel) {
+			options.setLogLevel(logLevel);
+			return this;
+		}
+
+		@Override
+		public PDFAConversionArgumentBuilder setMetadataSchemaExtensions(List<Document> metadataSchemaExtensions) {
+			options.setMetadataSchemaExtensions(metadataSchemaExtensions);
+			return this;
+		}
+
+		@Override
+		public PDFAConversionArgumentBuilder setOptionalContent(OptionalContent optionalContent) {
+			options.setOptionalContent(optionalContent);
+			return this;
+		}
+
+		@Override
+		public PDFAConversionArgumentBuilder setRemoveInvalidXMPProperties(boolean remove) {
+			options.setRemoveInvalidXMPProperties(remove);
+			return this;
+		}
+
+		@Override
+		public PDFAConversionArgumentBuilder setResultLevel(ResultLevel resultLevel) {
+			options.setResultLevel(resultLevel);
+			return this;
+		}
+
+		@Override
+		public PDFAConversionArgumentBuilder setRetainPDFFormState(boolean retainPDFFormState) {
+			options.setRetainPDFFormState(retainPDFFormState);
+			return this;
+		}
+
+		@Override
+		public PDFAConversionArgumentBuilder setSignatures(Signatures signatures) {
+			options.setSignatures(signatures);
+			return this;
+		}
+
+		@Override
+		public PDFAConversionArgumentBuilder setVerify(boolean verify) {
+			options.setVerify(verify);
+			return this;
+		}
+
+		@Override
+		public PDFAConversionResult executeOn(Document inDoc) throws AssemblerServiceException {
+			return toPDFA(inDoc, this.options);
+		}
 	}
+	
+	private class PDFAValidationArgumentBuilderImpl implements PDFAValidationArgumentBuilder {
+		private final PDFAValidationOptionSpecImpl options =new PDFAValidationOptionSpecImpl();
+		
+		@Override
+		public PDFAValidationArgumentBuilder setAllowCertificationSignatures(boolean allowCertificationSignatures) {
+			options.setAllowCertificationSignatures(allowCertificationSignatures);
+			return this;
+		}
 
+		@Override
+		public PDFAValidationArgumentBuilder setCompliance(Compliance compliance) {
+			options.setCompliance(compliance);
+			return this;
+		}
 
+		@Override
+		public PDFAValidationArgumentBuilder setIgnoreUnusedResource(boolean ignoreUnusedResource) {
+			options.setIgnoreUnusedResource(ignoreUnusedResource);
+			return this;
+		}
+
+		@Override
+		public PDFAValidationArgumentBuilder setLogLevel(LogLevel logLevel) {
+			options.setLogLevel(logLevel);
+			return this;
+		}
+
+		@Override
+		public PDFAValidationArgumentBuilder setResultLevel(com.adobe.fd.assembler.client.PDFAValidationOptionSpec.ResultLevel resultLevel) {
+			options.setResultLevel(resultLevel);
+			return this;
+		}
+
+		@Override
+		public PDFAValidationResult executeOn(Document inDoc) throws AssemblerServiceException {
+			return isPDFA(inDoc, options);
+		}
+	}
 }

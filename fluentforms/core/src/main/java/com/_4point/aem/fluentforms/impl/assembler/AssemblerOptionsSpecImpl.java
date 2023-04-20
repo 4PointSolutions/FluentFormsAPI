@@ -2,6 +2,7 @@ package com._4point.aem.fluentforms.impl.assembler;
 
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSetter;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
 
 public class AssemblerOptionsSpecImpl implements AssemblerOptionsSpec {
 	
