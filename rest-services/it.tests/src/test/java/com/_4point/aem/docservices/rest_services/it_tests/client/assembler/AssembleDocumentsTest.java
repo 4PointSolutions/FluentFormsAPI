@@ -16,12 +16,12 @@ import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDo
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerOptionsSpecImpl;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 
 
 public class AssembleDocumentsTest {

@@ -48,9 +48,9 @@ import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerOptionsSpecImpl;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.assembler.client.OperationException;
 

@@ -36,10 +36,14 @@ import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServ
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 
 public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceAdapter
@@ -136,7 +140,6 @@ implements TraditionalDocAssemblerService {
 		List<String> failedBlockNames = new ArrayList<String>();
 		DocumentBuilder db;
 		byte[] bytesPdf = null;
-		AssemblerResultImpl assemblerResult = new AssemblerResultImpl();
 		try {
 			db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			org.w3c.dom.Document doc = db.parse(assemblerResultXml);
@@ -152,12 +155,6 @@ implements TraditionalDocAssemblerService {
 					resultMap.put(eElement.getAttribute("documentName"), concatenatedDoc);
 				}
 			}
-			getNodeValueForAttribute(doc, "jobLog", "logValue", assemblerResult);
-			getNodeValueForAttribute(doc, "latestBatesNumber", "value", assemblerResult);
-			getNodeValueForAttribute(doc, "numRequestedBlocks", "value", assemblerResult);	
-			getNodeValeuForList(doc, "successfulDocumentNames", "successfulDocumentName", successfulDocumentNames);
-			getNodeValeuForList(doc, "successfulBlockNames", "successfulBlockName", successfulBlockNames);
-			getNodeValeuForList(doc, "failedBlockNames", "failedBlockName", failedBlockNames);	
 
 			NodeList multipleResultBlocksNodeLi = doc.getElementsByTagName("multipleResultBlocks");
 			for (int i = 0; i < multipleResultBlocksNodeLi.getLength(); i++) {
@@ -172,21 +169,23 @@ implements TraditionalDocAssemblerService {
 					multipleResultsBlocks.put(eElement.getAttribute("name"), documentNamesLi);
 				}
 			}
-			assemblerResult.setDocuments(resultMap);
-			assemblerResult.setSuccessfulDocumentNames(successfulDocumentNames);
-			assemblerResult.setSuccessfulBlockNames(successfulBlockNames);
-			assemblerResult.setFailedBlockNames(failedBlockNames);
-			assemblerResult.setMultipleResultsBlocks(multipleResultsBlocks);
-			assemblerResult.setThrowables(Collections.emptyMap());	// Not currently supported, so we return an empty map.
 
+		    return new AssemblerResultImpl(resultMap, // sourceDocuments
+							    		   getNodeValuesAsList(doc, "failedBlockNames", "failedBlockName"), // failedBlockNames
+							    		   getJobLog(doc), // jobLog
+							    		   getLatestBatesNumber(doc), 	// lastBatesNumber
+							    		   multipleResultsBlocks, // multipleResultsBlocks
+							    		   getNumRequestedBlocks(doc), 	// numRequestedBlocks
+							    		   getNodeValuesAsList(doc, "successfulBlockNames", "successfulBlockName"), // successfulBlockNames
+							    		   getNodeValuesAsList(doc, "successfulDocumentNames", "successfulDocumentName"), // successfulDocumentNames
+							    		   Collections.emptyMap());// throwables - Not currently supported, so we return an empty map.
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new AssemblerServiceException("Error while parsing xml", e);
 		}
-		return assemblerResult;
 	}
 
-	private static void getNodeValeuForList(org.w3c.dom.Document doc, String parentNodeName, String childNodeName,
-			List<String> stringLi) {
+	private static List<String> getNodeValuesAsList(org.w3c.dom.Document doc, String parentNodeName, String childNodeName) {
+		ArrayList<String> stringList = new ArrayList<String>();
 		NodeList nodeLi = doc.getElementsByTagName(parentNodeName);
 		for (int i = 0; i < nodeLi.getLength(); i++) {
 			Node node = nodeLi.item(i);
@@ -197,30 +196,31 @@ implements TraditionalDocAssemblerService {
 					Node childNode = childNodLi.item(j);
 					if (childNode.getNodeType() == Node.ELEMENT_NODE) {
 						Element childElement = (Element) node;	
-						stringLi.add(childElement.getElementsByTagName(childNodeName).item(j).getTextContent());
+						stringList.add(childElement.getElementsByTagName(childNodeName).item(j).getTextContent());
 					}
 				}
 			}
 		}
+		return stringList;
 	}
 
-
-	private static void getNodeValueForAttribute(org.w3c.dom.Document doc, String parentNodeName, String attributeName, AssemblerResultImpl assemblerResult) {
-		int result = 0;
-		Element eElement = (Element)doc.getElementsByTagName(parentNodeName).item(0);
-		if(parentNodeName.equals("jobLog")) {
-			byte[] bytesJobLog = Base64.getDecoder().decode(eElement.getAttribute(attributeName));
-			assemblerResult.setJobLog(SimpleDocumentFactoryImpl.getFactory().create(bytesJobLog));
-		} else {
-			result = Integer.parseInt(eElement.getAttribute(attributeName));
-			if(parentNodeName.equals("latestBatesNumber")) {
-				assemblerResult.setLastBatesNumber(result);
-			} else {
-				assemblerResult.setNumRequestedBlocks(result);
-			}
-		}
+	private static String getNodeValueForAttribute(org.w3c.dom.Document doc, String parentNodeName, String attributeName) {
+		return ((Element)doc.getElementsByTagName(parentNodeName).item(0)).getAttribute(attributeName);
 	}
 
+	private static Document getJobLog(org.w3c.dom.Document doc) {
+		byte[] bytesJobLog = Base64.getDecoder().decode(getNodeValueForAttribute(doc, "jobLog", "logValue"));
+		return SimpleDocumentFactoryImpl.getFactory().create(bytesJobLog);
+	}
+
+	private static int getLatestBatesNumber(org.w3c.dom.Document doc) {
+		return Integer.parseInt(getNodeValueForAttribute(doc, "latestBatesNumber", "value"));
+	}
+	
+	private static int getNumRequestedBlocks(org.w3c.dom.Document doc) {
+		return Integer.parseInt(getNodeValueForAttribute(doc, "numRequestedBlocks", "value"));
+	}
+	
 	/*
 	 * @Override public PDFAValidationResult isPDFA(Document inDoc,
 	 * PDFAValidationOptionSpec options) {
@@ -299,6 +299,20 @@ implements TraditionalDocAssemblerService {
 		public RestServicesDocAssemblerServiceAdapter build() {
 			return new RestServicesDocAssemblerServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType());
 		}
+	}
+
+	@Override
+	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options)
+			throws AssemblerServiceException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options)
+			throws AssemblerServiceException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
