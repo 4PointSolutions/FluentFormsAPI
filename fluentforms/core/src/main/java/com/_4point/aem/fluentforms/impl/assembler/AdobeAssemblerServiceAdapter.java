@@ -87,13 +87,14 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 		} 
 	}
 	
-	public static com.adobe.fd.assembler.client.AssemblerOptionSpec toAdobeAssemblerOptionSpec(
+	// Package private for unit testing.
+	static com.adobe.fd.assembler.client.AssemblerOptionSpec toAdobeAssemblerOptionSpec(
 			AssemblerOptionsSpec assemblerOptionSpec) {
 		com.adobe.fd.assembler.client.AssemblerOptionSpec adobeAssemblerOptionSpec = new com.adobe.fd.assembler.client.AssemblerOptionSpec();
 		setIfNotNull(adobeAssemblerOptionSpec::setFailOnError, assemblerOptionSpec.isFailOnError());
 		setIfNotNull(adobeAssemblerOptionSpec::setDefaultStyle, assemblerOptionSpec.getDefaultStyle());
 		setIfNotNull(adobeAssemblerOptionSpec::setFirstBatesNumber, assemblerOptionSpec.getFirstBatesNumber());
-		setIfNotNull(adobeAssemblerOptionSpec::setLogLevel, assemblerOptionSpec.getLogLevel()!=null?assemblerOptionSpec.getLogLevel().toString():null);
+		setIfNotNull(adobeAssemblerOptionSpec::setLogLevel, toStringIfNotNull(assemblerOptionSpec.getLogLevel()));
 		setIfNotNull(adobeAssemblerOptionSpec::setTakeOwnership, assemblerOptionSpec.isTakeOwnership());
 		setIfNotNull(adobeAssemblerOptionSpec::setValidateOnly, assemblerOptionSpec.isValidateOnly());
 		return adobeAssemblerOptionSpec;
@@ -121,12 +122,13 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 						);
 	}
 
-	private com.adobe.fd.assembler.client.PDFAValidationOptionSpec toAdobePDFAValidationOptionSpec(PDFAValidationOptionSpec options) {
+	// Package private for unit testing.
+	static com.adobe.fd.assembler.client.PDFAValidationOptionSpec toAdobePDFAValidationOptionSpec(PDFAValidationOptionSpec options) {
 		com.adobe.fd.assembler.client.PDFAValidationOptionSpec adobeOptions = new com.adobe.fd.assembler.client.PDFAValidationOptionSpec();
 		setIfNotNull(adobeOptions::setAllowCertificationSignatures, options.isAllowCertificationSignatures());
 		setIfNotNull(adobeOptions::setCompliance, options.getCompliance());
 		setIfNotNull(adobeOptions::setIgnoreUnusedResource, options.isIgnoreUnusedResource());
-		setIfNotNull(adobeOptions::setLogLevel, options.getLogLevel().toString());
+		setIfNotNull(adobeOptions::setLogLevel, toStringIfNotNull(options.getLogLevel()));
 		setIfNotNull(adobeOptions::setResultLevel, options.getResultLevel());
 		return adobeOptions ;
 	}
@@ -135,11 +137,12 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 		return new PDFAValidationResultImpl(documentFactory.create(result.getJobLog()), documentFactory.create(result.getValidationLog()), result.isPDFA());
 	}
 
-	private com.adobe.fd.assembler.client.PDFAConversionOptionSpec toAdobePDFAConversionOptionSpec(PDFAConversionOptionSpec options) {
+	// Package private for unit testing.
+	static com.adobe.fd.assembler.client.PDFAConversionOptionSpec toAdobePDFAConversionOptionSpec(PDFAConversionOptionSpec options) {
 		com.adobe.fd.assembler.client.PDFAConversionOptionSpec adobeOptions = new com.adobe.fd.assembler.client.PDFAConversionOptionSpec();
 		setIfNotNull(adobeOptions::setColorSpace, options.getColorSpace());
 		setIfNotNull(adobeOptions::setCompliance, options.getCompliance());
-		setIfNotNull(adobeOptions::setLogLevel, options.getLogLevel().toString());
+		setIfNotNull(adobeOptions::setLogLevel, toStringIfNotNull(options.getLogLevel()));
 		setIfNotNull(adobeOptions::setOptionalContent, options.getOptionalContent());
 		setIfNotNull(adobeOptions::setRemoveInvalidXMPProperties, options.isRemoveInvalidXMPProperties());
 		setIfNotNull(adobeOptions::setResultLevel, options.getResultLevel());
@@ -166,4 +169,5 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 	}
 	private static <E> boolean isNotEmpty(Collection<E> c) { return c != null && !c.isEmpty(); }
 	private static <K,V> boolean isNotEmpty(Map<K,V> m) { return m != null && !m.isEmpty(); }
+	private static <T> String toStringIfNotNull(T object) { return object == null ? null : object.toString(); };
 }

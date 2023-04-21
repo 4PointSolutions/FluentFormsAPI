@@ -7,9 +7,9 @@ import com.adobe.fd.assembler.client.PDFAValidationOptionSpec.ResultLevel;
 
 public class PDFAValidationOptionSpecImpl implements PDFAValidationOptionSpec {
 
-	private boolean allowCertificationSignatures;
+	private boolean allowCertificationSignatures = true;
 	private Compliance compliance;
-	private boolean ignoreUnusedResource;
+	private boolean ignoreUnusedResource = true;
 	private LogLevel logLevel;
 	private ResultLevel resultLevel;
 

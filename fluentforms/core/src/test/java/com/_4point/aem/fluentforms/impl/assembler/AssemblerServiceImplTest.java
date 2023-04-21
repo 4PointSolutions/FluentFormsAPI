@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +27,7 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerService.EitherDocument
 import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
 import com._4point.aem.fluentforms.api.assembler.PDFAValidationResult;
 import com._4point.aem.fluentforms.impl.UsageContext;
+import com._4point.aem.fluentforms.testing.assembler.MockAssemblerService;
 import com.adobe.fd.assembler.client.OperationException;
 
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -112,7 +114,7 @@ public class AssemblerServiceImplTest {
 		assertEquals(ddx, svc.getDdxOrg(), "Expected the ddx passed to AEM would match the ddx used.");
 		assertSame(sourceDocuments, svc.getSourceDocs(), "Expected the SourceDocuments passed to AEM would match the SourceDocuments used.");
 		assertSame(result, svc.getAssemblerResult(), "Expected the AssemblerResult returned by AEM would match the AssemblerResult.");
-		AssemblerOptionSpecTest.assertNotEmpty(svc.getOptionsArg());
+		AssemblerOptionSpecImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -151,7 +153,7 @@ public class AssemblerServiceImplTest {
 		assertThat(sourceDocs, hasEntry(sourceDocOrList1Name, sourceDocument3));
 		assertThat(sourceDocs, aMapWithSize(4));	// Ensure those are the only entries.
 		assertSame(result, svc.getAssemblerResult(), "Expected the AssemblerResult returned by AEM would match the AssemblerResult.");
-		AssemblerOptionSpecTest.assertNotEmpty(svc.getOptionsArg());
+		AssemblerOptionSpecImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 	
 	private class MockPdfAssemblerServiceInvoke {
@@ -184,32 +186,5 @@ public class AssemblerServiceImplTest {
         	return sourceDocuments.getValue();
         }
         
-	}
-
-	@Test
-	@DisplayName("Test isPDFA(Document,ValidationOptions) Happy Path.")
-	void testIsPdfA() throws Exception {
-		// Given 
-//		PDFAValidationOptionSpec validationOptions;
-//		Document pdf;
-//		
-//		// When
-//		PDFAValidationResult result = underTest.isPDFA(pdf, validationOptions);
-//		
-		// Then
-		
-//		MockPdfAssemblerServiceInvoke svc = new MockPdfAssemblerServiceInvoke();
-//		
-//		Document ddx = Mockito.mock(Document.class);
-//		AssemblerOptionsSpec options = Mockito.mock(AssemblerOptionsSpec.class);
-//		Map<String, Object> sourceDocuments = Mockito.mock(Map.class);
-//		AssemblerResult result = underTest.invoke(ddx, sourceDocuments, options);
-//		
-//		// Verify that all the results are correct.
-//		assertEquals(ddx, svc.getDdxOrg(), "Expected the ddx passed to AEM would match the ddx used.");
-//		assertTrue(svc.getOptionsArg() == options, "Expected the AssemblerOptionsSpec passed to AEM would match the AssemblerOptionsSpec used.");
-//		assertTrue(svc.getSourceDocs() == sourceDocuments, "Expected the SourceDocuments passed to AEM would match the SourceDocuments used.");
-//		assertTrue(result == svc.getAssemblerResult(), "Expected the AssemblerResult returned by AEM would match the AssemblerResult.");
-	}
-	
+	}	
 }
