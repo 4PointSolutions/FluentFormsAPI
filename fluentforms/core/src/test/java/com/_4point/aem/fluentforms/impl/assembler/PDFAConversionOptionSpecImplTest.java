@@ -32,13 +32,16 @@ class PDFAConversionOptionSpecImplTest {
 	private void assertEmpty(PDFAConversionOptionSpecImpl conversionOptionSpecImpl) {
 		com.adobe.fd.assembler.client.PDFAConversionOptionSpec adobePDFAConversionOptionSpec = AdobeAssemblerServiceAdapter.toAdobePDFAConversionOptionSpec(conversionOptionSpecImpl);
 		assertAll(
-				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getColorSpace(), adobePDFAConversionOptionSpec.getColorSpace()),
-				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getCompliance(), adobePDFAConversionOptionSpec.getCompliance()),
-				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getLogLevel(), adobePDFAConversionOptionSpec.getLogLevel()),
-				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getMetadataSchemaExtensions(), adobePDFAConversionOptionSpec.getMetadataSchemaExtensions()),
-				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getOptionalContent(), adobePDFAConversionOptionSpec.getOptionalContent()),
-				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getResultLevel(), adobePDFAConversionOptionSpec.getResultLevel()),
-				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getSignatures(), adobePDFAConversionOptionSpec.getSignatures())
+				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getColorSpace(), adobePDFAConversionOptionSpec.getColorSpace(), "getColorSpace default is different"),
+				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getCompliance(), adobePDFAConversionOptionSpec.getCompliance(), "getCompliance default is different"),
+				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getLogLevel(), adobePDFAConversionOptionSpec.getLogLevel(), "getLogLevel default is different"),
+				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getMetadataSchemaExtensions(), adobePDFAConversionOptionSpec.getMetadataSchemaExtensions(), "getMetadataSchemaExtensions default is different"),
+				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getOptionalContent(), adobePDFAConversionOptionSpec.getOptionalContent(), "getOptionalContent default is different"),
+				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getResultLevel(), adobePDFAConversionOptionSpec.getResultLevel(), "getResultLevel default is different"),
+				()->assertEquals(emptyAdobePDFAConversionOptionSpec.getSignatures(), adobePDFAConversionOptionSpec.getSignatures(), "getSignatures default is different"),
+				()->assertEquals(emptyAdobePDFAConversionOptionSpec.isRemoveInvalidXMPProperties(), adobePDFAConversionOptionSpec.isRemoveInvalidXMPProperties(), "isRemoveInvalidXMPProperties default is different"),
+				()->assertEquals(emptyAdobePDFAConversionOptionSpec.isRetainPDFFormState(), adobePDFAConversionOptionSpec.isRetainPDFFormState(), "isRetainPDFFormState default is different"),
+				()->assertEquals(emptyAdobePDFAConversionOptionSpec.isVerify(), adobePDFAConversionOptionSpec.isVerify(), "isVerify default is different")
 				);
 	}
 	
@@ -50,8 +53,9 @@ class PDFAConversionOptionSpecImplTest {
 		underTest.setLogLevel(LogLevel.FINEST);
 		underTest.setMetadataSchemaExtensions(Collections.singletonList(DUMMY_DOCUMENT));
 		underTest.setOptionalContent(OptionalContent.ALL);
-		underTest.setRemoveInvalidXMPProperties(true);
+		underTest.setRemoveInvalidXMPProperties(false);
 		underTest.setResultLevel(ResultLevel.SUMMARY);
+		underTest.setRetainPDFFormState(true);
 		underTest.setSignatures(Signatures.ARCHIVE_ALWAYS);
 		underTest.setVerify(false);
 		assertNotEmpty(underTest);
@@ -60,13 +64,16 @@ class PDFAConversionOptionSpecImplTest {
 	private void assertNotEmpty(PDFAConversionOptionSpecImpl conversionOptionSpecImpl) {
 		com.adobe.fd.assembler.client.PDFAConversionOptionSpec adobePDFAConversionOptionSpec = AdobeAssemblerServiceAdapter.toAdobePDFAConversionOptionSpec(conversionOptionSpecImpl);
 		assertAll(
-				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getColorSpace(), adobePDFAConversionOptionSpec.getColorSpace()),
-				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getCompliance(), adobePDFAConversionOptionSpec.getCompliance()),
-				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getLogLevel(), adobePDFAConversionOptionSpec.getLogLevel()),
-				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getMetadataSchemaExtensions(), adobePDFAConversionOptionSpec.getMetadataSchemaExtensions()),
-				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getOptionalContent(), adobePDFAConversionOptionSpec.getOptionalContent()),
-				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getResultLevel(), adobePDFAConversionOptionSpec.getResultLevel()),
-				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getSignatures(), adobePDFAConversionOptionSpec.getSignatures())
+				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getColorSpace(), adobePDFAConversionOptionSpec.getColorSpace(), "getColorSpace default is not being transfered."),
+				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getCompliance(), adobePDFAConversionOptionSpec.getCompliance(), "getCompliance default is not being transfered."),
+				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getLogLevel(), adobePDFAConversionOptionSpec.getLogLevel(), "getLogLevel default is not being transfered."),
+				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getMetadataSchemaExtensions(), adobePDFAConversionOptionSpec.getMetadataSchemaExtensions(), "getMetadataSchemaExtensions default is not being transfered."),
+				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getOptionalContent(), adobePDFAConversionOptionSpec.getOptionalContent(), "getOptionalContent default is not being transfered."),
+				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getResultLevel(), adobePDFAConversionOptionSpec.getResultLevel(), "getResultLevel default is not being transfered."),
+				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.getSignatures(), adobePDFAConversionOptionSpec.getSignatures(), "getSignatures default is not being transfered."),
+				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.isRemoveInvalidXMPProperties(), adobePDFAConversionOptionSpec.isRemoveInvalidXMPProperties(), "isRemoveInvalidXMPProperties default is not being transfered."),
+				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.isRetainPDFFormState(), adobePDFAConversionOptionSpec.isRetainPDFFormState(), "isRetainPDFFormState default is not being transfered."),
+				()->assertNotEquals(emptyAdobePDFAConversionOptionSpec.isVerify(), adobePDFAConversionOptionSpec.isVerify(), "isVerify default is not being transfered.")
 				);
 	}
 }

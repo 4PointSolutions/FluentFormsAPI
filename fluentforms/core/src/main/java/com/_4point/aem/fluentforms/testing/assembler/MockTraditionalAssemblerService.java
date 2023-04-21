@@ -44,6 +44,14 @@ public class MockTraditionalAssemblerService implements TraditionalDocAssemblerS
 		return new MockTraditionalAssemblerService().setAssemblerResult(assemblerResult);
 	}
 	
+	public static MockTraditionalAssemblerService createAssemblerMock(PDFAValidationResult validationResult) {
+		return new MockTraditionalAssemblerService().setPdfaValidationResult(validationResult);
+	}
+	
+	public static MockTraditionalAssemblerService createAssemblerMock(PDFAConversionResult conversionResult) {
+		return new MockTraditionalAssemblerService().setPdfaConversionResult(conversionResult);
+	}
+	
 	@Override
 	public AssemblerResult invoke(Document ddx, Map<String, Object> inputs,
 			AssemblerOptionsSpec adobAssemblerOptionSpec) throws AssemblerServiceException {

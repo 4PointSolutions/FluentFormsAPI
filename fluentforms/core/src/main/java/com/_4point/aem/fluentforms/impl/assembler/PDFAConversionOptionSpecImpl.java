@@ -18,11 +18,11 @@ public class PDFAConversionOptionSpecImpl implements PDFAConversionOptionSpec {
 	private LogLevel logLevel;
 	private List<Document> metadataSchemaExtensions;
 	private OptionalContent optionalContent;
-	private boolean remove;
+	private boolean removeInvalidXmpProperties = true;
 	private ResultLevel resultLevel;
 	private boolean retainPDFFormState;
 	private Signatures signatures;
-	private boolean verify;
+	private boolean verify = true;
 
 	@Override
 	public ColorSpace getColorSpace() {
@@ -61,7 +61,7 @@ public class PDFAConversionOptionSpecImpl implements PDFAConversionOptionSpec {
 
 	@Override
 	public boolean isRemoveInvalidXMPProperties() {
-		return remove;
+		return removeInvalidXmpProperties;
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class PDFAConversionOptionSpecImpl implements PDFAConversionOptionSpec {
 
 	@Override
 	public PDFAConversionOptionSpec setRemoveInvalidXMPProperties(boolean remove) {
-		this.remove = remove;
+		this.removeInvalidXmpProperties = remove;
 		return this;
 	}
 

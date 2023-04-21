@@ -18,8 +18,6 @@ public class AssemblerResultImpl implements AssemblerResult {
 	private final List<String> successfulBlockNames;
 	private final List<String> successfulDocumentNames;
 	private final Map<String,OperationException> throwables;
-
-	
 	
 	public AssemblerResultImpl(Map<String, Document> documents, List<String> failedBlockNames, Document jobLog,
 			int lastBatesNumber, Map<String, List<String>> multipleResultsBlocks, int numRequestedBlocks,
