@@ -76,7 +76,6 @@ class RestServicesDocAssemblerServiceAdapterTest {
 	@Captor ArgumentCaptor<Entity> entity;
 	@Captor ArgumentCaptor<String> correlationId;
 
-	RestServicesDocAssemblerServiceAdapter underTest;
 	private static final String POPULATED_ASSEMBLER_RESULT_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames><failedBlockName>failedBlock1</failedBlockName><failedBlockName>failedBlock2</failedBlockName></failedBlockNames><successfulDocumentNames><successfulDocumentName>successDocument1</successfulDocumentName><successfulDocumentName>successDocument2</successfulDocumentName></successfulDocumentNames><successfulBlockNames><successfulBlockName>successBlock1</successfulBlockName><successfulBlockName>successBlock2</successfulBlockName></successfulBlockNames><latestBatesNumber value=\"2\"/><numRequestedBlocks value=\"3\"/><multipleResultBlocks name=\"document\"><documentNames><documentName>test1</documentName><documentName>test2</documentName></documentNames></multipleResultBlocks><jobLog joblogValue=\"SU5GTw==\"/></assemblerResult>";
 	private static final String EMPTY_ASSEMBLER_RESULT_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><failedBlockNames/><successfulDocumentNames/><successfulBlockNames/><latestBatesNumber value=\"0\"/><numRequestedBlocks value=\"0\"/><jobLog/></assemblerResult>";
 
@@ -145,18 +144,7 @@ class RestServicesDocAssemblerServiceAdapterTest {
 	void testInvoke(HappyPathScenario scenario) throws Exception {
 		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create(POPULATED_ASSEMBLER_RESULT_XML.getBytes());
 
-		setupRestClientMocks(true, responseData, APPLICATION_XML);
-
-		AssemblerServiceBuilder assemblerServiceBuilder = RestServicesDocAssemblerServiceAdapter.builder()
-								.machineName(TEST_MACHINE_NAME)
-								.port(TEST_MACHINE_PORT)
-								.basicAuthentication("username", "password")
-								.useSsl(false)
-								.aemServerType(AemServerType.StandardType.JEE)
-								.correlationId(()->CORRELATION_ID)
-								.clientFactory(()->client);
-		
-		underTest = assemblerServiceBuilder.build();
+		RestServicesDocAssemblerServiceAdapter underTest = createAdapter(true, responseData, APPLICATION_XML);
 		
 		AssemblerOptionsSpec assemblerOptionSpec = scenario.assemblerSpec.get();
 		
@@ -188,10 +176,28 @@ class RestServicesDocAssemblerServiceAdapterTest {
 		scenario.assemblerSpecValidator.accept(postedData);
 	}
 
+	private RestServicesDocAssemblerServiceAdapter createAdapter(boolean setupCorrelationId, Document responseData, MediaType produces) throws IOException {
+		return createAdapter(setupCorrelationId, responseData, produces, produces, Response.Status.OK);
+	}
+		
+	private RestServicesDocAssemblerServiceAdapter createAdapter(boolean setupCorrelationId, Document responseData, MediaType accepts, MediaType produces, Response.Status status) throws IOException {
+		setupRestClientMocks(setupCorrelationId, responseData, accepts, produces, status);
+		
+		return 	RestServicesDocAssemblerServiceAdapter.builder()
+													  .machineName(TEST_MACHINE_NAME)
+													  .port(TEST_MACHINE_PORT)
+													  .basicAuthentication("username", "password")
+													  .useSsl(false)
+													  .aemServerType(AemServerType.StandardType.JEE)
+													  .correlationId(()->CORRELATION_ID)
+													  .clientFactory(()->client)
+													  .build();
+	}
+	
 	private void setupRestClientMocks(boolean setupCorrelationId, Document responseData, MediaType produces) throws IOException {
 		setupRestClientMocks(setupCorrelationId, responseData, produces, produces, Response.Status.OK);
 	}
-	
+
 	private void setupRestClientMocks(boolean setupCorrelationId, Document responseData, MediaType accepts, MediaType produces, Response.Status status) throws IOException {
 		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
 		when(client.target(machineName.capture())).thenReturn(target);
@@ -213,6 +219,8 @@ class RestServicesDocAssemblerServiceAdapterTest {
 		if (setupCorrelationId) {
 			when(builder.header(eq(CORRELATION_ID_HTTP_HDR), correlationId.capture())).thenReturn(builder);
 		}
+		
+		
 	}
 	
 	private static void validateTextFormField(FormDataMultiPart postedData, String fieldName, String expectedData) throws IOException {
@@ -336,7 +344,7 @@ class RestServicesDocAssemblerServiceAdapterTest {
 								.useSsl(false)
 								.clientFactory(()->client);
 		
-		underTest = assemblerServiceBuilder.build();
+		RestServicesDocAssemblerServiceAdapter underTest = assemblerServiceBuilder.build();
 		
 		byte[] srcDocumentDataBytes = "source Document Data".getBytes();
 		Map<String, Object> sourceDocuments = 
@@ -454,11 +462,11 @@ class RestServicesDocAssemblerServiceAdapterTest {
 			this.assemblerOptionSpec = assemblerOptionSpec;
 		}
 	}
-		
+
 	@ParameterizedTest
 	@EnumSource
 	void testNullArgs(NullArgumentTest scenario) throws Exception {
-		underTest = RestServicesDocAssemblerServiceAdapter.builder().build();
+		RestServicesDocAssemblerServiceAdapter underTest = RestServicesDocAssemblerServiceAdapter.builder().build();
 		
 		NullPointerException ex = assertThrows(NullPointerException.class,()->underTest.invoke(scenario.ddx, scenario.sourceDocuments, scenario.assemblerOptionSpec));
 		String msg = ex.getMessage();

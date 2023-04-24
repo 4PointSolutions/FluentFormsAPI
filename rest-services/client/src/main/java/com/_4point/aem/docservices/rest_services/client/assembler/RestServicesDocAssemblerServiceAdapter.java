@@ -12,12 +12,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.Response.StatusType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,21 +30,36 @@ import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServ
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
+import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.api.assembler.LogLevel;
 import com._4point.aem.fluentforms.api.assembler.PDFAConversionOptionSpec;
 import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
 import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
 import com._4point.aem.fluentforms.api.assembler.PDFAValidationResult;
-import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ColorSpace;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Compliance;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.OptionalContent;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ResultLevel;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Signatures;
+
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.Response.StatusType;
 
 public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceAdapter
 implements TraditionalDocAssemblerService {
 
 	private static final String ASSEMBLE_DOCUMENT_SERVICE_NAME = "AssemblerService";
 	private static final String ASSEMBLE_DOCUMENT_METHOD_NAME = "AssembleDocuments";
+	private static final String TO_PDFA_METHOD_NAME = "ToPdfA";
+	
+	// invoke parameters
 	private static final String DATA_PARAM_NAME = "ddx";
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
 	private static final String IS_VALIDATE_ONLY = "isValidateOnly";
@@ -60,6 +69,19 @@ implements TraditionalDocAssemblerService {
 	private static final String FIRST_BATES_NUMBER = "firstBatesNum";	
 	private static final String SOURCE_DOCUMENT_KEY = "sourceDocumentMap.key";
 	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
+	
+	// ToPdfA parameters
+	private static final String INPUT_DOCUMENT_PARAM = "inDoc";
+	private static final String COLOR_SPACE_PARAM = "colorSpace";
+	private static final String COMPLIANCE_PARAM = "compliance";
+	private static final String LOG_LEVEL_PARAM = "logLevel";
+	private static final String METADATA_EXTENSION_PARAM = "metadataExtension";
+	private static final String OPTIONAL_CONTENT_PARAM = "optionalContent";
+	private static final String RESULT_LEVEL_PARAM = "resultLevel";
+	private static final String SIGNATURES_PARAM = "signatures";
+	private static final String REMOVE_INVALID_XMP_PARAM = "removeInvalidXmlProperties";
+	private static final String RETAIN_PDF_FORM_STATE_PARAM = "retainPdfFormState";
+	private static final String VERIFY_PARAM = "verify";
 
 	// Only callable from Builder
 	private RestServicesDocAssemblerServiceAdapter(WebTarget target, Supplier<String> correlationId, AemServerType aemServerType) {
@@ -304,13 +326,82 @@ implements TraditionalDocAssemblerService {
 	@Override
 	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options)
 			throws AssemblerServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("isPDFA has not been implemented yet.");
 	}
 
 	@Override
-	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options)
-			throws AssemblerServiceException {
+	public PDFAConversionResult toPDFA(Document inPdf, PDFAConversionOptionSpec options) throws AssemblerServiceException {
+			WebTarget toPdfaTarget = baseTarget.path(constructStandardPath(ASSEMBLE_DOCUMENT_SERVICE_NAME, TO_PDFA_METHOD_NAME));
+
+			try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
+				
+				multipart.field(INPUT_DOCUMENT_PARAM, Objects.requireNonNull(inPdf, "input PDF can not be null").getInputStream(), APPLICATION_PDF);
+				
+				if (options != null) {
+					
+					ColorSpace colorSpace = options.getColorSpace();
+					Compliance compliance = options.getCompliance();
+					LogLevel logLevel = options.getLogLevel();
+					List<Document> metadataSchemaExtensions = options.getMetadataSchemaExtensions();
+					OptionalContent optionalContent = options.getOptionalContent();
+					ResultLevel resultLevel = options.getResultLevel();
+					Signatures signatures = options.getSignatures();
+					Boolean removeInvalidXMPProperties = options.isRemoveInvalidXMPProperties();
+					Boolean retainPDFFormState = options.isRetainPDFFormState();
+					Boolean verify = options.isVerify();
+
+					MultipartTransformer.create(multipart)
+						.transform((t) -> colorSpace == null ? t : t.field(COLOR_SPACE_PARAM, colorSpace.toString()))
+						.transform((t) -> compliance == null ? t : t.field(COMPLIANCE_PARAM, compliance.toString()))
+						.transform((t) -> logLevel == null ? t : t.field(LOG_LEVEL_PARAM, logLevel.toString()))
+						.transform((t) -> optionalContent == null ? t : t.field(OPTIONAL_CONTENT_PARAM, optionalContent.toString()))
+						.transform((t) -> resultLevel == null ? t : t.field(RESULT_LEVEL_PARAM, resultLevel.toString()))
+						.transform((t) -> signatures == null ? t : t.field(SIGNATURES_PARAM, signatures.toString()))
+						.transform((t) -> removeInvalidXMPProperties == null ? t : t.field(REMOVE_INVALID_XMP_PARAM, removeInvalidXMPProperties.toString()))
+						.transform((t) -> retainPDFFormState == null ? t : t.field(RETAIN_PDF_FORM_STATE_PARAM, retainPDFFormState.toString()))
+						.transform((t) -> verify == null ? t : t.field(VERIFY_PARAM, verify.toString()));
+					
+					for(Document extensionsDoc : metadataSchemaExtensions) {
+						multipart.field(METADATA_EXTENSION_PARAM, extensionsDoc.getInputStream(), MediaType.APPLICATION_XML_TYPE);
+					}
+				}
+
+				Response result = postToServer(toPdfaTarget, multipart, MediaType.APPLICATION_XML_TYPE);
+				StatusType resultStatus = result.getStatusInfo();
+				if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
+					String msg = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='"
+							+ resultStatus.getReasonPhrase() + "'.";
+					if (result.hasEntity()) {
+						InputStream entityStream = (InputStream) result.getEntity();
+						msg += "\n" + inputStreamtoString(entityStream);
+					}
+					throw new AssemblerServiceException(msg);
+				}
+
+				if (!result.hasEntity()) {
+					throw new AssemblerServiceException("Call to server succeeded but server failed to return assemblerResult xml.  This should never happen.");
+				}
+
+				MediaType responseContentType = result.getMediaType();
+				if (responseContentType == null || !responseContentType.isCompatible(MediaType.APPLICATION_XML_TYPE)) {
+					String msg = "Response from AEM server was  " + (responseContentType != null ? "content-type='" + responseContentType.toString() + "'"
+									: "content-type was null") + ".";
+					InputStream entityStream = (InputStream) result.getEntity();
+					msg += "\n" + inputStreamtoString(entityStream);
+					throw new AssemblerServiceException(msg);
+				}
+				PDFAConversionResult conversionResult = convertXmlToPdfaConversionResult((InputStream)result.getEntity());
+				return conversionResult;
+
+			} catch (IOException e) {
+				throw new AssemblerServiceException(
+						"I/O Error while converting document. (" + baseTarget.getUri().toString() + ").", e);
+			} catch (RestServicesServiceException e) {
+				throw new AssemblerServiceException("Error while posting to server", e);
+			}
+	}
+
+	private PDFAConversionResult convertXmlToPdfaConversionResult(InputStream entity) {
 		// TODO Auto-generated method stub
 		return null;
 	}
