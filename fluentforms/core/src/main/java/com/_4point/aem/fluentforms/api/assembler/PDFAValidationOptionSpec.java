@@ -27,13 +27,13 @@ public interface PDFAValidationOptionSpec extends PDFAValidationOptionsSetter {
 	 * @return
 	 * @see com.adobe.fd.assembler.client.PDFAValidationOptionSpec#isAllowCertificationSignatures()
 	 */
-	public boolean isAllowCertificationSignatures();
+	public Boolean isAllowCertificationSignatures();
 
 	/**
 	 * @return
 	 * @see com.adobe.fd.assembler.client.PDFAValidationOptionSpec#isIgnoreUnusedResource()
 	 */
-	public boolean isIgnoreUnusedResource();
+	public Boolean isIgnoreUnusedResource();
 
 	/**
 	 * @param allowCertificationSignatures

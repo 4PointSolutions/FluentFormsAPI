@@ -57,19 +57,19 @@ public interface PDFAConversionOptionSpec extends PDFAConversionOptionsSetter {
 	 * @return
 	 * @see com.adobe.fd.assembler.client.PDFAConversionOptionSpec#isRemoveInvalidXMPProperties()
 	 */
-	public boolean isRemoveInvalidXMPProperties();
+	public Boolean isRemoveInvalidXMPProperties();
 
 	/**
 	 * @return
 	 * @see com.adobe.fd.assembler.client.PDFAConversionOptionSpec#isRetainPDFFormState()
 	 */
-	public boolean isRetainPDFFormState();
+	public Boolean isRetainPDFFormState();
 
 	/**
 	 * @return
 	 * @see com.adobe.fd.assembler.client.PDFAConversionOptionSpec#isVerify()
 	 */
-	public boolean isVerify();
+	public Boolean isVerify();
 
 	/**
 	 * @param colorSpace

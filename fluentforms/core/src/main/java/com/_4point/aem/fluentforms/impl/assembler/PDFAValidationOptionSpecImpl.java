@@ -7,9 +7,9 @@ import com.adobe.fd.assembler.client.PDFAValidationOptionSpec.ResultLevel;
 
 public class PDFAValidationOptionSpecImpl implements PDFAValidationOptionSpec {
 
-	private boolean allowCertificationSignatures = true;
+	private Boolean allowCertificationSignatures;
 	private Compliance compliance;
-	private boolean ignoreUnusedResource = true;
+	private Boolean ignoreUnusedResource;
 	private LogLevel logLevel;
 	private ResultLevel resultLevel;
 
@@ -29,12 +29,12 @@ public class PDFAValidationOptionSpecImpl implements PDFAValidationOptionSpec {
 	}
 
 	@Override
-	public boolean isAllowCertificationSignatures() {
+	public Boolean isAllowCertificationSignatures() {
 		return this.allowCertificationSignatures;
 	}
 
 	@Override
-	public boolean isIgnoreUnusedResource() {
+	public Boolean isIgnoreUnusedResource() {
 		return this.ignoreUnusedResource;
 	}
 
