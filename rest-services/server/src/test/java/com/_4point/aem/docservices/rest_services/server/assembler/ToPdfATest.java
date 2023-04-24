@@ -197,9 +197,9 @@ class ToPdfATest {
 					()->assertNull(options.getOptionalContent(), "getOptionalContent should be null because it was not specified"),
 					()->assertNull(options.getResultLevel(), "getResultLevel should be null because it was not specified"),
 					()->assertNull(options.getSignatures(), "getSignatures should be null because it was not specified"),
-					()->assertTrue(options.isRemoveInvalidXMPProperties(), "isRemoveInvalidXMPProperties should be true if not specified."),
-					()->assertFalse(options.isRetainPDFFormState(), "isRetainPDFFormState should be false if not specified."),
-					()->assertTrue(options.isVerify(), "isVerify should be true if not specified.")
+					()->assertNull(options.isRemoveInvalidXMPProperties(), "isRemoveInvalidXMPProperties should be true if not specified."),
+					()->assertNull(options.isRetainPDFFormState(), "isRetainPDFFormState should be false if not specified."),
+					()->assertNull(options.isVerify(), "isVerify should be true if not specified.")
 					);
 			return this;
 		}
