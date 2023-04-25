@@ -14,6 +14,8 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +51,21 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.LogLevel;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
+import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerOptionsSpecImpl;
+import com._4point.aem.fluentforms.impl.assembler.PDFAConversionOptionSpecImpl;
+import com._4point.aem.fluentforms.impl.assembler.PDFAValidationOptionSpecImpl;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.assembler.client.OperationException;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ColorSpace;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Compliance;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.OptionalContent;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ResultLevel;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Signatures;
 
 @ExtendWith(MockitoExtension.class)
 class RestServicesDocAssemblerServiceAdapterTest {
@@ -79,10 +92,10 @@ class RestServicesDocAssemblerServiceAdapterTest {
 	private static final String POPULATED_ASSEMBLER_RESULT_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames><failedBlockName>failedBlock1</failedBlockName><failedBlockName>failedBlock2</failedBlockName></failedBlockNames><successfulDocumentNames><successfulDocumentName>successDocument1</successfulDocumentName><successfulDocumentName>successDocument2</successfulDocumentName></successfulDocumentNames><successfulBlockNames><successfulBlockName>successBlock1</successfulBlockName><successfulBlockName>successBlock2</successfulBlockName></successfulBlockNames><latestBatesNumber value=\"2\"/><numRequestedBlocks value=\"3\"/><multipleResultBlocks name=\"document\"><documentNames><documentName>test1</documentName><documentName>test2</documentName></documentNames></multipleResultBlocks><jobLog joblogValue=\"SU5GTw==\"/></assemblerResult>";
 	private static final String EMPTY_ASSEMBLER_RESULT_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><failedBlockNames/><successfulDocumentNames/><successfulBlockNames/><latestBatesNumber value=\"0\"/><numRequestedBlocks value=\"0\"/><jobLog/></assemblerResult>";
 
-	private enum HappyPathScenario {
-		NULL_ASSEMBLER_OPTIONS(()->null, HappyPathScenario::validateEmptySpec),
-		EMPTY_ASSEMBLER_OPTIONS(HappyPathScenario::emptySpec, HappyPathScenario::validateEmptySpec),
-		FULL_ASSEMBLER_OPTIONS(HappyPathScenario::fullSpec, HappyPathScenario::validateFullSpec);
+	private enum InvokeHappyPathScenario {
+		NULL_ASSEMBLER_OPTIONS(()->null, InvokeHappyPathScenario::validateEmptySpec),
+		EMPTY_ASSEMBLER_OPTIONS(InvokeHappyPathScenario::emptySpec, InvokeHappyPathScenario::validateEmptySpec),
+		FULL_ASSEMBLER_OPTIONS(InvokeHappyPathScenario::fullSpec, InvokeHappyPathScenario::validateFullSpec);
 		
 		private static final boolean FAIL_ON_ERROR_VALUE = false;
 		private static final boolean VALIDATE_ONLY_VALUE = false;
@@ -94,7 +107,7 @@ class RestServicesDocAssemblerServiceAdapterTest {
 		Supplier<AssemblerOptionsSpec> assemblerSpec;
 		Consumer<FormDataMultiPart> assemblerSpecValidator;
 
-		private HappyPathScenario(Supplier<AssemblerOptionsSpec> assemblerSpec,
+		private InvokeHappyPathScenario(Supplier<AssemblerOptionsSpec> assemblerSpec,
 				Consumer<FormDataMultiPart> assemblerSpecValidator) {
 			this.assemblerSpec = assemblerSpec;
 			this.assemblerSpecValidator = assemblerSpecValidator;
@@ -141,7 +154,7 @@ class RestServicesDocAssemblerServiceAdapterTest {
 	
 	@ParameterizedTest
 	@EnumSource
-	void testInvoke(HappyPathScenario scenario) throws Exception {
+	void testInvoke(InvokeHappyPathScenario scenario) throws Exception {
 		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create(POPULATED_ASSEMBLER_RESULT_XML.getBytes());
 
 		RestServicesDocAssemblerServiceAdapter underTest = createAdapter(true, responseData, APPLICATION_XML);
@@ -477,4 +490,159 @@ class RestServicesDocAssemblerServiceAdapterTest {
 				);
 	}
 
+	private static final byte[] PDFA_DOCUMENT_CONTENTS = "PDFA Document Contents".getBytes(StandardCharsets.UTF_8);
+	private static final byte[] JOB_LOG_DOCUMENT_CONTENTS = "JOB LOG Document Contents".getBytes(StandardCharsets.UTF_8);
+	private static final byte[] CONVERSION_LOG_DOCUMENT_CONTENTS = "Conversion Log Document Contents".getBytes(StandardCharsets.UTF_8);
+
+	private static final String EXPECTED_RESULT_DATA = "<ToPdfAResult>\n"
+			+ "  <ConversionLog>" + Base64.getEncoder().encodeToString(CONVERSION_LOG_DOCUMENT_CONTENTS) + "</ConversionLog>\n"
+			+ "  <JobLog>" + Base64.getEncoder().encodeToString(JOB_LOG_DOCUMENT_CONTENTS) + "</JobLog>\n"
+			+ "  <PdfADocument>" + Base64.getEncoder().encodeToString(PDFA_DOCUMENT_CONTENTS) + "</PdfADocument>\n"
+			+ "  <IsPdfA>true</IsPdfA>\n"
+			+ "</ToPdfAResult>\n";
+	private static final byte[] EXPECTED_INPUT_DOCUMENT_CONTENT = "Pre-PDFA Document Contents".getBytes(StandardCharsets.UTF_8);
+
+	private enum ToPdfaHappyPathScenario {
+		NULL_ASSEMBLER_OPTIONS(()->null, InvokeHappyPathScenario::validateEmptySpec),
+		EMPTY_ASSEMBLER_OPTIONS(ToPdfaHappyPathScenario::emptySpec, ToPdfaHappyPathScenario::validateEmptySpec),
+		FULL_ASSEMBLER_OPTIONS(ToPdfaHappyPathScenario::fullSpec, ToPdfaHappyPathScenario::validateFullSpec);
+		
+		private static final String INPUT_DOCUMENT_PARAM = "inDoc";
+		private static final String COLOR_SPACE_PARAM = "colorSpace";
+		private static final String COMPLIANCE_PARAM = "compliance";
+		private static final String LOG_LEVEL_PARAM = "logLevel";
+		private static final String METADATA_EXTENSION_PARAM = "metadataExtension";
+		private static final String OPTIONAL_CONTENT_PARAM = "optionalContent";
+		private static final String RESULT_LEVEL_PARAM = "resultLevel";
+		private static final String SIGNATURES_PARAM = "signatures";
+		private static final String REMOVE_INVALID_XMP_PARAM = "removeInvalidXmlProperties";
+		private static final String RETAIN_PDF_FORM_STATE_PARAM = "retainPdfFormState";
+		private static final String VERIFY_PARAM = "verify";
+
+		private static final Document METADATA_DOCUMENT_VALUE = SimpleDocumentFactoryImpl.getFactory().create("metadataExtension Contents".getBytes(StandardCharsets.UTF_8));
+		private static final ColorSpace COLOR_SPACE_VALUE = ColorSpace.JAPAN_COLOR_COATED;
+		private static final Compliance COMPLIANCE_VALUE = Compliance.PDFA_2B;
+		private static final LogLevel LOG_LEVEL_VALUE = LogLevel.FINER;
+		private static final List<Document> METADATA_EXTENSION_VALUE = Collections.singletonList(METADATA_DOCUMENT_VALUE);
+		private static final OptionalContent OPTIONAL_CONTENT_VALUE = OptionalContent.VISIBLE;
+		private static final ResultLevel RESULT_LEVEL_VALUE = ResultLevel.SUMMARY;
+		private static final Signatures SIGNATURES_VALUE = Signatures.ARCHIVE_AS_NEEDED;
+		private static final boolean REMOVE_INVALID_XMP_VALUE = true;
+		private static final boolean RETAIN_PDF_FORM_STATE_VALUE = false;
+		private static final boolean VERIFY_VALUE = false;
+
+		Supplier<PDFAConversionOptionSpec> pdfaConversionOptionsSpec;
+		Consumer<FormDataMultiPart> pdfaConversionOptionsValidator;
+
+		private ToPdfaHappyPathScenario(Supplier<PDFAConversionOptionSpec> pdfaConversionOptionsSpec,
+				Consumer<FormDataMultiPart> pdfaConversionOptionsValidator) {
+			this.pdfaConversionOptionsSpec = pdfaConversionOptionsSpec;
+			this.pdfaConversionOptionsValidator = pdfaConversionOptionsValidator;
+		}
+
+		private static final PDFAConversionOptionSpec emptySpec() {
+			return new PDFAConversionOptionSpecImpl();
+		}
+		
+		private static final void validateEmptySpec(FormDataMultiPart postedData) {
+			// Since we passed in an uninitialized structure, we expect these fields not to be passed in.
+			validateFormFieldDoesNotExist(postedData, COLOR_SPACE_PARAM);
+			validateFormFieldDoesNotExist(postedData, COMPLIANCE_PARAM);
+			validateFormFieldDoesNotExist(postedData, LOG_LEVEL_PARAM);
+			validateFormFieldDoesNotExist(postedData, METADATA_EXTENSION_PARAM);
+			validateFormFieldDoesNotExist(postedData, OPTIONAL_CONTENT_PARAM);
+			validateFormFieldDoesNotExist(postedData, RESULT_LEVEL_PARAM);
+			validateFormFieldDoesNotExist(postedData, SIGNATURES_PARAM);
+			validateFormFieldDoesNotExist(postedData, REMOVE_INVALID_XMP_PARAM);
+			validateFormFieldDoesNotExist(postedData, RETAIN_PDF_FORM_STATE_PARAM);
+			validateFormFieldDoesNotExist(postedData, VERIFY_PARAM);
+		}
+		
+		private static final PDFAConversionOptionSpec fullSpec() {
+			PDFAConversionOptionSpecImpl options = new PDFAConversionOptionSpecImpl();
+			// TODO: Fill these in with values
+			options.setColorSpace(COLOR_SPACE_VALUE);
+			options.setCompliance(COMPLIANCE_VALUE);
+			options.setLogLevel(LOG_LEVEL_VALUE);
+			options.setMetadataSchemaExtensions(METADATA_EXTENSION_VALUE);
+			options.setOptionalContent(OPTIONAL_CONTENT_VALUE);
+			options.setRemoveInvalidXMPProperties(REMOVE_INVALID_XMP_VALUE);
+			options.setResultLevel(RESULT_LEVEL_VALUE);
+			options.setRetainPDFFormState(RETAIN_PDF_FORM_STATE_VALUE);
+			options.setSignatures(SIGNATURES_VALUE);
+			options.setVerify(VERIFY_VALUE);
+			return options;
+		}
+
+		private static final void validateFullSpec(FormDataMultiPart postedData) {
+			try {
+				validateTextFormField(postedData, COLOR_SPACE_PARAM, COLOR_SPACE_VALUE.toString());
+				validateTextFormField(postedData, COMPLIANCE_PARAM, COMPLIANCE_VALUE.toString());
+				validateTextFormField(postedData, LOG_LEVEL_PARAM, LOG_LEVEL_VALUE.toString());
+				validateDocumentFormField(postedData, METADATA_EXTENSION_PARAM, APPLICATION_XML, IOUtils.toByteArray(METADATA_DOCUMENT_VALUE.getInputStream()));
+				validateTextFormField(postedData, OPTIONAL_CONTENT_PARAM, OPTIONAL_CONTENT_VALUE.toString());
+				validateTextFormField(postedData, RESULT_LEVEL_PARAM, RESULT_LEVEL_VALUE.toString());
+				validateTextFormField(postedData, SIGNATURES_PARAM, SIGNATURES_VALUE.toString());
+				validateTextFormField(postedData, REMOVE_INVALID_XMP_PARAM, Boolean.toString(REMOVE_INVALID_XMP_VALUE));
+				validateTextFormField(postedData, RETAIN_PDF_FORM_STATE_PARAM, Boolean.toString(RETAIN_PDF_FORM_STATE_VALUE));
+				validateTextFormField(postedData, VERIFY_PARAM, Boolean.toString(VERIFY_VALUE));
+			} catch (IOException e) {
+				throw new IllegalStateException("IO Exception while validating options spec fields.", e);
+			}
+		}
+	}
+	
+	@ParameterizedTest
+	@EnumSource
+	void testToPdfA(ToPdfaHappyPathScenario scenario) throws Exception {
+		Document responseData = SimpleDocumentFactoryImpl.getFactory().create(EXPECTED_RESULT_DATA.getBytes(StandardCharsets.UTF_8));
+		RestServicesDocAssemblerServiceAdapter underTest = createAdapter(true, responseData, APPLICATION_XML);
+	
+		Document inPdf = SimpleDocumentFactoryImpl.getFactory().create(EXPECTED_INPUT_DOCUMENT_CONTENT);;
+		PDFAConversionOptionSpec options = scenario.pdfaConversionOptionsSpec.get();
+		PDFAConversionResult result = underTest.toPDFA(inPdf, options);
+		
+		// Validate the Response
+		assertAll(
+				()->assertArrayEquals(CONVERSION_LOG_DOCUMENT_CONTENTS, IOUtils.toByteArray(result.getConversionLog().getInputStream())),
+				()->assertArrayEquals(JOB_LOG_DOCUMENT_CONTENTS, IOUtils.toByteArray(result.getJobLog().getInputStream())),
+				()->assertArrayEquals(PDFA_DOCUMENT_CONTENTS, IOUtils.toByteArray(result.getPDFADocument().getInputStream())),
+				()->assertTrue(result.isPDFA())
+				);
+		
+		// Validate the inputs to the REST client captured
+		assertEquals("http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT, machineName.getValue());
+		assertEquals("/lc/services/AssemblerService/ToPdfA", path.getValue());
+
+		// Make sure that the arguments we passed in are transmitted correctly.
+		@SuppressWarnings("unchecked")
+		Entity<FormDataMultiPart> postedEntity = (Entity<FormDataMultiPart>)entity.getValue();
+		FormDataMultiPart postedData = postedEntity.getEntity();
+		
+		assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
+		validateDocumentFormField(postedData, ToPdfaHappyPathScenario.INPUT_DOCUMENT_PARAM, APPLICATION_PDF, EXPECTED_INPUT_DOCUMENT_CONTENT);
+		// validate the assemblerOptions
+		scenario.pdfaConversionOptionsValidator.accept(postedData);
+	}
+	
+	@Test
+	void testIsPdfA() throws Exception {
+		RestServicesDocAssemblerServiceAdapter underTest = RestServicesDocAssemblerServiceAdapter.builder()
+																								  .machineName(TEST_MACHINE_NAME)
+																								  .port(TEST_MACHINE_PORT)
+																								  .basicAuthentication("username", "password")
+																								  .useSsl(false)
+																								  .aemServerType(AemServerType.StandardType.JEE)
+																								  .correlationId(()->CORRELATION_ID)
+																								  .clientFactory(()->client)
+																								  .build();
+		
+		Document inPdf = SimpleDocumentFactoryImpl.getFactory().create(EXPECTED_INPUT_DOCUMENT_CONTENT);;
+		PDFAValidationOptionSpec options = new PDFAValidationOptionSpecImpl();
+		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.isPDFA(inPdf, options));
+		
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		assertEquals("isPDFA has not been implemented yet.", msg);
+	}	
 }

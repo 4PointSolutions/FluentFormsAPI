@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,7 +55,7 @@ public class XmlDocument {
 			for (int i = 0; i < nodes.getLength(); i++) {
 				result.add(nodes.item(i).getTextContent());
 			}
-			return result;
+			return Collections.unmodifiableList(result);
 		} catch (XPathExpressionException | DOMException e) {
 			throw new XmlDocumentException("Error while processing xpath(" + xPathExpr + ").", e);
 		}
@@ -66,11 +67,16 @@ public class XmlDocument {
     
     public List<com._4point.aem.fluentforms.api.Document> getDocuments(String xPathExpr) throws XmlDocumentException {
     	DocumentFactory docFactory = SimpleDocumentFactoryImpl.getFactory();
-    	return getStrings(xPathExpr).stream()
-    								.map(s->docFactory.create(Base64.getDecoder().decode(s)))
-    								.collect(Collectors.toList());
+    	return Collections.unmodifiableList(getStrings(xPathExpr).stream()
+    															 .map(s->docFactory.create(Base64.getDecoder().decode(s)))
+    															 .collect(Collectors.toList())
+    										);
     }
-    
+
+    public Boolean getBoolean(String xPathExpr) throws XmlDocumentException {
+    	return Boolean.valueOf(getString(xPathExpr));
+    }
+
     @SuppressWarnings("serial")
 	public static class XmlDocumentException extends Exception {
 

@@ -27,6 +27,8 @@ import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument;
+import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument.XmlDocumentException;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
@@ -38,6 +40,7 @@ import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
 import com._4point.aem.fluentforms.api.assembler.PDFAValidationResult;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
+import com._4point.aem.fluentforms.impl.assembler.PDFAConversionResultImpl;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ColorSpace;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Compliance;
@@ -361,8 +364,10 @@ implements TraditionalDocAssemblerService {
 						.transform((t) -> retainPDFFormState == null ? t : t.field(RETAIN_PDF_FORM_STATE_PARAM, retainPDFFormState.toString()))
 						.transform((t) -> verify == null ? t : t.field(VERIFY_PARAM, verify.toString()));
 					
-					for(Document extensionsDoc : metadataSchemaExtensions) {
-						multipart.field(METADATA_EXTENSION_PARAM, extensionsDoc.getInputStream(), MediaType.APPLICATION_XML_TYPE);
+					if (metadataSchemaExtensions != null) {
+						for(Document extensionsDoc : metadataSchemaExtensions) {
+							multipart.field(METADATA_EXTENSION_PARAM, extensionsDoc.getInputStream(), MediaType.APPLICATION_XML_TYPE);
+						}
 					}
 				}
 
@@ -390,20 +395,32 @@ implements TraditionalDocAssemblerService {
 					msg += "\n" + inputStreamtoString(entityStream);
 					throw new AssemblerServiceException(msg);
 				}
-				PDFAConversionResult conversionResult = convertXmlToPdfaConversionResult((InputStream)result.getEntity());
+				PDFAConversionResult conversionResult = convertResponseToPdfaConversionResult((InputStream)result.getEntity());
 				return conversionResult;
-
 			} catch (IOException e) {
-				throw new AssemblerServiceException(
-						"I/O Error while converting document. (" + baseTarget.getUri().toString() + ").", e);
+				throw new AssemblerServiceException("I/O Error while converting document. (" + baseTarget.getUri().toString() + ").", e);
 			} catch (RestServicesServiceException e) {
 				throw new AssemblerServiceException("Error while posting to server", e);
+			} catch (XmlDocumentException e) {
+				throw new AssemblerServiceException("Error extracting data from response XML.", e);
 			}
 	}
 
-	private PDFAConversionResult convertXmlToPdfaConversionResult(InputStream entity) {
-		// TODO Auto-generated method stub
-		return null;
+	private static PDFAConversionResult convertResponseToPdfaConversionResult(InputStream entityIs) throws XmlDocumentException {
+		return convertXmlToPdfaConversionResult(XmlDocument.create(entityIs));
 	}
 
+	private static final String TO_PDFA_RESULT_BASE_XPATH = "/ToPdfAResult";
+	private static final String CONVERSION_LOG_XPATH = TO_PDFA_RESULT_BASE_XPATH + "/ConversionLog";
+	private static final String JOB_LOG_XPATH = TO_PDFA_RESULT_BASE_XPATH + "/JobLog";
+	private static final String PDFA_DOCUMENT_XPATH = TO_PDFA_RESULT_BASE_XPATH + "/PdfADocument";
+	private static final String IS_PDFA_XPATH = TO_PDFA_RESULT_BASE_XPATH + "/IsPdfA";
+	
+	private static PDFAConversionResult convertXmlToPdfaConversionResult(XmlDocument xmlDoc) throws XmlDocumentException {
+		return new PDFAConversionResultImpl(xmlDoc.getDocument(CONVERSION_LOG_XPATH), 
+											xmlDoc.getDocument(JOB_LOG_XPATH), 
+											xmlDoc.getDocument(PDFA_DOCUMENT_XPATH), 
+											xmlDoc.getBoolean(IS_PDFA_XPATH)
+											);
+	}
 }

@@ -52,6 +52,11 @@ class XmlDocumentTest {
 	}
 
 	@Test
+	void testGetBoolean() throws Exception {
+		assertEquals(true, underTest.getBoolean("/ToPdfAResult/IsPdfA"));
+	}
+
+	@Test
 	void testGetMultipleStrings() throws Exception {
 		List<String> result = underTest.getStrings("/ToPdfAResult/PdfADocument");
 		assertEquals(2, result.size());
