@@ -75,7 +75,7 @@ class RenderPdfFormTest {
 		Path contentRoot = SAMPLE_FORM_XDP.getParent();
 //		Path debugDir = null;
 		Locale locale = Locale.CANADA_FRENCH;
-//		String submitUrl = "";
+		String submitUrl = "http://example.com/";
 		Document xci = SimpleDocumentFactoryImpl.INSTANCE.create(RESOURCES_DIR.resolve("pa.xci"));
 		
 		Document pdfResult =  underTest.renderPDFForm()
@@ -85,7 +85,7 @@ class RenderPdfFormTest {
 //									.setDebugDir(debugDir)
 									.setEmbedFonts(true)
 									.setLocale(locale)
-//									.setSubmitUrlString(submitUrl)
+									.setSubmitUrlString(submitUrl)
 									.setTaggedPDF(true)
 									.setXci(xci)
 									.executeOn(SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
