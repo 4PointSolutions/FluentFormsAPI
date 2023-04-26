@@ -163,7 +163,7 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 		return new PDFAConversionResultImpl(
 				documentFactory.create(pdfaResult.getConversionLog()), 	// conversionLog
 				documentFactory.create(pdfaResult.getJobLog()), 		// jobLog
-				documentFactory.create(pdfaResult.getConversionLog()), 	// pdfADocument
+				documentFactory.create(pdfaResult.getPDFADocument()), 	// pdfADocument
 				pdfaResult.isPDFA()										// isPDFA
 				);
 	}
