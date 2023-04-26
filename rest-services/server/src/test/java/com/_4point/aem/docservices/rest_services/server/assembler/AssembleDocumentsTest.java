@@ -309,9 +309,36 @@ public class AssembleDocumentsTest {
 	@Test
 	void testConvertAssemblerResultToXml() throws InternalServerErrorException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException{
 		AssemblerResultImpl assemblerResult = createAssemblerResultStub();
-		String resultXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames><failedBlockName>failedBlock1</failedBlockName><failedBlockName>failedBlock2</failedBlockName></failedBlockNames><successfulDocumentNames><successfulDocumentName>successDocument1</successfulDocumentName><successfulDocumentName>successDocument2</successfulDocumentName></successfulDocumentNames><successfulBlockNames><successfulBlockName>successBlock1</successfulBlockName><successfulBlockName>successBlock2</successfulBlockName></successfulBlockNames><latestBatesNumber value=\"2\"/><numRequestedBlocks value=\"3\"/><multipleResultBlocks name=\"document\"><documentNames><documentName>test1</documentName><documentName>test2</documentName></documentNames></multipleResultBlocks><jobLog joblogValue=\"SU5GTw==\"/></assemblerResult>";
+		String resultXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
+				+ "<assemblerResult>\n"
+				+ "    <resultDocument documentName=\"concatenatedPDF.pdf\">\n"
+				+ "        <mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc>\n"
+				+ "    </resultDocument>\n"
+				+ "    <failedBlockNames>\n"
+				+ "        <failedBlockName>failedBlock1</failedBlockName>\n"
+				+ "        <failedBlockName>failedBlock2</failedBlockName>\n"
+				+ "    </failedBlockNames>\n"
+				+ "    <successfulDocumentNames>\n"
+				+ "        <successfulDocumentName>successDocument1</successfulDocumentName>\n"
+				+ "        <successfulDocumentName>successDocument2</successfulDocumentName>\n"
+				+ "    </successfulDocumentNames>\n"
+				+ "    <successfulBlockNames>\n"
+				+ "        <successfulBlockName>successBlock1</successfulBlockName>\n"
+				+ "        <successfulBlockName>successBlock2</successfulBlockName>\n"
+				+ "    </successfulBlockNames>\n"
+				+ "    <latestBatesNumber value=\"2\" />\n"
+				+ "    <numRequestedBlocks value=\"3\" />\n"
+				+ "    <multipleResultBlocks name=\"document\">\n"
+				+ "        <documentNames>\n"
+				+ "            <documentName>test1</documentName>\n"
+				+ "            <documentName>test2</documentName>\n"
+				+ "        </documentNames>\n"
+				+ "    </multipleResultBlocks>\n"
+				+ "    <jobLog joblogValue=\"SU5GTw==\" />\n"
+				+ "</assemblerResult>";
+		System.out.println(resultXml);
 		String responseXml = AssembleDocuments.convertAssemblerResultToxml(assemblerResult);
-		assertEquals(resultXml, responseXml);
+		assertThat(Input.fromString(responseXml), isIdenticalTo(Input.fromString(resultXml)).ignoreWhitespace());
 	}
 	
 	private AssemblerResultImpl createAssemblerResultStub() {
