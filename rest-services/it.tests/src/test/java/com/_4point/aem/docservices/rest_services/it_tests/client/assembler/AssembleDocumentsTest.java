@@ -1,6 +1,9 @@
 package com._4point.aem.docservices.rest_services.it_tests.client.assembler;
-import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
+
+import static org.hamcrest.MatcherAssert.assertThat; 
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,15 +16,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDocAssemblerServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument;
+import com._4point.aem.docservices.rest_services.it_tests.Pdf;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.assembler.LogLevel;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerOptionsSpecImpl;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ColorSpace;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Compliance;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.OptionalContent;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ResultLevel;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Signatures;
 
 
 public class AssembleDocumentsTest {
@@ -104,4 +115,49 @@ public class AssembleDocumentsTest {
 		assertNotNull(msg);
 		assertTrue(msg.contains("Call to server failed"));
 	}
+	
+	@Test
+	@DisplayName("Test ToPdfA() Happy Path.")
+	void testToPdfA() throws Exception {
+		PDFAConversionResult result = underTest.toPDFA()
+											   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF.toFile()));
+		Document pdfaDocument = result.getPDFADocument();
+		Document conversionLog = result.getConversionLog();
+		Document jobLog = result.getJobLog();
+		Boolean pdfa = result.isPDFA();
+		
+		assertNotNull(XmlDocument.create(conversionLog.getInputStream()));	// Make sure the conversion log is XML.
+		assertNotNull(XmlDocument.create(jobLog.getInputStream()));			// Make sure the job log is XML.
+		assertTrue(pdfa);
+		Pdf pdfResult = Pdf.from(pdfaDocument.getInputStream());
+		assertThat(pdfResult.getProducer(), containsStringIgnoringCase("assembler"));
+	}
+
+	@Test
+	@DisplayName("Test ToPdfA() All Args Happy Path.")
+	void testToPdfA_withAllArgs() throws Exception {
+		PDFAConversionResult result = underTest.toPDFA()
+											   .setColorSpace(ColorSpace.S_RGB)
+											   .setCompliance(Compliance.PDFA_1B)
+											   .setLogLevel(LogLevel.ALL)
+		//									   .setMetadataSchemaExtensions(null)	// Excluded because not sure what this is.
+											   .setOptionalContent(OptionalContent.ALL)
+											   .setRemoveInvalidXMPProperties(true)
+											   .setResultLevel(ResultLevel.DETAILED)
+											   .setRetainPDFFormState(true)
+											   .setSignatures(Signatures.ARCHIVE_ALWAYS)
+											   .setVerify(true)
+											   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF.toFile()));
+		Document pdfaDocument = result.getPDFADocument();
+		Document conversionLog = result.getConversionLog();
+		Document jobLog = result.getJobLog();
+		Boolean pdfa = result.isPDFA();
+		
+		assertNotNull(XmlDocument.create(conversionLog.getInputStream()));	// Make sure the conversion log is XML.
+		assertNotNull(XmlDocument.create(jobLog.getInputStream()));			// Make sure the job log is XML.
+		assertTrue(pdfa);
+		Pdf pdfResult = Pdf.from(pdfaDocument.getInputStream());
+		assertThat(pdfResult.getProducer(), containsStringIgnoringCase("assembler"));
+	}
+
 }
