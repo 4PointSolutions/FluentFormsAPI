@@ -54,7 +54,7 @@ type on the local machine. This parameter is required.
 
 **-F "isFailOnError=**[ **true** | **false** ]**"**
 
-:   Determines twhether the DDX job should exit immediately when an Exception or other error occurs. 
+:   Determines whether the DDX job should exit immediately when an Exception or other error occurs. 
 A value of true means that the job will terminate upon an error or exception condition and throw the corresponding Throwable exception. A value of false means that the job will terminate the current DDX result block, store the Throwable exception in the output map, and attempt to execute any remaining result blocks. The default is true, meaning that the first error will terminate the DDX job immediately. This parameter is optional.
 
 **-F "isTakeOwnerShip=**[ **true** | **false** ]**"**
@@ -101,7 +101,7 @@ EXAMPLES
 
 Executes a DDX on a single input PDF and sends the result XML to stdout.
 
-`curl -u admin:admin --insecure -F data=@SampleDDX.ddx -F sourceDocumentMap.key=inDoc -F sourceDocumentMap.value=@Sampls.pdf  http://172.18.110.21:4502/services/AssemblerService/AssembleDocuments | xmlstarlet sel -t -v "/assemblerResult/resultDocument/mergedDoc" result.xml | base64 -d > result.pdf`
+`curl -u admin:admin --insecure -F data=@SampleDDX.ddx -F sourceDocumentMap.key=inDoc -F sourceDocumentMap.value=@Sampls.pdf  http://172.18.110.21:4502/services/AssemblerService/AssembleDocuments | xmlstarlet sel -t -v "/assemblerResult/resultDocument/mergedDoc" | base64 -d > result.pdf`
 
 Executes a DDX on a single input PDF, parses the result XML, base64 decodes and writes the result document to 
 result.pdf.  NOTE: You need to have xmlstarlet installed (easy on Ubuntu `apt install xmlstarlet`, 
