@@ -2,11 +2,11 @@ package com._4point.aem.docservices.rest_services.client.helpers;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,6 +17,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -51,11 +52,12 @@ public class XmlDocument {
 	public List<String> getStrings(String xPathExpr) throws XmlDocumentException {
 		try {
 			NodeList nodes = (NodeList) xpath.evaluate(xPathExpr, document, XPathConstants.NODESET);
-			List<String> result = new ArrayList<>(nodes.getLength());
-			for (int i = 0; i < nodes.getLength(); i++) {
-				result.add(nodes.item(i).getTextContent());
-			}
-			return Collections.unmodifiableList(result);
+			// Down the road, improve this with Java 11's Collectors.toUnmodifiableList() or Java 16's Stream.toList()
+			return Collections.unmodifiableList(IntStream.range(0, nodes.getLength())
+          		  										 .mapToObj(nodes::item)
+          		  										 .map(Node::getTextContent)
+          		  										 .collect(Collectors.toList())
+          		  								);
 		} catch (XPathExpressionException | DOMException e) {
 			throw new XmlDocumentException("Error while processing xpath(" + xPathExpr + ").", e);
 		}
