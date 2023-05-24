@@ -1,0 +1,13 @@
+package com._4point.aem.fluentforms.sampleapp;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class FluentFormsSpringApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(FluentFormsSpringApplication.class, args);
+	}
+
+}
