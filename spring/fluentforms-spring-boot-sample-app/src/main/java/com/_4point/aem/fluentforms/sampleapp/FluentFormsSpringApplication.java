@@ -6,6 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class FluentFormsSpringApplication {
 
+	public FluentFormsSpringApplication(GitConfig gitConfig) {
+    	gitConfig.logGitInformation();
+	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(FluentFormsSpringApplication.class, args);
 	}
