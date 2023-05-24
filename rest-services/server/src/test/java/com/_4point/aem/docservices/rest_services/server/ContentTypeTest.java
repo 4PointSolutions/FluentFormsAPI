@@ -1,10 +1,17 @@
 package com._4point.aem.docservices.rest_services.server;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 public class ContentTypeTest {
 
@@ -59,4 +66,28 @@ public class ContentTypeTest {
 		assertTrue(MULTIPART_FORMDATA.isCompatibleWith(WILDCARD), "Expected all types to be compatible with wildcard");
 		assertTrue(WILDCARD.isCompatibleWith(MULTIPART_FORMDATA), "Expected all types to be compatible with wildcard");
 	}
+	
+	enum AutoDetectTestScenario {
+		XML(TestUtils.SAMPLE_DATA, Optional.of(ContentType.APPLICATION_XML)),
+		PDF(TestUtils.SAMPLE_PDF, Optional.of(ContentType.APPLICATION_PDF)),
+		XDP(TestUtils.SAMPLE_FORM, Optional.of(ContentType.APPLICATION_XDP)),
+		DOCX(TestUtils.SAMPLE_FORM_DOCX, Optional.empty())
+		;
+		private final Path sampleData;
+		private final Optional<ContentType> expectedContentType;
+
+		private AutoDetectTestScenario(Path sampleData, Optional<ContentType> expectedContentType) {
+			this.sampleData = sampleData;
+			this.expectedContentType = expectedContentType;
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource
+	public void testAutoDetect(AutoDetectTestScenario scenario) throws Exception {
+		byte[] sampleBytes = Files.readAllBytes(scenario.sampleData);
+		Optional<ContentType> result = ContentType.autoDetect(sampleBytes);
+		assertEquals(scenario.expectedContentType, result);
+	}	
+	
 }

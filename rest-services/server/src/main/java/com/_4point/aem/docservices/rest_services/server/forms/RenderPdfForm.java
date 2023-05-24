@@ -91,7 +91,6 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 
 		RenderPdfFormParameters reqParameters = RenderPdfFormParameters.readFormParameters(request, false);	// TODO: Make the validation of XML a config parameter.
 		TemplateParameter template = reqParameters.getTemplate();
-		Document data = reqParameters.getData() != null ? docFactory.create(reqParameters.getData()) : null;
 		PathOrUrl contentRoot = reqParameters.getContentRoot();
 		AcrobatVersion acrobatVersion = reqParameters.getAcrobatVersion();
 		CacheStrategy cacheStrategy = reqParameters.getCacheStrategy();
@@ -103,7 +102,8 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 		Boolean taggedPDF = reqParameters.getTaggedPDF();
 		byte[] xci = reqParameters.getXci();
 		
-		try {
+		
+		try(Document data = reqParameters.getData() != null ? docFactory.create(reqParameters.getData()) : null) {
 			// In the following call to the formsService, we only set the parameters if they are not null.
 			RenderPDFFormArgumentBuilder argBuilder = formsService.renderPDFForm()
 												.transform(b->contentRoot == null ? b : b.setContentRoot(contentRoot))

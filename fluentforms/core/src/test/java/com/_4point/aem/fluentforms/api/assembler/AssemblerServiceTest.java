@@ -21,7 +21,6 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerArgumentBuilder;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.EitherDocumentOrDocumentList;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 import com.adobe.fd.assembler.client.OperationException;
 
 @ExtendWith(MockitoExtension.class)

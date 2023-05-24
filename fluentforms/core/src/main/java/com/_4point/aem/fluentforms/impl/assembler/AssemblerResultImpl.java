@@ -1,6 +1,5 @@
 package com._4point.aem.fluentforms.impl.assembler;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -10,109 +9,73 @@ import com.adobe.fd.assembler.client.OperationException;
 
 public class AssemblerResultImpl implements AssemblerResult {
 		
-	Map<String,Document> getDocuments;
-
-	List<String> getFailedBlockNames;
-
-	Document getJobLog;
-
-	int getLastBatesNumber;
-
-	Map<String,List<String>> getMultipleResultsBlocks;
-
-	int getNumRequestedBlocks;
-
-	List<String> getSuccessfulBlockNames;
-
-	List<String> getSuccessfulDocumentNames;
-
-	Map<String,OperationException>	getThrowables;
+	private final Map<String,Document> documents;
+	private final List<String> failedBlockNames;
+	private final Document jobLog;
+	private final int lastBatesNumber;
+	private final Map<String,List<String>> multipleResultsBlocks;
+	private final int numRequestedBlocks;
+	private final List<String> successfulBlockNames;
+	private final List<String> successfulDocumentNames;
+	private final Map<String,OperationException> throwables;
 	
+	public AssemblerResultImpl(Map<String, Document> documents, List<String> failedBlockNames, Document jobLog,
+			int lastBatesNumber, Map<String, List<String>> multipleResultsBlocks, int numRequestedBlocks,
+			List<String> successfulBlockNames, List<String> successfulDocumentNames,
+			Map<String, OperationException> throwables) {
+		this.documents = documents;
+		this.failedBlockNames = failedBlockNames;
+		this.jobLog = jobLog;
+		this.lastBatesNumber = lastBatesNumber;
+		this.multipleResultsBlocks = multipleResultsBlocks;
+		this.numRequestedBlocks = numRequestedBlocks;
+		this.successfulBlockNames = successfulBlockNames;
+		this.successfulDocumentNames = successfulDocumentNames;
+		this.throwables = throwables;
+	}
 
 	@Override
 	public Map<String, Document> getDocuments() {	
-		return getDocuments;
+		return documents;
 	}
 
 	@Override
 	public List<String> getFailedBlockNames() {	
-		return getFailedBlockNames;
+		return failedBlockNames;
 	}
 
 	@Override
 	public Document getJobLog() {	
-		return this.getJobLog;
+		return this.jobLog;
 	}
 
 	@Override
 	public int getLastBatesNumber() {	
-		return getLastBatesNumber;
+		return lastBatesNumber;
 	}
 
 	@Override
 	public Map<String, List<String>> getMultipleResultsBlocks() {	
-		return getMultipleResultsBlocks;
+		return multipleResultsBlocks;
 	}
 
 	@Override
 	public int getNumRequestedBlocks() {	
-		return getNumRequestedBlocks;
+		return numRequestedBlocks;
 	}
 
 	@Override
 	public List<String> getSuccessfulBlockNames() {	
-		return getSuccessfulBlockNames;
+		return successfulBlockNames;
 	}
 
 	@Override
 	public List<String> getSuccessfulDocumentNames() {
-		return getSuccessfulDocumentNames;
+		return successfulDocumentNames;
 	}
 
 	@Override
 	public Map<String, OperationException> getThrowables() {
-		return getThrowables;
+		return throwables;
 	}
-
-	 public void setDocuments(Map<String,Document> documents) {
-		 this.getDocuments = documents;
-	 }
-  
-	 public void setFailedBlockNames(List<String> failedBlockNames) {
-		 this.getFailedBlockNames = failedBlockNames;
-	 }
-   
-	 public void setJobLog(Document jobLog) {
-		 this.getJobLog = jobLog;
-	 }
-   
-	 public void setLastBatesNumber(int lastBatesNumber) {
-		 this.getLastBatesNumber = lastBatesNumber;
-	 }
-     
-	 public void setMultipleResultsBlocks(Map<String,List<String>> multipleResultsBlocks) {
-		 this.getMultipleResultsBlocks = multipleResultsBlocks;
-	 }
-    
-	 public void setNumRequestedBlocks(int numRequestedBlocks) {
-		 this.getNumRequestedBlocks = numRequestedBlocks;
-	 }
-    
-	 public void setSuccessfulBlockNames(List<String> successfulBlockNames) {
-		 this.getSuccessfulBlockNames = successfulBlockNames;
-	 }
-   
-	 public void setSuccessfulDocumentNames(List<String> successfulDocumentNames) {
-		 this.getSuccessfulDocumentNames = successfulDocumentNames;
-	 }
-   
-	 public void setThrowables(Map<String,OperationException> throwables) {
-		 this.getThrowables = throwables;
-	 }
-
-	@Override
-	public void close() throws IOException {
-	
-	}
-
 }

@@ -114,6 +114,9 @@ public class Pdf implements AutoCloseable {
 		return null;
 	}
 	
+	public String getProducer() {
+		return doc.getDocumentInformation().getProducer();
+	}
 	public static Pdf from(byte[] docBytes) throws PdfException  {
 		 try {
 			return new Pdf(PDDocument.load(docBytes));

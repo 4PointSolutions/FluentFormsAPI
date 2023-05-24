@@ -3,6 +3,7 @@ package com._4point.aem.docservices.rest_services.server.assembler;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +22,6 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -49,18 +48,18 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerArgumentBuilder;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AdobeAssemblerServiceAdapter;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
 import com.adobe.fd.assembler.client.OperationException;
 
 @SuppressWarnings("serial")
 @Component(service = Servlet.class, property = {
-		Constants.SERVICE_DESCRIPTION + "=AssembleService.AssembleDocuments Service",
+		Constants.SERVICE_DESCRIPTION + "=AssemblerService.AssembleDocuments Service",
 		"sling.servlet.methods=" + HttpConstants.METHOD_POST })
 @SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/AssemblerService/AssembleDocuments")
 public class AssembleDocuments extends SlingAllMethodsServlet {
@@ -109,14 +108,14 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		AssemblerService assemblerService = new AssemblerServiceImpl(assemblerServiceFactory.get(),
 				UsageContext.SERVER_SIDE);
 		try {
-			Map<String, Object> sourceDocuments = new HashMap<String, Object>();
 			RequestParameter ddxParam = FormParameters.getMandatoryParameter(request,DDX);
-			RequestParameter[] soruceDocName =  FormParameters.getMandatoryParameters(request, SOURCE_DOCUMENT_KEY);
+			RequestParameter[] sourceDocName =  FormParameters.getMandatoryParameters(request, SOURCE_DOCUMENT_KEY);
 			RequestParameter[] sourceDocs = FormParameters.getMandatoryParameters(request, SOURCE_DOCUMENT_VALUE);
-			if (soruceDocName.length == sourceDocs.length) {
-				for (int i = 0; i < soruceDocName.length; i++) {
-					log.info("Document Name: " + soruceDocName[i].toString());
-					sourceDocuments.put(soruceDocName[i].getString(), docFactory.create(sourceDocs[i].get()));
+			Map<String, Object> sourceDocuments = new HashMap<String, Object>();
+			if (sourceDocName.length == sourceDocs.length) {
+				for (int i = 0; i < sourceDocName.length; i++) {
+					log.info("Document Name: " + sourceDocName[i].toString());
+					sourceDocuments.put(sourceDocName[i].getString(), docFactory.create(sourceDocs[i].get()));
 				}
 			}
 			
@@ -140,8 +139,9 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 							: b.setFirstBatesNumber(Integer.parseInt(firstBatesNumber.toString())))
 					.transform(b -> defaultStyle == null ? b : b.setDefaultStyle(defaultStyle.toString()));
 
-			try (@SuppressWarnings("deprecation")
-			AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments)) {
+			try  {
+				@SuppressWarnings("deprecation")
+				AssemblerResult assemblerResult = argumentBuilder.executeOn(ddx, sourceDocuments);
 				String assemblerResultxml = convertAssemblerResultToxml(assemblerResult);
 				String contentType = ContentType.APPLICATION_XML.toString();	// We know the result is always XML.
 				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
@@ -152,8 +152,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 						"Internal Error while Converting assembler result to xml. (" + e.getMessage() + ").", e);
 			}
 		} catch (AssemblerServiceException | IOException | OperationException ex1) {
-			throw new InternalServerErrorException("Internal Error while merging PDF. (" + ex1.getMessage() + ").",
-					ex1);
+			throw new InternalServerErrorException("Internal Error while merging PDF. (" + ex1.getMessage() + ").",	ex1);
 		} catch (IllegalArgumentException ex2) {
 			throw new BadRequestException("Bad arguments while merging PDF", ex2);
 		}
@@ -170,7 +169,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		org.w3c.dom.Document document = documentBuilder.newDocument();
 		org.w3c.dom.Element root = document.createElement("assemblerResult");
 		document.appendChild(root);
-		if (MapUtils.isNotEmpty(resultDocMap)) {
+		if (isNotEmpty(resultDocMap)) {
 			resultDocMap.forEach((docName, resultDoc) -> {
 					addMapOfResultDocInXml(docName, resultDoc, document, root);
 			});
@@ -183,7 +182,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		createElementWithAttribute(document, root, "numRequestedBlocks", "value", assemblerResult.getNumRequestedBlocks());
 
 		
-		if (MapUtils.isNotEmpty(assemblerResult.getMultipleResultsBlocks())) {
+		if (isNotEmpty(assemblerResult.getMultipleResultsBlocks())) {
 			assemblerResult.getMultipleResultsBlocks().forEach((blockName,docNames)-> {
 				Element resultBlockName = document.createElement("multipleResultBlocks");
 				root.appendChild(resultBlockName);
@@ -191,7 +190,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 				nameAttr.setValue(blockName);
 				resultBlockName.setAttributeNode(nameAttr);
 				Element documentNames  = document.createElement("documentNames");			
-				if(CollectionUtils.isNotEmpty(docNames)) {
+				if(isNotEmpty(docNames)) {
 					docNames.forEach(docName -> {
 						Element documentName = document.createElement("documentName");	
 						documentName.appendChild(document.createTextNode(docName));
@@ -270,7 +269,7 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			String parentElementName, String childlementName, List<String> stringList) {
 		Element elementName = document.createElement(parentElementName);
 		root.appendChild(elementName);
-		if (CollectionUtils.isNotEmpty(stringList)) {
+		if (isNotEmpty(stringList)) {
 			stringList.forEach(assemblerResultPropertyName -> createElement(document, elementName, childlementName,
 					assemblerResultPropertyName));
 		}
@@ -287,4 +286,6 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		return new AdobeAssemblerServiceAdapter(adobeAssembleService, docFactory);
 	}
 
+	private static <E> boolean isNotEmpty(Collection<E> c) { return c != null && !c.isEmpty(); }
+	private static <K,V> boolean isNotEmpty(Map<K,V> m) { return m != null && !m.isEmpty(); }
 }

@@ -123,6 +123,8 @@ public class AdobeFormsServiceAdapter implements TraditionalFormsService {
 		log.info("Locale=" + adobeOptions.getRenderAtClient().toString());
 		log.info("TaggedPdf=" + adobeOptions.getTaggedPDF());
 		log.info("Xci is null=" + Boolean.toString(adobeOptions.getXci() == null));
+		final List<String> submitUrls = adobeOptions.getSubmitUrls();
+		if (submitUrls != null && submitUrls.size() > 0) { log.info("SubmitUrl=" + submitUrls.get(0)); }
 		return adobeOptions;
 	}
 

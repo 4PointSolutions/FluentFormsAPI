@@ -2,11 +2,13 @@ package com._4point.aem.fluentforms.impl.assembler;
 
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +17,14 @@ import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationResult;
 import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
+import com.adobe.fd.assembler.client.ConversionException;
 import com.adobe.fd.assembler.client.OperationException;
+import com.adobe.fd.assembler.client.ValidationException;
 
 public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerService {
 
@@ -61,27 +69,32 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 		return input;
 	}
 
-	/*
-	 * @Override public PDFAValidationResult isPDFA(Document inDoc,
-	 * PDFAValidationOptionSpec options) throws AssemblerServiceException,
-	 * ValidationException { return
-	 * adobeDocAssemblerService.isPDFA(AdobeDocumentFactoryImpl.getAdobeDocument(
-	 * inDoc), options); }
-	 * 
-	 * @Override public PDFAConversionResult toPDFA(Document inDoc,
-	 * PDFAConversionOptionSpec options) throws AssemblerServiceException,
-	 * ConversionException { return
-	 * adobeDocAssemblerService.toPDFA(AdobeDocumentFactoryImpl.getAdobeDocument(
-	 * inDoc), options); }
-	 */
+	@Override 
+	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) throws AssemblerServiceException {
+		try {
+			return toPDFAValidationResult(adobeDocAssemblerService.isPDFA(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), toAdobePDFAValidationOptionSpec(options)));
+		} catch (ValidationException e) {
+			throw new AssemblerServiceException("Error while validating PDF/A document", e);
+		} 
+	}
+
+	@Override 
+	public PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options) throws AssemblerServiceException { 
+		try {
+			return toPDFAConversionResult(adobeDocAssemblerService.toPDFA(AdobeDocumentFactoryImpl.getAdobeDocument(inDoc), toAdobePDFAConversionOptionSpec(options)));
+		} catch (ConversionException e) {
+			throw new AssemblerServiceException("Error while converting to PDF/A document", e);
+		} 
+	}
 	
-	public static com.adobe.fd.assembler.client.AssemblerOptionSpec toAdobeAssemblerOptionSpec(
+	// Package private for unit testing.
+	static com.adobe.fd.assembler.client.AssemblerOptionSpec toAdobeAssemblerOptionSpec(
 			AssemblerOptionsSpec assemblerOptionSpec) {
 		com.adobe.fd.assembler.client.AssemblerOptionSpec adobeAssemblerOptionSpec = new com.adobe.fd.assembler.client.AssemblerOptionSpec();
 		setIfNotNull(adobeAssemblerOptionSpec::setFailOnError, assemblerOptionSpec.isFailOnError());
 		setIfNotNull(adobeAssemblerOptionSpec::setDefaultStyle, assemblerOptionSpec.getDefaultStyle());
 		setIfNotNull(adobeAssemblerOptionSpec::setFirstBatesNumber, assemblerOptionSpec.getFirstBatesNumber());
-		setIfNotNull(adobeAssemblerOptionSpec::setLogLevel, assemblerOptionSpec.getLogLevel()!=null?assemblerOptionSpec.getLogLevel().toString():null);
+		setIfNotNull(adobeAssemblerOptionSpec::setLogLevel, toStringIfNotNull(assemblerOptionSpec.getLogLevel()));
 		setIfNotNull(adobeAssemblerOptionSpec::setTakeOwnership, assemblerOptionSpec.isTakeOwnership());
 		setIfNotNull(adobeAssemblerOptionSpec::setValidateOnly, assemblerOptionSpec.isValidateOnly());
 		return adobeAssemblerOptionSpec;
@@ -90,25 +103,71 @@ public class AdobeAssemblerServiceAdapter implements TraditionalDocAssemblerServ
 
 	private AssemblerResult toAssemblerResult(com.adobe.fd.assembler.client.AssemblerResult assemblerResult) {
 		log.info("AdobeAssembler result to fluentForm assembler result");
-		AssemblerResultImpl assemblerResultImpl = new AssemblerResultImpl();
-		setIfNotNull(assemblerResultImpl::setFailedBlockNames, assemblerResult.getFailedBlockNames());
-		setIfNotNull(assemblerResultImpl::setJobLog, assemblerResult.getJobLog()!=null ? documentFactory.create(assemblerResult.getJobLog()):null);
-		setIfNotNull(assemblerResultImpl::setLastBatesNumber, assemblerResult.getLastBatesNumber());
-		setIfNotNull(assemblerResultImpl::setMultipleResultsBlocks, assemblerResult.getMultipleResultsBlocks());
-		setIfNotNull(assemblerResultImpl::setNumRequestedBlocks, assemblerResult.getNumRequestedBlocks());
-		setIfNotNull(assemblerResultImpl::setSuccessfulDocumentNames, assemblerResult.getSuccessfulDocumentNames());
-		setIfNotNull(assemblerResultImpl::setThrowables, assemblerResult.getThrowables());
-		setIfNotNull(assemblerResultImpl::setSuccessfulBlockNames, assemblerResult.getSuccessfulBlockNames());
 		Map<String, Document> documents= new HashMap<String, Document>();
-		if(MapUtils.isNotEmpty(assemblerResult.getDocuments())) {
+		if(isNotEmpty(assemblerResult.getDocuments())) {
 			assemblerResult.getDocuments().forEach((docName, doc) -> {
 				documents.put(docName, documentFactory.create(doc));
 			});		
 		}
-		setIfNotNull(assemblerResultImpl::setDocuments, documents);
-		return assemblerResultImpl;
-
+		return new AssemblerResultImpl(
+						documents, 	// documents
+						assemblerResult.getFailedBlockNames(), 	// failedBlockNames
+						assemblerResult.getJobLog()!=null ? documentFactory.create(assemblerResult.getJobLog()):null, 	// jobLog
+						assemblerResult.getLastBatesNumber(), 		// lastBatesNumber
+						assemblerResult.getMultipleResultsBlocks(), 	// multipleResultsBlocks
+						assemblerResult.getNumRequestedBlocks(), 		// numRequestedBlocks
+						assemblerResult.getSuccessfulDocumentNames(), 	// successfulBlockNames
+						assemblerResult.getSuccessfulBlockNames(), 	// successfulDocumentNames
+						assemblerResult.getThrowables()	// throwables 
+						);
 	}
 
+	// Package private for unit testing.
+	static com.adobe.fd.assembler.client.PDFAValidationOptionSpec toAdobePDFAValidationOptionSpec(PDFAValidationOptionSpec options) {
+		com.adobe.fd.assembler.client.PDFAValidationOptionSpec adobeOptions = new com.adobe.fd.assembler.client.PDFAValidationOptionSpec();
+		setIfNotNull(adobeOptions::setAllowCertificationSignatures, options.isAllowCertificationSignatures());
+		setIfNotNull(adobeOptions::setCompliance, options.getCompliance());
+		setIfNotNull(adobeOptions::setIgnoreUnusedResource, options.isIgnoreUnusedResource());
+		setIfNotNull(adobeOptions::setLogLevel, toStringIfNotNull(options.getLogLevel()));
+		setIfNotNull(adobeOptions::setResultLevel, options.getResultLevel());
+		return adobeOptions ;
+	}
 
+	private PDFAValidationResult toPDFAValidationResult(com.adobe.fd.assembler.client.PDFAValidationResult result) {
+		return new PDFAValidationResultImpl(documentFactory.create(result.getJobLog()), documentFactory.create(result.getValidationLog()), result.isPDFA());
+	}
+
+	// Package private for unit testing.
+	static com.adobe.fd.assembler.client.PDFAConversionOptionSpec toAdobePDFAConversionOptionSpec(PDFAConversionOptionSpec options) {
+		com.adobe.fd.assembler.client.PDFAConversionOptionSpec adobeOptions = new com.adobe.fd.assembler.client.PDFAConversionOptionSpec();
+		setIfNotNull(adobeOptions::setColorSpace, options.getColorSpace());
+		setIfNotNull(adobeOptions::setCompliance, options.getCompliance());
+		setIfNotNull(adobeOptions::setLogLevel, toStringIfNotNull(options.getLogLevel()));
+		setIfNotNull(adobeOptions::setOptionalContent, options.getOptionalContent());
+		setIfNotNull(adobeOptions::setRemoveInvalidXMPProperties, options.isRemoveInvalidXMPProperties());
+		setIfNotNull(adobeOptions::setResultLevel, options.getResultLevel());
+		setIfNotNull(adobeOptions::setRetainPDFFormState, options.isRetainPDFFormState());
+		setIfNotNull(adobeOptions::setSignatures, options.getSignatures());
+		setIfNotNull(adobeOptions::setVerify, options.isVerify());
+		final List<Document> ext = options.getMetadataSchemaExtensions();
+		if(isNotEmpty(ext)) {
+			adobeOptions.setMetadataSchemaExtensions(ext.stream()
+														.map(AdobeDocumentFactoryImpl::getAdobeDocument)	// Transform to list of Adobe docs
+														.collect(Collectors.toList())
+													);
+		}
+		return adobeOptions;
+	}
+
+	private PDFAConversionResult toPDFAConversionResult(com.adobe.fd.assembler.client.PDFAConversionResult pdfaResult) {
+		return new PDFAConversionResultImpl(
+				documentFactory.create(pdfaResult.getConversionLog()), 	// conversionLog
+				documentFactory.create(pdfaResult.getJobLog()), 		// jobLog
+				documentFactory.create(pdfaResult.getPDFADocument()), 	// pdfADocument
+				pdfaResult.isPDFA()										// isPDFA
+				);
+	}
+	private static <E> boolean isNotEmpty(Collection<E> c) { return c != null && !c.isEmpty(); }
+	private static <K,V> boolean isNotEmpty(Map<K,V> m) { return m != null && !m.isEmpty(); }
+	private static <T> String toStringIfNotNull(T object) { return object == null ? null : object.toString(); };
 }

@@ -20,6 +20,7 @@ import com.adobe.fd.forms.api.RenderAtClient;
 
 class PDFFormRenderOptionsImplTest {
 	
+	private static final String EXPECTED_SUBMIT_URL = "http://example.com";
 	private final static com.adobe.fd.forms.api.PDFFormRenderOptions emptyPDFFormRenderOptions = new com.adobe.fd.forms.api.PDFFormRenderOptions();
 	private final PDFFormRenderOptionsImpl underTest = new PDFFormRenderOptionsImpl();
 	
@@ -55,7 +56,7 @@ class PDFFormRenderOptionsImplTest {
 		underTest.setEmbedFonts(true);
 		underTest.setLocale(Locale.CANADA_FRENCH);
 		underTest.setRenderAtClient(RenderAtClient.NO);
-		underTest.setSubmitUrl(new URL("http://example.com"));
+		underTest.setSubmitUrl(new URL(EXPECTED_SUBMIT_URL));
 		underTest.setTaggedPDF(true);
 		// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
 //		underTest.setXci(new MockDocumentFactory().create(new byte[0]));
@@ -75,6 +76,7 @@ class PDFFormRenderOptionsImplTest {
 		assertNotEquals(emptyPDFFormRenderOptions.getLocale(), adobePDFFormRenderOptions.getLocale());
 		assertNotEquals(emptyPDFFormRenderOptions.getRenderAtClient(), adobePDFFormRenderOptions.getRenderAtClient());
 		assertNotEquals(emptyPDFFormRenderOptions.getSubmitUrls(), adobePDFFormRenderOptions.getSubmitUrls());
+		assertEquals(EXPECTED_SUBMIT_URL, adobePDFFormRenderOptions.getSubmitUrls().get(0));
 		assertNotEquals(emptyPDFFormRenderOptions.getTaggedPDF(), adobePDFFormRenderOptions.getTaggedPDF());
 	}
 

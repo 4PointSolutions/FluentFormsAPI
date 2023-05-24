@@ -7,22 +7,25 @@ import java.util.stream.Stream;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.Transformable;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
 import com.adobe.fd.assembler.client.OperationException;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ColorSpace;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Compliance;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.OptionalContent;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ResultLevel;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Signatures;
 public interface AssemblerService {
 	
 	AssemblerResult invoke(Document ddx, Map<String,Object> sourceDocuments, AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException; 
-
 	
-	/*
-	 * PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options)
-	 * throws AssemblerServiceException;
-	 * 
-	 * PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options)
-	 * throws AssemblerServiceException ;
-	 */
+	PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options) throws AssemblerServiceException;
+	
+	PDFAConversionResult toPDFA(Document inDoc, PDFAConversionOptionSpec options)throws AssemblerServiceException;
 	
 	AssemblerArgumentBuilder invoke();
+
+	PDFAConversionArgumentBuilder toPDFA();
+	
+	PDFAValidationArgumentBuilder isPDFA();
 	
 	@SuppressWarnings("serial")
 	public static class AssemblerServiceException extends Exception {
@@ -87,28 +90,28 @@ public interface AssemblerService {
 	public static interface AssemblerArgumentBuilder extends AssemblerOptionsSetter, Transformable<AssemblerArgumentBuilder> {
 		
 		@Override
-		AssemblerArgumentBuilder setFailOnError(Boolean isFailOnError);
+		public AssemblerArgumentBuilder setFailOnError(Boolean isFailOnError);
 		
 		@Override
-		AssemblerArgumentBuilder setDefaultStyle(String defaultStyle);
+		public AssemblerArgumentBuilder setDefaultStyle(String defaultStyle);
 	    
 		@Override
-		AssemblerArgumentBuilder setFirstBatesNumber(int start);
+		public AssemblerArgumentBuilder setFirstBatesNumber(int start);
 	    
 		@Override
-		AssemblerArgumentBuilder setLogLevel(LogLevel logLevel);
+		public AssemblerArgumentBuilder setLogLevel(LogLevel logLevel);
 	    
 		@Override
-		AssemblerArgumentBuilder setTakeOwnership(Boolean takeOwnership);
+		public AssemblerArgumentBuilder setTakeOwnership(Boolean takeOwnership);
 	    
 		@Override
-		AssemblerArgumentBuilder setValidateOnly(Boolean validateOnly);
+		public AssemblerArgumentBuilder setValidateOnly(Boolean validateOnly);
       
-		AssemblerArgumentBuilder add(String name, Document document);
+		public AssemblerArgumentBuilder add(String name, Document document);
 		
-		AssemblerArgumentBuilder add(String name, List<Document> documentList);
+		public AssemblerArgumentBuilder add(String name, List<Document> documentList);
 		
-		AssemblerArgumentBuilder add(String name, EitherDocumentOrDocumentList docOrList);
+		public AssemblerArgumentBuilder add(String name, EitherDocumentOrDocumentList docOrList);
 		
 		/**
 		 * This is deprecated because it is not typesafe.  As alternatives use:
@@ -145,4 +148,59 @@ public interface AssemblerService {
 		}
 	}
 
+	public static interface PDFAConversionArgumentBuilder extends PDFAConversionOptionsSetter, Transformable<PDFAConversionArgumentBuilder> {
+
+		@Override
+		public PDFAConversionArgumentBuilder setColorSpace(ColorSpace colorSpace);
+
+		@Override
+		public PDFAConversionArgumentBuilder setCompliance(Compliance compliance);
+
+		@Override
+		public PDFAConversionArgumentBuilder setLogLevel(LogLevel logLevel);
+
+		@Override
+		public PDFAConversionArgumentBuilder setMetadataSchemaExtensions(List<Document> metadataSchemaExtensions);
+
+		@Override
+		public PDFAConversionArgumentBuilder setOptionalContent(OptionalContent optionalContent);
+
+		@Override
+		public PDFAConversionArgumentBuilder setRemoveInvalidXMPProperties(boolean remove);
+
+		@Override
+		public PDFAConversionArgumentBuilder setResultLevel(ResultLevel resultLevel);
+
+		@Override
+		public PDFAConversionArgumentBuilder setRetainPDFFormState(boolean retainPDFFormState);
+
+		@Override
+		public PDFAConversionArgumentBuilder setSignatures(Signatures signatures);
+
+		@Override
+		public PDFAConversionArgumentBuilder setVerify(boolean verify);
+		
+		public PDFAConversionResult executeOn(Document inDoc) throws AssemblerServiceException;
+	}
+	
+	public static interface PDFAValidationArgumentBuilder extends PDFAValidationOptionsSetter, Transformable<PDFAConversionArgumentBuilder> {
+
+		@Override
+		public PDFAValidationArgumentBuilder setAllowCertificationSignatures(boolean allowCertificationSignatures);
+
+		@Override
+		public PDFAValidationArgumentBuilder setCompliance(Compliance compliance);
+
+		@Override
+		public PDFAValidationArgumentBuilder setIgnoreUnusedResource(boolean ignoreUnusedResource);
+
+		@Override
+		public PDFAValidationArgumentBuilder setLogLevel(LogLevel logLevel);
+
+		@Override
+		public PDFAValidationArgumentBuilder setResultLevel(com.adobe.fd.assembler.client.PDFAValidationOptionSpec.ResultLevel resultLevel);
+		
+		public PDFAValidationResult executeOn(Document inDoc) throws AssemblerServiceException;
+	}
+	
 }

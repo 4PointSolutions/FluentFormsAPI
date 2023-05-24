@@ -12,12 +12,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.Response.StatusType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,20 +27,42 @@ import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument;
+import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument.XmlDocumentException;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationResult;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
+import com._4point.aem.fluentforms.impl.assembler.PDFAConversionResultImpl;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ColorSpace;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Compliance;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.OptionalContent;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ResultLevel;
+import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Signatures;
+
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.Response.StatusType;
 
 public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceAdapter
 implements TraditionalDocAssemblerService {
 
 	private static final String ASSEMBLE_DOCUMENT_SERVICE_NAME = "AssemblerService";
 	private static final String ASSEMBLE_DOCUMENT_METHOD_NAME = "AssembleDocuments";
+	private static final String TO_PDFA_METHOD_NAME = "ToPdfA";
+	
+	// invoke parameters
 	private static final String DATA_PARAM_NAME = "ddx";
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
 	private static final String IS_VALIDATE_ONLY = "isValidateOnly";
@@ -56,6 +72,19 @@ implements TraditionalDocAssemblerService {
 	private static final String FIRST_BATES_NUMBER = "firstBatesNum";	
 	private static final String SOURCE_DOCUMENT_KEY = "sourceDocumentMap.key";
 	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
+	
+	// ToPdfA parameters
+	private static final String INPUT_DOCUMENT_PARAM = "inDoc";
+	private static final String COLOR_SPACE_PARAM = "colorSpace";
+	private static final String COMPLIANCE_PARAM = "compliance";
+	private static final String LOG_LEVEL_PARAM = "logLevel";
+	private static final String METADATA_EXTENSION_PARAM = "metadataExtension";
+	private static final String OPTIONAL_CONTENT_PARAM = "optionalContent";
+	private static final String RESULT_LEVEL_PARAM = "resultLevel";
+	private static final String SIGNATURES_PARAM = "signatures";
+	private static final String REMOVE_INVALID_XMP_PARAM = "removeInvalidXmlProperties";
+	private static final String RETAIN_PDF_FORM_STATE_PARAM = "retainPdfFormState";
+	private static final String VERIFY_PARAM = "verify";
 
 	// Only callable from Builder
 	private RestServicesDocAssemblerServiceAdapter(WebTarget target, Supplier<String> correlationId, AemServerType aemServerType) {
@@ -136,7 +165,6 @@ implements TraditionalDocAssemblerService {
 		List<String> failedBlockNames = new ArrayList<String>();
 		DocumentBuilder db;
 		byte[] bytesPdf = null;
-		AssemblerResultImpl assemblerResult = new AssemblerResultImpl();
 		try {
 			db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			org.w3c.dom.Document doc = db.parse(assemblerResultXml);
@@ -152,12 +180,6 @@ implements TraditionalDocAssemblerService {
 					resultMap.put(eElement.getAttribute("documentName"), concatenatedDoc);
 				}
 			}
-			getNodeValueForAttribute(doc, "jobLog", "logValue", assemblerResult);
-			getNodeValueForAttribute(doc, "latestBatesNumber", "value", assemblerResult);
-			getNodeValueForAttribute(doc, "numRequestedBlocks", "value", assemblerResult);	
-			getNodeValeuForList(doc, "successfulDocumentNames", "successfulDocumentName", successfulDocumentNames);
-			getNodeValeuForList(doc, "successfulBlockNames", "successfulBlockName", successfulBlockNames);
-			getNodeValeuForList(doc, "failedBlockNames", "failedBlockName", failedBlockNames);	
 
 			NodeList multipleResultBlocksNodeLi = doc.getElementsByTagName("multipleResultBlocks");
 			for (int i = 0; i < multipleResultBlocksNodeLi.getLength(); i++) {
@@ -172,21 +194,23 @@ implements TraditionalDocAssemblerService {
 					multipleResultsBlocks.put(eElement.getAttribute("name"), documentNamesLi);
 				}
 			}
-			assemblerResult.setDocuments(resultMap);
-			assemblerResult.setSuccessfulDocumentNames(successfulDocumentNames);
-			assemblerResult.setSuccessfulBlockNames(successfulBlockNames);
-			assemblerResult.setFailedBlockNames(failedBlockNames);
-			assemblerResult.setMultipleResultsBlocks(multipleResultsBlocks);
-			assemblerResult.setThrowables(Collections.emptyMap());	// Not currently supported, so we return an empty map.
 
+		    return new AssemblerResultImpl(resultMap, // sourceDocuments
+							    		   getNodeValuesAsList(doc, "failedBlockNames", "failedBlockName"), // failedBlockNames
+							    		   getJobLog(doc), // jobLog
+							    		   getLatestBatesNumber(doc), 	// lastBatesNumber
+							    		   multipleResultsBlocks, // multipleResultsBlocks
+							    		   getNumRequestedBlocks(doc), 	// numRequestedBlocks
+							    		   getNodeValuesAsList(doc, "successfulBlockNames", "successfulBlockName"), // successfulBlockNames
+							    		   getNodeValuesAsList(doc, "successfulDocumentNames", "successfulDocumentName"), // successfulDocumentNames
+							    		   Collections.emptyMap());// throwables - Not currently supported, so we return an empty map.
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new AssemblerServiceException("Error while parsing xml", e);
 		}
-		return assemblerResult;
 	}
 
-	private static void getNodeValeuForList(org.w3c.dom.Document doc, String parentNodeName, String childNodeName,
-			List<String> stringLi) {
+	private static List<String> getNodeValuesAsList(org.w3c.dom.Document doc, String parentNodeName, String childNodeName) {
+		ArrayList<String> stringList = new ArrayList<String>();
 		NodeList nodeLi = doc.getElementsByTagName(parentNodeName);
 		for (int i = 0; i < nodeLi.getLength(); i++) {
 			Node node = nodeLi.item(i);
@@ -197,30 +221,31 @@ implements TraditionalDocAssemblerService {
 					Node childNode = childNodLi.item(j);
 					if (childNode.getNodeType() == Node.ELEMENT_NODE) {
 						Element childElement = (Element) node;	
-						stringLi.add(childElement.getElementsByTagName(childNodeName).item(j).getTextContent());
+						stringList.add(childElement.getElementsByTagName(childNodeName).item(j).getTextContent());
 					}
 				}
 			}
 		}
+		return stringList;
 	}
 
-
-	private static void getNodeValueForAttribute(org.w3c.dom.Document doc, String parentNodeName, String attributeName, AssemblerResultImpl assemblerResult) {
-		int result = 0;
-		Element eElement = (Element)doc.getElementsByTagName(parentNodeName).item(0);
-		if(parentNodeName.equals("jobLog")) {
-			byte[] bytesJobLog = Base64.getDecoder().decode(eElement.getAttribute(attributeName));
-			assemblerResult.setJobLog(SimpleDocumentFactoryImpl.getFactory().create(bytesJobLog));
-		} else {
-			result = Integer.parseInt(eElement.getAttribute(attributeName));
-			if(parentNodeName.equals("latestBatesNumber")) {
-				assemblerResult.setLastBatesNumber(result);
-			} else {
-				assemblerResult.setNumRequestedBlocks(result);
-			}
-		}
+	private static String getNodeValueForAttribute(org.w3c.dom.Document doc, String parentNodeName, String attributeName) {
+		return ((Element)doc.getElementsByTagName(parentNodeName).item(0)).getAttribute(attributeName);
 	}
 
+	private static Document getJobLog(org.w3c.dom.Document doc) {
+		byte[] bytesJobLog = Base64.getDecoder().decode(getNodeValueForAttribute(doc, "jobLog", "logValue"));
+		return SimpleDocumentFactoryImpl.getFactory().create(bytesJobLog);
+	}
+
+	private static int getLatestBatesNumber(org.w3c.dom.Document doc) {
+		return Integer.parseInt(getNodeValueForAttribute(doc, "latestBatesNumber", "value"));
+	}
+	
+	private static int getNumRequestedBlocks(org.w3c.dom.Document doc) {
+		return Integer.parseInt(getNodeValueForAttribute(doc, "numRequestedBlocks", "value"));
+	}
+	
 	/*
 	 * @Override public PDFAValidationResult isPDFA(Document inDoc,
 	 * PDFAValidationOptionSpec options) {
@@ -301,4 +326,101 @@ implements TraditionalDocAssemblerService {
 		}
 	}
 
+	@Override
+	public PDFAValidationResult isPDFA(Document inDoc, PDFAValidationOptionSpec options)
+			throws AssemblerServiceException {
+		throw new UnsupportedOperationException("isPDFA has not been implemented yet.");
+	}
+
+	@Override
+	public PDFAConversionResult toPDFA(Document inPdf, PDFAConversionOptionSpec options) throws AssemblerServiceException {
+			WebTarget toPdfaTarget = baseTarget.path(constructStandardPath(ASSEMBLE_DOCUMENT_SERVICE_NAME, TO_PDFA_METHOD_NAME));
+
+			try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
+				
+				multipart.field(INPUT_DOCUMENT_PARAM, Objects.requireNonNull(inPdf, "input PDF can not be null").getInputStream(), APPLICATION_PDF);
+				
+				if (options != null) {
+					
+					ColorSpace colorSpace = options.getColorSpace();
+					Compliance compliance = options.getCompliance();
+					LogLevel logLevel = options.getLogLevel();
+					List<Document> metadataSchemaExtensions = options.getMetadataSchemaExtensions();
+					OptionalContent optionalContent = options.getOptionalContent();
+					ResultLevel resultLevel = options.getResultLevel();
+					Signatures signatures = options.getSignatures();
+					Boolean removeInvalidXMPProperties = options.isRemoveInvalidXMPProperties();
+					Boolean retainPDFFormState = options.isRetainPDFFormState();
+					Boolean verify = options.isVerify();
+
+					MultipartTransformer.create(multipart)
+						.transform((t) -> colorSpace == null ? t : t.field(COLOR_SPACE_PARAM, colorSpace.toString()))
+						.transform((t) -> compliance == null ? t : t.field(COMPLIANCE_PARAM, compliance.toString()))
+						.transform((t) -> logLevel == null ? t : t.field(LOG_LEVEL_PARAM, logLevel.toString()))
+						.transform((t) -> optionalContent == null ? t : t.field(OPTIONAL_CONTENT_PARAM, optionalContent.toString()))
+						.transform((t) -> resultLevel == null ? t : t.field(RESULT_LEVEL_PARAM, resultLevel.toString()))
+						.transform((t) -> signatures == null ? t : t.field(SIGNATURES_PARAM, signatures.toString()))
+						.transform((t) -> removeInvalidXMPProperties == null ? t : t.field(REMOVE_INVALID_XMP_PARAM, removeInvalidXMPProperties.toString()))
+						.transform((t) -> retainPDFFormState == null ? t : t.field(RETAIN_PDF_FORM_STATE_PARAM, retainPDFFormState.toString()))
+						.transform((t) -> verify == null ? t : t.field(VERIFY_PARAM, verify.toString()));
+					
+					if (metadataSchemaExtensions != null) {
+						for(Document extensionsDoc : metadataSchemaExtensions) {
+							multipart.field(METADATA_EXTENSION_PARAM, extensionsDoc.getInputStream(), MediaType.APPLICATION_XML_TYPE);
+						}
+					}
+				}
+
+				Response result = postToServer(toPdfaTarget, multipart, MediaType.APPLICATION_XML_TYPE);
+				StatusType resultStatus = result.getStatusInfo();
+				if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
+					String msg = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='"
+							+ resultStatus.getReasonPhrase() + "'.";
+					if (result.hasEntity()) {
+						InputStream entityStream = (InputStream) result.getEntity();
+						msg += "\n" + inputStreamtoString(entityStream);
+					}
+					throw new AssemblerServiceException(msg);
+				}
+
+				if (!result.hasEntity()) {
+					throw new AssemblerServiceException("Call to server succeeded but server failed to return assemblerResult xml.  This should never happen.");
+				}
+
+				MediaType responseContentType = result.getMediaType();
+				if (responseContentType == null || !responseContentType.isCompatible(MediaType.APPLICATION_XML_TYPE)) {
+					String msg = "Response from AEM server was  " + (responseContentType != null ? "content-type='" + responseContentType.toString() + "'"
+									: "content-type was null") + ".";
+					InputStream entityStream = (InputStream) result.getEntity();
+					msg += "\n" + inputStreamtoString(entityStream);
+					throw new AssemblerServiceException(msg);
+				}
+				PDFAConversionResult conversionResult = convertResponseToPdfaConversionResult((InputStream)result.getEntity());
+				return conversionResult;
+			} catch (IOException e) {
+				throw new AssemblerServiceException("I/O Error while converting document. (" + baseTarget.getUri().toString() + ").", e);
+			} catch (RestServicesServiceException e) {
+				throw new AssemblerServiceException("Error while posting to server", e);
+			} catch (XmlDocumentException e) {
+				throw new AssemblerServiceException("Error extracting data from response XML.", e);
+			}
+	}
+
+	private static PDFAConversionResult convertResponseToPdfaConversionResult(InputStream entityIs) throws XmlDocumentException {
+		return convertXmlToPdfaConversionResult(XmlDocument.create(entityIs));
+	}
+
+	private static final String TO_PDFA_RESULT_BASE_XPATH = "/ToPdfAResult";
+	private static final String CONVERSION_LOG_XPATH = TO_PDFA_RESULT_BASE_XPATH + "/ConversionLog";
+	private static final String JOB_LOG_XPATH = TO_PDFA_RESULT_BASE_XPATH + "/JobLog";
+	private static final String PDFA_DOCUMENT_XPATH = TO_PDFA_RESULT_BASE_XPATH + "/PdfADocument";
+	private static final String IS_PDFA_XPATH = TO_PDFA_RESULT_BASE_XPATH + "/IsPdfA";
+	
+	private static PDFAConversionResult convertXmlToPdfaConversionResult(XmlDocument xmlDoc) throws XmlDocumentException {
+		return new PDFAConversionResultImpl(xmlDoc.getDocument(CONVERSION_LOG_XPATH), 
+											xmlDoc.getDocument(JOB_LOG_XPATH), 
+											xmlDoc.getDocument(PDFA_DOCUMENT_XPATH), 
+											xmlDoc.getBoolean(IS_PDFA_XPATH)
+											);
+	}
 }

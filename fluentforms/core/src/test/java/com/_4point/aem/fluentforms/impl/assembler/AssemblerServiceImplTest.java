@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,9 +21,13 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.EitherDocumentOrDocumentList;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
+import com._4point.aem.fluentforms.api.assembler.PDFAValidationResult;
 import com._4point.aem.fluentforms.impl.UsageContext;
+import com._4point.aem.fluentforms.testing.assembler.MockAssemblerService;
 import com.adobe.fd.assembler.client.OperationException;
 
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -30,7 +35,6 @@ import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 @ExtendWith(AemContextExtension.class)
 @ExtendWith(MockitoExtension.class)
 public class AssemblerServiceImplTest {
-
 	
 	@Mock
 	private TraditionalDocAssemblerService adobeAssemblerService;
@@ -44,9 +48,9 @@ public class AssemblerServiceImplTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	@DisplayName("Test testInvoke(Document,...) Happy Path.")
+	@DisplayName("Test invoke(Document,...) Happy Path.")
 	void testInvoke() throws Exception {
-		MockPdfAssemblerService svc = new MockPdfAssemblerService();
+		MockPdfAssemblerServiceInvoke svc = new MockPdfAssemblerServiceInvoke();
 		
 		Document ddx = Mockito.mock(Document.class);
 		AssemblerOptionsSpec options = Mockito.mock(AssemblerOptionsSpec.class);
@@ -74,8 +78,6 @@ public class AssemblerServiceImplTest {
         
 		NullPointerException ex2 = assertThrows(NullPointerException.class, ()->underTest.invoke(ddx, null, options));
 		assertTrue(ex2.getMessage().contains("sourceDocuments"), ()->"'" + ex2.getMessage() + "' does not contain 'sourceDocuments'");
-		
-	
 	}
   
 	@SuppressWarnings("unchecked")
@@ -95,7 +97,7 @@ public class AssemblerServiceImplTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	void testAssembleDocument_deprecated() throws Exception {
-	    MockPdfAssemblerService svc = new MockPdfAssemblerService();
+	    MockPdfAssemblerServiceInvoke svc = new MockPdfAssemblerServiceInvoke();
 		Document ddx = Mockito.mock(Document.class);
 		Map<String, Object> sourceDocuments = Mockito.mock(Map.class);
 		@SuppressWarnings("deprecation")
@@ -112,13 +114,13 @@ public class AssemblerServiceImplTest {
 		assertEquals(ddx, svc.getDdxOrg(), "Expected the ddx passed to AEM would match the ddx used.");
 		assertSame(sourceDocuments, svc.getSourceDocs(), "Expected the SourceDocuments passed to AEM would match the SourceDocuments used.");
 		assertSame(result, svc.getAssemblerResult(), "Expected the AssemblerResult returned by AEM would match the AssemblerResult.");
-		AssemblerOptionSpecTest.assertNotEmpty(svc.getOptionsArg());
+		AssemblerOptionSpecImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	void testAssembleDocument() throws Exception {
-	    MockPdfAssemblerService svc = new MockPdfAssemblerService();
+	    MockPdfAssemblerServiceInvoke svc = new MockPdfAssemblerServiceInvoke();
 		Document ddx = Mockito.mock(Document.class);
 		String sourceDocument1Name = "Name1";
 		Document sourceDocument1 = Mockito.mock(Document.class);
@@ -151,17 +153,17 @@ public class AssemblerServiceImplTest {
 		assertThat(sourceDocs, hasEntry(sourceDocOrList1Name, sourceDocument3));
 		assertThat(sourceDocs, aMapWithSize(4));	// Ensure those are the only entries.
 		assertSame(result, svc.getAssemblerResult(), "Expected the AssemblerResult returned by AEM would match the AssemblerResult.");
-		AssemblerOptionSpecTest.assertNotEmpty(svc.getOptionsArg());
+		AssemblerOptionSpecImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 	
-	private class MockPdfAssemblerService {
+	private class MockPdfAssemblerServiceInvoke {
 		private final AssemblerResult assemblerResult =  Mockito.mock(AssemblerResult.class);
 		private final ArgumentCaptor<Document> ddx = ArgumentCaptor.forClass(Document.class);
 		private final ArgumentCaptor<AssemblerOptionsSpec> optionsArg = ArgumentCaptor.forClass(AssemblerOptionsSpec.class);
 		@SuppressWarnings("unchecked")
 		private final ArgumentCaptor<Map<String, Object>> sourceDocuments = ArgumentCaptor.forClass(Map.class);
 		
-		protected MockPdfAssemblerService() throws AssemblerServiceException, OperationException {
+		protected MockPdfAssemblerServiceInvoke() throws AssemblerServiceException, OperationException {
 			super();
 			// These are "lenient" because we only expect one or the other to be called.  Also, in some of the exceptional cases,
 			// neither are called.
@@ -184,6 +186,5 @@ public class AssemblerServiceImplTest {
         	return sourceDocuments.getValue();
         }
         
-	}
-
+	}	
 }

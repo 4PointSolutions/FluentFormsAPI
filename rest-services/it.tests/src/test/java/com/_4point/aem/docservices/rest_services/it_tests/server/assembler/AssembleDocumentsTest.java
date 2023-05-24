@@ -33,7 +33,7 @@ import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDo
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
-import com._4point.aem.fluentforms.impl.assembler.LogLevel;
+import com._4point.aem.fluentforms.api.assembler.LogLevel;
 public class AssembleDocumentsTest {
 	
 	private static final String ASSEMBLE_DOCUMENT_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/AssemblerService/AssembleDocuments";
