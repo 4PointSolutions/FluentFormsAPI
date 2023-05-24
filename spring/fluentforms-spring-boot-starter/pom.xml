@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.2</version>
+		<version>3.1.0</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>fluentforms-spring-boot-starter</artifactId>
@@ -14,7 +14,7 @@
 	<properties>
 		<java.version>17</java.version>
 		<jasypt.spring.boot.version>3.0.5</jasypt.spring.boot.version>
-		<jasypt.maven.plugin.version>3.0.3</jasypt.maven.plugin.version>
+		<jasypt.maven.plugin.version>3.0.5</jasypt.maven.plugin.version>
 		<fluentforms.version>0.0.2-SNAPSHOT</fluentforms.version>
 	</properties>
 	<dependencies>
