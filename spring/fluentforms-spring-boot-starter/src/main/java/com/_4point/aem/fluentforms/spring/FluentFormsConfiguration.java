@@ -1,7 +1,8 @@
 package com._4point.aem.fluentforms.spring;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
@@ -30,7 +31,8 @@ import com._4point.aem.fluentforms.impl.output.OutputServiceImpl;
 import com._4point.aem.fluentforms.impl.pdfUtility.PdfUtilityServiceImpl;
 
 @Lazy
-@Configuration
+@AutoConfiguration
+@EnableConfigurationProperties(AemConfiguration.class)
 public class FluentFormsConfiguration {
 	
 	@SuppressWarnings("unchecked")

@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com._4point.aem.fluentforms</groupId>
 	<parent>
@@ -28,6 +30,11 @@
 			<artifactId>jasypt-spring-boot-starter</artifactId>
 			<version>${jasypt.spring.boot.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-autoconfigure</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<!-- Testing Dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -47,18 +54,29 @@
 	</dependencies>
 	<build>
 		<plugins>
-			<!-- Useful in case you want to change the password or secret key for the jasypt data -->
+			<!-- Useful in case you want to change the password or secret key
+			for the jasypt data -->
 			<!-- To change password or key 
-				- Navigate to directory where this pom resides
+				- Navigate to directory where
+			this pom resides
 				- In command line execute:  
-						mvn jasypt:encrypt-value -Djasypt.encryptor.password=SECRET_KEY -Djasypt.plugin.value=VALUE_TO_BE_ENCRYPTED
-				- SECRET_KEY is the value that is used to encrypt/decrypt 
-				- Alternatively you can download the plugin jar an execute the command from the location where the plugin jar reside
+						mvn
+			jasypt:encrypt-value -Djasypt.encryptor.password=SECRET_KEY
+			-Djasypt.plugin.value=VALUE_TO_BE_ENCRYPTED
+				- SECRET_KEY is the
+			value that is used to encrypt/decrypt 
+				- Alternatively you can
+			download the plugin jar an execute the command from the location
+			where the plugin jar reside
 			-->
 			<plugin>
 				<groupId>com.github.ulisesbocchio</groupId>
 				<artifactId>jasypt-maven-plugin</artifactId>
 				<version>${jasypt.maven.plugin.version}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
