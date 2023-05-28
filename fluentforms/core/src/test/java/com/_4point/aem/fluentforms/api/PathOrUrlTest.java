@@ -21,6 +21,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com._4point.aem.fluentforms.impl.CrxUrlHandler;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+
 class PathOrUrlTest {
 	private static final String fileSeparator = FileSystems.getDefault().getSeparator();
 
@@ -267,6 +269,11 @@ class PathOrUrlTest {
 				);
 	}
 	
+	@Test
+	void equalsContract() {
+	    EqualsVerifier.forClass(PathOrUrl.class).verify();
+	}
+
 	@Test
 	void test_isRelative() throws Exception {
 		final String filePrefix = "file://";

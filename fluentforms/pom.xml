@@ -87,6 +87,7 @@
         <slf4j-test.version>1.2.0</slf4j-test.version>
         <slf4j.version>1.7.32</slf4j.version>
         <hamcrest.version>2.2</hamcrest.version>
+        <equalsverifier.version>3.14.1</equalsverifier.version>
         
         <!-- Project dependecies -->
         <aemfd.client.sdk.version>6.0.566</aemfd.client.sdk.version> <!-- fluentforms requires AEM 6.5 SP11 or later -->
@@ -568,7 +569,13 @@
                 <version>${slf4j-test.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!-- AEM Forms SDK -->
+			<dependency>
+				<groupId>nl.jqno.equalsverifier</groupId>
+				<artifactId>equalsverifier</artifactId>
+				<version>${equalsverifier.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<!-- AEM Forms SDK -->
             <dependency>
 			  <groupId>com.adobe.aemfd</groupId>
 			  <artifactId>aemfd-client-sdk</artifactId>
