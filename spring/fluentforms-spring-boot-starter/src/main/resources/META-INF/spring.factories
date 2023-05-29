@@ -1,2 +1,0 @@
-# Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com._4point.aem.fluentforms.spring.FluentFormsConfiguration

@@ -1,8 +1,12 @@
 package com._4point.aem.fluentforms.spring;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
@@ -44,52 +48,61 @@ public class FluentFormsConfiguration {
 				  );
 	}
 
+	@ConditionalOnMissingBean
 	@Bean
 	public AdaptiveFormsService adaptiveFormsService(AemConfiguration aemConfig) {
 		return setAemFields(AdaptiveFormsService.builder(), aemConfig).build();
 	}
 
+	@ConditionalOnMissingBean
 	@Bean
 	public AssemblerService assemblerService(AemConfiguration aemConfig) {
 		RestServicesDocAssemblerServiceAdapter adapter = setAemFields(RestServicesDocAssemblerServiceAdapter.builder(), aemConfig).build();
 		return new AssemblerServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 	}
 
+	@ConditionalOnMissingBean
 	@Bean
 	public DocAssuranceService docAssuranceService(AemConfiguration aemConfig) {
 		RestServicesDocAssuranceServiceAdapter adapter = setAemFields(RestServicesDocAssuranceServiceAdapter.builder(), aemConfig).build();
 		return new DocAssuranceServiceImpl(adapter);
 	}
 
+	@ConditionalOnMissingBean
 	@Bean
 	public FormsService formsService(AemConfiguration aemConfig) {
 		RestServicesFormsServiceAdapter adapter = setAemFields(RestServicesFormsServiceAdapter.builder(), aemConfig).build();
 		return new FormsServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 	}
 
+	@ConditionalOnMissingBean
 	@Bean
 	public GeneratePDFService generatePDFService(AemConfiguration aemConfig) {
 		RestServicesGeneratePDFServiceAdapter adapter = setAemFields(RestServicesGeneratePDFServiceAdapter.builder(), aemConfig).build();
 		return new GeneratePDFServiceImpl(adapter);
 	}
 
+	@ConditionalOnMissingBean
 	@Bean
 	public Html5FormsService html5FormsService(AemConfiguration aemConfig) {
 		return setAemFields(Html5FormsService.builder(), aemConfig).build();
 	}
 
+	@ConditionalOnMissingBean
 	@Bean
 	public OutputService outputService(AemConfiguration aemConfig) {
 		RestServicesOutputServiceAdapter adapter = setAemFields(RestServicesOutputServiceAdapter.builder(), aemConfig).build();
 		return new OutputServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 	}
 	
+	@ConditionalOnMissingBean
 	@Bean
 	public PdfUtilityService pdfUtilityService(AemConfiguration aemConfig) {
 		RestServicesPdfUtilityServiceAdapter adapter = setAemFields(RestServicesPdfUtilityServiceAdapter.builder(), aemConfig).build();
 		return new PdfUtilityServiceImpl(adapter);
 	}
 	
+	@ConditionalOnMissingBean
 	@Bean 
 	public DocumentFactory documentFactory() {
 		return SimpleDocumentFactoryImpl.getFactory();

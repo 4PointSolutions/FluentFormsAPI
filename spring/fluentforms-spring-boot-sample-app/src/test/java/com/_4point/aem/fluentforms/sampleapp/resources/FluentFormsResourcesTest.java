@@ -31,4 +31,7 @@ class FluentFormsResourcesTest {
 		assertEquals(Status.OK.getStatusCode(), response.getStatus());
 	}
 
+    @Test
+    public void whenSpringContextIsBootstrapped_thenNoExceptions() {
+    }
 }

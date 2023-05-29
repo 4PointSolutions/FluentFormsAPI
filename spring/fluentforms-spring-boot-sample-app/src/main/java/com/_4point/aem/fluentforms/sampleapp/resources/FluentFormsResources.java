@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com._4point.aem.fluentforms.api.output.OutputService;
+import com._4point.aem.fluentforms.spring.FluentFormsConfiguration;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
