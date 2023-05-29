@@ -1,10 +1,14 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
+import java.io.FileNotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.output.OutputService;
+import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
 import com._4point.aem.fluentforms.spring.FluentFormsConfiguration;
 
 import jakarta.ws.rs.GET;
@@ -28,8 +32,13 @@ public class FluentFormsResources {
 	@Path("/OutputServiceGeneratePdf")
 	@GET
 	@Produces({APPLICATION_PDF, "*/*;qs=0.8"})	// Will be selected if user requests JSON or nothing at all.
-	public Response outputServiceGeneratePdf() {
+	public Response outputServiceGeneratePdf() throws FileNotFoundException, OutputServiceException {
 		if (outputService == null) return Response.serverError().build();
+		
+		Document result = outputService.generatePDFOutput()
+									   .executeOn(java.nio.file.Path.of("sample_template.xdp"));
+		
+		
 		return Response.ok().build();
 	}
 
