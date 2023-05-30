@@ -1,5 +1,9 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
+import static com._4point.aem.fluentforms.sampleapp.resources.ResponseMatcher.hasMediaType;
+import static com._4point.aem.fluentforms.sampleapp.resources.ResponseMatcher.isStatus;
+import static org.hamcrest.MatcherAssert.assertThat; 
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URI;
@@ -13,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -32,6 +37,9 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 class FluentFormsResourcesTest {
 	private static final boolean SAVE_RESULTS = false;
 	private static final boolean WIREMOCK_RECORDING = false;
+
+	private static final String APPLICATION_PDF = "application/pdf";
+	private static final MediaType APPLICATION_PDF_TYPE = MediaType.valueOf(APPLICATION_PDF);
 
 	@LocalServerPort
 	private int port;
@@ -67,7 +75,19 @@ class FluentFormsResourcesTest {
 										 .request()
 										 .get();
 		
-		assertEquals(Status.OK.getStatusCode(), response.getStatus());
+		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(APPLICATION_PDF_TYPE)));
+	}
+
+	@Test
+	void testAdaptiveFormsServiceRenderAdaptiveForm_NoData() {
+		Response response = ClientBuilder.newClient()
+										 .target(getBaseUri(port))
+										 .path("/FluentForms/AdaptiveFormsServiceRenderAdaptiveForm")
+										 .queryParam("form", "formName")
+										 .request()
+										 .get();
+		
+		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE)));
 	}
 
 	private static String getBaseUriString(int port) {
@@ -77,8 +97,4 @@ class FluentFormsResourcesTest {
 	private static URI getBaseUri(int port) {
 		return URI.create("http://localhost:" + port);
 	}
-
-    @Test
-    public void whenSpringContextIsBootstrapped_thenNoExceptions() {
-    }
 }

@@ -1,6 +1,6 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +17,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -35,14 +36,14 @@ public class FluentFormsResources {
 	@Path("/OutputServiceGeneratePdf")
 	@GET
 	@Produces({APPLICATION_PDF, "*/*;qs=0.8"})	// Will be selected if user requests PDF or nothing at all.
-	public Response outputServiceGeneratePdf() throws FileNotFoundException, OutputServiceException {
+	public Response outputServiceGeneratePdf() throws OutputServiceException, IOException {
 		if (outputService == null) return Response.serverError().build();
 		
 		Document result = outputService.generatePDFOutput()
 									   .executeOn(java.nio.file.Path.of("sample_template.xdp"));
 		
 		
-		return Response.ok().build();
+		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
 	}
 
 	@Autowired
@@ -51,10 +52,10 @@ public class FluentFormsResources {
 	@Path("/AdaptiveFormsServiceRenderAdaptiveForm")
 	@GET
 	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
-	public Response adaptiveFormsServiceRenderAdaptiveForm(@QueryParam("form") String templateName) throws AdaptiveFormsServiceException {
-		Document result = adaptiveFormsService.renderAdaptiveForm("");
+	public Response adaptiveFormsServiceRenderAdaptiveForm(@QueryParam("form") String templateName) throws AdaptiveFormsServiceException, IOException {
+		Document result = adaptiveFormsService.renderAdaptiveForm("sample00002test");
 		
-		return Response.ok().build();
+		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
 	}
 
 	

@@ -12,8 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 							  "fluentforms.aem.user=user", "fluentforms.aem.password=password"})
 class FluentFormsSpringApplicationTest {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    public void whenSpringContextIsBootstrapped_thenNoExceptions() {
+    }
 
 }
