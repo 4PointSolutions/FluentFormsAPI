@@ -63,10 +63,32 @@ public class ResponseMatcher {
 			}
 			return result;
 		}
-		
 	}
 	
 	public static TypeSafeDiagnosingMatcher<Response> hasMediaType(MediaType expectedMediaType) {
 		return new HasMediaType(expectedMediaType); 
 	}
+
+	private static class HasEntity extends TypeSafeDiagnosingMatcher<Response> {
+		
+		@Override
+		public void describeTo(Description description) {
+			description.appendText("Response should hava an entity.");
+		}
+
+		@Override
+		protected boolean matchesSafely(Response item, Description mismatchDescription) {
+			boolean result = item.hasEntity();
+			if (!result) {
+				mismatchDescription.appendText(", but Response did not have entity.");
+			}
+			return result;
+		}
+	}
+	
+	public static TypeSafeDiagnosingMatcher<Response> hasEntity() {
+		return new HasEntity(); 
+	}
+
+
 }

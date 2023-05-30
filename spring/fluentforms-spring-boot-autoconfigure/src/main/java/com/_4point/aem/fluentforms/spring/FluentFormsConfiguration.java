@@ -1,12 +1,10 @@
 package com._4point.aem.fluentforms.spring;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
@@ -106,5 +104,10 @@ public class FluentFormsConfiguration {
 	@Bean 
 	public DocumentFactory documentFactory() {
 		return SimpleDocumentFactoryImpl.getFactory();
+	}
+	
+	@Bean
+	public ResourceConfigCustomizer afProxyConfigurer(AemConfiguration aemConfig) {
+		return config->config.register(new AemProxyEndpoint(aemConfig));
 	}
 }

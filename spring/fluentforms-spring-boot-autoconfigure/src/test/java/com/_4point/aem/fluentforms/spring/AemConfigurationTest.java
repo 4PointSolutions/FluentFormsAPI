@@ -63,6 +63,11 @@ class AemConfigurationTest {
 		assertEquals(false, underTest.useSsl());
 	}
 
+	@Test
+	void testGetAfBaseLocation() {
+		assertEquals("", underTest.afBaseLocation());
+	}
+
 	@SpringBootApplication
 	@EnableConfigurationProperties(AemConfiguration.class)
 	public static class TestApplication {

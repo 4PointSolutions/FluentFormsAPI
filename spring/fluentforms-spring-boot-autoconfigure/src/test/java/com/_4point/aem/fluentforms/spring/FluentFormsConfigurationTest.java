@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -77,6 +78,11 @@ class FluentFormsConfigurationTest {
 	void testDocumentFactory(@Autowired DocumentFactory factory) {
 		assertNotNull(factory);
 		assertNotNull(factory.create(new byte[6]));
+	}
+
+	@Test
+	void testDocumentFactory(@Autowired ResourceConfigCustomizer afProxyConfigurer) {
+		assertNotNull(afProxyConfigurer);
 	}
 
 	@SpringBootApplication
