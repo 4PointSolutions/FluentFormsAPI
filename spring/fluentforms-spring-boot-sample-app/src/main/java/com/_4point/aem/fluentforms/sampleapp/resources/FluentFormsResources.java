@@ -36,11 +36,11 @@ public class FluentFormsResources {
 	@Path("/OutputServiceGeneratePdf")
 	@GET
 	@Produces({APPLICATION_PDF, "*/*;qs=0.8"})	// Will be selected if user requests PDF or nothing at all.
-	public Response outputServiceGeneratePdf() throws OutputServiceException, IOException {
+	public Response outputServiceGeneratePdf(@QueryParam("form") String templateName) throws OutputServiceException, IOException {
 		if (outputService == null) return Response.serverError().build();
 		
 		Document result = outputService.generatePDFOutput()
-									   .executeOn(java.nio.file.Path.of("sample_template.xdp"));
+									   .executeOn(java.nio.file.Path.of(templateName));
 		
 		
 		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
@@ -53,7 +53,7 @@ public class FluentFormsResources {
 	@GET
 	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
 	public Response adaptiveFormsServiceRenderAdaptiveForm(@QueryParam("form") String templateName) throws AdaptiveFormsServiceException, IOException {
-		Document result = adaptiveFormsService.renderAdaptiveForm("sample00002test");
+		Document result = adaptiveFormsService.renderAdaptiveForm(templateName);
 		
 		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
 	}

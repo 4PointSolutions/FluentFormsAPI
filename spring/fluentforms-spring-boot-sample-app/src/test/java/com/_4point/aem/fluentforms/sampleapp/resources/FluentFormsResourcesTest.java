@@ -71,7 +71,7 @@ class FluentFormsResourcesTest {
 		Response response = ClientBuilder.newClient()
 										 .target(getBaseUri(port))
 										 .path("/FluentForms/OutputServiceGeneratePdf")
-										 .queryParam("formName", "formName")
+										 .queryParam("form", "sample_template.xdp")
 										 .request()
 										 .get();
 		
@@ -83,7 +83,7 @@ class FluentFormsResourcesTest {
 		Response response = ClientBuilder.newClient()
 										 .target(getBaseUri(port))
 										 .path("/FluentForms/AdaptiveFormsServiceRenderAdaptiveForm")
-										 .queryParam("form", "formName")
+										 .queryParam("form", "sample00002test")
 										 .request()
 										 .get();
 		
