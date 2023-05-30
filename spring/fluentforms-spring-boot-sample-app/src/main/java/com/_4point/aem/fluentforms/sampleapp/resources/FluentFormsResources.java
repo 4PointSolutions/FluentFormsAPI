@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
+import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService.AdaptiveFormsServiceException;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
@@ -14,6 +16,7 @@ import com._4point.aem.fluentforms.spring.FluentFormsConfiguration;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -31,13 +34,25 @@ public class FluentFormsResources {
 	
 	@Path("/OutputServiceGeneratePdf")
 	@GET
-	@Produces({APPLICATION_PDF, "*/*;qs=0.8"})	// Will be selected if user requests JSON or nothing at all.
+	@Produces({APPLICATION_PDF, "*/*;qs=0.8"})	// Will be selected if user requests PDF or nothing at all.
 	public Response outputServiceGeneratePdf() throws FileNotFoundException, OutputServiceException {
 		if (outputService == null) return Response.serverError().build();
 		
 		Document result = outputService.generatePDFOutput()
 									   .executeOn(java.nio.file.Path.of("sample_template.xdp"));
 		
+		
+		return Response.ok().build();
+	}
+
+	@Autowired
+	AdaptiveFormsService adaptiveFormsService;
+	
+	@Path("/AdaptiveFormsServiceRenderAdaptiveForm")
+	@GET
+	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
+	public Response adaptiveFormsServiceRenderAdaptiveForm(@QueryParam("form") String templateName) throws AdaptiveFormsServiceException {
+		Document result = adaptiveFormsService.renderAdaptiveForm("");
 		
 		return Response.ok().build();
 	}
