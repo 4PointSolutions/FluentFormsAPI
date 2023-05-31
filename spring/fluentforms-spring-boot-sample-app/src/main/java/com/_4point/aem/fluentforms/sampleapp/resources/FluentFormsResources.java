@@ -11,7 +11,7 @@ import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService.
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
-import com._4point.aem.fluentforms.spring.FluentFormsConfiguration;
+import com._4point.aem.fluentforms.spring.FluentFormsAutoConfiguration;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

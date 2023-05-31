@@ -35,7 +35,7 @@ import com._4point.aem.fluentforms.impl.pdfUtility.PdfUtilityServiceImpl;
 @Lazy
 @AutoConfiguration
 @EnableConfigurationProperties(AemConfiguration.class)
-public class FluentFormsConfiguration {
+public class FluentFormsAutoConfiguration {
 	
 	@SuppressWarnings("unchecked")
 	private <T extends Builder> T setAemFields(T builder, AemConfiguration aemConfig) {

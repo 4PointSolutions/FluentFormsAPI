@@ -21,14 +21,14 @@ import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
 
-@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsConfigurationTest.TestApplication.class, FluentFormsConfiguration.class}, 
+@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
 				properties = {
 						"fluentforms.aem.servername=localhost", 
 						"fluentforms.aem.port=4502", 
 						"fluentforms.aem.user=admin",		 
 						"fluentforms.aem.password=admin)",
 						})
-class FluentFormsConfigurationTest {
+class FluentFormsAutoConfigurationTest {
 	
 	@BeforeEach
 	void setUp() throws Exception {
