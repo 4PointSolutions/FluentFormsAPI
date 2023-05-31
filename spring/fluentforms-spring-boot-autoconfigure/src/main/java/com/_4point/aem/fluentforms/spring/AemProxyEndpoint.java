@@ -58,7 +58,7 @@ public class AemProxyEndpoint {
     public AemProxyEndpoint(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig) {
     	this.aemProxyConfig = aemProxyConfig;
     	this.aemConfig = aemConfig;
-    	this.httpClient = ClientBuilder.newClient().register(HttpAuthenticationFeature.basic(aemConfig.servername(), aemConfig.password())).register(MultiPartFeature.class);
+    	this.httpClient = ClientBuilder.newClient().register(HttpAuthenticationFeature.basic(aemConfig.user(), aemConfig.password())).register(MultiPartFeature.class);
 	}
 
     @Path("libs/granite/csrf/token.json")
