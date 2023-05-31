@@ -2,12 +2,10 @@ package com._4point.aem.fluentforms.spring;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -30,10 +28,6 @@ import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
 						})
 class FluentFormsAutoConfigurationTest {
 	
-	@BeforeEach
-	void setUp() throws Exception {
-	}
-
 	@Test
 	void testAdaptiveFormsService(@Autowired AdaptiveFormsService service) {
 		assertNotNull(service);
@@ -78,11 +72,6 @@ class FluentFormsAutoConfigurationTest {
 	void testDocumentFactory(@Autowired DocumentFactory factory) {
 		assertNotNull(factory);
 		assertNotNull(factory.create(new byte[6]));
-	}
-
-	@Test
-	void testDocumentFactory(@Autowired ResourceConfigCustomizer afProxyConfigurer) {
-		assertNotNull(afProxyConfigurer);
 	}
 
 	@SpringBootApplication

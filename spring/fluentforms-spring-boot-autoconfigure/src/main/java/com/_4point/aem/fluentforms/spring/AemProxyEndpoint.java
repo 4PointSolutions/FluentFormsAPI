@@ -26,7 +26,6 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ChunkedOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
 
@@ -38,12 +37,14 @@ public class AemProxyEndpoint {
 	private static final String AEM_APP_PREFIX = "/";
 	private Client httpClient;
 
+	private final AemProxyConfiguration aemProxyConfig;
 	private final AemConfiguration aemConfig;
 
     /**
      * 
      */
-    public AemProxyEndpoint(AemConfiguration aemConfig) {
+    public AemProxyEndpoint(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig) {
+    	this.aemProxyConfig = aemProxyConfig;
     	this.aemConfig = aemConfig;
     	this.httpClient = ClientBuilder.newClient().register(HttpAuthenticationFeature.basic(aemConfig.servername(), aemConfig.password())).register(MultiPartFeature.class);
 	}
@@ -163,10 +164,10 @@ public class AemProxyEndpoint {
      * @return
      */
     private InputStream substituteAfBaseLocation(InputStream is) {
-    	if (aemConfig.afBaseLocation().isBlank()) {
+    	if (aemProxyConfig.afBaseLocation().isBlank()) {
     		return is;
     	} else {
-    		return new ReplacingInputStream(is, "contextPath = result[1];", "contextPath = \""+ aemConfig.afBaseLocation() + "\" + result[1];");
+    		return new ReplacingInputStream(is, "contextPath = result[1];", "contextPath = \""+ aemProxyConfig.afBaseLocation() + "\" + result[1];");
     	}
     }
     

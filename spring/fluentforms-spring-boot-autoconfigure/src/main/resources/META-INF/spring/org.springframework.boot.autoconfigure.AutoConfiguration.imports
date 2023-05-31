@@ -1,1 +1,2 @@
 com._4point.aem.fluentforms.spring.FluentFormsAutoConfiguration
+com._4point.aem.fluentforms.spring.AemProxyAutoConfiguration

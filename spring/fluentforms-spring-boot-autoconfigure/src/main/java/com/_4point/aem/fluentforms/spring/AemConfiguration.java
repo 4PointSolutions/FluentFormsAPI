@@ -12,8 +12,7 @@ public record AemConfiguration(
 	Integer port,							// "aem.port"
 	String user,							// "aem.user"
 	String password,						// "aem.password"
-	@DefaultValue("false") Boolean useSsl,	// "aem.useSsl"
-	@DefaultValue("") String afBaseLocation	// "aem.af-base-location"
+	@DefaultValue("false") Boolean useSsl	// "aem.useSsl"
 	) {
 
 	public String url() {
