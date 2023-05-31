@@ -20,6 +20,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 @Path(FluentFormsResources.RESOURCE_PATH)
 public class FluentFormsResources {
@@ -37,6 +38,7 @@ public class FluentFormsResources {
 	@GET
 	@Produces({APPLICATION_PDF, "*/*;qs=0.8"})	// Will be selected if user requests PDF or nothing at all.
 	public Response outputServiceGeneratePdf(@QueryParam("form") String templateName) throws OutputServiceException, IOException {
+		if (templateName == null) return Response.status(Status.BAD_REQUEST).build();
 		if (outputService == null) return Response.serverError().build();
 		
 		Document result = outputService.generatePDFOutput()
@@ -53,7 +55,11 @@ public class FluentFormsResources {
 	@GET
 	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
 	public Response adaptiveFormsServiceRenderAdaptiveForm(@QueryParam("form") String templateName) throws AdaptiveFormsServiceException, IOException {
-		Document result = adaptiveFormsService.renderAdaptiveForm(templateName);
+		if (templateName == null) return Response.status(Status.BAD_REQUEST).build();
+		if (adaptiveFormsService == null) return Response.serverError().build();
+
+		Document result = adaptiveFormsService
+				.renderAdaptiveForm(templateName);
 		
 		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
 	}
