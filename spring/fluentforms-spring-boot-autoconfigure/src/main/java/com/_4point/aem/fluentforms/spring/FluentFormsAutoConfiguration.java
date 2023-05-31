@@ -12,6 +12,7 @@ import com._4point.aem.docservices.rest_services.client.docassurance.RestService
 import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.generatePDF.RestServicesGeneratePDFServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.StandardFormsFeederUrlFilters;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.pdfUtility.RestServicesPdfUtilityServiceAdapter;
@@ -55,7 +56,9 @@ public class FluentFormsAutoConfiguration {
 	@ConditionalOnMissingBean
 	@Bean
 	public AdaptiveFormsService adaptiveFormsService(AemConfiguration aemConfig) {
-		return setAemFields(AdaptiveFormsService.builder(), aemConfig).build();
+		return setAemFields(AdaptiveFormsService.builder(), aemConfig)
+				.addRenderResultFilter(StandardFormsFeederUrlFilters.getStandardInputStreamFilter())
+				.build();
 	}
 
 	@ConditionalOnMissingBean
@@ -89,7 +92,9 @@ public class FluentFormsAutoConfiguration {
 	@ConditionalOnMissingBean
 	@Bean
 	public Html5FormsService html5FormsService(AemConfiguration aemConfig) {
-		return setAemFields(Html5FormsService.builder(), aemConfig).build();
+		return setAemFields(Html5FormsService.builder(), aemConfig)
+				.addRenderResultFilter(StandardFormsFeederUrlFilters.getStandardInputStreamFilter())
+				.build();
 	}
 
 	@ConditionalOnMissingBean
