@@ -7,6 +7,10 @@ import org.springframework.core.convert.converter.Converter;
 
 import com._4point.aem.fluentforms.api.PathOrUrl;
 
+/**
+ * Spring Converters used in Spring's auto conversion mechanism.  In this case used to convert Strings
+ * to java.nio.file.Path or FluentForm's PathOrUrl objects.
+ */
 public class Converters {
 
 	@Configuration

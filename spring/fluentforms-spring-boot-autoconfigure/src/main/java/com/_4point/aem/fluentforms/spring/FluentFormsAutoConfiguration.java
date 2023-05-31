@@ -31,6 +31,13 @@ import com._4point.aem.fluentforms.impl.generatePDF.GeneratePDFServiceImpl;
 import com._4point.aem.fluentforms.impl.output.OutputServiceImpl;
 import com._4point.aem.fluentforms.impl.pdfUtility.PdfUtilityServiceImpl;
 
+/**
+ * AutoConfiguration for the FluentForms Rest Services Client library.
+ * 
+ * This class automatically configures a set of beans (one for each AEM service) that can be injected
+ * into any Spring Boot code. 
+ *
+ */
 @Lazy
 @AutoConfiguration
 @EnableConfigurationProperties(AemConfiguration.class)

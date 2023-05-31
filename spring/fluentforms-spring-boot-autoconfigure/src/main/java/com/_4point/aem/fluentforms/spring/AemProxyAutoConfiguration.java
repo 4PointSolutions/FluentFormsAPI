@@ -8,6 +8,10 @@ import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+/**
+ * AutoConfiguration for the Reverse Proxy Library which reverse proxies secondary
+ * resources (.css, .js, etc.) that the browser will request.  These requests are forwarded to AEM.
+ */
 @AutoConfiguration
 @ConditionalOnWebApplication(type=Type.SERVLET)
 @ConditionalOnProperty(prefix="fluentforms.rproxy", name="enabled", havingValue="true", matchIfMissing=true )

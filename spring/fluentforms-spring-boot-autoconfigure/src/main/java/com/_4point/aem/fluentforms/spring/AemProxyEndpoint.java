@@ -29,6 +29,18 @@ import org.slf4j.LoggerFactory;
 
 import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
 
+/**
+ * Reverse Proxy Code which reverse proxies secondary resources (.css, .js, etc.) that the browser will request.
+ * These requests are forwarded to AEM.
+ * 
+ * This code relies on Eclipse Jersey and expects that the spring-boo-starter-jersey is included in the project.
+ * 
+ * It assumes that the application that generated the Adaptive Form or HTML5 Form inserted /aem in from of any
+ * AEM links in the AF or HTML5 html code.  This task is typically performes using the FluentForms 
+ * StandardFormsFeederUrlFilters.getStandardInputStreamFilter() method and passing that into the call to 
+ * get the AdaptiveForm or HTML5 Form using the FLuentForms libraries.
+ *
+ */
 @Path("/aem")
 public class AemProxyEndpoint {
 
