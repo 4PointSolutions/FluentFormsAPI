@@ -9,7 +9,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com._4point.aem.fluentforms</groupId>
-	<artifactId>fluentforms-simple-app</artifactId>
+	<artifactId>fluentforms-sample-cli-app</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Simple Sample App</name>
 
