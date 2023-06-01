@@ -4,7 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 
-public class AbsoluteOrRelativeUrl {
+public final class AbsoluteOrRelativeUrl {
 	private final URL absolute;
 	private final String relative;
 	

@@ -1,0 +1,23 @@
+{
+  "id" : "d340f02e-d2dd-4f9a-b127-d6d45e6908b3",
+  "name" : "services_outputservice_generatepdfoutput",
+  "request" : {
+    "url" : "/services/OutputService/GeneratePdfOutput",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "contains" : "testRenderDoc_ThrowsException_invalidXml"
+    } ]
+  },
+  "response" : {
+    "status" : 500,
+    "body" : "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html>\n    <head><title>500 Internal Error while rendering PDF. (com.adobe.fd.output.internal.exception.OutputServiceException: AEM_OUT_001_003:Unexpected Exception: PAExecute Failure: XFA_RENDER_FAILURE).</title></head>\n    <body>\n        <h1>Internal Error while rendering PDF. (com.adobe.fd.output.internal.exception.OutputServiceException: AEM_OUT_001_003:Unexpected Exception: PAExecute Failure: XFA_RENDER_FAILURE).</h1>\n        <p>Cannot serve request to /services/OutputService/GeneratePdfOutput on this server</p>\n        \n        \n        \n        <hr>\n        <address>ApacheSling/2.7 (jetty/9.4.43.v20210629, Java HotSpot(TM) 64-Bit Server VM 11.0.9, Windows 10 10.0 amd64)</address>\n    </body>\n</html>\n",
+    "headers" : {
+      "Date" : "Wed, 22 Mar 2023 18:00:28 GMT",
+      "X-Content-Type-Options" : "nosniff",
+      "Content-Type" : "text/html;charset=utf-8"
+    }
+  },
+  "uuid" : "d340f02e-d2dd-4f9a-b127-d6d45e6908b3",
+  "persistent" : true,
+  "insertionIndex" : 28
+}

@@ -19,7 +19,7 @@ import java.util.Optional;
  *   be constructed directly from <code>java.nio.file.Path</code> or <code>java.net.URL</code> objects.
  *
  */
-public class PathOrUrl {
+public final class PathOrUrl {
 	private static final String CRX_URL_PROTOCOL = "crx:";
 	private static final int CRX_URL_PROTOCOL_LENGTH = CRX_URL_PROTOCOL.length();
 	private static final String CRX_URL_SUBSTITUTE = "file:";
