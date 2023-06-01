@@ -7,7 +7,6 @@ on:
     - '.github/workflows/spring-boot-starter-ci.yml'
   workflow_dispatch:
     
-
 jobs:
   build:
     runs-on: ubuntu-latest
