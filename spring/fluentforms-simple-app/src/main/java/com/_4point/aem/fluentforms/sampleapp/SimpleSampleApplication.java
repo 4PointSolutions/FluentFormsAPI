@@ -19,7 +19,6 @@ public class SimpleSampleApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		// TODO:  Build this out to invoke FluentForms.
 		System.out.println("Application ran successfully!");
 	}
 }
