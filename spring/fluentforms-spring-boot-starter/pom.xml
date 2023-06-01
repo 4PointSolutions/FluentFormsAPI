@@ -20,6 +20,15 @@
 		<fluentforms.version>0.0.2-SNAPSHOT</fluentforms.version>
 		<fluentforms-autoconfigure.version>0.0.1-SNAPSHOT</fluentforms-autoconfigure.version>
 	</properties>
+
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>4Point Solutions FluentFormsAPI Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/4PointSolutions/FluentFormsAPI</url>
+		</repository>
+	</distributionManagement>
+	
 	<dependencies>
 		<!-- Project Dependencies -->
 		<dependency>
