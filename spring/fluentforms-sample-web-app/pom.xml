@@ -18,6 +18,24 @@
 		<wiremock.version>3.0.0-beta-8</wiremock.version>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>4Point Solutions FluentFormsAPI Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/4PointSolutions/FluentFormsAPI</url>
+		</repository>
+	</distributionManagement>
+
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/4PointSolutions/*</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
