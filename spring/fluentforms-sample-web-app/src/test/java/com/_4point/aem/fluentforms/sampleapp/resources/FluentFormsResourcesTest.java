@@ -1,7 +1,7 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseMatcher.hasMediaType;
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseMatcher.isStatus;
+import static com._4point.testing.matchers.jaxrs.ResponseMatcher.hasMediaType;
+import static com._4point.testing.matchers.jaxrs.ResponseMatcher.isStatus;
 import static org.hamcrest.MatcherAssert.assertThat; 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;

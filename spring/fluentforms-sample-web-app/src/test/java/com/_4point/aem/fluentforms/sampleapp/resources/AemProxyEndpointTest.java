@@ -1,7 +1,8 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseMatcher.hasMediaType;
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseMatcher.isStatus;
+import static com._4point.testing.matchers.jaxrs.ResponseMatcher.hasMediaType;
+import static com._4point.testing.matchers.jaxrs.ResponseMatcher.isStatus;
+import static com._4point.testing.matchers.jaxrs.ResponseMatcher.hasEntity;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.jupiter.api.Assertions.*;
@@ -74,7 +75,7 @@ class AemProxyEndpointTest {
 				 .request()
 				 .get();
 		
-		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE), ResponseMatcher.hasEntity()));
+		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE), hasEntity()));
 
 //		if (USE_WIREMOCK) {	// For some reason that I can't determine, wiremock returns text/html.  I would like to fix this, but for now, I work around it.
 //			assertTrue(MediaType.TEXT_HTML_TYPE.isCompatible(mediaType), "Expected response media type (" + response.getMediaType().toString() + ") to be compatible with 'text/html'.");
