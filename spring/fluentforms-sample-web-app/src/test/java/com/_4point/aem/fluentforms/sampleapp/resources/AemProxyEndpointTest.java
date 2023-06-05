@@ -38,7 +38,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 class AemProxyEndpointTest {
 	private static final boolean SAVE_RESULTS = false;
 	private static final boolean WIREMOCK_RECORDING = false;
-	private static final int WIREMOCK_PORT = 5502;
+	static final int WIREMOCK_PORT = 5502;
 
 	@LocalServerPort
 	private int port;

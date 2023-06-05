@@ -37,7 +37,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 class FluentFormsResourcesTest {
 	private static final boolean SAVE_RESULTS = false;
 	private static final boolean WIREMOCK_RECORDING = false;
-	private static final int WIREMOCK_PORT = 5502;
+	static final int WIREMOCK_PORT = 5502;
 
 	private static final String APPLICATION_PDF = "application/pdf";
 	private static final MediaType APPLICATION_PDF_TYPE = MediaType.valueOf(APPLICATION_PDF);
