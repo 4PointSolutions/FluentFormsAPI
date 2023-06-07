@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import com._4point.aem.fluentforms.sampleapp.domain.DataService;
 import com._4point.aem.fluentforms.sampleapp.domain.DataService.DataServiceException;
 
-public class AbstractDataServiceTest {
+public abstract class AbstractDataServiceTest {
 
 	private final DataService underTest;
 	private final String[] loadExceptionExpectedStrings;	// Additional Strings we expect to see in exceptions thrown by load()
@@ -66,4 +66,22 @@ public class AbstractDataServiceTest {
 		byte[] result = underTest.load(key);
 		assertArrayEquals(testData, result, "Test data retrieved should match what was written.");
 	}
+	
+	@Test
+	void testExists_Preexisting() throws Exception {
+		byte[] testData = "testExists_Preexisting Test Data".getBytes();
+		String key = "testExists_Preexisting.txt";
+		underTest.save(key, testData);
+
+		assertTrue(underTest.exists(key), "Key should exist but it does not.");
+	}
+
+	@DisplayName("Saving to non-existing file should work.")
+	@Test
+	void testExists_Nonexisting() throws Exception {
+		String key = "testExists_Nonexisting.txt";
+		
+		assertFalse(underTest.exists(key), "Key should not exist but it does.");
+	}
+
 }

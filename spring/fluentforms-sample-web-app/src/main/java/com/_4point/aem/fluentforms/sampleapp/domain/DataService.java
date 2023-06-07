@@ -29,6 +29,16 @@ public interface DataService {
 	 * @throws DataServiceException
 	 */
 	void save(String key, byte[] data) throws DataServiceException;
+
+	/**
+	 * Tests whether a particular key already exists within the data store.
+	 * 
+	 * @param key
+	 *  	the Key that may be used later to retieve the data
+	 * @return true if the key exists, false if it does not
+	 * @throws DataServiceException
+	 */
+	boolean exists(String key) throws DataServiceException;
 	
 	@SuppressWarnings("serial")
 	public static final class DataServiceException extends RuntimeException {

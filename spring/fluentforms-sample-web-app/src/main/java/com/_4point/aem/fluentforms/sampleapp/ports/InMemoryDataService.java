@@ -24,4 +24,9 @@ public class InMemoryDataService implements DataService {
 		dataStore.put(Objects.requireNonNull(key), Arrays.copyOf(Objects.requireNonNull(data), data.length));
 	}
 
+	@Override
+	public boolean exists(String key) throws DataServiceException {
+		return dataStore.containsKey(key);
+	}
+
 }

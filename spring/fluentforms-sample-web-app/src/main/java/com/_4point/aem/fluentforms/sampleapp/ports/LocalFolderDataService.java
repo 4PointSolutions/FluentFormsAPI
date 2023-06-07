@@ -33,5 +33,10 @@ public final class LocalFolderDataService implements DataService {
 		}
 	}
 
+	@Override
+	public boolean exists(String key) {
+		return Files.exists(folder.resolve(key));
+	}
+
 	
 }
