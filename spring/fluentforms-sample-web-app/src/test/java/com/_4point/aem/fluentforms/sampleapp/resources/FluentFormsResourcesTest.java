@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -88,6 +89,18 @@ class FluentFormsResourcesTest {
 										 .get();
 		
 		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE)));
+	}
+
+	@Test
+	void testSaveData() {
+		Response response = ClientBuilder.newClient()
+										 .target(getBaseUri(port))
+										 .path("/FluentForms/SaveData")
+										 .queryParam("key", "saveDataKey")
+										 .request()
+										 .post(Entity.xml("<root/>"));
+		
+		assertThat(response, allOf(isStatus(Status.NO_CONTENT)));
 	}
 
 	private static String getBaseUriString(int port) {

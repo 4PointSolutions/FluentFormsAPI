@@ -1,6 +1,8 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +13,12 @@ import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService.
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
+import com._4point.aem.fluentforms.sampleapp.domain.DataService;
+import com._4point.aem.fluentforms.sampleapp.domain.DataService.DataServiceException;
 import com._4point.aem.fluentforms.spring.FluentFormsAutoConfiguration;
 
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
@@ -64,5 +69,22 @@ public class FluentFormsResources {
 		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
 	}
 
+	@Autowired
+	DataService dataService;
 	
+	@Path("/SaveData")
+	@POST
+	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
+	public Response saveData(@QueryParam("key") String key, InputStream body) {
+		try {
+			dataService.save(Objects.requireNonNull(key), Objects.requireNonNull(body).readAllBytes());
+			return Response.noContent().build();
+		} catch (DataServiceException e) {
+			log.atError().setCause(e).log("Error saving data, returning Bad Request.");
+			return Response.status(Status.BAD_REQUEST).build();
+		} catch (IOException e) {
+			log.atError().setCause(e).log("Error saving data, returning Internal Server Error.");
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
 }
