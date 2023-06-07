@@ -3,6 +3,7 @@ package com._4point.aem.fluentforms.sampleapp.ports;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import com._4point.aem.fluentforms.sampleapp.domain.DataService;
 
@@ -25,8 +26,11 @@ public final class LocalFolderDataService implements DataService {
 
 	@Override
 	public void save(String key, byte[] data) {
-		// TODO Auto-generated method stub
-
+		try {
+			Files.write(folder.resolve(key), data, StandardOpenOption.CREATE_NEW);
+		} catch (IOException e) {
+			throw new DataServiceException("Error while writing file '%s' from folder '%s'.".formatted(key, folder), e);
+		}
 	}
 
 	

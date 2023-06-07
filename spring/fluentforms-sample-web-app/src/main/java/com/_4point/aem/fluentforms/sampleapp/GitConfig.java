@@ -40,7 +40,7 @@ public class GitConfig {
 	}
 	
 	public void logGitInformation() {
-    	log.info("Build Information: Branch '{}', Commit Id '{}'{} ({}), Build Time '{}'.", branch, commitIdAbbrev, (Boolean.parseBoolean(dirty) ? "*" : "") + "'" + dirty + "'", commitTime, commitBuildTime);
+    	log.info("Build Information: Branch '{}', Commit Id '{}'{}, Build Time '{}'.", branch, commitIdAbbrev, (Boolean.parseBoolean(dirty) ? "*" : ""), commitTime, commitBuildTime);
 	}
 
 	@Bean
