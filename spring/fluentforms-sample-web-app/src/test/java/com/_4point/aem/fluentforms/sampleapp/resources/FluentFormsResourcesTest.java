@@ -6,7 +6,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -16,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
+import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
@@ -42,6 +46,9 @@ class FluentFormsResourcesTest {
 
 	private static final String APPLICATION_PDF = "application/pdf";
 	private static final MediaType APPLICATION_PDF_TYPE = MediaType.valueOf(APPLICATION_PDF);
+	
+	private static final Path RESOURCES_DIR = Path.of("src", "test", "resources");
+	private static final Path SAMPLE_FILES_DIR = RESOURCES_DIR.resolve("SampleFiles");
 
 	@LocalServerPort
 	private int port;
@@ -92,11 +99,41 @@ class FluentFormsResourcesTest {
 	}
 
 	@Test
+	void testAdaptiveFormsServiceRenderAdaptiveForm_WithData() {
+		Client client = ClientBuilder.newClient();
+		String dataKeyValue = "testAdaptiveFormsServiceRenderAdaptiveForm_WithData";
+		Response dataResponse = client.target(getBaseUri(port))
+								  .path("/FluentForms/SaveData")
+								  .queryParam("dataKey", dataKeyValue)
+								  .request()
+								  .post(Entity.xml(readData()));
+		assertThat(dataResponse, allOf(isStatus(Status.NO_CONTENT)));
+
+		Response response = client.target(getBaseUri(port))
+								  .path("/FluentForms/AdaptiveFormsServiceRenderAdaptiveForm")
+								  .queryParam("form", "sample00002test")
+								  .queryParam("dataKey", dataKeyValue)
+								  .request()
+								  .get();
+		
+		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE)));
+	}
+
+	private byte[] readData() {
+		Path sampleData = SAMPLE_FILES_DIR.resolve("SampleForm_data.xml");
+		try {
+			return Files.readAllBytes(sampleData);
+		} catch (IOException e) {
+			throw new IllegalStateException("Error while reading sample data (%s)".formatted(sampleData.toAbsolutePath()), e);
+		}
+	}
+
+	@Test
 	void testSaveData() {
 		Response response = ClientBuilder.newClient()
 										 .target(getBaseUri(port))
 										 .path("/FluentForms/SaveData")
-										 .queryParam("key", "saveDataKey")
+										 .queryParam("dataKey", "saveDataKey_testSaveData")
 										 .request()
 										 .post(Entity.xml("<root/>"));
 		

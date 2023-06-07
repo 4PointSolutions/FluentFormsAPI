@@ -3,6 +3,7 @@ package com._4point.aem.fluentforms.sampleapp.resources;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,19 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService.AdaptiveFormsServiceException;
+import com._4point.aem.docservices.rest_services.client.helpers.AemDataFormat;
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
 import com._4point.aem.fluentforms.sampleapp.domain.DataService;
 import com._4point.aem.fluentforms.sampleapp.domain.DataService.DataServiceException;
-import com._4point.aem.fluentforms.spring.FluentFormsAutoConfiguration;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -35,6 +36,9 @@ public class FluentFormsResources {
 	private static final MediaType APPLICATION_PDF_TYPE = MediaType.valueOf(APPLICATION_PDF);
 
 	protected static final String RESOURCE_PATH = "/FluentForms";
+	
+	@Autowired
+	DocumentFactory documentFactory;
 	
 	@Autowired
 	OutputService outputService;
@@ -59,14 +63,27 @@ public class FluentFormsResources {
 	@Path("/AdaptiveFormsServiceRenderAdaptiveForm")
 	@GET
 	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
-	public Response adaptiveFormsServiceRenderAdaptiveForm(@QueryParam("form") String templateName) throws AdaptiveFormsServiceException, IOException {
+	public Response adaptiveFormsServiceRenderAdaptiveForm(@QueryParam("form") String templateName, @QueryParam("dataKey") String key) throws AdaptiveFormsServiceException, IOException {
 		if (templateName == null) return Response.status(Status.BAD_REQUEST).build();
 		if (adaptiveFormsService == null) return Response.serverError().build();
-
-		Document result = adaptiveFormsService
-				.renderAdaptiveForm(templateName);
+		if (key != null && !dataService.exists(key)) Response.status(Status.BAD_REQUEST).build();
+		
+		Optional<Document> data = Optional.ofNullable(key)
+				  						  .map(dataService::load)
+				  						  .map(this::convertDataToDocument);
+		
+		Document result = data.isPresent() ? adaptiveFormsService.renderAdaptiveForm(templateName, data.orElseThrow())
+										   : adaptiveFormsService.renderAdaptiveForm(templateName);
 		
 		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
+	}
+
+	private Document convertDataToDocument(byte[] data) {
+		Document doc = documentFactory.create(data);
+		return AemDataFormat.sniff(data)						// sniff the data
+							.map(AemDataFormat::getContentType)	// if it's a recognized type
+							.map(doc::setContentType)			// set the content type
+							.orElse(doc);						// otherwise return the doc without a content type.
 	}
 
 	@Autowired
@@ -75,7 +92,7 @@ public class FluentFormsResources {
 	@Path("/SaveData")
 	@POST
 	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
-	public Response saveData(@QueryParam("key") String key, InputStream body) {
+	public Response saveData(@QueryParam("dataKey") String key, InputStream body) {
 		try {
 			dataService.save(Objects.requireNonNull(key), Objects.requireNonNull(body).readAllBytes());
 			return Response.noContent().build();
