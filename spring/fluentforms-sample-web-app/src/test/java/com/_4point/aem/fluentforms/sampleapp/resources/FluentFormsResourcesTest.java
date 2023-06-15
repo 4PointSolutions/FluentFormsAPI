@@ -1,7 +1,6 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
-import static com._4point.testing.matchers.jaxrs.ResponseMatchers.hasMediaType;
-import static com._4point.testing.matchers.jaxrs.ResponseMatchers.isStatus;
+import static com._4point.testing.matchers.jaxrs.ResponseMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat; 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,7 +74,7 @@ class FluentFormsResourcesTest {
 	}
 	
 	@Test
-	void testOutputServiceGeneratePdf() {
+	void testOutputServiceGeneratePdf_NoData() {
 		Response response = ClientBuilder.newClient()
 										 .target(getBaseUri(port))
 										 .path("/FluentForms/OutputServiceGeneratePdf")
@@ -83,6 +82,52 @@ class FluentFormsResourcesTest {
 										 .request()
 										 .get();
 		
+		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(APPLICATION_PDF_TYPE)));
+	}
+
+	@Test
+	void testOutputServiceGeneratePdf_WithData() {
+		Client client = ClientBuilder.newClient();
+		String dataKeyValue = "testOutputServiceGeneratePdf_WithData.xml";
+		Response dataResponse = client.target(getBaseUri(port))
+								  .path("/FluentForms/SaveData")
+								  .queryParam("dataKey", dataKeyValue)
+								  .request()
+								  .post(Entity.xml(readXmlData()));
+		assertThat(dataResponse, allOf(isStatus(Status.NO_CONTENT)));
+
+		Response response = ClientBuilder.newClient()
+				 .target(getBaseUri(port))
+				 .path("/FluentForms/OutputServiceGeneratePdf")
+				 .queryParam("form", "sample_template.xdp")
+				 .queryParam("dataKey", dataKeyValue)
+				 .request()
+				 .get();
+
+		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(APPLICATION_PDF_TYPE)));
+	}
+
+	@Test
+	void testOutputServiceGeneratePdf_WithPostedXmlData() {
+		Response response = ClientBuilder.newClient()
+				 .target(getBaseUri(port))
+				 .path("/FluentForms/OutputServiceGeneratePdf")
+				 .queryParam("form", "sample_template.xdp")
+				 .request()
+				 .post(Entity.xml(readXmlData()));
+
+		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(APPLICATION_PDF_TYPE)));
+	}
+
+	@Test
+	void testOutputServiceGeneratePdf_WithPostedJsonData() {
+		Response response = ClientBuilder.newClient()
+				 .target(getBaseUri(port))
+				 .path("/FluentForms/OutputServiceGeneratePdf")
+				 .queryParam("form", "sample_template.xdp")
+				 .request()
+				 .post(Entity.json(readJsonData()));
+
 		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(APPLICATION_PDF_TYPE)));
 	}
 
@@ -106,7 +151,7 @@ class FluentFormsResourcesTest {
 								  .path("/FluentForms/SaveData")
 								  .queryParam("dataKey", dataKeyValue)
 								  .request()
-								  .post(Entity.xml(readData()));
+								  .post(Entity.xml(readXmlData()));
 		assertThat(dataResponse, allOf(isStatus(Status.NO_CONTENT)));
 
 		Response response = client.target(getBaseUri(port))
@@ -119,8 +164,17 @@ class FluentFormsResourcesTest {
 		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE)));
 	}
 
-	private byte[] readData() {
+	private byte[] readXmlData() {
 		Path sampleData = SAMPLE_FILES_DIR.resolve("SampleForm_data.xml");
+		try {
+			return Files.readAllBytes(sampleData);
+		} catch (IOException e) {
+			throw new IllegalStateException("Error while reading sample data (%s)".formatted(sampleData.toAbsolutePath()), e);
+		}
+	}
+	
+	private byte[] readJsonData() {
+		Path sampleData = SAMPLE_FILES_DIR.resolve("SampleForm_data.json");
 		try {
 			return Files.readAllBytes(sampleData);
 		} catch (IOException e) {
