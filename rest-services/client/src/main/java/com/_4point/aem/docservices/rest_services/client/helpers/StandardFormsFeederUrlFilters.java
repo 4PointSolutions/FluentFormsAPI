@@ -23,6 +23,7 @@ public class StandardFormsFeederUrlFilters {
 			"/libs/wcm/",
 			"/etc/clientlibs/",
 			"/libs/fd/",
+			"/content/dam/",
 			"/content/forms/",
 			"/content/xfaforms/",
 			"/libs/granite/",
