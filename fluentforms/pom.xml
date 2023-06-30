@@ -90,7 +90,8 @@
         <equalsverifier.version>3.14.1</equalsverifier.version>
         
         <!-- Project dependecies -->
-        <aemfd.client.sdk.version>6.0.566</aemfd.client.sdk.version> <!-- fluentforms requires AEM 6.5 SP11 or later -->
+        <aemfd.client.sdk.version>6.0.640</aemfd.client.sdk.version> <!-- fluentforms requires AEM 6.5 SP12 or later -->
+        <io.wcm.maven.aem-dependencies.version>6.5.12.0001</io.wcm.maven.aem-dependencies.version>
 
     </properties>
 
@@ -499,7 +500,7 @@
 			<dependency>
 				<groupId>io.wcm.maven</groupId>
 				<artifactId>io.wcm.maven.aem-dependencies</artifactId>
-				<version>6.5.6.0002</version>
+				<version>${io.wcm.maven.aem-dependencies.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
