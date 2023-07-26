@@ -20,6 +20,9 @@ public class AemProxyAutoConfiguration {
 
 	@Bean
 	public ResourceConfigCustomizer afProxyConfigurer(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig) {
-		return config->config.register(new AemProxyEndpoint(aemConfig, aemProxyConfig));
+		return config->config.register(new AemProxyEndpoint(aemConfig, aemProxyConfig))
+							 // TODO:  Make this registration conditional on there being available submit handlers
+					  		 .register(new AemProxyAfSubmission())
+					  		 ;
 	}
 }
