@@ -1,11 +1,9 @@
 package com._4point.aem.fluentforms.spring;
 
 import static com._4point.aem.fluentforms.spring.AemProxyAfSubmissionTest.TestApplication.JerseyConfig;
-import static com._4point.aem.fluentforms.spring.AemProxyAfSubmissionTest.MockSubmitProcessor;
-import static com._4point.testing.matchers.jaxrs.ResponseMatchers.isStatus;
-import static com._4point.testing.matchers.jaxrs.ResponseMatchers.hasEntity;
+import static com._4point.testing.matchers.jaxrs.ResponseMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URI;
@@ -24,8 +22,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.stereotype.Component;
 
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitProcessor;
-import com._4point.aem.fluentforms.spring.AemProxyAutoConfigurationTest.TestApplication;
 
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -34,44 +33,29 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
-				classes = {TestApplication.class, JerseyConfig.class, MockSubmitProcessor.class}
-//				,properties = "debug"
-				)
+/**
+ * Tests for AemProxyAfSubmissions classes.
+ * 
+ * Includes inner classes that test the different SubmitProcessor implementations. 
+ * 
+ */
 class AemProxyAfSubmissionTest {
 	public static final String AF_TEMPLATE_NAME = "sample00002test";
 	private static final String SUBMIT_ADAPTIVE_FORM_SERVICE_PATH = "/aem/content/forms/af/" + AF_TEMPLATE_NAME + "/jcr:content/guideContainer.af.submit.jsp";
 	public static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
+	private static final String SAMPLE_RESPONSE_BODY = "body";
 
-	@LocalServerPort
-	private int port;
+	record JakartaRestClient(WebTarget target, URI uri) {};
 
-	private URI uri;
-
-	private WebTarget target;
-
-	@BeforeEach
-	public void setUp() throws Exception {
-		this.uri = getBaseUri(port);
-		target = ClientBuilder.newClient() //newClient(clientConfig)
+	public static JakartaRestClient setUpRestClient(int port) {
+		var uri = getBaseUri(port);
+		var target = ClientBuilder.newClient() //newClient(clientConfig)
 				 .property(ClientProperties.FOLLOW_REDIRECTS, Boolean.FALSE)	// Disable re-directs so that we can test for "thank you page" redirection.
 				 .register(MultiPartFeature.class)
-				 .target(this.uri);
+				 .target(uri);
+		return new JakartaRestClient(target, uri);
 	}
 
-
-	@Test
-	void test() {
-		final FormDataMultiPart getPdfForm = mockFormData("foo", "bar");
-		
-		Response response = target
-				 .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
-				 .request()
-				 .accept(APPLICATION_PDF)
-				 .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
-
-		assertThat(response, allOf(isStatus(Response.Status.OK), hasEntity()));
-	}
 
 	/* package */ static FormDataMultiPart mockFormData(String redirect, String data) {
 		final FormDataMultiPart getPdfForm = new FormDataMultiPart();
@@ -102,6 +86,7 @@ class AemProxyAfSubmissionTest {
 		return URI.create("http://localhost:" + port);
 	}
 
+	// Supporting mock application class that limits the amount of classes to be loaded.
 	@SpringBootApplication()
 	@EnableConfigurationProperties({AemConfiguration.class,AemProxyConfiguration.class})
 	public static class TestApplication {
@@ -113,12 +98,120 @@ class AemProxyAfSubmissionTest {
 		public static class JerseyConfig extends ResourceConfig {
 		}
 	}
+
+	/**
+	 * Tests the AemAfSubmitProcessor
+	 * 
+	 */
+	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
+					classes = {TestApplication.class, JerseyConfig.class, AfSubmitAemProxyProcessor.class},
+					properties = {
+//						"debug",
+						"fluentforms.aem.servername=" + "locahost", 
+						"fluentforms.aem.port=" + "4502", 
+						"fluentforms.aem.user=admin",		 
+						"fluentforms.aem.password=admin",
+						}
+					)
+	public static class AemProxyAfSubmissionTestWithAemAfSubmitProcessorTest {
+
+		@LocalServerPort
+		private int port;
 	
-	@Component
-	public static class MockSubmitProcessor implements AfSubmitProcessor {
-		@Override
-		public Response processRequest(FormDataMultiPart inFormData, HttpHeaders headers, String remainder) {
-			return Response.ok().entity("body").build();
+		private JakartaRestClient jrc;
+	
+		@BeforeEach
+		public void setUp() throws Exception {
+			jrc = setUpRestClient(port);
+		}
+	
+		@Test
+		void test() {
+			final FormDataMultiPart getPdfForm = mockFormData("foo", "bar");
+	
+			Response response = jrc.target.path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH).request().accept(APPLICATION_PDF)
+					.post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
+	
+			assertThat(response, allOf(isStatus(Response.Status.OK),hasEntityMatching(equalTo("AfSubmitAemProxyProcessor Response".getBytes()))));
 		}
 	}
+
+	/**
+	 * Tests the AemLocalSubmitProcessor
+	 * 
+	 */
+	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
+					classes = {TestApplication.class, JerseyConfig.class, AfSubmitLocalProcessor.class}
+//					,properties = "debug"
+					)
+	public static class AemProxyAfSubmissionTestWithLocalAfSubmitProcessorTest {
+
+		@LocalServerPort
+		private int port;
+
+		private JakartaRestClient jrc;
+
+		@BeforeEach
+		public void setUp() throws Exception {
+			jrc = setUpRestClient(port);
+		}
+
+
+		@Test
+		void test() {
+			final FormDataMultiPart getPdfForm = mockFormData("foo", "bar");
+
+			Response response = jrc.target
+								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
+								   .request()
+								   .accept(APPLICATION_PDF)
+								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
+
+			assertThat(response, allOf(isStatus(Response.Status.OK),hasEntityMatching(equalTo("AfSubmitLocalProcessor Response".getBytes()))));
+		}
+	}
+
+	/**
+	 * Tests a custom AfSubmitProcessor
+	 * 
+	 */
+	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
+					classes = {TestApplication.class, JerseyConfig.class, AemProxyAfSubmissionTestWithCustomAfSubmitProcessorTest.MockSubmitProcessor.class}
+//					,properties = "debug"
+					)
+	public static class AemProxyAfSubmissionTestWithCustomAfSubmitProcessorTest {
+		
+		@LocalServerPort
+		private int port;
+
+		private JakartaRestClient jrc;
+
+		@BeforeEach
+		public void setUp() throws Exception {
+			jrc = setUpRestClient(port);
+		}
+
+		@Test
+		void test() {
+			final FormDataMultiPart getPdfForm = mockFormData("foo", "bar");
+			
+			Response response = jrc.target
+								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
+								   .request()
+								   .accept(APPLICATION_PDF)
+								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
+
+			assertThat(response, allOf(isStatus(Response.Status.OK), hasEntityMatching(equalTo(SAMPLE_RESPONSE_BODY.getBytes()))));
+		}
+
+		@Component
+		public static class MockSubmitProcessor implements AfSubmitProcessor {
+
+			@Override
+			public Response processRequest(FormDataMultiPart inFormData, HttpHeaders headers, String remainder) {
+				return Response.ok().entity(SAMPLE_RESPONSE_BODY).build();
+			}
+		}
+	}
+	
 }
