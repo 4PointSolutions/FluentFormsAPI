@@ -76,14 +76,14 @@ public class AemProxyEndpoint {
 	}
 
 	private ChunkedOutput<byte[]> getCsrfToken(final String path) {
-		logger.debug("Proxying GET request. CSRF token");
+		logger.atDebug().log("Proxying GET request. CSRF token");
 		WebTarget webTarget = httpClient.target(aemConfig.url())
 								.path(path);
-		logger.debug("Proxying GET request for CSRF token '" + webTarget.getUri().toString() + "'.");
+		logger.atDebug().log(()->"Proxying GET request for CSRF token '" + webTarget.getUri().toString() + "'.");
 		Response result = webTarget.request()
 		   .get();
 
-		logger.debug("CSRF token GET response status = " + result.getStatus());
+		logger.atDebug().log(()->"CSRF token GET response status = " + result.getStatus());
 		final ChunkedInput<byte[]> chunkedInput = result.readEntity(new GenericType<ChunkedInput<byte[]>>() {});
 		final ChunkedOutput<byte[]> output = new ChunkedOutput<byte[]>(byte[].class);
 		
@@ -104,7 +104,7 @@ public class AemProxyEndpoint {
             }
         }.start();
 		
-        logger.debug("Returning GET response for CSRF token.");
+        logger.atDebug().log("Returning GET response for CSRF token.");
 		return output;
 	}
 
@@ -121,17 +121,17 @@ public class AemProxyEndpoint {
     @Path("{remainder : .+}")
     @GET
     public Response proxyGet(@PathParam("remainder") String remainder) {
-    	logger.debug("Proxying GET request. remainder=" + remainder);
+    	logger.atDebug().log(()->"Proxying GET request. remainder=" + remainder);
 		WebTarget webTarget = httpClient.target(aemConfig.url())
 								.path(AEM_APP_PREFIX + remainder);
-		logger.debug("Proxying GET request for target '" + webTarget.getUri().toString() + "'.");
+		logger.atDebug().log(()->"Proxying GET request for target '" + webTarget.getUri().toString() + "'.");
 		Response result = webTarget.request()
 		   .get();
 		if (logger.isDebugEnabled()) {
-			result.getHeaders().forEach((h, l)->logger.debug("For " + webTarget.getUri().toString() + ", Header:" + h + "=" + l.stream().map(o->(String)o).collect(Collectors.joining("','", "'", "'"))));
+			result.getHeaders().forEach((h, l)->logger.atDebug().log("For " + webTarget.getUri().toString() + ", Header:" + h + "=" + l.stream().map(o->(String)o).collect(Collectors.joining("','", "'", "'"))));
 		}
 
-		logger.debug("Returning GET response from target '" + webTarget.getUri().toString() + "' status code=" + result.getStatus() + ".");
+		logger.atDebug().log(()->"Returning GET response from target '" + webTarget.getUri().toString() + "' status code=" + result.getStatus() + ".");
 		
 		return Response.fromResponse(result)
 					   .header("Transfer-Encoding", null)			// Remove the Transfer-Encoding header
@@ -147,15 +147,15 @@ public class AemProxyEndpoint {
     @Path("/etc.clientlibs/clientlibs/granite/utils.js")
     @GET
     public Response proxyGet_Utils_Js() {
-    	logger.debug("Proxying Utils GET request. remainder=/etc.clientlibs/clientlibs/granite/utils.js");
+    	logger.atDebug().log("Proxying Utils GET request. remainder=/etc.clientlibs/clientlibs/granite/utils.js");
 		WebTarget webTarget = httpClient.target(aemConfig.url())
 								.path(AEM_APP_PREFIX + "etc.clientlibs/clientlibs/granite/utils.js");
-		logger.debug("Proxying Utils GET request for target '" + webTarget.getUri().toString() + "'.");
+		logger.atDebug().log(()->"Proxying Utils GET request for target '" + webTarget.getUri().toString() + "'.");
 		Response result = webTarget.request()
 		   .get();
 		
 //		System.out.println("Received GET response from target '" + webTarget.getUri().toString() + "'. contentType='" + result.getMediaType().toString() + "'.  transfer-encoding='" + result.getHeaderString("Transfer-Encoding") + "'.");
-		logger.debug("Returning Utils GET response from target '" + webTarget.getUri().toString() + "' status code=" + result.getStatus() + ".");
+		logger.atDebug().log(()->"Returning Utils GET response from target '" + webTarget.getUri().toString() + "' status code=" + result.getStatus() + ".");
 		
 		return Response.fromResponse(result)
 					   .entity(substituteAfBaseLocation(result.readEntity(InputStream.class)))
@@ -186,10 +186,12 @@ public class AemProxyEndpoint {
     @Path("{remainder : .+}")
     @POST
     public Response proxyPost(@PathParam("remainder") String remainder, @HeaderParam("Content-Type") String contentType, InputStream in) {
-    	logger.debug("Proxying POST request. remainder={}", remainder);
+    	logger.atDebug().log("Proxying POST request. remainder={}", remainder);
 		WebTarget webTarget = httpClient.target(aemConfig.url())
 								.path(AEM_APP_PREFIX + remainder);
-		logger.debug("Proxying POST request for target '{}'.  ContentType='{}'.", webTarget.getUri().toString(), contentType );
+		logger.atDebug().addArgument(()->webTarget.getUri().toString())
+						.addArgument(contentType)
+						.log(()->"Proxying POST request for target '{}'.  ContentType='{}'.");
 		Response result = webTarget.request()
 				.post(Entity.entity(
 						logger.isDebugEnabled() ? debugInput(in, webTarget.getUri().toString()) : in,	// if Debug is on, write out information about input stream 
@@ -197,11 +199,18 @@ public class AemProxyEndpoint {
 						));
 
 		if (remainder.contains("af.submit.jsp")) {
-			logger.debug("result == null is {}.", Boolean.valueOf(result == null).toString());
+			logger.atDebug().addArgument(()->Boolean.valueOf(result == null).toString())
+							.log("result == null is {}.");
 			MediaType mediaType = result.getMediaType();
-			logger.debug("Returning POST response from target '{}'. contentType='{}'.  transfer-encoding='{}'.", webTarget.getUri().toString(), mediaType != null ? mediaType.toString() : "", result.getHeaderString("Transfer-Encoding"));
+			logger.atDebug()
+				  .addArgument(()->webTarget.getUri().toString())
+				  .addArgument(()->mediaType != null ? mediaType.toString() : "")
+				  .addArgument(()->result.getHeaderString("Transfer-Encoding"))
+				  .log("Returning POST response from target '{}'. contentType='{}'.  transfer-encoding='{}'.");
 		} else {
-			logger.debug("Returning POST response from target '{}'.", webTarget.getUri().toString());
+			logger.atDebug()
+				  .addArgument(webTarget.getUri()::toString)
+				  .log("Returning POST response from target '{}'.");
 		}
 		
 		return Response.fromResponse(result).build();
@@ -210,11 +219,17 @@ public class AemProxyEndpoint {
     private InputStream debugInput(InputStream in, String target) {
 		try {
 			byte[] inputBytes = in.readAllBytes();
-			logger.debug("Proxying POST request for target '{}'.  numberOfBytes proxied='{}'.", target, inputBytes.length );
-			logger.trace("Proxying POST request for target '{}'.  input bytes proxied='{}'.", target, new String(inputBytes, StandardCharsets.UTF_8) );
+			logger.atDebug()
+				  .log("Proxying POST request for target '{}'.  numberOfBytes proxied='{}'.", target, inputBytes.length);
+			logger.atTrace()
+				  .addArgument(target)
+				  .addArgument(()->new String(inputBytes, StandardCharsets.UTF_8))
+				  .log("Proxying POST request for target '{}'.  input bytes proxied='{}'.");
 			return new ByteArrayInputStream(inputBytes);
 		} catch (IOException e) {
-			logger.error("Error reading input stream.", e);
+			logger.atError()
+				  .setCause(e)
+				  .log("Error reading input stream.");
 			return new ByteArrayInputStream(new byte[0]);
 		}
     }
