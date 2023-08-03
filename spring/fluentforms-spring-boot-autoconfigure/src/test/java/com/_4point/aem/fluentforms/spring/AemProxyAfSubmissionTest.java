@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitProcessor;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -42,6 +44,7 @@ import jakarta.ws.rs.core.Response;
 class AemProxyAfSubmissionTest {
 	public static final String AF_TEMPLATE_NAME = "sample00002test";
 	private static final String SUBMIT_ADAPTIVE_FORM_SERVICE_PATH = "/aem/content/forms/af/" + AF_TEMPLATE_NAME + "/jcr:content/guideContainer.af.submit.jsp";
+	private static final String AEM_SUBMIT_ADAPTIVE_FORM_SERVICE_PATH = SUBMIT_ADAPTIVE_FORM_SERVICE_PATH.substring(4); // Same as above minus "/aem"
 	public static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private static final String SAMPLE_RESPONSE_BODY = "body";
 
@@ -103,11 +106,12 @@ class AemProxyAfSubmissionTest {
 	 * Tests the AemAfSubmitProcessor
 	 * 
 	 */
+	@WireMockTest(httpPort = 4502)
 	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
 					classes = {TestApplication.class, JerseyConfig.class, AfSubmitAemProxyProcessor.class},
 					properties = {
 //						"debug",
-						"fluentforms.aem.servername=" + "locahost", 
+						"fluentforms.aem.servername=" + "localhost", 
 						"fluentforms.aem.port=" + "4502", 
 						"fluentforms.aem.user=admin",		 
 						"fluentforms.aem.password=admin",
@@ -117,7 +121,7 @@ class AemProxyAfSubmissionTest {
 
 		@LocalServerPort
 		private int port;
-	
+		
 		private JakartaRestClient jrc;
 	
 		@BeforeEach
@@ -127,13 +131,25 @@ class AemProxyAfSubmissionTest {
 	
 		@Test
 		void test() {
+			// given
+			String expectedResponseString = "<html><body>Dummy Response</body></html>";
+			WireMock.stubFor(WireMock.post(AEM_SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)	
+					 .willReturn(WireMock.okForContentType("text/html", expectedResponseString))
+			 );
 			final FormDataMultiPart getPdfForm = mockFormData("foo", "bar");
 	
+			// when
 			Response response = jrc.target.path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH).request().accept(APPLICATION_PDF)
 					.post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
 	
-			assertThat(response, allOf(isStatus(Response.Status.OK),hasEntityMatching(equalTo("AfSubmitAemProxyProcessor Response".getBytes()))));
+			// then
+			assertThat(response, allOf(isStatus(Response.Status.OK),hasEntityMatching(equalTo(expectedResponseString.getBytes()))));
+			WireMock.verify(
+						  	WireMock.postRequestedFor(WireMock.urlEqualTo(AEM_SUBMIT_ADAPTIVE_FORM_SERVICE_PATH))
+						  		    .withAnyRequestBodyPart(WireMock.aMultipart("jcr:data").withBody(WireMock.equalTo("bar")))
+					);
 		}
+		
 	}
 
 	/**

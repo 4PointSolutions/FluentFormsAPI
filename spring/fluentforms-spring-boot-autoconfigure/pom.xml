@@ -18,6 +18,8 @@
 		<jasypt.spring.boot.version>3.0.5</jasypt.spring.boot.version>
 		<jasypt.maven.plugin.version>3.0.5</jasypt.maven.plugin.version>
 		<fluentforms.version>0.0.2-SNAPSHOT</fluentforms.version>
+		<fp.hamcrest.matchers.version>0.0.1-SNAPSHOT</fp.hamcrest.matchers.version>
+		<wiremock.version>2.35.0</wiremock.version>
 	</properties>
 
 	<distributionManagement>
@@ -85,7 +87,13 @@
 		<dependency>
 			<groupId>com._4point.testing</groupId>
 			<artifactId>4point-hamcrest-matchers</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${fp.hamcrest.matchers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock-jre8-standalone</artifactId>
+			<version>${wiremock.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
