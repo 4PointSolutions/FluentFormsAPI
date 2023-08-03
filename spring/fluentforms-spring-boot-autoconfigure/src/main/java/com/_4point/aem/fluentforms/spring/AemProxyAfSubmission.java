@@ -8,8 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import org.glassfish.jersey.client.ChunkedInput;
 import org.glassfish.jersey.client.ClientProperties;
@@ -21,12 +21,15 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.MultiValueMapAdapter;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -67,6 +70,7 @@ public class AemProxyAfSubmission {
 	@Path(CONTENT_FORMS_AF + "{remainder : .+}")
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.WILDCARD)
     public Response proxySubmitPost(@PathParam("remainder") String remainder, /* @HeaderParam(CorrelationId.CORRELATION_ID_HDR) final String correlationIdHdr,*/ @Context HttpHeaders headers, final FormDataMultiPart inFormData)  {
 		logger.atInfo().addArgument(()->submitProcessor != null ?  submitProcessor.getClass().getName() : "null" ).log("Submit proxy called. SubmitProcessor={}");
 //		final String correlationId = CorrelationId.generate(correlationIdHdr);
@@ -74,11 +78,6 @@ public class AemProxyAfSubmission {
 		return submitProcessor.processRequest(inFormData, headers, remainder);
 	}
 	
-	// NOTE:  The following method is not currently in use however it will be at some future point when the
-	//        ability to customize the submission going to AEM is added.  Currently the code only allows
-	//        a developer to forward an unaltered version of the submission to AEM.  At some point in the future
-	//        a developer will be able to provide a bean that this function will use to allow the developer to 
-	//        perform operations on the submission before it is forwarded on tho AEM.
 	/**
 	 * Transforms a FormDataMultiPart object using a set of provided functions.
 	 * 
@@ -268,26 +267,98 @@ public class AemProxyAfSubmission {
 	 * 
 	 * It will invoke one or more AfSubmitHandlers that have been configured in the Spring context.
 	 * 
+	 * TODO:  Add configuration variable that becomes enum value for FIRST and ALL.  FIRST = quit after first handler that canHandle
+	 *        ALL - process all handlers that canHandle a request.
+	 * 
 	 */
 	public static class AfSubmitLocalProcessor implements AfSubmitProcessor {
-		
-		public interface AfSubmitHandler {
+		private final static Logger logger = LoggerFactory.getLogger(AfSubmitLocalProcessor.class);
+		private static final String REMAINDER_PATH_SUFFIX = "/jcr:content/guideContainer.af.submit.jsp";
+
+		public interface AfSubmissionHandler {
+			public record Submission(String formData, String formName, String redirectUrl, MultiValueMap<String, String> headers) {};
 			public record SubmitResponse(byte[] responseBytes, String mediaType) {};
 			
-			Predicate<String> canHandle();
+			boolean canHandle(String formName);
 			
+			SubmitResponse processSubmission(Submission submission);
 		}
 		
-		private final List<AfSubmitHandler> submitHandlers;
+		private final List<AfSubmissionHandler> submissionHandlers;
 
-		private AfSubmitLocalProcessor(List<AfSubmitHandler> submitHandlers) {
-			this.submitHandlers = submitHandlers;
+		private AfSubmitLocalProcessor(List<AfSubmissionHandler> submissionHandlers) {
+			this.submissionHandlers = submissionHandlers;
+			logger.atInfo().addArgument(submissionHandlers.size()).log("Found {} available AfSubmissionHandlers.");
+			if(logger.isDebugEnabled()) {
+				submissionHandlers.forEach(sh->logger.atDebug().addArgument(sh.getClass().getName()).log("  Found AfSubmissionHandler named '{}'."));
+			}
 		}
 
 		@Override
 		public Response processRequest(FormDataMultiPart inFormData, HttpHeaders headers, String remainder) {
-			return Response.ok().entity("AfSubmitLocalProcessor Response").build();
+			String formName = determineFormName(remainder);
+			Optional<AfSubmissionHandler> firstHandler = submissionHandlers.stream()
+																		   .filter(sh->sh.canHandle(formName))
+																		   .findFirst();
+			
+			return firstHandler.map(h->extracted(h, inFormData, headers, formName))
+							   .orElseGet(()->errorResponse());
+		}
+
+		private Response extracted(AfSubmissionHandler handler, FormDataMultiPart inFormData, HttpHeaders headers, String formName) {
+			logger.atInfo().addArgument(handler.getClass().getName()).log("Calling AfSubmissionHandler={}");
+			return formulateResponse(handler.processSubmission(formulateSubmission(inFormData, headers, formName)));
 		}
 		
+		private String determineFormName(String guideContainerPath) {
+			if (!guideContainerPath.endsWith(REMAINDER_PATH_SUFFIX)) {
+				logger.atWarn().addArgument(REMAINDER_PATH_SUFFIX)
+							   .addArgument(guideContainerPath)
+							   .log("Expected guideContainerPath to end with {}, but it didn't. ({})");
+			}
+			return guideContainerPath.substring(0, guideContainerPath.length() - REMAINDER_PATH_SUFFIX.length());
+		}
+		
+		// Create a AfSubmissionHandler.Submission object from the JAX-RS Request classes.
+		private AfSubmissionHandler.Submission formulateSubmission(FormDataMultiPart inFormData, HttpHeaders headers, String formName) {
+			class ExtractedData {
+				String formData;
+				String redirectUrl;
+			};
+			final ExtractedData extractedData = new ExtractedData();
+			// Extract data some of the parts.
+			final Map<String, Function<byte[], byte[]>> fieldFunctions = 		// Create a table of functions that will be called to transform specific fields in the incoming AF submission.
+	        		Map.of(
+	        				":redirect",	(redirect)->{ extractedData.redirectUrl = new String(redirect, StandardCharsets.UTF_8); return null; },
+	        				"jcr:data",		(dataBytes)->{ extractedData.formData = new String(dataBytes, StandardCharsets.UTF_8); return null; }
+	        			);
+			transformFormData(inFormData, fieldFunctions, logger);
+			return new AfSubmissionHandler.Submission(extractedData.formData, 
+													  formName, 
+													  extractedData.redirectUrl, 
+													  transferHeaders(headers)
+													  );
+		}
+		
+		// Transfer headers from JAX-RS construct to Spring construct (in order to keep JAX-RS encapsulated in this class)
+		private MultiValueMapAdapter<String, String> transferHeaders(HttpHeaders headers) {
+			if (logger.isDebugEnabled()) {
+				headers.getRequestHeaders().forEach((k,v)->logger.atDebug().addArgument(k).addArgument(v.size()).log("Found Http header {} with {} values."));
+			}
+			return new MultiValueMapAdapter<String, String>(headers.getRequestHeaders());
+		}
+		
+		// Convert the SubmitResponse object into a JAX-RS Response object.  
+		private Response formulateResponse(AfSubmissionHandler.SubmitResponse response) {
+			var builder = response.responseBytes().length > 0 ? Response.ok().entity(response.responseBytes()).type(response.mediaType()) 
+															  : Response.noContent();
+			return builder.build();
+		}
+		
+		// Generate an JAX-RS Error response if not AfSubmissionHandler was found.
+		private Response errorResponse() {
+			logger.atWarn().log("No applicable AfSubmissionHandler found.");
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
 	}
 }
