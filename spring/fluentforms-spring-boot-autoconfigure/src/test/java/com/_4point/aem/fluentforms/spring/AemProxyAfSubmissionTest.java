@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -185,8 +186,8 @@ class AemProxyAfSubmissionTest {
 
 
 		@Test
-		void test() {
-			final FormDataMultiPart getPdfForm = mockFormData("foo", "bar");
+		void testResponse() {
+			final FormDataMultiPart getPdfForm = mockFormData("foo1", "bar");
 
 			Response response = jrc.target
 								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
@@ -195,6 +196,19 @@ class AemProxyAfSubmissionTest {
 								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
 
 			assertThat(response, allOf(isStatus(Response.Status.OK),hasEntityMatching(equalTo(AF_SUBMIT_LOCAL_PROCESSOR_RESPONSE.getBytes()))));
+		}
+		
+		@Test
+		void testRedirect() {
+			final FormDataMultiPart getPdfForm = mockFormData("foo2", "bar");
+
+			Response response = jrc.target
+								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
+								   .request()
+								   .accept(MediaType.TEXT_PLAIN_TYPE)
+								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
+
+			assertThat(response, allOf(isStatus(Response.Status.TEMPORARY_REDIRECT), doesNotHaveEntity()));
 		}
 		
 		@Component
@@ -215,11 +229,16 @@ class AemProxyAfSubmissionTest {
 				assertAll(
 						()->assertEquals(AF_TEMPLATE_NAME, submission.formName()),
 						()->assertEquals("bar", submission.formData()),
-						()->assertEquals("foo", submission.redirectUrl()),
+						()->assertThat(submission.redirectUrl(), anyOf(equalTo("foo1"), equalTo("foo2"))),
 						()->assertEquals(MediaType.TEXT_PLAIN, submission.headers().getFirst("accept")),
 						()->assertTrue(MediaType.MULTIPART_FORM_DATA_TYPE.isCompatible(MediaType.valueOf(submission.headers().getFirst("content-type"))))
 						);
-				return new SubmitResponse(AF_SUBMIT_LOCAL_PROCESSOR_RESPONSE.getBytes(), "text/plain");
+				try {
+					return "foo2".equals(submission.redirectUrl())	? new SubmitResponse.Redirect(new URI("http://localhost/"))
+																	: new SubmitResponse.Response(AF_SUBMIT_LOCAL_PROCESSOR_RESPONSE.getBytes(), "text/plain");
+				} catch (URISyntaxException e) {
+					throw new IllegalStateException("Bad URI -- ", e);
+				}
 			}
 		}
 

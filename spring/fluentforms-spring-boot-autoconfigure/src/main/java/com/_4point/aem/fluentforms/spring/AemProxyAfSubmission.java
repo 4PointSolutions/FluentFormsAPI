@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -277,8 +278,11 @@ public class AemProxyAfSubmission {
 
 		public interface AfSubmissionHandler {
 			public record Submission(String formData, String formName, String redirectUrl, MultiValueMap<String, String> headers) {};
-			public record SubmitResponse(byte[] responseBytes, String mediaType) {};
 			
+			public sealed interface SubmitResponse permits SubmitResponse.Response, SubmitResponse.Redirect {
+				public record Response(byte[] responseBytes, String mediaType) implements SubmitResponse {};
+				public record Redirect(URI redirectUrl) implements SubmitResponse {};
+			}
 			boolean canHandle(String formName);
 			
 			SubmitResponse processSubmission(Submission submission);
@@ -349,10 +353,18 @@ public class AemProxyAfSubmission {
 		}
 		
 		// Convert the SubmitResponse object into a JAX-RS Response object.  
-		private Response formulateResponse(AfSubmissionHandler.SubmitResponse response) {
-			var builder = response.responseBytes().length > 0 ? Response.ok().entity(response.responseBytes()).type(response.mediaType()) 
-															  : Response.noContent();
-			return builder.build();
+		private Response formulateResponse(AfSubmissionHandler.SubmitResponse submitResponse) {
+			if (submitResponse instanceof AfSubmissionHandler.SubmitResponse.Response response) {
+				var builder = response.responseBytes().length > 0 ? Response.ok().entity(response.responseBytes()).type(response.mediaType()) 
+																  :	Response.noContent();
+				return builder.build();
+			} else if (submitResponse instanceof AfSubmissionHandler.SubmitResponse.Redirect redirect) {
+				return Response.temporaryRedirect(redirect.redirectUrl()).build();
+			} else {
+				// This cannot happen, but we need to supply an else until we can turn this code into a switch
+				// expression in JDK 21.
+				throw new IllegalStateException("Unexpected SubmitResponse class type '%s', this should never happen!".formatted(submitResponse.getClass().getName()));
+			}
 		}
 		
 		// Generate an JAX-RS Error response if not AfSubmissionHandler was found.
