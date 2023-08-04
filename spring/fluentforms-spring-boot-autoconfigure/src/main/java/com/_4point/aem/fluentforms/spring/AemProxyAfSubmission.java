@@ -302,14 +302,14 @@ public class AemProxyAfSubmission {
 		public Response processRequest(FormDataMultiPart inFormData, HttpHeaders headers, String remainder) {
 			String formName = determineFormName(remainder);
 			Optional<AfSubmissionHandler> firstHandler = submissionHandlers.stream()
-																		   .filter(sh->sh.canHandle(formName))
+																		   .filter(sh->canHandle(sh, formName))
 																		   .findFirst();
 			
-			return firstHandler.map(h->extracted(h, inFormData, headers, formName))
+			return firstHandler.map(h->processSubmission(h, inFormData, headers, formName))
 							   .orElseGet(()->errorResponse());
 		}
 
-		private Response extracted(AfSubmissionHandler handler, FormDataMultiPart inFormData, HttpHeaders headers, String formName) {
+		private Response processSubmission(AfSubmissionHandler handler, FormDataMultiPart inFormData, HttpHeaders headers, String formName) {
 			logger.atInfo().addArgument(handler.getClass().getName()).log("Calling AfSubmissionHandler={}");
 			return formulateResponse(handler.processSubmission(formulateSubmission(inFormData, headers, formName)));
 		}
@@ -321,6 +321,12 @@ public class AemProxyAfSubmission {
 							   .log("Expected guideContainerPath to end with {}, but it didn't. ({})");
 			}
 			return guideContainerPath.substring(0, guideContainerPath.length() - REMAINDER_PATH_SUFFIX.length());
+		}
+		
+		private boolean canHandle(AfSubmissionHandler sh, String formName) {
+			boolean result = sh.canHandle(formName);
+			logger.atDebug().addArgument(formName).addArgument(()->sh.getClass().getName()).log("Submission Handler canHandle returned {}. ({})");
+			return result;
 		}
 		
 		// Create a AfSubmissionHandler.Submission object from the JAX-RS Request classes.
