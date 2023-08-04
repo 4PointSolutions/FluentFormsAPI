@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
-import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor.AfSubmissionHandler;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitProcessor;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;

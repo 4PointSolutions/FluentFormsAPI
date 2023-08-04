@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor.AfSubmissionHandler;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitProcessor;

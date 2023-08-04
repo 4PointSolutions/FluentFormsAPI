@@ -15,7 +15,7 @@ import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
-import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor.AfSubmissionHandler;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitProcessor;
 
 /**

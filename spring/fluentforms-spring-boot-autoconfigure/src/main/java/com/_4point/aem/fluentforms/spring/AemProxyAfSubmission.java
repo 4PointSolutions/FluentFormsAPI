@@ -264,6 +264,55 @@ public class AemProxyAfSubmission {
 	}
 
 	/**
+	 * Implement this interface in order to provide code that will handle an Adaptive Form submission
+	 * 
+	 */
+	public interface AfSubmissionHandler {
+		/**
+		 * Object that contains the data submitted by the Adaptive Form
+		 */
+		public record Submission(String formData, String formName, String redirectUrl, MultiValueMap<String, String> headers) {};
+		
+		/**
+		 * Interface that is a tagging interface for the different types of response.
+		 */
+		public sealed interface SubmitResponse permits SubmitResponse.Response, SubmitResponse.Redirect {
+			/**
+			 * A Normal response with a 200 HTTP status code (204 if the responseBytes variable is empty)
+			 */
+			public record Response(byte[] responseBytes, String mediaType) implements SubmitResponse {};
+			/**
+			 * A Temporary Redirect (307 HTTP status code) response
+			 */
+			public record Redirect(URI redirectUrl) implements SubmitResponse {};
+		}
+		/**
+		 * Called to determine if this handler can handle a submission from this form.
+		 * 
+		 * The first handler that can handle a form submission (i.e. for which canHandle() returns true) will be selected.
+		 * 
+		 * @param formName
+		 * 		Adaptive Form name (full path under formsanddocuments)
+		 * @return
+		 * 		true indicates the this handler can handle the submission, false indicates that it cannot
+		 */
+		boolean canHandle(String formName);
+		
+		/**
+		 * Called to process the submission
+		 * 
+		 * The incoming submission is parsed into a Submission object and then the first handler that indicates
+		 * that is can handle the submission will have its processSubmission method called.
+		 * 
+		 * @param submission
+		 * 		Submission object containing the form submission data
+		 * @return
+		 * 		a SubmitResponse object that will be turned into an HTTP response to the submission.
+		 */
+		SubmitResponse processSubmission(Submission submission);
+	}
+	
+	/**
 	 * This processor will process Adaptive Forms submissions locally without sending anything to AEM.
 	 * 
 	 * It will invoke one or more AfSubmitHandlers that have been configured in the Spring context.
@@ -276,18 +325,6 @@ public class AemProxyAfSubmission {
 		private final static Logger logger = LoggerFactory.getLogger(AfSubmitLocalProcessor.class);
 		private static final String REMAINDER_PATH_SUFFIX = "/jcr:content/guideContainer.af.submit.jsp";
 
-		public interface AfSubmissionHandler {
-			public record Submission(String formData, String formName, String redirectUrl, MultiValueMap<String, String> headers) {};
-			
-			public sealed interface SubmitResponse permits SubmitResponse.Response, SubmitResponse.Redirect {
-				public record Response(byte[] responseBytes, String mediaType) implements SubmitResponse {};
-				public record Redirect(URI redirectUrl) implements SubmitResponse {};
-			}
-			boolean canHandle(String formName);
-			
-			SubmitResponse processSubmission(Submission submission);
-		}
-		
 		private final List<AfSubmissionHandler> submissionHandlers;
 
 		AfSubmitLocalProcessor(List<AfSubmissionHandler> submissionHandlers) {
