@@ -92,7 +92,7 @@ public class AemProxyAfSubmission {
 	 * @return
 	 * @throws IOException
 	 */
-	public static FormDataMultiPart transformFormData(final FormDataMultiPart inFormData, final Map<String, Function<byte[], byte[]>> fieldFunctions, Logger logger) {
+	private static FormDataMultiPart transformFormData(final FormDataMultiPart inFormData, final Map<String, Function<byte[], byte[]>> fieldFunctions, Logger logger) {
 		try {
 			FormDataMultiPart outFormData = new FormDataMultiPart();
 			var fields = inFormData.getFields();
@@ -169,7 +169,7 @@ public class AemProxyAfSubmission {
 	 * Spring context.  
 	 * 
 	 */
-	public static class AfSubmitAemProxyProcessor implements AfSubmitProcessor {
+	static class AfSubmitAemProxyProcessor implements AfSubmitProcessor {
 
 		private final AemConfiguration aemConfig;
 		private final Client httpClient;
@@ -272,7 +272,7 @@ public class AemProxyAfSubmission {
 	 *        ALL - process all handlers that canHandle a request.
 	 * 
 	 */
-	public static class AfSubmitLocalProcessor implements AfSubmitProcessor {
+	static class AfSubmitLocalProcessor implements AfSubmitProcessor {
 		private final static Logger logger = LoggerFactory.getLogger(AfSubmitLocalProcessor.class);
 		private static final String REMAINDER_PATH_SUFFIX = "/jcr:content/guideContainer.af.submit.jsp";
 
@@ -290,7 +290,7 @@ public class AemProxyAfSubmission {
 		
 		private final List<AfSubmissionHandler> submissionHandlers;
 
-		private AfSubmitLocalProcessor(List<AfSubmissionHandler> submissionHandlers) {
+		AfSubmitLocalProcessor(List<AfSubmissionHandler> submissionHandlers) {
 			this.submissionHandlers = submissionHandlers;
 			logger.atInfo().addArgument(submissionHandlers.size()).log("Found {} available AfSubmissionHandlers.");
 			if(logger.isDebugEnabled()) {
