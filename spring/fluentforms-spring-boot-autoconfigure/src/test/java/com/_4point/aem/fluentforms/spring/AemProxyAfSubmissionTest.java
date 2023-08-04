@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -15,6 +17,8 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -29,6 +33,7 @@ import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyP
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitProcessor;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler.SubmitResponse;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
@@ -303,4 +308,33 @@ class AemProxyAfSubmissionTest {
 		}
 	}
 	
+	public static class SubmitResponseResponseTests {
+		private static final String SAMPLE_TEXT = "text";
+		private static final byte[] SAMPLE_TEXT_BYTES = SAMPLE_TEXT.getBytes(StandardCharsets.UTF_8);
+		
+		enum TestScenario {
+			TEXT("text/plain", SubmitResponse.Response::text),
+			HTML("text/html", SubmitResponse.Response::html),
+			JSON("application/json", SubmitResponse.Response::json),
+			XML("application/xml", SubmitResponse.Response::xml)
+			;
+			final String expectedContentType;
+			final Function<String, SubmitResponse.Response> methodUnderTest;
+
+			private TestScenario(String expectedContentType, Function<String, SubmitResponse.Response> methodUnderTest) {
+				this.expectedContentType = expectedContentType;
+				this.methodUnderTest = methodUnderTest;
+			}
+		}
+		
+		@ParameterizedTest
+		@EnumSource
+		void testText(TestScenario scenario) {
+			var result = scenario.methodUnderTest.apply(SAMPLE_TEXT);
+			assertAll(
+					()->assertArrayEquals(SAMPLE_TEXT_BYTES, result.responseBytes()),
+					()->assertEquals(scenario.expectedContentType, result.mediaType())
+					);
+		}
+	}
 }

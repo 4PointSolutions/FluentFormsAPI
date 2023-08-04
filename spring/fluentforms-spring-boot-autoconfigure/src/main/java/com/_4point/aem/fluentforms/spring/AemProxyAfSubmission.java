@@ -280,7 +280,44 @@ public class AemProxyAfSubmission {
 			/**
 			 * A Normal response with a 200 HTTP status code (204 if the responseBytes variable is empty)
 			 */
-			public record Response(byte[] responseBytes, String mediaType) implements SubmitResponse {};
+			public record Response(byte[] responseBytes, String mediaType) implements SubmitResponse {
+				/**
+				 * Creates a text response from a String
+				 * 
+				 * @param text
+				 * 		Text to go into the response.
+				 * @return
+				 * 		Response object with a media type of "text/plain"
+				 */
+				public static Response text(String text) { return new Response(text.getBytes(StandardCharsets.UTF_8), MediaType.TEXT_PLAIN); }
+				/**
+				 * Creates an HTML response from a String
+				 * 
+				 * @param html
+				 * 		String containing HTML.  No checking is done to ensure that this is valid HTML.
+				 * @return
+				 * 		Response object with a media type of "text/html"
+				 */
+				public static Response html(String html) { return new Response(html.getBytes(StandardCharsets.UTF_8), MediaType.TEXT_HTML); }
+				/**
+				 * Creates an JSON response from a String
+				 * 
+				 * @param json
+				 * 		String containing JSON.  No checking is done to ensure that this is valid JSON.
+				 * @return
+				 * 		Response object with a media type of "application/html"
+				 */
+				public static Response json(String json) { return new Response(json.getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_JSON); }
+				/**
+				 * Creates an XML response from a String
+				 * 
+				 * @param xml
+				 * 		String containing XML.  No checking is done to ensure that this is valid XML.
+				 * @return
+				 * 		Response object with a media type of "application/xml"
+				 */
+				public static Response xml(String xml) { return new Response(xml.getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_XML); }
+			};
 			/**
 			 * A Temporary Redirect (307 HTTP status code) response
 			 */
