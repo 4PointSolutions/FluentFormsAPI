@@ -13,8 +13,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
-import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor.InternalAfSubmitAemProxyProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitProcessor;
 
 /**
@@ -66,8 +67,8 @@ public class AemProxyAutoConfiguration {
 	@ConditionalOnMissingBean(AfSubmitProcessor.class)
 	@ConditionalOnBean(AfSubmissionHandler.class)
 	@Bean
-	public AfSubmitProcessor localSubmitProcessor(List<AfSubmissionHandler> submissionHandlers) {
-		return new AfSubmitLocalProcessor(submissionHandlers);
+	public AfSubmitProcessor localSubmitProcessor(List<AfSubmissionHandler> submissionHandlers, InternalAfSubmitAemProxyProcessor aemProxyProcessor) {
+		return new AfSubmitLocalProcessor(submissionHandlers, aemProxyProcessor);
 	}
 	
 	/**
@@ -83,8 +84,28 @@ public class AemProxyAutoConfiguration {
 	 * 		Processor that forwards all submissions on to AEM.
 	 */
 	@ConditionalOnMissingBean({AfSubmitProcessor.class, AfSubmissionHandler.class})
-	@Bean
+	@Bean()
 	public AfSubmitProcessor aemSubmitProcessor(AemConfiguration aemConfig) {
 		return new AfSubmitAemProxyProcessor(aemConfig);
+	}
+	
+	/**
+	 * Supply a AfSubmitAemProxyProcessor for use by the localSubmitProcessor.
+	 * 
+	 * This is the a processor that will forward all submissions on to the configured AEM
+	 * instance.  It is used by the localSubmitProcessor to proxy any requests that aren't 
+	 * true submissions (e.g. an internalsubmit).
+	 * 
+	 * @param aemConfig
+	 * 		AEM configuration typically configured using application.properties files.  This is
+	 * 		typically injected by the Spring Framework.
+	 * @return
+	 * 		Processor that forwards all submissions on to AEM.
+	 */
+	@ConditionalOnMissingBean(InternalAfSubmitAemProxyProcessor.class)
+	@ConditionalOnBean(AfSubmissionHandler.class)
+	@Bean
+	public InternalAfSubmitAemProxyProcessor aemProxyProcessor(AemConfiguration aemConfig) {
+		return ()->new AfSubmitAemProxyProcessor(aemConfig);
 	}
 }

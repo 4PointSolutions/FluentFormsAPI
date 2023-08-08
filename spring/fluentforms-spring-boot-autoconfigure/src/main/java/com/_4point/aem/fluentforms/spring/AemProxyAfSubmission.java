@@ -488,11 +488,21 @@ public class AemProxyAfSubmission {
 	static class AfSubmitLocalProcessor implements AfSubmitProcessor {
 		private final static Logger logger = LoggerFactory.getLogger(AfSubmitLocalProcessor.class);
 		private static final String REMAINDER_PATH_SUFFIX = "/jcr:content/guideContainer.af.submit.jsp";
+		
+		// Have to implement an internal interface so that Spring does not think there are two available
+		// AfSubmitProcessors.  This wraps an internal AfSubmitAemProxyProcessor that the local processor
+		// uses to handle requests it chooses to pass on to AEM.
+		@FunctionalInterface
+		public interface InternalAfSubmitAemProxyProcessor {
+			AfSubmitAemProxyProcessor get();
+		}
 
 		private final List<AfSubmissionHandler> submissionHandlers;
+		private final AfSubmitAemProxyProcessor aemProxyProcessor;
 
-		AfSubmitLocalProcessor(List<AfSubmissionHandler> submissionHandlers) {
+		AfSubmitLocalProcessor(List<AfSubmissionHandler> submissionHandlers, InternalAfSubmitAemProxyProcessor aemProxyProcessor) {
 			this.submissionHandlers = submissionHandlers;
+			this.aemProxyProcessor = aemProxyProcessor.get();
 			logger.atInfo().addArgument(submissionHandlers.size()).log("Found {} available AfSubmissionHandlers.");
 			if(logger.isDebugEnabled()) {
 				submissionHandlers.forEach(sh->logger.atDebug().addArgument(sh.getClass().getName()).log("  Found AfSubmissionHandler named '{}'."));
@@ -501,6 +511,10 @@ public class AemProxyAfSubmission {
 
 		@Override
 		public Response processRequest(FormDataMultiPart inFormData, HttpHeaders headers, String remainder) {
+			if (!remainder.endsWith(REMAINDER_PATH_SUFFIX)) {
+				// If the submission does not end with the expected submission suffix, then just proxy it AEM.
+				return aemProxyProcessor.processRequest(inFormData, headers, remainder);
+			}
 			String formName = determineFormName(remainder);
 			Optional<AfSubmissionHandler> firstHandler = submissionHandlers.stream()
 																		   .filter(sh->canHandle(sh, formName))
@@ -516,11 +530,6 @@ public class AemProxyAfSubmission {
 		}
 		
 		private String determineFormName(String guideContainerPath) {
-			if (!guideContainerPath.endsWith(REMAINDER_PATH_SUFFIX)) {
-				logger.atWarn().addArgument(REMAINDER_PATH_SUFFIX)
-							   .addArgument(guideContainerPath)
-							   .log("Expected guideContainerPath to end with {}, but it didn't. ({})");
-			}
 			return guideContainerPath.substring(0, guideContainerPath.length() - REMAINDER_PATH_SUFFIX.length());
 		}
 		

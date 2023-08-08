@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -31,6 +32,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
@@ -38,6 +41,8 @@ import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProc
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler.SubmitResponse;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor.InternalAfSubmitAemProxyProcessor;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmissionTest.AemProxyAfSubmissionTestWithLocalAfSubmitProcessorTest.MockAemProxy;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
@@ -119,13 +124,13 @@ class AemProxyAfSubmissionTest {
 	 * Tests the AemAfSubmitProcessor
 	 * 
 	 */
-	@WireMockTest(httpPort = 4502)
+	@WireMockTest(httpPort = 8502)
 	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
 					classes = {TestApplication.class, JerseyConfig.class, AfSubmitAemProxyProcessor.class},
 					properties = {
 //						"debug",
 						"fluentforms.aem.servername=" + "localhost", 
-						"fluentforms.aem.port=" + "4502", 
+						"fluentforms.aem.port=" + "8502", 
 						"fluentforms.aem.user=admin",		 
 						"fluentforms.aem.password=admin",
 						}
@@ -170,7 +175,7 @@ class AemProxyAfSubmissionTest {
 	 * 
 	 */
 	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
-					classes = {TestApplication.class, JerseyConfig.class, AfSubmitLocalProcessor.class, 
+					classes = {TestApplication.class, JerseyConfig.class, AfSubmitLocalProcessor.class, MockAemProxy.class,
 							   AemProxyAfSubmissionTestWithLocalAfSubmitProcessorTest.MockSubmissionProcessor.class, 
 							   AemProxyAfSubmissionTestWithLocalAfSubmitProcessorTest.MockSubmissionProcessor2.class}
 					,properties={
@@ -220,6 +225,19 @@ class AemProxyAfSubmissionTest {
 			assertThat(response, allOf(isStatus(Response.Status.TEMPORARY_REDIRECT), doesNotHaveEntity()));
 		}
 		
+		@Test
+		void testProxy() {
+			final FormDataMultiPart getPdfForm = mockFormData("foo2", "bar");
+
+			Response response = jrc.target
+								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH+"anythingElse")
+								   .request()
+								   .accept(MediaType.TEXT_PLAIN_TYPE)
+								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
+
+			assertThat(response, allOf(isStatus(Response.Status.OK), doesNotHaveEntity()));
+		}
+		
 		@Component
 		public static class MockSubmissionProcessor implements AfSubmissionHandler {
 
@@ -267,6 +285,15 @@ class AemProxyAfSubmissionTest {
 			}
 		}
 
+		@Configuration
+		public static class MockAemProxy {
+			@Bean()
+			public InternalAfSubmitAemProxyProcessor aemProxyProcessor() {
+				AfSubmitAemProxyProcessor mock = Mockito.mock(AfSubmitAemProxyProcessor.class);
+				Mockito.when(mock.processRequest(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Response.ok().build());
+				return ()->mock;
+			}
+		}
 	}
 
 	/**
