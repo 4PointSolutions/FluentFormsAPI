@@ -9,8 +9,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import org.glassfish.jersey.client.ChunkedInput;
 import org.glassfish.jersey.client.ClientProperties;
@@ -267,6 +269,12 @@ public class AemProxyAfSubmission {
 	 * Implement this interface in order to provide code that will handle an Adaptive Form submission
 	 * 
 	 */
+	/**
+	 * 
+	 */
+	/**
+	 * 
+	 */
 	public interface AfSubmissionHandler {
 		/**
 		 * Object that contains the data submitted by the Adaptive Form
@@ -347,6 +355,125 @@ public class AemProxyAfSubmission {
 		 * 		a SubmitResponse object that will be turned into an HTTP response to the submission.
 		 */
 		SubmitResponse processSubmission(Submission submission);
+		
+		/**
+		 * Creates an AfSubmissionHandler that handles form submissions from a specific form
+		 * 
+		 * @param formName
+		 * 		name of the form (so the form name under FormsAndDocuments)
+		 * @param handlerLogic
+		 * 		function that will be called when a form submission for occurs from that form
+		 * @return
+		 * 		an AfSubmissionHandler object
+		 */
+		public static AfSubmissionHandler canHandleFormNameEquals(String formName, Function<Submission, SubmitResponse> handlerLogic) {
+			Objects.requireNonNull(formName, "Form Name for submission handler cannot be null.");
+			return new AfSubmissionHandler() {
+
+				@Override
+				public boolean canHandle(String formNameIn) {
+					return formName.equals(formNameIn);
+				}
+
+				@Override
+				public SubmitResponse processSubmission(Submission submission) {
+					return handlerLogic.apply(submission);
+				}
+			};
+		}
+		
+		/**
+		 * Creates an AfSubmissionHandler that handles form submissions from one or more specific forms
+		 * 
+		 * @param handlerLogic
+		 * 		function that will be called when a form submission for occurs from that form
+		 * @param formNames
+		 * 		one or more form names (can be zero, but then this handler will never be called)
+		 * @return
+		 * 		an AfSubmissionHandler object
+		 */
+		public static AfSubmissionHandler canHandleFormNameAnyOf(Function<Submission, SubmitResponse> handlerLogic, String... formNames) {
+			if (formNames.length < 1) {
+				logger.atWarn().log("No form names were supplied, so this handler will never be called.");
+			}
+			return new AfSubmissionHandler() {
+
+				@Override
+				public boolean canHandle(String formNameIn) {
+					for (String formName : formNames) {
+						if (Objects.equals(formName, formNameIn)) {
+							return true;
+						}
+					}
+					return false;
+				}
+
+				@Override
+				public SubmitResponse processSubmission(Submission submission) {
+					return handlerLogic.apply(submission);
+				}
+			};
+		}
+		
+		/**
+		 * Creates an AfSubmissionHandler that handles form submissions from one or more specific forms
+		 * 
+		 * @param formNames
+		 * 		list of one or more form names (can be empty, but then this handler will never be called)
+		 * @param handlerLogic
+		 * 		function that will be called when a form submission for occurs from that form
+		 * @return
+		 * 		an AfSubmissionHandler object
+		 */
+		public static AfSubmissionHandler canHandleFormNameAnyOf(List<String> formNames, Function<Submission, SubmitResponse> handlerLogic) {
+			if (formNames.size() < 1) {
+				logger.atWarn().log("No form names were supplied, so this handler will never be called.");
+			}
+			return new AfSubmissionHandler() {
+
+				@Override
+				public boolean canHandle(String formNameIn) {
+					for (String formName : formNames) {
+						if (Objects.equals(formName, formNameIn)) {
+							return true;
+						}
+					}
+					return false;
+				}
+
+				@Override
+				public SubmitResponse processSubmission(Submission submission) {
+					return handlerLogic.apply(submission);
+				}
+			};
+		}
+		
+ 		/**
+		 * Creates an AfSubmissionHandler that handles form submissions from one or more specific forms
+		 * 
+ 		 * @param formNameRegEx
+		 * 		a regex that will be applied to the name of the form, if it matches, then the handler will apply
+ 		 * @param handlerLogic
+		 * 		function that will be called when a form submission for occurs from that form
+ 		 * @return
+		 * 		an AfSubmissionHandler object
+ 		 */
+ 		public static AfSubmissionHandler canHandleFormNameMatchesRegex(String formNameRegEx, Function<Submission, SubmitResponse> handlerLogic) {
+			final var pattern = Pattern.compile(Objects.requireNonNull(formNameRegEx, "Form Name RegEx for submission handler cannot be null."));
+
+			return new AfSubmissionHandler() {
+
+				@Override
+				public boolean canHandle(String formNameIn) {
+					return pattern.matcher(formNameIn).matches();
+				}
+
+				@Override
+				public SubmitResponse processSubmission(Submission submission) {
+					return handlerLogic.apply(submission);
+				}
+			};
+		}
 	}
 	
 	/**
