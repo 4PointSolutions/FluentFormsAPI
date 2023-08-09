@@ -269,12 +269,6 @@ public class AemProxyAfSubmission {
 	 * Implement this interface in order to provide code that will handle an Adaptive Form submission
 	 * 
 	 */
-	/**
-	 * 
-	 */
-	/**
-	 * 
-	 */
 	public interface AfSubmissionHandler {
 		/**
 		 * Object that contains the data submitted by the Adaptive Form
