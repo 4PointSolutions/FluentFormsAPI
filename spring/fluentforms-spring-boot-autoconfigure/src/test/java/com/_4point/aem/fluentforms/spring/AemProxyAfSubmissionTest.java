@@ -226,6 +226,19 @@ class AemProxyAfSubmissionTest {
 		}
 		
 		@Test
+		void testSeeOther() {
+			final FormDataMultiPart getPdfForm = mockFormData("foo3", "bar");
+
+			Response response = jrc.target
+								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
+								   .request()
+								   .accept(MediaType.TEXT_PLAIN_TYPE)
+								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
+
+			assertThat(response, allOf(isStatus(Response.Status.SEE_OTHER), doesNotHaveEntity()));
+		}
+		
+		@Test
 		void testProxy() {
 			final FormDataMultiPart getPdfForm = mockFormData("foo2", "bar");
 
@@ -256,13 +269,18 @@ class AemProxyAfSubmissionTest {
 				assertAll(
 						()->assertEquals(AF_TEMPLATE_NAME, submission.formName()),
 						()->assertEquals("bar", submission.formData()),
-						()->assertThat(submission.redirectUrl(), anyOf(equalTo("foo1"), equalTo("foo2"))),
+						()->assertThat(submission.redirectUrl(), anyOf(equalTo("foo1"), equalTo("foo2"), equalTo("foo3"))),
 						()->assertEquals(MediaType.TEXT_PLAIN, submission.headers().getFirst("accept")),
 						()->assertTrue(MediaType.MULTIPART_FORM_DATA_TYPE.isCompatible(MediaType.valueOf(submission.headers().getFirst("content-type"))))
 						);
 				try {
-					return "foo2".equals(submission.redirectUrl())	? new SubmitResponse.Redirect(new URI("http://localhost/"))
-																	: new SubmitResponse.Response(AF_SUBMIT_LOCAL_PROCESSOR_RESPONSE.getBytes(), "text/plain");
+					String redirectUrl = submission.redirectUrl();
+					return switch(redirectUrl) {
+						case "foo1" -> new SubmitResponse.Response(AF_SUBMIT_LOCAL_PROCESSOR_RESPONSE.getBytes(), "text/plain");
+						case "foo2" -> new SubmitResponse.Redirect(new URI("http://localhost/"));
+						case "foo3" -> new SubmitResponse.SeeOther(new URI("http://localhost/"));
+						default -> throw new UnsupportedOperationException("Unexpected value in redirectUrl (%s)".formatted(redirectUrl));
+					};
 				} catch (URISyntaxException e) {
 					throw new IllegalStateException("Bad URI -- ", e);
 				}

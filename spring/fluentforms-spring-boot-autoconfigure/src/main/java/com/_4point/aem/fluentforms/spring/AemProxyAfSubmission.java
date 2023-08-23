@@ -278,7 +278,7 @@ public class AemProxyAfSubmission {
 		/**
 		 * Interface that is a tagging interface for the different types of response.
 		 */
-		public sealed interface SubmitResponse permits SubmitResponse.Response, SubmitResponse.Redirect {
+		public sealed interface SubmitResponse permits SubmitResponse.Response, SubmitResponse.SeeOther, SubmitResponse.Redirect {
 			/**
 			 * A Normal response with a 200 HTTP status code (204 if the responseBytes variable is empty)
 			 */
@@ -320,6 +320,10 @@ public class AemProxyAfSubmission {
 				 */
 				public static Response xml(String xml) { return new Response(xml.getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_XML); }
 			};
+			/**
+			 * A Temporary Redirect (302 HTTP status code) response
+			 */
+			public record SeeOther(URI redirectUrl) implements SubmitResponse {};
 			/**
 			 * A Temporary Redirect (307 HTTP status code) response
 			 */
@@ -568,6 +572,8 @@ public class AemProxyAfSubmission {
 				var builder = response.responseBytes().length > 0 ? Response.ok().entity(response.responseBytes()).type(response.mediaType()) 
 																  :	Response.noContent();
 				return builder.build();
+			} else if (submitResponse instanceof AfSubmissionHandler.SubmitResponse.SeeOther redirectFound) {
+				return Response.seeOther(redirectFound.redirectUrl()).build();
 			} else if (submitResponse instanceof AfSubmissionHandler.SubmitResponse.Redirect redirect) {
 				return Response.temporaryRedirect(redirect.redirectUrl()).build();
 			} else {
