@@ -14,7 +14,7 @@ object (which all implement the `SubmitResponse` interface).  A `Response` objec
 html, json, etc. to the browser.  A `SeeOther` will redirect the browser to perform a GET on another URL.  A `Redirect` will redirect the browser to perform a POST to another URL.
 
 There are a bunch of static convenience methods in `AfSubmissionHandler` that means that you probably 
-won�t have to create an `AfSubmissionhandler` directly, but can use a convenience method like 
+won't have to create an `AfSubmissionhandler` directly, but can use a convenience method like 
 `AfSubmissionHandler. canHandleFormNameEquals(String formName, Function<Submission, SubmitResponse> handlerLogic)` 
 and others.
 
