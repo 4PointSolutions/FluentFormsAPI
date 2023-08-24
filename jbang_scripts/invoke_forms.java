@@ -1,7 +1,7 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //REPOS mavencentral,github=https://maven.pkg.github.com/4PointSolutions/*
 //DEPS info.picocli:picocli:4.6.3
-//DEPS com._4point.aem:fluentforms.core:0.0.2-SNAPSHOT  com._4point.aem.docservices:rest-services.client:0.0.2-SNAPSHOT
+//DEPS com._4point.aem:fluentforms.core:0.0.3-SNAPSHOT  com._4point.aem.docservices:rest-services.client:0.0.3-SNAPSHOT
 //JAVA 11+
 
 /*

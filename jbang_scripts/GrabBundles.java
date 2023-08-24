@@ -56,13 +56,13 @@ class GrabJars implements Callable<Integer> {
     	packages.repo("4PointSolutions", "FluentFormsAPI")
 				.group("com._4point.aem.docservices")
 				.artifact("rest-services.server")
-				.version("0.0.2-SNAPSHOT")
+				.version("0.0.3-SNAPSHOT")
 				.copyTo(dest, StandardCopyOption.REPLACE_EXISTING);
 		
 		packages.repo("4PointSolutions", "FluentFormsAPI")
 				.group("com._4point.aem")
 				.artifact("fluentforms.core")
-				.version("0.0.2-SNAPSHOT")
+				.version("0.0.3-SNAPSHOT")
 				.copyTo(dest, StandardCopyOption.REPLACE_EXISTING);
 
         return 0;
