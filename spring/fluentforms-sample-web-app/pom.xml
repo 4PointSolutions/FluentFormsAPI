@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com._4point.aem.fluentforms</groupId>
 	<artifactId>fluentforms-sample-web-app</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>Fluent Forms Spring Boot Sample Web Application</name>
 	<description>Sample Spring Boot Web Application that utilizes the Fluent Forms Spring Boot Starters</description>
 
@@ -65,7 +65,7 @@
 		<dependency>
 			<groupId>com._4point.aem.fluentforms</groupId>
 			<artifactId>fluentforms-spring-boot-starter</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Testing Dependencies -->
