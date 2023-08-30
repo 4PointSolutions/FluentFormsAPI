@@ -15,7 +15,7 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<wiremock.version>3.0.0-beta-8</wiremock.version>
+		<wiremock.version>3.0.0</wiremock.version>
 	</properties>
 
 	<distributionManagement>
@@ -74,7 +74,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.github.tomakehurst</groupId>
+			<groupId>org.wiremock</groupId>
 			<artifactId>wiremock-standalone</artifactId>
 			<version>${wiremock.version}</version>
 			<scope>test</scope>
