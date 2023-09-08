@@ -15,7 +15,7 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<wiremock.version>3.0.0</wiremock.version>
+		<wiremock.version>3.0.3</wiremock.version>
 	</properties>
 
 	<distributionManagement>
