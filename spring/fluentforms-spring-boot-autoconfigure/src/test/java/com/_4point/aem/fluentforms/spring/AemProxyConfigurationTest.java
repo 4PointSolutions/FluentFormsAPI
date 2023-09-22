@@ -31,6 +31,11 @@ class AemProxyConfigurationTest {
 		assertEquals("", underTest.afBaseLocation());
 	}
 
+	@Test
+	void testGetAppPrefix() {
+		assertEquals("", underTest.appPrefix());
+	}
+
 	@SpringBootApplication
 	@EnableConfigurationProperties(AemConfiguration.class)
 	public static class TestApplication {

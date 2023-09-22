@@ -1,5 +1,8 @@
 package com._4point.aem.fluentforms.spring;
 
+import java.io.InputStream;
+import java.util.function.Function;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -55,10 +58,18 @@ public class FluentFormsAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public AdaptiveFormsService adaptiveFormsService(AemConfiguration aemConfig) {
+	public AdaptiveFormsService adaptiveFormsService(AemConfiguration aemConfig, Function<InputStream, InputStream> afInputStreamFilter) {
 		return setAemFields(AdaptiveFormsService.builder(), aemConfig)
-				.addRenderResultFilter(StandardFormsFeederUrlFilters.getStandardInputStreamFilter())
+				.addRenderResultFilter(afInputStreamFilter)
 				.build();
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	public Function<InputStream, InputStream> afInputStreamFilter(AemProxyConfiguration aemProxyConfig) {
+		String appPrefix = aemProxyConfig.appPrefix();
+		return appPrefix.isBlank() ? StandardFormsFeederUrlFilters.getStandardInputStreamFilter() :
+									 StandardFormsFeederUrlFilters.getStandardInputStreamFilter(appPrefix);
 	}
 
 	@ConditionalOnMissingBean
@@ -91,9 +102,9 @@ public class FluentFormsAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public Html5FormsService html5FormsService(AemConfiguration aemConfig) {
+	public Html5FormsService html5FormsService(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig) {
 		return setAemFields(Html5FormsService.builder(), aemConfig)
-				.addRenderResultFilter(StandardFormsFeederUrlFilters.getStandardInputStreamFilter())
+				.addRenderResultFilter(afInputStreamFilter(aemProxyConfig))
 				.build();
 	}
 

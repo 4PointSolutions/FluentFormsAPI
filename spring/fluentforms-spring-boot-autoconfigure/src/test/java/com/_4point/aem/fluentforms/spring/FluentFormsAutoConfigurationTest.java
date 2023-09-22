@@ -2,6 +2,15 @@ package com._4point.aem.fluentforms.spring;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -73,13 +82,64 @@ class FluentFormsAutoConfigurationTest {
 		assertNotNull(factory);
 		assertNotNull(factory.create(new byte[6]));
 	}
-
+	
+	@Test
+	void testAfInputStreamFilterFactory(@Autowired Function<InputStream, InputStream> afInputStreamFilter) throws Exception {
+		final String INPUT_STRING = "/etc.clientlibs/foobar";
+		final String EXPECTED_RESULT_STRING = "/aem/etc.clientlibs/foobar";
+		
+		assertNotNull(afInputStreamFilter);
+		assertEquals(EXPECTED_RESULT_STRING, applyStreamFilter(INPUT_STRING, afInputStreamFilter)); 
+	}
+	
 	@SpringBootApplication
 	@EnableConfigurationProperties({AemConfiguration.class})
 	public static class TestApplication {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+	}
+	
+	
+	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+			properties = {
+					"fluentforms.aem.servername=localhost", 
+					"fluentforms.aem.port=4502", 
+					"fluentforms.aem.user=admin",		 
+					"fluentforms.aem.password=admin)",
+					"fluentforms.rproxy.appPrefix=/app_prefix",
+					})
+	public static class AfStreamFilterTest {
+		
+		@Test
+		void testAfInputStreamFilterFactory(@Autowired Function<InputStream, InputStream> afInputStreamFilter) throws Exception {
+			final String INPUT_STRING = "/app_prefix/etc.clientlibs/foobar";
+			final String EXPECTED_RESULT_STRING = "/aem/app_prefix/etc.clientlibs/foobar";
+			
+			assertNotNull(afInputStreamFilter);
+			assertEquals(EXPECTED_RESULT_STRING, applyStreamFilter(INPUT_STRING, afInputStreamFilter)); 
+		}
+		
+	}
+	
+	
+	private static String applyStreamFilter(String inputString, Function<InputStream, InputStream> afInputStreamFilter) {
+		try (InputStream is = afInputStreamFilter.apply(stringToInputStream(inputString))) {
+			return inputStreamToString(is);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
+	private static InputStream stringToInputStream(String inputString) {
+		return new ByteArrayInputStream(inputString.getBytes(StandardCharsets.UTF_8));
+	}
+	
+	private static String inputStreamToString(InputStream inputStream) throws IOException {
+		String result = new BufferedReader(
+			      new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+			        .lines()
+			        .collect(Collectors.joining("\n"));
+		return result;
 	}
 }
