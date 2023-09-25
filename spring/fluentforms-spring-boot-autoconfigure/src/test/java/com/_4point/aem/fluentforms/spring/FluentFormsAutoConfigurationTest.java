@@ -107,14 +107,15 @@ class FluentFormsAutoConfigurationTest {
 					"fluentforms.aem.port=4502", 
 					"fluentforms.aem.user=admin",		 
 					"fluentforms.aem.password=admin)",
-					"fluentforms.rproxy.appPrefix=/app_prefix",
+					"fluentforms.rproxy.aemPrefix=/app_prefix",
+					"fluentforms.rproxy.clientPrefix=/client_prefix",
 					})
 	public static class AfStreamFilterTest {
 		
 		@Test
 		void testAfInputStreamFilterFactory(@Autowired Function<InputStream, InputStream> afInputStreamFilter) throws Exception {
 			final String INPUT_STRING = "/app_prefix/etc.clientlibs/foobar";
-			final String EXPECTED_RESULT_STRING = "/aem/app_prefix/etc.clientlibs/foobar";
+			final String EXPECTED_RESULT_STRING = "/client_prefix/aem/app_prefix/etc.clientlibs/foobar";
 			
 			assertNotNull(afInputStreamFilter);
 			assertEquals(EXPECTED_RESULT_STRING, applyStreamFilter(INPUT_STRING, afInputStreamFilter)); 

@@ -15,6 +15,7 @@ import com._4point.aem.docservices.rest_services.client.docassurance.RestService
 import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.generatePDF.RestServicesGeneratePDFServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.FormsFeederUrlFilterBuilder;
 import com._4point.aem.docservices.rest_services.client.helpers.StandardFormsFeederUrlFilters;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
@@ -67,9 +68,14 @@ public class FluentFormsAutoConfiguration {
 	@ConditionalOnMissingBean
 	@Bean
 	public Function<InputStream, InputStream> afInputStreamFilter(AemProxyConfiguration aemProxyConfig) {
-		String aemPrefix = aemProxyConfig.aemPrefix();
-		return aemPrefix.isBlank() ? StandardFormsFeederUrlFilters.getStandardInputStreamFilter() :
-									 StandardFormsFeederUrlFilters.getStandardInputStreamFilter(aemPrefix);
+		return buildInputFilter(aemProxyConfig.aemPrefix(), aemProxyConfig.clientPrefix());	
+	}
+
+	private Function<InputStream, InputStream> buildInputFilter(String aemPrefix, String clientPrefix) {
+		FormsFeederUrlFilterBuilder builder = StandardFormsFeederUrlFilters.getUrlFilterBuilder();
+		builder = aemPrefix.isBlank() ? builder : builder.aemPrefix(aemPrefix);
+		builder = clientPrefix.isBlank() ? builder : builder.clientPrefix(clientPrefix);;
+		return builder.buildInputStreamFn();
 	}
 
 	@ConditionalOnMissingBean
