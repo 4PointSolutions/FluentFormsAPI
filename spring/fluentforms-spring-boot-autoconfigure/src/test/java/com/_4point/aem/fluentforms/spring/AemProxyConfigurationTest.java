@@ -33,7 +33,7 @@ class AemProxyConfigurationTest {
 
 	@Test
 	void testGetAppPrefix() {
-		assertEquals("", underTest.appPrefix());
+		assertEquals("", underTest.aemPrefix());
 	}
 
 	@SpringBootApplication

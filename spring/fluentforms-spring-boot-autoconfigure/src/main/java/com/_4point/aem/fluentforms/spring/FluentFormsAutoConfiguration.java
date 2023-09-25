@@ -67,9 +67,9 @@ public class FluentFormsAutoConfiguration {
 	@ConditionalOnMissingBean
 	@Bean
 	public Function<InputStream, InputStream> afInputStreamFilter(AemProxyConfiguration aemProxyConfig) {
-		String appPrefix = aemProxyConfig.appPrefix();
-		return appPrefix.isBlank() ? StandardFormsFeederUrlFilters.getStandardInputStreamFilter() :
-									 StandardFormsFeederUrlFilters.getStandardInputStreamFilter(appPrefix);
+		String aemPrefix = aemProxyConfig.aemPrefix();
+		return aemPrefix.isBlank() ? StandardFormsFeederUrlFilters.getStandardInputStreamFilter() :
+									 StandardFormsFeederUrlFilters.getStandardInputStreamFilter(aemPrefix);
 	}
 
 	@ConditionalOnMissingBean

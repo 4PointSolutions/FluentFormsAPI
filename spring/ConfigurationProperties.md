@@ -31,8 +31,7 @@ property is optional, and it defaults to `false` if it is not supplied.
 `fluentforms.rproxy.enabled` - This is used to enable/disable the reverse proxying of secondary resources to AEM.  If it is 
 `true`, then reverse proxying is enabled otherwise it is not.  This property is optional and defaults to `true`.
 
-`fluentforms.rproxy.appPrefix` - This is used if an application using the FluentForms reverse proxy functionality is located 
-somewhere besides the root of the web server.  Normally, all secondary resources (like js and css files) are routed through `/aem`, however if the application is deployed to a app server under `/clientApp`, then the reverse proxy will reside under `/clientApp/aem`.  In order to compensate for this, the configuration property `fluentforms.rproxy.appPrefix` should be set to 
-`/clientApp` (as in `fluentforms.rproxy.appPrefix=/clientApp`).
+`fluentforms.rproxy.aemPrefix` - This is used if the AEM instance is running under some directory other than the root 
+directory on the AEM server.  This can happen, for instance, when AEM is running under a JEE Application server.
 
 `fluentforms.rproxy.afBaseLocation` - TBD - This needs to be documented.

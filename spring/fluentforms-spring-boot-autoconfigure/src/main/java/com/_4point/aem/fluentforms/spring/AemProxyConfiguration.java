@@ -16,6 +16,6 @@ import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties
 @ConfigurationProperties("fluentforms.rproxy")
 public record AemProxyConfiguration(
 		@DefaultValue("") String afBaseLocation,	// "rproxy.af-base-location"
-		@DefaultValue("") String appPrefix
+		@DefaultValue("") String aemPrefix
 		) {
 }
