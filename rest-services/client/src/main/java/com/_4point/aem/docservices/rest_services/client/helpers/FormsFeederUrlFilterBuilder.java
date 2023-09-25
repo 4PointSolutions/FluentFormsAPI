@@ -27,7 +27,8 @@ public class FormsFeederUrlFilterBuilder {
 	private static final String FORMSFEEDER_URL_PREFIX = "/aem";
 
 	private final List<String> replacedUrls;
-	private String appPrefix = "";
+	private String aemPrefix = "";
+	private String clientPrefix = "";
 	private Location location = null;
 
 	/**
@@ -73,13 +74,47 @@ public class FormsFeederUrlFilterBuilder {
 	}
 
 	/**
-	 * set the string that will be prefixed in front of the URLs
+	 * set the string that AEM is prefixing in front of the URLs
 	 * 
-	 * @param appPrefix String that will be prefixed in front of URLs
+	 * This has been renamed to aemPrefix().  This version is retained for
+	 * backwards compatibility.  It will likely be deprecated at some point
+	 * in the future.
+	 * 
+	 * @param appPrefix String that AEM us prefixing in front of URLs
 	 * @return this builder
 	 */
 	public FormsFeederUrlFilterBuilder appPrefix(String appPrefix) {
-		this.appPrefix = appPrefix;
+		this.aemPrefix = appPrefix;
+		return this;
+	}
+	
+	/**
+	 * set the string that AEM is prefixing in front of the URLs
+	 * 
+	 * When AEM is deployed as a .jar on an Java Application Server, the jar's name gets prefixed
+	 * in front of any URLs.  We need to know about this in order to properly recognize the
+	 * standard URLs we redirect.
+	 * 
+	 * The most common case is when the code is dealing with an AEM on JEE instance.  In that
+	 * case the aemPrefix is "/lc".
+	 * 
+	 * @param aemPrefix String that AEM us prefixing in front of URLs
+	 * @return this builder
+	 */
+	public FormsFeederUrlFilterBuilder aemPrefix(String aemPrefix) {
+		this.aemPrefix = aemPrefix;
+		return this;
+	}
+	
+	/**
+	 * set the string that will be prefixed in front of the URLs
+	 * 
+	 * @param aemPrefix String that will be prefixed in front of URLs
+	 * @return this builder
+	 */
+	public FormsFeederUrlFilterBuilder clientPrefix(String clientPrefix) {
+		// It must start from the root
+		this.clientPrefix = clientPrefix.startsWith("/") ? clientPrefix : "/" + clientPrefix;
 		return this;
 	}
 	
@@ -141,7 +176,7 @@ public class FormsFeederUrlFilterBuilder {
 	 * @return
 	 */
 	public Function<InputStream, InputStream> buildInputStreamFn() {
-		String srcPrefix = appPrefix;
+		String srcPrefix = aemPrefix;
 		String targetPrefix = constructTargetPrefix();
 		Function<InputStream, InputStream> fn = Function.identity();
 		for (String url : replacedUrls) {
@@ -156,7 +191,7 @@ public class FormsFeederUrlFilterBuilder {
 	 * @return
 	 */
 	public Function<OutputStream, OutputStream> buildOutputStreamFn() {
-		String srcPrefix = appPrefix;
+		String srcPrefix = this.aemPrefix;
 		String targetPrefix = constructTargetPrefix();
 		Function<OutputStream, OutputStream> fn = Function.identity();
 		for (String url : replacedUrls) {
@@ -166,7 +201,7 @@ public class FormsFeederUrlFilterBuilder {
 	}
 
 	private String constructTargetPrefix() {
-		String prefix = FORMSFEEDER_URL_PREFIX + appPrefix;
+		String prefix = this.clientPrefix + FORMSFEEDER_URL_PREFIX + this.aemPrefix;
 		if (location == null) {
 			// The URL does not have a machine name
 			return prefix;

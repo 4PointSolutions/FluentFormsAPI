@@ -64,7 +64,7 @@ class FormsFeederUrlFilterBuilderTest {
 				;
 	}
 
-	@DisplayName("Urls array and prefix parameter should add prefix. (InputStream)")
+	@DisplayName("Urls array and prefix parameter should add aem prefix. (InputStream)")
 	@Test
 	void testBuildInputStreamFn_UrlArrayAndPrefixParameters() throws Exception {
 		tester(replacedUrls)
@@ -73,7 +73,7 @@ class FormsFeederUrlFilterBuilderTest {
 				;
 	}
 
-	@DisplayName("Urls array and prefix parameter should add prefix. (OutputStream)")
+	@DisplayName("Urls array and prefix parameter should add aem prefix. (OutputStream)")
 	@Test
 	void testBuildOutputStreamFn_UrlArrayAndPrefixParameters() throws Exception {
 		tester(replacedUrls)
@@ -82,7 +82,7 @@ class FormsFeederUrlFilterBuilderTest {
 				;
 	}
 
-	@DisplayName("Urls List and prefix parameter should add prefix. (InputStream)")
+	@DisplayName("Urls List and prefix parameter should add aem prefix. (InputStream)")
 	@Test
 	void testBuildInputStreamFn_UrlListAndPrefixParameters() throws Exception {
 		String expectedPrefix = "/foo";
@@ -94,7 +94,7 @@ class FormsFeederUrlFilterBuilderTest {
 				;
 	}
 
-	@DisplayName("Urls List and prefix parameter should add prefix. (OutputStream)")
+	@DisplayName("Urls List and prefix parameter should add aem prefix. (OutputStream)")
 	@Test
 	void testBuildOutputStreamFn_UrlListAndPrefixParameters() throws Exception {
 		String expectedPrefix = "/foo";
@@ -106,9 +106,9 @@ class FormsFeederUrlFilterBuilderTest {
 				;
 	}
 
-	@DisplayName("All parameters should add prefix. (InputStream)")
+	@DisplayName("Mmost parameters and should add aem prefix. (InputStream)")
 	@Test
-	void testBuildInputStreamFn_AllParameters() throws Exception {
+	void testBuildInputStreamFn_MostParameters() throws Exception {
 		String expectedPrefix = "/foo";
 		String expectedLocation = "https://" + MACHINE_NAME + ":" + PORT_NO;
 		tester()
@@ -120,9 +120,9 @@ class FormsFeederUrlFilterBuilderTest {
 				;
 	}
 
-	@DisplayName("All parameters should add prefix. (OutputStream)")
+	@DisplayName("Most parameters and should add aem prefix. (OutputStream)")
 	@Test
-	void testBuildOutputStreamFn_AllParameters() throws Exception {
+	void testBuildOutputStreamFn_MostParameters() throws Exception {
 		String expectedPrefix = "/foo";
 		String expectedLocation = "https://" + MACHINE_NAME + ":" + PORT_NO;
 		tester()
@@ -134,7 +134,39 @@ class FormsFeederUrlFilterBuilderTest {
 				;
 	}
 
-	@DisplayName("All parameters should add prefix. AbsolouteLocation without port. (InputStream)")
+	@DisplayName("All parameters should add aem prefix and client prefix. (InputStream)")
+	@Test
+	void testBuildInputStreamFn_AllParameters() throws Exception {
+		String expectedAemPrefix = "/foo";
+		String expectedClientPrefix = "/client";
+		String expectedLocation = "https://" + MACHINE_NAME + ":" + PORT_NO;
+		tester()
+				.addReplacementUrls(replacedUrls)
+				.aemPrefix(expectedAemPrefix)
+				.clientPrefix(expectedClientPrefix)
+				.absoluteLocation(Protocol.HTTPS, MACHINE_NAME, PORT_NO)
+				.runInputStreamTest(expectedAemPrefix)
+				.shouldBe(expectedLocation + expectedClientPrefix + FF_PREFIX + expectedAemPrefix)
+				;
+	}
+
+	@DisplayName("All parameters should add aem prefix and client prefix. (OutputStream)")
+	@Test
+	void testBuildOutputStreamFn_AllParameters() throws Exception {
+		String expectedAemPrefix = "/foo";
+		String expectedClientPrefix = "/client";
+		String expectedLocation = "https://" + MACHINE_NAME + ":" + PORT_NO;
+		tester()
+				.addReplacementUrls(replacedUrls)
+				.aemPrefix(expectedAemPrefix)
+				.clientPrefix(expectedClientPrefix)
+				.absoluteLocation(Protocol.HTTPS, MACHINE_NAME, PORT_NO)
+				.runOutputStreamTest(expectedAemPrefix)
+				.shouldBe(expectedLocation + expectedClientPrefix + FF_PREFIX + expectedAemPrefix)
+				;
+	}
+
+	@DisplayName("All parameters should add aem prefix. AbsolouteLocation without port. (InputStream)")
 	@Test
 	void testBuildInputStreamFn_AllParameters_NoPort() throws Exception {
 		String expectedPrefix = "/foo";
@@ -148,7 +180,7 @@ class FormsFeederUrlFilterBuilderTest {
 			;
 	}
 
-	@DisplayName("All parameters should add prefix. AbsolouteLocation without port. (OutputStream)")
+	@DisplayName("All parameters should add aem prefix. AbsolouteLocation without port. (OutputStream)")
 	@Test
 	void testBuildOutputStreamFn_AllParameters_NoPort() throws Exception {
 		String expectedPrefix = "/foo";
@@ -162,7 +194,7 @@ class FormsFeederUrlFilterBuilderTest {
 			;
 	}
 
-	@DisplayName("All parameters should add prefix. AbsoluteLocation using String. (InputStream)")
+	@DisplayName("All parameters should add aem prefix. AbsoluteLocation using String. (InputStream)")
 	@Test
 	void testBuildInputStreamFn_AllParameters_LocationString() throws Exception {
 		String expectedPrefix = "/foo";
@@ -176,7 +208,7 @@ class FormsFeederUrlFilterBuilderTest {
 			;
 	}
 
-	@DisplayName("All parameters should add prefix. AbsoluteLocation using String. (OutputStream)")
+	@DisplayName("All parameters should add aem prefix. AbsoluteLocation using String. (OutputStream)")
 	@Test
 	void testBuildOutputStreamFn_AllParameters_LocationString() throws Exception {
 		String expectedPrefix = "/foo";
@@ -190,7 +222,7 @@ class FormsFeederUrlFilterBuilderTest {
 			;
 	}
 
-	@DisplayName("All parameters should add prefix. AbsoluteLocation using String with no port. (InputStream)")
+	@DisplayName("All parameters should add aem prefix. AbsoluteLocation using String with no port. (InputStream)")
 	@Test
 	void testBuildInputStreamFn_AllParameters_LocationStringNoPort() throws Exception {
 		String expectedPrefix = "/foo";
@@ -204,7 +236,7 @@ class FormsFeederUrlFilterBuilderTest {
 			;
 	}
 
-	@DisplayName("All parameters should add prefix. AbsoluteLocation using String with no port. (OutputStream)")
+	@DisplayName("All parameters should add aem prefix. AbsoluteLocation using String with no port. (OutputStream)")
 	@Test
 	void testBuildOutputStreamFn_AllParameters_LocationStringNoPort() throws Exception {
 		String expectedPrefix = "/foo";
@@ -218,7 +250,7 @@ class FormsFeederUrlFilterBuilderTest {
 			;
 	}
 
-	@DisplayName("All parameters should add prefix. AbsoluteLocation using Location object. (InputStream)")
+	@DisplayName("All parameters should add aem prefix. AbsoluteLocation using Location object. (InputStream)")
 	@Test
 	void testBuildInputStreamFn_AllParameters_LocationObject() throws Exception {
 		String expectedPrefix = "/foo";
@@ -232,7 +264,7 @@ class FormsFeederUrlFilterBuilderTest {
 			;
 	}
 
-	@DisplayName("All parameters should add prefix. AbsoluteLocation using Location object. (OutputStream)")
+	@DisplayName("All parameters should add aem prefix. AbsoluteLocation using Location object. (OutputStream)")
 	@Test
 	void testBuildOutputStreamFn_AllParameters_LocationObject() throws Exception {
 		String expectedPrefix = "/foo";
@@ -248,7 +280,7 @@ class FormsFeederUrlFilterBuilderTest {
 	}
 
 	
-	@DisplayName("All parameters should add prefix. AbsoluteLocation using Location object with no port. (InputStream)")
+	@DisplayName("All parameters should add aem prefix. AbsoluteLocation using Location object with no port. (InputStream)")
 	@Test
 	void testBuildInputStreamFn_AllParameters_LocationObjectNoPort() throws Exception {
 		String expectedPrefix = "/foo";
@@ -262,7 +294,7 @@ class FormsFeederUrlFilterBuilderTest {
 			;
 	}
 
-	@DisplayName("All parameters should add prefix. AbsoluteLocation using Location object with no port. (OutputStream)")
+	@DisplayName("All parameters should add aem prefix. AbsoluteLocation using Location object with no port. (OutputStream)")
 	@Test
 	void testBuildOutputStreamFn_AllParameters_LocationObjectNoPort() throws Exception {
 		String expectedPrefix = "/foo";
@@ -297,12 +329,7 @@ class FormsFeederUrlFilterBuilderTest {
 			this.underTest = new FormsFeederUrlFilterBuilder(urls);
 		}
 
-		Tester addReplacementUrls(String urls) {
-			underTest = underTest.addReplacementUrls(urls);
-			return this;
-		}
-		
-		public Tester addReplacementUrls(List<String> urls) {
+		Tester addReplacementUrls(List<String> urls) {
 			underTest = underTest.addReplacementUrls(urls);
 			return this;
 		}
@@ -314,6 +341,11 @@ class FormsFeederUrlFilterBuilderTest {
 		
 		Tester aemPrefix(String prefix) {
 			underTest = underTest.aemPrefix(prefix);
+			return this;
+		}
+		
+		Tester clientPrefix(String prefix) {
+			underTest = underTest.clientPrefix(prefix);
 			return this;
 		}
 		
