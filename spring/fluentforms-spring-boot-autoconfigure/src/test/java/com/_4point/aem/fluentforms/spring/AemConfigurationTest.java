@@ -63,6 +63,44 @@ class AemConfigurationTest {
 		assertEquals(false, underTest.useSsl());
 	}
 
+	@Test
+	void testGetUrl() {
+		assertEquals("http://" + EXPECTED_SERVERNAME + ":" + EXPECTED_PORT + "/", underTest.url());
+	}
+
+	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.AemConfigurationTest.TestApplication.class}, 
+			properties = {
+					"fluentforms.aem.servername=" + EXPECTED_SERVERNAME, 
+					"fluentforms.aem.port=" + AemConfigurationTests2.EXPECTED_PORT, 
+					"fluentforms.aem.user=" + EXPECTED_USER,		 
+					"fluentforms.aem.password=" + EXPECTED_PASSWORD,
+					"fluentforms.aem.useSsl=true",
+	})
+	static class AemConfigurationTests2 {
+		protected static final int EXPECTED_PORT = 80;
+
+		@Autowired
+		AemConfiguration underTest;
+
+		
+		@BeforeEach
+		void setUp() throws Exception {
+			assertNotNull(underTest);
+		}
+
+		@Test
+		void testGetUseSsl() {
+			assertEquals(true, underTest.useSsl());
+		}
+
+		@Test
+		void testGetUrl() {
+			assertEquals("https://" + EXPECTED_SERVERNAME + "/", underTest.url());
+		}
+
+		
+	}
+	
 	@SpringBootApplication
 	@EnableConfigurationProperties(AemConfiguration.class)
 	public static class TestApplication {
