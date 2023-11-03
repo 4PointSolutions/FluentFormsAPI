@@ -79,6 +79,10 @@
         <content-package-maven-plugin.version>1.0.4</content-package-maven-plugin.version>
         <maven-bundle-plugin.version>5.1.8</maven-bundle-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+        
+        <!-- Mutation Testing plugin versions -->
+		<pitest.maven.plugin.version>1.15.3</pitest.maven.plugin.version>
+		<pitest.junit5.maven.plugin.version>1.2.1</pitest.junit5.maven.plugin.version>
 
 		<!-- Testing dependencies -->
         <mockito.version>5.3.1</mockito.version>
@@ -198,6 +202,13 @@
 					</execution>
 				</executions>
             </plugin>
+			<plugin>
+				<!-- PiTest Mutation Testing plugin -->
+				<!-- Run with goals 'test-compile' and 'org.pitest:pitest-maven:mutationCoverage' --> 
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>${pitest.maven.plugin.version}</version>
+			</plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -507,58 +518,6 @@
 
             <!-- Testing -->
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-				<groupId>org.hamcrest</groupId>
-				<artifactId>hamcrest-library</artifactId>
-				<version>${hamcrest.version}</version>
-				<scope>test</scope>
-			</dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${slf4j.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-junit-jupiter</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>junit-addons</groupId>
-                <artifactId>junit-addons</artifactId>
-                <version>1.4</version>
-                <scope>test</scope>
-				<exclusions>
-					<exclusion>	<!-- Exclude this really old version of junit that junit-addons depends on -->
-						<groupId>junit</groupId>
-						<artifactId>junit</artifactId>
-					</exclusion>
-					<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends 
-							on -->
-						<groupId>xerces</groupId>
-						<artifactId>xercesImpl</artifactId>
-					</exclusion>
-					<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends 
-							on -->
-						<groupId>xerces</groupId>
-						<artifactId>xmlParserAPIs</artifactId>
-					</exclusion>
-				</exclusions>
-            </dependency>
-            <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
                 <version>${wcm.mocks.version}</version>
@@ -582,7 +541,72 @@
 			  <artifactId>aemfd-client-sdk</artifactId>
 			  <version>${aemfd.client.sdk.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-junit5-plugin</artifactId>
+				<version>${pitest.junit5.maven.plugin.version}</version>
+				<scope>test</scope>
+			</dependency>
         </dependencies>
     </dependencyManagement>
+
+	<dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<version>${hamcrest.version}</version>
+			<scope>test</scope>
+		</dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit-addons</groupId>
+            <artifactId>junit-addons</artifactId>
+            <version>1.4</version>
+            <scope>test</scope>
+			<exclusions>
+				<exclusion>	<!-- Exclude this really old version of junit that junit-addons depends on -->
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends 
+						on -->
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
+				</exclusion>
+				<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends 
+						on -->
+					<groupId>xerces</groupId>
+					<artifactId>xmlParserAPIs</artifactId>
+				</exclusion>
+			</exclusions>
+        </dependency>
+		<dependency>
+			<groupId>org.pitest</groupId>
+			<artifactId>pitest-junit5-plugin</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 </project>
