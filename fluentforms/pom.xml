@@ -87,7 +87,7 @@
 		<!-- Testing dependencies -->
         <mockito.version>5.3.1</mockito.version>
         <junit.version>5.9.3</junit.version>
-        <wcm.mocks.version>5.2.0</wcm.mocks.version>
+        <wcm.mocks.version>5.4.0</wcm.mocks.version>
         <slf4j-test.version>1.2.0</slf4j-test.version>
         <slf4j.version>1.7.32</slf4j.version>
         <hamcrest.version>2.2</hamcrest.version>
@@ -521,6 +521,12 @@
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
                 <version>${wcm.mocks.version}</version>
+                <exclusions>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-library</artifactId>
+					</exclusion>
+				</exclusions>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -559,7 +565,7 @@
         </dependency>
         <dependency>
 			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-library</artifactId>
+			<artifactId>hamcrest</artifactId>
 			<version>${hamcrest.version}</version>
 			<scope>test</scope>
 		</dependency>
