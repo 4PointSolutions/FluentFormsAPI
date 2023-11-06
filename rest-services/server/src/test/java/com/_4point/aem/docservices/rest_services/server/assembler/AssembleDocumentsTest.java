@@ -1,6 +1,6 @@
 package com._4point.aem.docservices.rest_services.server.assembler;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.xmlunit.matchers.CompareMatcher.isIdenticalTo;

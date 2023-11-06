@@ -1,21 +1,18 @@
 package com._4point.aem.docservices.rest_services.server.output;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import javax.servlet.ServletException;
 
-import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;

@@ -1,7 +1,7 @@
 package com._4point.aem.docservices.rest_services.server.forms;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
 import java.io.File;

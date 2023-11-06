@@ -2,7 +2,7 @@ package com._4point.aem.docservices.rest_services.server.data;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;

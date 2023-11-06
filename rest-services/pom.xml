@@ -74,6 +74,10 @@
         <maven-bundle-plugin.version>5.1.8</maven-bundle-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
 
+        <!-- Mutation Testing plugin versions -->
+		<pitest.maven.plugin.version>1.15.3</pitest.maven.plugin.version>
+		<pitest.junit5.maven.plugin.version>1.2.1</pitest.junit5.maven.plugin.version>
+
 		<!-- Project dependencies -->
 		<jersey.version>3.1.0</jersey.version>
 		<jaxb.version>4.0.0</jaxb.version>
@@ -83,7 +87,7 @@
 		<rest-services.version>0.0.3-SNAPSHOT</rest-services.version>
 
 		<!-- Testing dependencies -->
-        <mockito.version>5.3.1</mockito.version>
+        <mockito.version>5.7.0</mockito.version>
         <junit.version>5.9.3</junit.version>
         <wcm.mocks.version>3.0.0</wcm.mocks.version> <!-- Versions later than this produce a org.reflections.ReflectionsException: Scanner TypeAnnotationsScanner was not configured error -->
         <slf4j-test.version>1.2.0</slf4j-test.version>
@@ -200,6 +204,13 @@
 					</execution>
 				</executions>
             </plugin> 
+			<plugin>
+				<!-- PiTest Mutation Testing plugin -->
+				<!-- Run with goals 'test-compile' and 'org.pitest:pitest-maven:mutationCoverage' --> 
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>${pitest.maven.plugin.version}</version>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -512,7 +523,6 @@
 
 	</profiles>
 
-
 	<!-- ====================================================================== -->
 	<!-- D E P E N D E N C I E S -->
 	<!-- ====================================================================== -->
@@ -525,48 +535,16 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- Testing -->
-			<dependency>
-				<groupId>org.junit</groupId>
-				<artifactId>junit-bom</artifactId>
-				<version>${junit.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.hamcrest</groupId>
-				<artifactId>hamcrest-library</artifactId>
-				<version>${hamcrest.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-simple</artifactId>
-                <version>${slf4j.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-core</artifactId>
-				<version>${mockito.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-junit-jupiter</artifactId>
-				<version>${mockito.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>junit-addons</groupId>
-				<artifactId>junit-addons</artifactId>
-				<version>${junit-addons.version}</version>
-				<scope>test</scope>
-			</dependency>
 			<dependency>
 				<groupId>io.wcm</groupId>
 				<artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
 				<version>${wcm.mocks.version}</version>
+                <exclusions>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-library</artifactId>
+					</exclusion>
+				</exclusions>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -603,6 +581,16 @@
 				<groupId>org.xmlunit</groupId>
 				<artifactId>xmlunit-matchers</artifactId>
 				<version>${xml-unit-version}</version>
+                <exclusions>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-library</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-core</artifactId>
+					</exclusion>
+				</exclusions>
 				<scope>test</scope>
 			</dependency>
 			<dependency>	<!-- required by xml-unit -->
@@ -657,4 +645,49 @@
 		</dependencies>
 	</dependencyManagement>
 
+	<dependencies>
+		<!-- Testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest</artifactId>
+			<version>${hamcrest.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit-addons</groupId>
+			<artifactId>junit-addons</artifactId>
+			<version>${junit-addons.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.pitest</groupId>
+			<artifactId>pitest-junit5-plugin</artifactId>
+			<version>${pitest.junit5.maven.plugin.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>

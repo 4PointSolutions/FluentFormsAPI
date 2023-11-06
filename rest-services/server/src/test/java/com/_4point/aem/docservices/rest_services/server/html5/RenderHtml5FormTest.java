@@ -1,6 +1,6 @@
 package com._4point.aem.docservices.rest_services.server.html5;
 
-import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
