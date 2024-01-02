@@ -8,8 +8,8 @@ graph LR
     end
     CA-->RE
     subgraph aem[AEM]
-    AAF[AEM Adaptive Forms]
-    AA[AEM Document Services APIs]
+    AAF[Adaptive Forms]
+    AA[Document Services APIs]
     end
     SBS-->AA
     SBS-->AAF
@@ -23,8 +23,8 @@ graph LR
     RE[Rest Endpoints]-->SBS[FF Spring Boot Starter]
     end
     subgraph aem[AEM]
-    AAF[AEM Adaptive Forms]
-    AA[AEM Document Services APIs]
+    AAF[Adaptive Forms]
+    AA[Document Services APIs]
     end
     SBS-->AA
     SBS-->AAF
@@ -38,8 +38,8 @@ graph LR
     RE[Rest Endpoints]-->SBS[FF Spring Boot Starter]
     end
     subgraph aem[AEM]
-    AAF[AEM Adaptive Forms]
-    AA[AEM Document Services APIs]
+    AAF[Adaptive Forms]
+    AA[Document Services APIs]
     end
     AAF-->RE
     SBS-->AA
