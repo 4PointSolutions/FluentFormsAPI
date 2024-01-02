@@ -9,7 +9,7 @@ graph LR
     CA-->RE
     subgraph aem[AEM]
     AAF[AEM Adaptive Forms]
-    AA[AEM APIs]
+    AA[AEM Document Services APIs]
     end
     SBS-->AA
     SBS-->AAF
@@ -24,7 +24,7 @@ graph LR
     end
     subgraph aem[AEM]
     AAF[AEM Adaptive Forms]
-    AA[AEM APIs]
+    AA[AEM Document Services APIs]
     end
     SBS-->AA
     SBS-->AAF
@@ -39,7 +39,7 @@ graph LR
     end
     subgraph aem[AEM]
     AAF[AEM Adaptive Forms]
-    AA[AEM APIs]
+    AA[AEM Document Services APIs]
     end
     AAF-->RE
     SBS-->AA
