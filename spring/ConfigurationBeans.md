@@ -20,6 +20,8 @@ with a name of `afInputStreamFilter`, you can override the default stream filter
 default bean provided by the Spring Starter looks like this:
 ```java
 	public Function<InputStream, InputStream> afInputStreamFilter(AemProxyConfiguration aemProxyConfig) {
+		String aemPrefix = aemProxyConfig.aemPrefix();
+		String clientPrefix = aemProxyConfig.clientPrefix();
 		FormsFeederUrlFilterBuilder builder = StandardFormsFeederUrlFilters.getUrlFilterBuilder();
 		builder = aemPrefix.isBlank() ? builder : builder.aemPrefix(aemPrefix);
 		builder = clientPrefix.isBlank() ? builder : builder.clientPrefix(clientPrefix);;
