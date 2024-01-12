@@ -1,19 +1,54 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-# FluentFormsAPI
-The FluentFormsAPI project will eventually consist of three interrelated sub-projects.  All sub-projects are Java projects that use
-Maven as a build tool.
+# FluentForms API
 
-# fluentforms
-[This project](https://github.com/4PointSolutions/FluentFormsAPI/tree/master/fluentforms) is a fluent API wrapper around the Adobe AEM Forms Java APIs.  It provides a bunch of small
-improvements over the Adobe API (stronger typing, stronger validation, enhanced readability for starters).
+The FluentForms API project is a set of Java libraries that allow remote access to Adobe Experience Manager (AEM) 
+functionality. It has a layered architecture with four layers. Each layer targets a different 
+type of client application. Each layer is built upon the previous layers and requires less client code to use than the layers below it.  The top layer is the Spring Boot Starter.
 
-# rest-services
-[This project](https://github.com/4PointSolutions/FluentFormsAPI/tree/master/rest-services) is an AEM bundle and client library that provides a REST services wrapper 
-on top of the Adobe AEM Forms Java APIs (via the fluentforms API).  It provides both a server-side bundle for receiving
-API calls and a Java client library (.jar) that makes it easy to call the rest-services server API.
 
-# aemforms-ivs
-Eventually, we would like to add a third project which is a server bundle that produces HTML pages that can be used to call the 
-rest-services APIs.  This would allow a user to invoke AEM APIs from a browser and would provide equivilent functionality to
-the AEM Forms for JEE IVS applications.
+## Sprint Boot Starter
+
+This is the easiest way to use FluentForms to integration with AEM.  The Spring Boot starter publishes Spring beans into the
+Spring context that can be utilized easily by any Spring Boot application.
+
+### Getting started with the Spring Boot starter
+
+* Retrieve OSGi bundles and install into your AEM server
+* Add starter to project using maven
+* Add AEM code to your project
+
+## Java Client Library
+
+ This is the targeted at customers with Java applications that are _not_ based on Spring Boot.
+
+### Getting started with the Java Client Library
+
+* Retrieve OSGi bundles and install into your AEM server
+* Add client library to project using maven
+* Add AEM code to your project
+
+
+## AEM REST Services
+
+This is targeted at customers with non-Java applications.
+
+### Getting started with the AEM REST Services
+
+* Retrieve OSGi bundles and install into your AEM server
+* Make REST calls to the REST services
+
+## Fluent Forms Core Libraries
+
+This is used internally by the AEM Server REST Services but could be utilized by customers 
+writing OSGi bundles in Java that will run directly on the AEM server.
+
+### Getting started with the Fluent Forms Core Libraries
+* Retrieve OSGi bundles and install into your AEM server
+* Add AEM code to your project
+
+
+# Retrieving the OSGi Bundles
+
+The bundles can either be built from source or retrieved from this project's [GitHub Packages 
+Repository](https://github.com/orgs/4PointSolutions/packages?repo_name=FluentFormsAPI).  
