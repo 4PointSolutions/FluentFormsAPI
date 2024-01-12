@@ -13,7 +13,7 @@ type of client application. Each layer is built upon the previous layers and req
 client code to use than the layers below it.  The top layer is the Spring Boot Starter.
 
 
-## Sprint Boot Starter
+## Spring Boot Starter
 
 This is the easiest way to use the FluentForms integration with AEM.  The Spring Boot starter 
 publishes Spring beans into the
