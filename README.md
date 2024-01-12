@@ -2,14 +2,21 @@
 
 # FluentForms API
 
-The FluentForms API project is a set of Java libraries that allow remote access to Adobe Experience Manager (AEM) 
-functionality. It has a layered architecture with four layers. Each layer targets a different 
-type of client application. Each layer is built upon the previous layers and requires less client code to use than the layers below it.  The top layer is the Spring Boot Starter.
+The FluentForms API project is a set of Java libraries that allow remote access to 
+[Adobe Experience Manager Forms](https://experienceleague.adobe.com/docs/experience-manager-65/content/forms/getting-started/introduction-aem-forms.html?lang=en) (a.k.a. AEM Forms) 
+functionality. 
+
+In addition to providing remote access to AEM Forms functionality, it also provides a modern, typesafe, and [fluent](https://en.wikipedia.org/wiki/Fluent_interface) facade over the existing [AEM Forms APIs](https://developer.adobe.com/experience-manager/reference-materials/6-5/forms/javadocs/index.html).
+
+It has a layered architecture with four layers. Each layer targets a different 
+type of client application. Each layer is built upon the previous layers and requires less 
+client code to use than the layers below it.  The top layer is the Spring Boot Starter.
 
 
 ## Sprint Boot Starter
 
-This is the easiest way to use FluentForms to integration with AEM.  The Spring Boot starter publishes Spring beans into the
+This is the easiest way to use the FluentForms integration with AEM.  The Spring Boot starter 
+publishes Spring beans into the
 Spring context that can be utilized easily by any Spring Boot application.
 
 ### Getting started with the Spring Boot starter
@@ -17,6 +24,10 @@ Spring context that can be utilized easily by any Spring Boot application.
 * Retrieve OSGi bundles and install into your AEM server
 * Add starter to project using maven
 * Add AEM code to your project
+
+There is a [sample web application](spring/fluentforms-sample-web-app) that uses the Spring Boot 
+starter library.  There are also documents outlining the [Spring Beans provided by the 
+starter library](spring/ConfigurationBeans.md)  and the [configuration properties](spring/ConfigurationProperties.md) that is uses.
 
 ## Java Client Library
 
