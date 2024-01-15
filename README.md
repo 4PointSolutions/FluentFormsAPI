@@ -59,7 +59,135 @@ writing OSGi bundles in Java that will run directly on the AEM server.
 * Add AEM code to your project
 
 
-# Retrieving the OSGi Bundles
+# Retrieving the Fluent Forms OSGi Bundles
 
 The bundles can either be built from source or retrieved from this project's [GitHub Packages 
 Repository](https://github.com/orgs/4PointSolutions/packages?repo_name=FluentFormsAPI).  
+
+There are a couple of ways to retrieve files from this project's GitHub Packages Repository. 
+The GitHub Packages Repository is a maven repository that requires authentication, 
+so both approaches require that you have a GitHub account and that you set up your 
+GitHub credentials in your local maven `settings.xml` file (i.e. `~/.m2/settings.xml`).
+
+To set up your maven credentials, create a `settings.xml` file within a `.m2` directory 
+underneath your home directory.  The settings.xml file should look like this:
+
+```xml
+ <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                          https://maven.apache.org/xsd/settings-1.0.0.xsd">
+      <servers>
+        <server>
+            <id>github</id>
+            <username>your GitHub user name goes here</username>
+            <password>your personal access token goes here</password>
+        </server>
+      </servers>
+    </settings>
+```
+
+Both methods outlined below assume that the server's id is set to `github` as in the sample above.
+
+The two common methods for retrieving the bundles are:
+
+1. Use [JBang](https://www.jbang.dev/) and run the `GrabBundles.java` script located under the [jbang_scripts](FluentFormsAPI/jbang_scripts) directory.  
+
+2. Use Maven to retrieve the artifacts using the Maven Dependency Plugin.
+
+This is a sample maven pom.xml that accompilishes this task:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com._4point.aem</groupId>
+    <artifactId>fluentforms-get</artifactId>
+    <packaging>pom</packaging>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>Retreive FluentForms bundles</name>
+    <description>Retreive FluentForms bundles from GitHub Package Repository</description>
+ 
+ 	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.6.0</version>
+				<executions>
+					<execution>
+						<id>get_fluentforms_core</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>com._4point.aem:fluentforms.core:0.0.3-SNAPSHOT</artifact>
+							<remoteRepositories>
+								github::::https://maven.pkg.github.com/4PointSolutions/FluentFormsAPI
+							</remoteRepositories>
+							<packaging>jar</packaging>
+						</configuration>
+					</execution>
+					<execution>
+						<id>get_restservices_server</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>com._4point.aem.docservices:rest-services.server:0.0.3-SNAPSHOT</artifact>
+							<remoteRepositories>
+								github::::https://maven.pkg.github.com/4PointSolutions/FluentFormsAPI
+							</remoteRepositories>
+							<packaging>jar</packaging>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com._4point.aem</groupId>
+									<artifactId>fluentforms.core</artifactId>
+									<version>0.0.3-SNAPSHOT</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com._4point.aem.docservices</groupId>
+									<artifactId>rest-services.server</artifactId>
+									<version>0.0.3-SNAPSHOT</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+```
+
+After executing `mnv package` the files should be available in the `target\dependency` dependency under 
+the directory where the pom.xml resides.
+
+# Deploying the Fluent Forms OSGi Bundles
+
+The easiest way to install the Fluent Forms OSGi bundles is to copy them to AEM's 
+`crx-quickstart/install` directory (this directory is not created by default, so 
+you may have to create the directory before copying the bundles into it).  AEM
+monitors this directory and when the bundle .jar files are copied there, it will detect 
+and install them.
+
+You can verify that the bundles are installed and running by locating them in the OSGi 
+bundles console (located under `http://<machine>:<port>/system/console/bundles`).  Both bundles 
+should be present with a status of  `Active`:
+![Screenshot showing bundles with Active status](images/BundlesInOSGiConsole.png)
