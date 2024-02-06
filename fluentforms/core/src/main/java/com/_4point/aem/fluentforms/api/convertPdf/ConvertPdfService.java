@@ -3,7 +3,9 @@ package com._4point.aem.fluentforms.api.convertPdf;
 import java.util.List;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.Transformable;
+import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com.adobe.fd.cpdf.api.enumeration.CMYKPolicy;
 import com.adobe.fd.cpdf.api.enumeration.Color;
 import com.adobe.fd.cpdf.api.enumeration.ColorCompression;
@@ -115,6 +117,11 @@ public interface ConvertPdfService {
 		ToImageArgumentBuilder setUseLegacyImageSizeBehavior(boolean useLegacyImageSizeBehavior);
 		
 		public List<Document> executeOn(Document inPdfDoc) throws ConvertPdfServiceException;
+		
+		default public List<Document> executeOn(byte[] inPdf) throws ConvertPdfServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(inPdf));
+		};
 	}
 
 	public static interface ToPSArgumentBuilder extends ToPSOptionsSpecSetter, Transformable<ToPSArgumentBuilder> {
@@ -195,5 +202,10 @@ public interface ConvertPdfService {
 		ToPSArgumentBuilder setUseMaxJPEGImageResolution(boolean useMaxJPEGImageResolution);
 		
 		public Document executeOn(Document inPdfDoc) throws ConvertPdfServiceException;
+
+		default public Document executeOn(byte[] inPdf) throws ConvertPdfServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(inPdf));
+		};
 	}
 }
