@@ -6,13 +6,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.Transformable;
+import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com.adobe.fd.assembler.client.OperationException;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ColorSpace;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Compliance;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.OptionalContent;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ResultLevel;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Signatures;
+
 public interface AssemblerService {
 	
 	AssemblerResult invoke(Document ddx, Map<String,Object> sourceDocuments, AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException; 
@@ -132,6 +135,16 @@ public interface AssemblerService {
 
 		public AssemblerResult executeOn(Document ddx) throws AssemblerServiceException, OperationException;
 		
+		default public AssemblerResult executeOn2(byte[] ddx) throws AssemblerServiceException, OperationException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(ddx));
+		};
+
+		default public AssemblerResult executeOn(byte[] ddx) throws AssemblerServiceException, OperationException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(ddx));
+		};
+
 		default AssemblerArgumentBuilder addAllDocs(Stream<Map.Entry<String, Document>> pairs) {
 			pairs.forEach(e->add(e.getKey(), e.getValue()));
 			return this;
@@ -181,6 +194,11 @@ public interface AssemblerService {
 		public PDFAConversionArgumentBuilder setVerify(boolean verify);
 		
 		public PDFAConversionResult executeOn(Document inDoc) throws AssemblerServiceException;
+
+		default public PDFAConversionResult executeOn(byte[] inPdf) throws AssemblerServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(inPdf));
+		};
 	}
 	
 	public static interface PDFAValidationArgumentBuilder extends PDFAValidationOptionsSetter, Transformable<PDFAConversionArgumentBuilder> {
@@ -201,6 +219,11 @@ public interface AssemblerService {
 		public PDFAValidationArgumentBuilder setResultLevel(com.adobe.fd.assembler.client.PDFAValidationOptionSpec.ResultLevel resultLevel);
 		
 		public PDFAValidationResult executeOn(Document inDoc) throws AssemblerServiceException;
+
+		default public PDFAValidationResult executeOn(byte[] inPdf) throws AssemblerServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(inPdf));
+		};
 	}
 	
 }
