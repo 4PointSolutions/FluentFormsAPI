@@ -9,6 +9,8 @@ import java.util.function.BiFunction;
  * and reduce boilerplate in client code.
  */
 public interface HasAttributes {
+	
+	public static final String ATTRIBUTE_PAGE_COUNT = "PAGE_COUNT";
 
 	Object getAttribute(String name);
 
