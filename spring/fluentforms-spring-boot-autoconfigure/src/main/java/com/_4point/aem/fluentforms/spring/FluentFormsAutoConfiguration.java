@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Lazy;
 
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
 import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDocAssemblerServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.convertPdf.RestServicesConvertPdfServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.docassurance.RestServicesDocAssuranceServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.generatePDF.RestServicesGeneratePDFServiceAdapter;
@@ -22,6 +23,7 @@ import com._4point.aem.docservices.rest_services.client.output.RestServicesOutpu
 import com._4point.aem.docservices.rest_services.client.pdfUtility.RestServicesPdfUtilityServiceAdapter;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
+import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
@@ -30,6 +32,7 @@ import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
+import com._4point.aem.fluentforms.impl.convertPdf.ConvertPdfServiceImpl;
 import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
 import com._4point.aem.fluentforms.impl.generatePDF.GeneratePDFServiceImpl;
@@ -126,6 +129,13 @@ public class FluentFormsAutoConfiguration {
 	public PdfUtilityService pdfUtilityService(AemConfiguration aemConfig) {
 		RestServicesPdfUtilityServiceAdapter adapter = setAemFields(RestServicesPdfUtilityServiceAdapter.builder(), aemConfig).build();
 		return new PdfUtilityServiceImpl(adapter);
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	public ConvertPdfService convertPdfService(AemConfiguration aemConfig) {
+		RestServicesConvertPdfServiceAdapter adapter = setAemFields(RestServicesConvertPdfServiceAdapter.builder(), aemConfig).build();
+		return new ConvertPdfServiceImpl(adapter);
 	}
 	
 	@ConditionalOnMissingBean

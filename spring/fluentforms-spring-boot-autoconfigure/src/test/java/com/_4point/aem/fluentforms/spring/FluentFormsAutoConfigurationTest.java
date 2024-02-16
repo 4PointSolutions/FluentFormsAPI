@@ -22,6 +22,7 @@ import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
+import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
@@ -74,6 +75,11 @@ class FluentFormsAutoConfigurationTest {
 
 	@Test
 	void testPdfUtilityService(@Autowired PdfUtilityService service) {
+		assertNotNull(service);
+	}
+
+	@Test
+	void testConvertPdfService(@Autowired ConvertPdfService service) {
 		assertNotNull(service);
 	}
 
