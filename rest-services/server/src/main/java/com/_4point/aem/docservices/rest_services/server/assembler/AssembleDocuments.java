@@ -236,9 +236,11 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 		try {
 			Element result = document.createElement("resultDocument");
 			root.appendChild(result);
-			Attr attr = document.createAttribute("documentName");
-			attr.setValue(docName);
-			result.setAttributeNode(attr);
+			addAttributeToElement("documentName", docName, document, result);
+			String contentType = resultDoc.getContentType();
+			if (contentType != null && !contentType.isEmpty()) {
+				addAttributeToElement("contentType", contentType, document, result);
+			}
 			if (resultDoc != null) {
 				byte[] concatenatedPdf = null;
 				concatenatedPdf = IOUtils.toByteArray(resultDoc.getInputStream());
@@ -253,6 +255,12 @@ public class AssembleDocuments extends SlingAllMethodsServlet {
 			String msg = e.getMessage();
 			throw new IllegalStateException("Error while reading result document. (" + (msg == null ? e.getClass().getName() : msg) + ").", e);
 		}
+	}
+
+	private static void addAttributeToElement(String attributeName, String attributeValue, org.w3c.dom.Document document, Element element) {
+		Attr attr = document.createAttribute(attributeName);
+		attr.setValue(attributeValue);
+		element.setAttributeNode(attr);
 	}
 
 	private static void createElementWithAttribute(org.w3c.dom.Document document, Element root, String parentElementName,

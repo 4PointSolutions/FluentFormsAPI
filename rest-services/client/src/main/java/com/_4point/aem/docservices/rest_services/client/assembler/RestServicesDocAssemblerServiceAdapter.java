@@ -176,7 +176,14 @@ implements TraditionalDocAssemblerService {
 					bytesPdf = Base64.getDecoder()
 							.decode(eElement.getElementsByTagName("mergedDoc").item(0).getTextContent());
 					Document concatenatedDoc = SimpleDocumentFactoryImpl.getFactory().create(bytesPdf);
-					concatenatedDoc.setContentType(APPLICATION_PDF.toString());
+					String contentType = eElement.getAttribute("contentType");
+					if (contentType.isEmpty()) {
+						// Defaulting to APPLICATION_PDF is not the best choice, however
+						// it is required for backwards compatibility (since that was the initial implementation).
+						concatenatedDoc.setContentType(APPLICATION_PDF.toString());
+					} else {
+						concatenatedDoc.setContentType(contentType);
+					}
 					resultMap.put(eElement.getAttribute("documentName"), concatenatedDoc);
 				}
 			}
