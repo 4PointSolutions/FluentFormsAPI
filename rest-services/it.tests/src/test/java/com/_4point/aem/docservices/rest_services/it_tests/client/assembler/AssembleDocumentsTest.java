@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,11 +20,13 @@ import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDo
 import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument;
 import com._4point.aem.docservices.rest_services.it_tests.Pdf;
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.assembler.LogLevel;
 import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
+import com._4point.aem.fluentforms.api.assembler.AssemblerService.EitherDocumentOrDocumentList;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerOptionsSpecImpl;
@@ -36,6 +39,7 @@ import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Signatures;
 
 
 public class AssembleDocumentsTest {
+	private static final DocumentFactory DOC_FACTORY = SimpleDocumentFactoryImpl.getFactory();
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private AssemblerService underTest;
 	@BeforeEach
@@ -57,10 +61,10 @@ public class AssembleDocumentsTest {
 		byte[] samplePdf1 = SAMPLE_FORM_PDF.toString().getBytes();
 		byte[] samplePdf2 = SAMPLE_FORM_PDF.toString().getBytes();
 		Map<String, Object> inputs = new HashMap<String, Object>();
-		inputs.put("File0.pdf", SimpleDocumentFactoryImpl.getFactory().create(samplePdf1));
-		inputs.put("File1.pdf", SimpleDocumentFactoryImpl.getFactory().create(samplePdf2));	
+		inputs.put("File0.pdf", DOC_FACTORY.create(samplePdf1));
+		inputs.put("File1.pdf", DOC_FACTORY.create(samplePdf2));	
 
-		AssemblerResult assemblerResult	= underTest.invoke().executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DDX.toFile()), inputs);
+		AssemblerResult assemblerResult	= underTest.invoke().executeOn(DOC_FACTORY.create(SAMPLE_FORM_DDX.toFile()), inputs);
 		Map<String, Document> resultDocument = assemblerResult.getDocuments();
 		byte[] resultByte = null;
 		for(Entry<String, Document> entry: resultDocument.entrySet()){
@@ -78,8 +82,8 @@ public class AssembleDocumentsTest {
 		byte[] samplePdf1 = SAMPLE_FORM_PDF.toString().getBytes();
 		byte[] samplePdf2 = SAMPLE_FORM_PDF.toString().getBytes();
 		Map<String, Object> inputs = new HashMap<String, Object>();
-		inputs.put("File0.pdf", SimpleDocumentFactoryImpl.getFactory().create(samplePdf1));
-		inputs.put("File1.pdf", SimpleDocumentFactoryImpl.getFactory().create(samplePdf2));	
+		inputs.put("File0.pdf", DOC_FACTORY.create(samplePdf1));
+		inputs.put("File1.pdf", DOC_FACTORY.create(samplePdf2));	
 		
 		AssemblerResult assemblerResult	= underTest.invoke()
 				.setDefaultStyle("")
@@ -88,7 +92,7 @@ public class AssembleDocumentsTest {
 				.setLogLevel(LogLevel.ALL)
 				.setTakeOwnership(Boolean.FALSE)
 				.setValidateOnly(Boolean.FALSE)
-				.executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DDX.toFile()), inputs);
+				.executeOn(DOC_FACTORY.create(SAMPLE_FORM_DDX.toFile()), inputs);
 		Map<String, Document> resultDocument = assemblerResult.getDocuments();
 		byte[] resultByte = null;
 		for(Entry<String, Document> entry: resultDocument.entrySet()){
@@ -106,11 +110,11 @@ public class AssembleDocumentsTest {
 		byte[] samplePdf1 = SAMPLE_FORM_PDF.toString().getBytes();
 		byte[] samplePdf2 = SAMPLE_FORM_PDF.toString().getBytes();
 		Map<String, Object> sourceDocuments = new HashMap<String, Object>();
-		sourceDocuments.put("File0.pdf", SimpleDocumentFactoryImpl.getFactory().create(samplePdf1));
-		sourceDocuments.put("File1.pdf", SimpleDocumentFactoryImpl.getFactory().create(samplePdf2));	
+		sourceDocuments.put("File0.pdf", DOC_FACTORY.create(samplePdf1));
+		sourceDocuments.put("File1.pdf", DOC_FACTORY.create(samplePdf2));	
 		AssemblerOptionsSpecImpl assemblerOptionsSpecImpl = new AssemblerOptionsSpecImpl();
 		assemblerOptionsSpecImpl.setLogLevel(LogLevel.ALL);
-		AssemblerServiceException ex = assertThrows(AssemblerServiceException.class, ()->underTest.invoke(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DOCX.toFile()), sourceDocuments, assemblerOptionsSpecImpl));
+		AssemblerServiceException ex = assertThrows(AssemblerServiceException.class, ()->underTest.invoke(DOC_FACTORY.create(SAMPLE_FORM_DOCX.toFile()), sourceDocuments, assemblerOptionsSpecImpl));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 		assertTrue(msg.contains("Call to server failed"));
@@ -120,7 +124,7 @@ public class AssembleDocumentsTest {
 	@DisplayName("Test ToPdfA() Happy Path.")
 	void testToPdfA() throws Exception {
 		PDFAConversionResult result = underTest.toPDFA()
-											   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF.toFile()));
+											   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_PDF.toFile()));
 		Document pdfaDocument = result.getPDFADocument();
 		Document conversionLog = result.getConversionLog();
 		Document jobLog = result.getJobLog();
@@ -147,7 +151,7 @@ public class AssembleDocumentsTest {
 											   .setRetainPDFFormState(true)
 											   .setSignatures(Signatures.ARCHIVE_ALWAYS)
 											   .setVerify(true)
-											   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF.toFile()));
+											   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_PDF.toFile()));
 		Document pdfaDocument = result.getPDFADocument();
 		Document conversionLog = result.getConversionLog();
 		Document jobLog = result.getJobLog();
@@ -158,6 +162,26 @@ public class AssembleDocumentsTest {
 		assertTrue(pdfa);
 		Pdf pdfResult = Pdf.from(pdfaDocument.getInputStream());
 		assertThat(pdfResult.getProducer(), containsStringIgnoringCase("assembler"));
+	}
+
+	@Test
+	void testAssembleDocuments_DocInfoDdx() throws Exception {
+		String ddx =  "<DDX xmlns=\"http://ns.adobe.com/DDX/1.0/\">\n"
+					+ "    <DocumentInformation result=\"info\" source=\"doc1\"/>\n"
+					+ "</DDX>\n";
+ 
+		Map<String, EitherDocumentOrDocumentList> inputDocs = Collections.singletonMap("doc1", EitherDocumentOrDocumentList.from(DOC_FACTORY.create(SAMPLE_FORM_PDF)));
+		
+		AssemblerResult result = underTest.invoke()
+										  .executeOn2(DOC_FACTORY.create(ddx.getBytes()), inputDocs);
+		
+		Map<String, Document> documents = result.getDocuments();
+		assertEquals(1, documents.size());
+		Document resultDoc = documents.get("info");
+		assertEquals(resultDoc.getContentType(), "application/xml");
+		String info = new String(resultDoc.getInlineData());
+		String numPages = info.substring(info.indexOf("<NumPages>") + 10, info.indexOf("</NumPages>"));
+		assertEquals(1, Integer.valueOf(numPages));
 	}
 
 }
