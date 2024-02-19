@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 /**
  * This interface is based on AEM's Document object (com.adobe.aemfd.docmanager.Document).  When running
@@ -137,6 +138,28 @@ public interface Document extends AutoCloseable, Closeable, HasAttributes {
 			String exMsg = e.getMessage();
 			throw new IllegalStateException("I/O Error while determining the length of document." + (exMsg != null ? " (" + exMsg + ")" : ""), e);
 		}
+	}
+	
+	/**
+	 * Returns a page count attribute if there is one.
+	 * 
+	 * The OutputService and FormsService both set a page count attribute when they generate a document. 
+	 * If this document has a page count attribute, then this method will return that page count.
+	 * 
+	 * @return
+	 */
+	public default Optional<Long> getPageCount() {
+		return this.getOptionalAttributeAsLong(HasAttributes.ATTRIBUTE_PAGE_COUNT);
+	}
+	
+	/**
+	 * Sets the page count attribute on this document.  Replaces any existing page count.
+	 * 
+	 * @param pageCount long containsing page count
+	 * @return
+	 */
+	public default Document setPageCount(Long pageCount) {
+		return this.setAttributeAsLong(HasAttributes.ATTRIBUTE_PAGE_COUNT, pageCount);
 	}
 	
 	@Override

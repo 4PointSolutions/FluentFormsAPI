@@ -10,7 +10,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
-import com._4point.aem.fluentforms.api.HasAttributes;
 
 
 /**
@@ -147,9 +146,9 @@ public enum AdobeDocumentFactoryImpl implements DocumentFactory {
 			Object outputPageCount = doc.getAttribute(com.adobe.fd.output.api.OutputService.PAGE_COUNT);
 			Object formsPageCount = doc.getAttribute(com.adobe.fd.forms.api.FormsService.PAGE_COUNT);
 			if (outputPageCount instanceof Long) {
-				this.setAttributeAsLong(HasAttributes.ATTRIBUTE_PAGE_COUNT, (Long)outputPageCount);
+				this.setPageCount((Long)outputPageCount);
 			} else if (formsPageCount instanceof Long) {
-				this.setAttributeAsLong(HasAttributes.ATTRIBUTE_PAGE_COUNT, (Long)formsPageCount);
+				this.setPageCount((Long)formsPageCount);
 			}
 		}
 		

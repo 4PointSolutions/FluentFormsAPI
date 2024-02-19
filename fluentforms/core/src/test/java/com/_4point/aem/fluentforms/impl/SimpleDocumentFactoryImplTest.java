@@ -28,7 +28,15 @@ class SimpleDocumentFactoryImplTest {
 			assertNull(underTest.getAttribute(attr1));
 			assertFalse(underTest.getOptionalAttributeAsString(attr1).isPresent());
 		}
-		
 	}
 
+	// Test that the document interface is fluent.
+	@Test
+	void testDocumentPageCount() throws Exception {
+		Long expectedPageCount = 23L;
+		try (Document underTest = SimpleDocumentFactoryImpl.getFactory().create("TestData".getBytes())) {
+			underTest.setPageCount(expectedPageCount);
+			assertEquals(expectedPageCount, underTest.getPageCount().get());
+		}
+	}
 }
