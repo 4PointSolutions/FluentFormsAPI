@@ -1,13 +1,14 @@
 package com._4point.aem.docservices.rest_services.server.docassurance;
 
-import static com._4point.aem.docservices.rest_services.server.FormParameters.*;
+import static com._4point.aem.docservices.rest_services.server.FormParameters.getMandatoryParameter;
+import static com._4point.aem.docservices.rest_services.server.FormParameters.getOptionalParameter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.function.Supplier;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-
-import java.util.function.Supplier;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -21,7 +22,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
@@ -112,11 +112,7 @@ public class SecureDocument extends SlingAllMethodsServlet {
 										.done()
 									.done()
 									.executeOn(inDoc)) {
-				String contentType = result.getContentType();
-				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-				response.setContentType(contentType);
-				response.setContentLength((int)result.length());
-				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+				ServletUtils.transferDocumentToResponse(request, response, result, true);
 			}
 		} catch (FileNotFoundException | NullPointerException ex1) {
 			throw new BadRequestException("Bad request parameter while reader extending a PDF. " + ex1.getMessage(), ex1);

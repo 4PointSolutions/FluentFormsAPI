@@ -243,6 +243,7 @@ class ImportDataTest {
 	private class MockImportDataResultDoc implements Document {
 
 		Document importDataResult;
+		boolean contentTypeSet = false;
 		
 		public MockImportDataResultDoc(byte[] resultDataBytes) {
 			super();
@@ -272,6 +273,9 @@ class ImportDataTest {
 
 		@Override
 		public String getContentType() throws IOException {
+			if (contentTypeSet) {
+				return this.importDataResult.getContentType();
+			}
 			throw new UnsupportedOperationException("getContentType() not supported on PDF-based documents under AEM 6.5!");
 		}
 
@@ -315,6 +319,7 @@ class ImportDataTest {
 
 		@Override
 		public Document setContentType(String contentType) {
+			this.contentTypeSet = true;
 			this.importDataResult.setContentType(contentType);
 			return this;
 		}

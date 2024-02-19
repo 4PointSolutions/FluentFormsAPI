@@ -6,7 +6,11 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
+import com._4point.aem.fluentforms.api.Document;
 
 public class ServletUtils {
 
@@ -35,5 +39,17 @@ public class ServletUtils {
 			out.write(buffer, 0, len);
 		}
 	}
+
+	public static void transferDocumentToResponse(SlingHttpServletRequest request, SlingHttpServletResponse response,
+			Document result, boolean returnLength) throws IOException, NotAcceptableException {
+		String contentType = result.getContentType();
+		ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
+		response.setContentType(contentType);
+		if (returnLength) { // We don't want to always get length do to an issue with the Adobe code (see FluentFormsAPI Issue #15).
+			response.setContentLength((int)result.length());
+		}
+		ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+	}
+
 
 }

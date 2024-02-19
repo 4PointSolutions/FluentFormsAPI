@@ -25,14 +25,13 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.DataParameter;
-import com._4point.aem.docservices.rest_services.server.ServletUtils;
-import com._4point.aem.docservices.rest_services.server.TemplateParameter;
 import com._4point.aem.docservices.rest_services.server.DataParameter.ParameterType;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
+import com._4point.aem.docservices.rest_services.server.TemplateParameter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -105,10 +104,7 @@ public class GeneratePrintedOutput extends SlingAllMethodsServlet {
 													.transform(b->b.setPrintConfig(printConfig))
 													.transform(b->xci == null ? b : b.setXci(docFactory.create(xci)));
 			try (Document result = executeOn(template, data, argBuilder)) {
-				String contentType = result.getContentType();
-				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-				response.setContentType(contentType);
-				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+				ServletUtils.transferDocumentToResponse(request, response, result, false);
 			}
 		} catch (FileNotFoundException fnfex) {
 			throw new BadRequestException("Bad request parameter while rendering print output (" + fnfex.getMessage() + ").", fnfex);

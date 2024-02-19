@@ -24,16 +24,17 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
-import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService.ConvertPdfServiceException;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService.ToImageArgumentBuilder;
+import com._4point.aem.fluentforms.impl.convertPdf.AdobeConvertPdfServiceAdapter;
+import com._4point.aem.fluentforms.impl.convertPdf.ConvertPdfServiceImpl;
 import com._4point.aem.fluentforms.impl.convertPdf.TraditionalConvertPdfService;
 import com.adobe.fd.cpdf.api.enumeration.CMYKPolicy;
 import com.adobe.fd.cpdf.api.enumeration.ColorCompression;
@@ -46,9 +47,6 @@ import com.adobe.fd.cpdf.api.enumeration.JPEGFormat;
 import com.adobe.fd.cpdf.api.enumeration.MonochromeCompression;
 import com.adobe.fd.cpdf.api.enumeration.PNGFilter;
 import com.adobe.fd.cpdf.api.enumeration.RGBPolicy;
-import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
-import com._4point.aem.fluentforms.impl.convertPdf.AdobeConvertPdfServiceAdapter;
-import com._4point.aem.fluentforms.impl.convertPdf.ConvertPdfServiceImpl;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property={Constants.SERVICE_DESCRIPTION + "=ConvertPdfService.ToImage Service",
@@ -139,10 +137,7 @@ public class ToImage extends SlingAllMethodsServlet {
 
 			List<Document> result = argBuilder.executeOn(inPdfDoc);
 			if (result.size() == 1) {
-				String contentType = result.get(0).getContentType();
-				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-				response.setContentType(contentType);
-				ServletUtils.transfer(result.get(0).getInputStream(), response.getOutputStream());
+				ServletUtils.transferDocumentToResponse(request, response, result.get(0), false);
 			}
 			else if (result.size() == 0) {
 				throw new ConvertPdfServiceException("The returned List<Document> was empty.");

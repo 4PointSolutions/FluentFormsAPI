@@ -29,7 +29,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.DataParameter;
 import com._4point.aem.docservices.rest_services.server.DataParameter.ParameterType;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
@@ -117,12 +116,7 @@ public class RenderPdfForm extends SlingAllMethodsServlet {
 												.transform(b->taggedPDF == null ? b : b.setTaggedPDF(taggedPDF.booleanValue()))
 												.transform(b->xci == null ? b : b.setXci(docFactory.create(xci)));
 			try (Document result = executeOn(template, data, argBuilder)) {
-				
-				String contentType = result.getContentType();
-				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-				response.setContentType(contentType);
-				response.setContentLength((int)result.length());
-				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+				ServletUtils.transferDocumentToResponse(request, response, result, true);
 			}
 		} catch (FileNotFoundException fnfex) {
 			throw new BadRequestException("Bad request parameter while rendering PDF (" + fnfex.getMessage() + ").", fnfex);

@@ -20,7 +20,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
@@ -75,11 +74,8 @@ public class ConvertPdfToXdp extends SlingAllMethodsServlet {
 		RequestParameter document = getMandatoryParameter(request, DOCUMENT_PARAM_NAME);
 		Document documentParameter = docFactory.create(document.getInputStream());
 		try (Document result = pdfUtilityService.convertPDFtoXDP(documentParameter)){
-			String contentType = requireNonNullOrElse(result.getContentType(), APPLICATION_XDP);
-			ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-			response.setContentType(contentType);
-			response.setContentLength((int)result.length());
-			ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+			result.setContentTypeIfEmpty(APPLICATION_XDP);
+			ServletUtils.transferDocumentToResponse(request, response, result, true);
 		} catch (PdfUtilityException e) {
 			throw new InternalServerErrorException("Internal Error while converting Pdf to Xdp. (" + e.getMessage() + ").", e);
 		}

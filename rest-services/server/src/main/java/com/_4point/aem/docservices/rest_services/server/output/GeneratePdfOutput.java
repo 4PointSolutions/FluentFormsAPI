@@ -1,6 +1,7 @@
 package com._4point.aem.docservices.rest_services.server.output;
 
-import static com._4point.aem.docservices.rest_services.server.FormParameters.*;
+import static com._4point.aem.docservices.rest_services.server.FormParameters.getMandatoryParameter;
+import static com._4point.aem.docservices.rest_services.server.FormParameters.getOptionalParameter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,7 +25,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.DataParameter;
 import com._4point.aem.docservices.rest_services.server.DataParameter.ParameterType;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
@@ -109,11 +109,7 @@ public class GeneratePdfOutput extends SlingAllMethodsServlet {
 												.transform(b->xci == null ? b : b.setXci(docFactory.create(xci)));
 
 			try (Document result = executeOn(template, data, argBuilder)) {
-				String contentType = result.getContentType();
-				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-				response.setContentType(contentType);
-				// response.setContentLength((int)result.length());	// Commented out length do to an issue with the Adobe code (see FluentFormsAPI Issue #15).
-				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+				ServletUtils.transferDocumentToResponse(request, response, result, false);
 			}
 		} catch (FileNotFoundException fnfex) {
 			throw new BadRequestException("Bad request parameter while rendering PDF (" + fnfex.getMessage() + ").", fnfex);

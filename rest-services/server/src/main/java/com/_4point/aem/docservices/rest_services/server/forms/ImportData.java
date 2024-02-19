@@ -19,7 +19,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.ByteArrayString;
 import com._4point.aem.docservices.rest_services.server.ContentType;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
@@ -84,13 +83,8 @@ public class ImportData extends SlingAllMethodsServlet {
 		
 		try {
 			try (Document result = formsService.importData(pdf, data)) {
-			
-				
-				String contentType = ContentType.APPLICATION_PDF.toString();	// We know the result is always PDF.
-				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-				response.setContentType(contentType);
-//				response.setContentLength((int)result.length());	// Setting the content length seems to throw an UnsupportedOperation exception.
-				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+				result.setContentType(ContentType.APPLICATION_PDF.toString());	// We know the result is always PDF.
+				ServletUtils.transferDocumentToResponse(request, response, result, false);
 			}
 		} catch (FormsServiceException | IOException ex1) {
 			throw new InternalServerErrorException("Internal Error while importing data", ex1);

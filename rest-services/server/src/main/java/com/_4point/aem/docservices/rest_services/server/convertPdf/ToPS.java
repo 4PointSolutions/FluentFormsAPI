@@ -20,11 +20,10 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
-import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService;
@@ -137,10 +136,7 @@ public class ToPS extends SlingAllMethodsServlet {
 					.transform(b->useMaxJPEGImageResolution == null ? b : b.setUseMaxJPEGImageResolution(useMaxJPEGImageResolution));
 			
 			try (Document result = argBuilder.executeOn(inPdfDoc)) {
-				String contentType = result.getContentType();
-				ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-				response.setContentType(contentType);
-				ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
+				ServletUtils.transferDocumentToResponse(request, response, result, false);
 			}
 		} catch (ConvertPdfServiceException | IOException ex1) {
 			throw new InternalServerErrorException("Internal Error while converting a PDF to PostScript. (" + ex1.getMessage() + ").", ex1);

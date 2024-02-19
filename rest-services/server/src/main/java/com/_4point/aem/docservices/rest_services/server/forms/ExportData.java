@@ -20,14 +20,12 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._4point.aem.docservices.rest_services.server.AcceptHeaders;
 import com._4point.aem.docservices.rest_services.server.ContentType;
-import com._4point.aem.docservices.rest_services.server.FormParameters;
-import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.docservices.rest_services.server.Exceptions.BadRequestException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.InternalServerErrorException;
 import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptableException;
-
+import com._4point.aem.docservices.rest_services.server.FormParameters;
+import com._4point.aem.docservices.rest_services.server.ServletUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.forms.FormsService;
@@ -93,13 +91,9 @@ public class ExportData extends SlingAllMethodsServlet {
 				Optional<Document> optResult = formsService.exportData(pdforxdp, dataformat);
 				if (optResult.isPresent()) {
 					try (Document result = optResult.get()) {
-					
-						String contentType = ContentType.APPLICATION_XML.toString();	// We know the result is always PDF.
-						ServletUtils.validateAcceptHeader(request.getHeader(AcceptHeaders.ACCEPT_HEADER_STR), contentType);
-						response.setContentType(contentType);
-	
-						ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
-					}
+						result.setContentType(ContentType.APPLICATION_XML.toString());	// We know the result is always XDP.
+						ServletUtils.transferDocumentToResponse(request, response, result, false);
+				}
 				} else {
 					response.setStatus(SlingHttpServletResponse.SC_NO_CONTENT);
 				}

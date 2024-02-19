@@ -211,6 +211,7 @@ class ExportDataTest {
 	private class MockExportDataResultDoc implements Document {
 
 		Document exportDataResult;
+		boolean contentTypeSet = false;
 		
 		public MockExportDataResultDoc(byte[] resultDataBytes) {
 			super();
@@ -237,6 +238,9 @@ class ExportDataTest {
 
 		@Override
 		public String getContentType() throws IOException {
+			if (contentTypeSet) {
+				return this.exportDataResult.getContentType();
+			}
 			throw new UnsupportedOperationException("getContentType() not supported on PDF-based documents under AEM 6.5!");
 		}
 
@@ -281,6 +285,7 @@ class ExportDataTest {
 
 		@Override
 		public Document setContentType(String contentType) {
+			this.contentTypeSet = true;
 			this.exportDataResult.setContentType(contentType);
 			return this;
 		}
