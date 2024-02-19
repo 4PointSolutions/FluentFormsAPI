@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
@@ -38,7 +39,10 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -91,6 +95,7 @@ class RestServicesDocAssemblerServiceAdapterTest {
 
 	private static final String POPULATED_ASSEMBLER_RESULT_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames><failedBlockName>failedBlock1</failedBlockName><failedBlockName>failedBlock2</failedBlockName></failedBlockNames><successfulDocumentNames><successfulDocumentName>successDocument1</successfulDocumentName><successfulDocumentName>successDocument2</successfulDocumentName></successfulDocumentNames><successfulBlockNames><successfulBlockName>successBlock1</successfulBlockName><successfulBlockName>successBlock2</successfulBlockName></successfulBlockNames><latestBatesNumber value=\"2\"/><numRequestedBlocks value=\"3\"/><multipleResultBlocks name=\"document\"><documentNames><documentName>test1</documentName><documentName>test2</documentName></documentNames></multipleResultBlocks><jobLog joblogValue=\"SU5GTw==\"/></assemblerResult>";
 	private static final String EMPTY_ASSEMBLER_RESULT_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><failedBlockNames/><successfulDocumentNames/><successfulBlockNames/><latestBatesNumber value=\"0\"/><numRequestedBlocks value=\"0\"/><jobLog/></assemblerResult>";
+	private static final String POPULATED_ASSEMBLER_RESULT_XML_WITH_CONTENT_TYPE = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\" contentType=\"application/xml\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames><failedBlockName>failedBlock1</failedBlockName><failedBlockName>failedBlock2</failedBlockName></failedBlockNames><successfulDocumentNames><successfulDocumentName>successDocument1</successfulDocumentName><successfulDocumentName>successDocument2</successfulDocumentName></successfulDocumentNames><successfulBlockNames><successfulBlockName>successBlock1</successfulBlockName><successfulBlockName>successBlock2</successfulBlockName></successfulBlockNames><latestBatesNumber value=\"2\"/><numRequestedBlocks value=\"3\"/><multipleResultBlocks name=\"document\"><documentNames><documentName>test1</documentName><documentName>test2</documentName></documentNames></multipleResultBlocks><jobLog joblogValue=\"SU5GTw==\"/></assemblerResult>";
 
 	private enum InvokeHappyPathScenario {
 		NULL_ASSEMBLER_OPTIONS(()->null, InvokeHappyPathScenario::validateEmptySpec),
@@ -170,7 +175,7 @@ class RestServicesDocAssemblerServiceAdapterTest {
 		AssemblerResult result = underTest.invoke(ddx, sourceDocuments, assemblerOptionSpec);
 		
 		// Validate the result was returned as expected.
-		validatePopulatedResult(result);
+		validatePopulatedResult(result, "application/pdf");
 		
 		// Validate that the arguments were populated as expected.
 		// Make sure that the arguments we passed in are transmitted correctly.
@@ -371,17 +376,29 @@ class RestServicesDocAssemblerServiceAdapterTest {
 		scenario.validateExceptionMessage.accept(msg);
 	}
 
-	@Test
-	void testConvertXmlToAssemblerResult() throws Exception {
-		AssemblerResult result = RestServicesDocAssemblerServiceAdapter.convertXmlToAssemblerResult(new ByteArrayInputStream(POPULATED_ASSEMBLER_RESULT_XML.getBytes()));
+	@ParameterizedTest
+	@MethodSource("testXmls")
+	void testConvertXmlToAssemblerResult(String xml, String expectedContentType) throws Exception {
+		AssemblerResult result = RestServicesDocAssemblerServiceAdapter.convertXmlToAssemblerResult(new ByteArrayInputStream(xml.getBytes()));
 		
-		validatePopulatedResult(result);
+		validatePopulatedResult(result, expectedContentType);
 	}
 
-	private void validatePopulatedResult(AssemblerResult result) {
+	static Stream<Arguments> testXmls() {
+		return Stream.of(
+				Arguments.of(POPULATED_ASSEMBLER_RESULT_XML, "application/pdf"),
+				Arguments.of(POPULATED_ASSEMBLER_RESULT_XML_WITH_CONTENT_TYPE, "application/xml")
+				);
+				
+	}
+	
+	private void validatePopulatedResult(AssemblerResult result, String expectedContentType) throws IOException {
 		Map<String, Document> documents = result.getDocuments();
 		assertEquals(1, documents.size());
-		assertTrue(documents.containsKey("concatenatedPDF.pdf"));
+		String expectedDpcumentName = "concatenatedPDF.pdf";
+		assertTrue(documents.containsKey(expectedDpcumentName));
+		Document doc = documents.get(expectedDpcumentName);
+		assertEquals(expectedContentType, doc.getContentType());
 		
 		List<String> failedBlockNames = result.getFailedBlockNames();
 		assertEquals(2, failedBlockNames.size());

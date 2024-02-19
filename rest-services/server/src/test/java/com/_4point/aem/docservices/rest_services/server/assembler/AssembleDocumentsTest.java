@@ -75,7 +75,7 @@ public class AssembleDocumentsTest {
 	
 	@Test
 	void testDoPost_HappyPath_JustForm() throws ServletException, IOException, NoSuchFieldException {
-		String expectedResultData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames/><successfulDocumentNames/><successfulBlockNames/><latestBatesNumber value=\"0\"/><numRequestedBlocks value=\"0\"/><jobLog/></assemblerResult>" ;
+		String expectedResultData = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><assemblerResult><resultDocument documentName=\"concatenatedPDF.pdf\" contentType=\"application/pdf\"><mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc></resultDocument><failedBlockNames/><successfulDocumentNames/><successfulBlockNames/><latestBatesNumber value=\"0\"/><numRequestedBlocks value=\"0\"/><jobLog/></assemblerResult>" ;
 		String data = "testDoPost Happy Path Result";
 		String templateData = TestUtils.SAMPLE_DDX.toString();
 		byte[] samplePdf1 = TestUtils.SAMPLE_PDF.toString().getBytes();
@@ -311,7 +311,7 @@ public class AssembleDocumentsTest {
 		AssemblerResultImpl assemblerResult = createAssemblerResultStub();
 		String resultXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 				+ "<assemblerResult>\n"
-				+ "    <resultDocument documentName=\"concatenatedPDF.pdf\">\n"
+				+ "    <resultDocument documentName=\"concatenatedPDF.pdf\" contentType=\"application/pdf\">\n"
 				+ "        <mergedDoc>dGVzdERvUG9zdCBIYXBweSBQYXRoIFJlc3VsdA==</mergedDoc>\n"
 				+ "    </resultDocument>\n"
 				+ "    <failedBlockNames>\n"
@@ -343,7 +343,9 @@ public class AssembleDocumentsTest {
 	
 	private AssemblerResultImpl createAssemblerResultStub() {
 		String data = "testDoPost Happy Path Result";
-		Map<String, Document> sourceDocuments = Collections.singletonMap("concatenatedPDF.pdf", mockDocumentFactory.create(data.getBytes()));
+		Document mockDoc = mockDocumentFactory.create(data.getBytes())
+											  .setContentType("application/pdf");
+		Map<String, Document> sourceDocuments = Collections.singletonMap("concatenatedPDF.pdf", mockDoc);
 		
 		List<String> successfulBlockNames = new ArrayList<String>();
 		successfulBlockNames.add("successBlock1");
