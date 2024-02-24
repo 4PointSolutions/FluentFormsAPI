@@ -288,7 +288,7 @@ class RestServicesFormsServiceAdapterTest {
 		Document data = MockDocumentFactory.GLOBAL_INSTANCE.create("data Document Data".getBytes());
 
 		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->underTest.importData(pdf, data));
-		assertThat(ex.getMessage(), containsString("was not a PDF"));
+		assertThat(ex.getMessage(), containsString("was not of expected type(application/pdf)"));
 		assertThat(ex.getMessage(), containsString(HTML_CONTENT_TYPE));
 	}
 	

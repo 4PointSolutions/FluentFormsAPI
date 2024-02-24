@@ -31,7 +31,6 @@ import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -322,7 +321,8 @@ class Html5FormsServiceTest {
 		Html5FormsServiceException ex = assertThrows(Html5FormsServiceException.class, ()->underTest.renderHtml5Form(DUMMY_TEMPLATE_STR));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
-		assertThat(msg, allOf(containsStringIgnoringCase("Response from AEM server was not HTML"),
+		assertThat(msg, allOf(containsStringIgnoringCase("Response from AEM server was not of expected type"),
+							  containsStringIgnoringCase("text/html"),
 							  containsStringIgnoringCase(responseString),
 							  containsStringIgnoringCase("content-type='text/plain'"))
 							 );

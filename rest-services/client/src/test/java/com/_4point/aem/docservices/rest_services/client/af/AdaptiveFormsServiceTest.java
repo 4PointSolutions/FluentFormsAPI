@@ -474,7 +474,7 @@ class AdaptiveFormsServiceTest {
 		AdaptiveFormsServiceException ex = assertThrows(AdaptiveFormsServiceException.class, ()->underTest.renderAdaptiveForm(DUMMY_TEMPLATE_STR));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
-		assertThat(msg, allOf(containsStringIgnoringCase("Response from AEM server was not HTML"),
+		assertThat(msg, allOf(containsStringIgnoringCase("was not of expected type(text/html)"),
 							  containsStringIgnoringCase(responseString),
 							  containsStringIgnoringCase("content-type='text/plain'"))
 							 );

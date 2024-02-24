@@ -1,18 +1,9 @@
 package com._4point.aem.docservices.rest_services.client.pdfUtility;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
-
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.StatusType;
-import jakarta.ws.rs.core.Response.Status.Family;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
@@ -22,13 +13,16 @@ import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService.PdfUtilityException;
-import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.pdfUtility.TraditionalPdfUtilityService;
 import com.adobe.fd.pdfutility.services.client.PDFPropertiesOptionSpec;
 import com.adobe.fd.pdfutility.services.client.PDFPropertiesResult;
 import com.adobe.fd.pdfutility.services.client.RedactionOptionSpec;
 import com.adobe.fd.pdfutility.services.client.RedactionResult;
 import com.adobe.fd.pdfutility.services.client.SanitizationResult;
+
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
 
 public class RestServicesPdfUtilityServiceAdapter extends RestServicesServiceAdapter implements TraditionalPdfUtilityService {
 
@@ -55,36 +49,14 @@ public class RestServicesPdfUtilityServiceAdapter extends RestServicesServiceAda
 			multipart.field(DOCUMENT_PARAM_NAME, Objects.requireNonNull(doc, "document parameter cannot be null.").getInputStream(), APPLICATION_PDF);			
 			Response result = postToServer(convertPdfTarget, multipart, APPLICATION_XDP);
 			
-			StatusType resultStatus = result.getStatusInfo();
-			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
-				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
-				if (result.hasEntity()) {
-					InputStream entityStream = (InputStream) result.getEntity();
-					message += "\n" + inputStreamtoString(entityStream);
-				}
-				throw new PdfUtilityException(message);
-			}
-			if (!result.hasEntity()) {
-				throw new PdfUtilityException("Call to server succeeded but server failed to return document.  This should never happen.");
-			}
-
-			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if ( responseContentType == null || !APPLICATION_XDP.isCompatible(MediaType.valueOf(responseContentType))) {
-				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
-				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + inputStreamtoString(entityStream);
-				throw new PdfUtilityException(msg);
-			}
-
-			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-			resultDoc.setContentType(APPLICATION_XDP.toString());
-			return resultDoc;
+			return responseToDoc(result, APPLICATION_XDP, msg->new PdfUtilityException(msg));
 		} catch (IOException e) {
 			throw new PdfUtilityException("I/O Error while converting PDF to XDP. (" + baseTarget.getUri().toString() + ").", e);
 		} catch (RestServicesServiceException e) {
 			throw new PdfUtilityException("Error while POSTing to server (" + baseTarget.getUri().toString() + ").", e);
 		}
 	}
+
 
 	@Override
 	public PDFPropertiesResult getPDFProperties(Document doc, PDFPropertiesOptionSpec pdfPropOptionsSpec) throws PdfUtilityException {

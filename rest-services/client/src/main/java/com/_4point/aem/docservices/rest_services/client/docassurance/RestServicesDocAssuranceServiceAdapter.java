@@ -1,17 +1,8 @@
 package com._4point.aem.docservices.rest_services.client.docassurance;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.function.Supplier;
-
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
@@ -24,7 +15,6 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
 import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
 import com._4point.aem.fluentforms.api.docassurance.ReaderExtensionOptions;
-import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.docassurance.TraditionalDocAssuranceService;
 import com.adobe.fd.docassurance.client.api.SignatureOptions;
 import com.adobe.fd.encryption.client.EncryptionTypeResult;
@@ -42,6 +32,10 @@ import com.adobe.fd.signatures.client.types.VerificationTime;
 import com.adobe.fd.signatures.pdf.inputs.UnlockOptions;
 import com.adobe.fd.signatures.pdf.inputs.ValidationPreferences;
 import com.adobe.fd.signatures.pki.client.types.common.RevocationCheckStyle;
+
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
 
 public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceAdapter implements TraditionalDocAssuranceService {
 
@@ -76,11 +70,13 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 		
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			if (encryptionOptions != null) {
-				// TODO Auto-generated method stub
+				// TODO Implement this
+				throw new UnsupportedOperationException("Encryption support has not yet been added to FluentForms library.");
 			}
 			
 			if (signatureOptions != null) {
-				// TODO Auto-generated method stub
+				// TODO Implement this
+				throw new UnsupportedOperationException("Digital Signature support has not yet been added to FluentForms library.");
 			}
 
 			if (readerExtensionOptions != null) {
@@ -128,33 +124,8 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 			}
 
 			Response result = postToServer(secureDocTarget, multipart, APPLICATION_PDF);
-			
-			StatusType resultStatus = result.getStatusInfo();
-			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
-				String msg = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
-				if (result.hasEntity()) {
-					InputStream entityStream = (InputStream) result.getEntity();
-					msg += "\n" + inputStreamtoString(entityStream);
-				}
-				throw new DocAssuranceServiceException(msg);
-			}
-			
-			if (!result.hasEntity()) {
-				throw new DocAssuranceServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
-			}
-			
-			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if ( responseContentType == null || !APPLICATION_PDF.isCompatible(MediaType.valueOf(responseContentType))) {
-				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
-				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + inputStreamtoString(entityStream);
-				throw new DocAssuranceServiceException(msg);
-			}
-			
-			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-			resultDoc.setContentType(APPLICATION_PDF.toString());
-			return resultDoc;
-			
+
+			return responseToDoc(result, APPLICATION_PDF, msg->new DocAssuranceServiceException(msg));			
 		} catch (IOException e) {
 			throw new DocAssuranceServiceException("I/O Error while reader extending the document. (" + baseTarget.getUri().toString() + ").", e);
 		} catch (RestServicesServiceException e) {

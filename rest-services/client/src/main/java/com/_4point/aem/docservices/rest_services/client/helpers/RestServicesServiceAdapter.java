@@ -4,14 +4,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+
+import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import jakarta.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.StatusType;
 
 public abstract class RestServicesServiceAdapter {
 	protected static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
@@ -64,6 +72,47 @@ public abstract class RestServicesServiceAdapter {
 		return this.aemServerType.pathPrefix() + SERVICES_URL_PREFIX + "/" + serviceName + "/" + methodName;
 	}
 
+	protected <E extends Exception> Document responseToDoc(Response result, MediaType expectedMediaType, Function<String, E> exSupplier) throws IOException, E {
+		return responseToDoc(result, expectedMediaType, exSupplier, is->is);
+	}
+
+	protected <E extends Exception> Document responseToDoc(Response result, MediaType expectedMediaType, Function<String, E> exSupplier, Function<InputStream, InputStream> filter) throws IOException, E {
+		// If the server returns a "NO CONTENT" result, that means that it's intentionally returned an empty document.
+		if (result.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()) {
+			return SimpleDocumentFactoryImpl.emptyDocument();
+		}
+		String responseContentType = validateResponse(result, expectedMediaType, exSupplier);
+
+		Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create(filter.apply((InputStream) result.getEntity()));
+		resultDoc.setContentType(responseContentType);
+		return resultDoc;
+	}
+
+	protected <E extends Exception> String validateResponse(Response response, MediaType expectedMediaType, Function<String, E> exSupplier) throws IOException, E {
+		StatusType resultStatus = response.getStatusInfo();
+		if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
+			String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
+			if (response.hasEntity()) {
+				InputStream entityStream = (InputStream) response.getEntity();
+				message += "\n" + inputStreamtoString(entityStream);
+			}
+			throw exSupplier.apply(message);
+		}
+		if (!response.hasEntity()) {
+			throw exSupplier.apply("Call to server succeeded but server failed to return document.  This should never happen.");
+		}
+
+		String responseContentType = response.getHeaderString(HttpHeaders.CONTENT_TYPE);
+		if ( responseContentType == null || !expectedMediaType.isCompatible(MediaType.valueOf(responseContentType))) {
+			String msg = "Response from AEM server was not of expected type(" + expectedMediaType.toString() + ").  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
+			InputStream entityStream = (InputStream) response.getEntity();
+			msg += "\n" + inputStreamtoString(entityStream);
+			throw exSupplier.apply(msg);
+		}
+		return responseContentType;
+	}
+
+	
 	@SuppressWarnings("serial")
 	protected static class RestServicesServiceException extends Exception {
 

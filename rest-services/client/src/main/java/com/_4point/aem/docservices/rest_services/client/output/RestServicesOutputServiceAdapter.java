@@ -1,20 +1,11 @@
 package com._4point.aem.docservices.rest_services.client.output;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
-
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
@@ -31,11 +22,15 @@ import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceExcepti
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
-import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.output.TraditionalOutputService;
 import com.adobe.fd.output.api.AcrobatVersion;
 import com.adobe.fd.output.api.PaginationOverride;
 import com.adobe.fd.output.api.RenderType;
+
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter implements TraditionalOutputService {
 
@@ -134,30 +129,7 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 
 			Response result = postToServer(renderPdfTarget, multipart, APPLICATION_PDF);
 			
-			StatusType resultStatus = result.getStatusInfo();
-			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
-				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
-				if (result.hasEntity()) {
-					InputStream entityStream = (InputStream) result.getEntity();
-					message += "\n" + inputStreamtoString(entityStream);
-				}
-				throw new OutputServiceException(message);
-			}
-			if (!result.hasEntity()) {
-				throw new OutputServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
-			}
-
-			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if ( responseContentType == null || !APPLICATION_PDF.isCompatible(MediaType.valueOf(responseContentType))) {
-				String msg = "Response from AEM server was not a PDF.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
-				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + inputStreamtoString(entityStream);
-				throw new OutputServiceException(msg);
-			}
-
-			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-			resultDoc.setContentType(APPLICATION_PDF.toString());
-			return resultDoc;
+			return responseToDoc(result, APPLICATION_PDF, msg->new OutputServiceException(msg));
 		} catch (IOException e) {
 			throw new OutputServiceException("I/O Error while generating PDF. (" + baseTarget.getUri().toString() + ").", e);
 		} catch (RestServicesServiceException e) {
@@ -236,30 +208,7 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 			MediaType acceptType = getAcceptType(printConfig.getRenderType());
 			Response result = postToServer(renderPrintedTarget, multipart, acceptType);
 			
-			StatusType resultStatus = result.getStatusInfo();
-			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
-				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
-				if (result.hasEntity()) {
-					InputStream entityStream = (InputStream) result.getEntity();
-					message += "\n" + inputStreamtoString(entityStream);
-				}
-				throw new OutputServiceException(message);
-			}
-			if (!result.hasEntity()) {
-				throw new OutputServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
-			}
-
-			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if ( responseContentType == null || !acceptType.isCompatible(MediaType.valueOf(responseContentType))) {
-				String msg = "Response from AEM server was not an expected print type.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
-				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + inputStreamtoString(entityStream);
-				throw new OutputServiceException(msg);
-			}
-
-			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-			resultDoc.setContentType(acceptType.toString());
-			return resultDoc;
+			return responseToDoc(result, acceptType, msg->new OutputServiceException(msg));
 		} catch (IOException e) {
 			throw new OutputServiceException("I/O Error while generating print output. (" + baseTarget.getUri().toString() + ").", e);
 		} catch (RestServicesServiceException e) {

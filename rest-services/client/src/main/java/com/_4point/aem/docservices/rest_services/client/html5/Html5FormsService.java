@@ -8,14 +8,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.Response.StatusType;
-
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
@@ -25,6 +17,11 @@ import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServ
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
+
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 public class Html5FormsService extends RestServicesServiceAdapter {
 
@@ -72,31 +69,7 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 
 			Response result = postToServer(renderHtml5Target, multipart, MediaType.TEXT_HTML_TYPE);
 			
-			StatusType resultStatus = result.getStatusInfo();
-			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
-				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
-				if (result.hasEntity()) {
-					InputStream entityStream = (InputStream) result.getEntity();
-					message += "\n" + inputStreamtoString(entityStream);
-				}
-				throw new Html5FormsServiceException(message);
-			}
-			
-			if (!result.hasEntity()) {
-				throw new Html5FormsServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
-			}
-
-			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if ( responseContentType == null || !MediaType.TEXT_HTML_TYPE.isCompatible(MediaType.valueOf(responseContentType))) {
-				String msg = "Response from AEM server was not HTML.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
-				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + inputStreamtoString(entityStream);
-				throw new Html5FormsServiceException(msg);
-			}
-
-			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create(this.responseFilter.apply((InputStream) result.getEntity()));
-			resultDoc.setContentType(responseContentType);
-			return resultDoc;
+			return responseToDoc(result, MediaType.TEXT_HTML_TYPE, msg->new Html5FormsServiceException(msg), this.responseFilter);
 			
 		} catch (IOException e) {
 			String msg = e.getMessage();

@@ -233,7 +233,7 @@ public class RestServicesDocAssuranceServiceAdapterTest {
 		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
 
 		Exception ex = assertThrows(Exception.class, ()->underTest.secureDocument(pdf, null, null, null, null));
-		assertThat(ex.getMessage(), containsString("was not a PDF"));
+		assertThat(ex.getMessage(), containsString("was not of expected type(application/pdf)"));
 		assertThat(ex.getMessage(), containsString(HTML_CONTENT_TYPE));
 	}
 

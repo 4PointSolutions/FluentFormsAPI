@@ -10,15 +10,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.Response.StatusType;
-
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
@@ -28,6 +19,15 @@ import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServ
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
+
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.Response.StatusType;
 
 /**
  * Adaptive Forms Service for rendering Adaptive Forms.  The forms can be pre-populated with data by passing in an XML data file.
@@ -118,33 +118,8 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		Response result = invokeBuilder.get();
 
 		try {
-			StatusType resultStatus = result.getStatusInfo();
-			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
-				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
-				if (result.hasEntity()) {
-					InputStream entityStream = (InputStream) result.getEntity();
-					message += "\n" + inputStreamtoString(entityStream);
-				}
-				throw new AdaptiveFormsServiceException(message);
-			}
-			
-			if (!result.hasEntity()) {
-				throw new AdaptiveFormsServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
-			}
-
-			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if ( responseContentType == null || !MediaType.TEXT_HTML_TYPE.isCompatible(MediaType.valueOf(responseContentType))) {
-				String msg = "Response from AEM server was not HTML.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
-				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + inputStreamtoString(entityStream);
-				throw new AdaptiveFormsServiceException(msg);
-			}
-
-			InputStream entityInputStream = this.responseFilter != null ? this.responseFilter.apply((InputStream) result.getEntity()) : (InputStream) result.getEntity();
-			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create(entityInputStream);
-			resultDoc.setContentType(responseContentType);
-			return resultDoc;
-			
+			return responseFilter == null ? responseToDoc(result, MediaType.TEXT_HTML_TYPE, msg->new AdaptiveFormsServiceException(msg))
+										  : responseToDoc(result, MediaType.TEXT_HTML_TYPE, msg->new AdaptiveFormsServiceException(msg), responseFilter);			
 		} catch (IOException e) {
 			String msg = e.getMessage();
 			throw new AdaptiveFormsServiceException("Error while reading Adaptive Form (" + (msg == null ? e.getClass().getName() : msg) + ").", e );
