@@ -10,7 +10,7 @@ import java.util.function.BiFunction;
  */
 public interface HasAttributes {
 	
-	public static final String ATTRIBUTE_PAGE_COUNT = "PAGE_COUNT";
+	public static final String ATTRIBUTE_PAGE_COUNT = "com._4point.aem.fluentforms.api.PAGE_COUNT";
 
 	Object getAttribute(String name);
 
