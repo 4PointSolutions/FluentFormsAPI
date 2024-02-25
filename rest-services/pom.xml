@@ -346,6 +346,7 @@
                                         <artifactId>maven-bundle-plugin</artifactId>
                                         <versionRange>[1.1,)</versionRange>
                                         <goals>
+                                            <goal>manifest</goal>
                                             <goal>bundle</goal>
                                             <goal>install</goal>
                                         </goals>
@@ -709,6 +710,20 @@
 			<artifactId>junit-addons</artifactId>
 			<version>${junit-addons.version}</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>	<!-- Exclude this really old version of junit that junit-addons depends on -->
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends on -->
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
+				</exclusion>
+				<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends on -->
+					<groupId>xerces</groupId>
+					<artifactId>xmlParserAPIs</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.pitest</groupId>
