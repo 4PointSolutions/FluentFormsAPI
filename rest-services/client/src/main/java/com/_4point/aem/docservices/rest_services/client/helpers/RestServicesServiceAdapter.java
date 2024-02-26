@@ -22,6 +22,7 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.StatusType;
 
 public abstract class RestServicesServiceAdapter {
+	private static final String PAGE_COUNT_HEADER = "com._4point.aem.rest_services.page_count";
 	protected static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	protected static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	protected static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
@@ -84,6 +85,10 @@ public abstract class RestServicesServiceAdapter {
 		String responseContentType = validateResponse(result, expectedMediaType, exSupplier);
 
 		Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create(filter.apply((InputStream) result.getEntity()));
+		String pageCount = result.getHeaderString(PAGE_COUNT_HEADER);
+		if (pageCount != null) {
+			resultDoc.setPageCount(Long.valueOf(pageCount));
+		}
 		resultDoc.setContentType(responseContentType);
 		return resultDoc;
 	}

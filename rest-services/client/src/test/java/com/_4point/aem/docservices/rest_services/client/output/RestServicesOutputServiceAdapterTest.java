@@ -56,6 +56,8 @@ import com.adobe.fd.output.api.PaginationOverride;
 @ExtendWith(MockitoExtension.class)
 class RestServicesOutputServiceAdapterTest {
 
+	private static final String PAGE_COUNT_HEADER = "com._4point.aem.rest_services.page_count";
+	private static final long EXPECTED_PAGE_COUNT = 23L;
 	private final static Document DUMMY_TEMPLATE_DOC = MockDocumentFactory.GLOBAL_DUMMY_DOCUMENT;
 	private final static String DUMMY_TEMPLATE_STR = "TemplateString";
 	private final static Document DUMMY_DATA = MockDocumentFactory.GLOBAL_DUMMY_DOCUMENT;
@@ -176,7 +178,8 @@ class RestServicesOutputServiceAdapterTest {
 	@ParameterizedTest
 	@EnumSource(HappyPaths.class)
 	void testGeneratePDFOutput_HappyPath(HappyPaths codePath) throws Exception {
-		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
+		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes())
+																   .setPageCount(EXPECTED_PAGE_COUNT);
 
 		setUpMocks(responseData);
 		
@@ -261,6 +264,7 @@ class RestServicesOutputServiceAdapterTest {
 		// Make sure the response is correct.
 		assertArrayEquals(responseData.getInlineData(), pdfResult.getInlineData());
 		assertEquals(APPLICATION_PDF, MediaType.valueOf(pdfResult.getContentType()));
+		assertEquals(EXPECTED_PAGE_COUNT, pdfResult.getPageCount().get());
 	}
 	
 	private void setUpMocks(Document responseData) throws IOException {
@@ -275,6 +279,7 @@ class RestServicesOutputServiceAdapterTest {
 		when(response.hasEntity()).thenReturn(true);
 		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
 		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn("application/pdf");
+		when(response.getHeaderString(PAGE_COUNT_HEADER)).thenReturn(Long.toString(EXPECTED_PAGE_COUNT));
 	}
 	
 	@ParameterizedTest

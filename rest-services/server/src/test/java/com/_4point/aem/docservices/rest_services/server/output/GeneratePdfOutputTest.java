@@ -43,6 +43,8 @@ import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 @ExtendWith(AemContextExtension.class)
 @ExtendWith(MockitoExtension.class)
 class GeneratePdfOutputTest {
+	private static final long EXPECTED_PAGE_COUNT = 23L;
+	private static final String PAGE_COUNT_HEADER = "com._4point.aem.rest_services.page_count";
 	private static final String APPLICATION_XML = "application/xml";
 	private static final String APPLICATION_PDF = "application/pdf";
 	private static final String APPLICATION_XDP = "application/vnd.adobe.xdp+xml";
@@ -97,6 +99,7 @@ class GeneratePdfOutputTest {
 		assertEquals(SlingHttpServletResponse.SC_OK, response.getStatus());
 		assertEquals(APPLICATION_PDF, response.getContentType());
 		assertEquals(resultData, response.getOutputAsString());
+		assertEquals(Long.toString(EXPECTED_PAGE_COUNT), response.getHeader(PAGE_COUNT_HEADER));
 		// assertEquals(resultDataBytes.length, response.getContentLength());	// Commented out due to FluentForms Issue #15
 	
 		// Validate that the correct parameters were passed in to renderPdf
@@ -484,6 +487,7 @@ class GeneratePdfOutputTest {
 	public MockTraditionalOutputService mockGeneratePdf(byte[] resultDataBytes) throws NoSuchFieldException {
 		Document renderPdfResult = mockDocumentFactory.create(resultDataBytes);
 		renderPdfResult.setContentType(APPLICATION_PDF);
+		renderPdfResult.setPageCount(EXPECTED_PAGE_COUNT);
 		MockTraditionalOutputService generatePdfMock = MockTraditionalOutputService.createDocumentMock(renderPdfResult);
 		junitx.util.PrivateAccessor.setField(underTest, "outputServiceFactory", (Supplier<TraditionalOutputService>)()->(TraditionalOutputService)generatePdfMock);
 		return generatePdfMock;
