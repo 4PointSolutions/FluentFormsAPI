@@ -8,7 +8,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
@@ -26,12 +28,19 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 	
 	private static final Document EMPTY_DOCUMENT = new EmptyDocumentImpl();
 	
+	/**
+	 * Returns a singleton instance of this SimpleDocumentFactoryImpl.
+	 * 
+	 * @return - singleton instance of SimpleDocumentFactoryImpl
+	 */
 	public static DocumentFactory getFactory() {
 		return INSTANCE;
 	}
 
 	/* (non-Javadoc)
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(byte[])
+	 * 
+	 * It holds a defensive copy of the array in memory.
 	 */
 	@Override
 	public Document create(byte[] data) {
@@ -42,6 +51,7 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.io.File, boolean)
 	 */
 	@Override
+	@Deprecated
 	public Document create(File file, boolean ownFile) {
 		return new SimpleDocumentImpl(file, ownFile);
 	}
@@ -50,6 +60,7 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 	 * @see com._4point.aem.fluentforms.api.DocumentFactory#create(java.io.File)
 	 */
 	@Override
+	@Deprecated
 	public Document create(File file) {
 		return new SimpleDocumentImpl(file);
 	}
@@ -127,20 +138,19 @@ public enum SimpleDocumentFactoryImpl implements DocumentFactory {
 
 		private SimpleDocumentImpl(File file, boolean ownFile) {
 			// We ignore the ownFile parameter because we don't care.  We are going to just read it in anyway.
-			try {
-				this.inlineData = readToByteArray(new FileInputStream(file));
-			} catch (FileNotFoundException e) {
-				// Convert to runtime exception.
-				throw new IllegalArgumentException("File not found. (" + file.toString() + ").", e);
-			}
+			this(file.toPath());
 		}
 
 		private SimpleDocumentImpl(File file) {
+			this(file.toPath());
+		}
+
+		private SimpleDocumentImpl(Path path) {
 			try {
-				this.inlineData = readToByteArray(new FileInputStream(file));
-			} catch (FileNotFoundException e) {
+				this.inlineData = Files.readAllBytes(path);
+			} catch (IOException e) {
 				// Convert to runtime exception.
-				throw new IllegalArgumentException("File not found. (" + file.toString() + ").", e);
+				throw new UncheckedIOException("Error reading file (" + path.toString() + ").", e);
 			}
 		}
 
