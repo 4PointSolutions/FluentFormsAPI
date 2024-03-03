@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com._4point.aem.docservices</groupId>
+		<artifactId>rest-services</artifactId>
+		<version>0.0.3-SNAPSHOT</version>
+	</parent>
+	<groupId>com._4point.aem.docservices.rest-services</groupId>
+	<artifactId>rest-services.jersey-client</artifactId>
+	<name>Jersey REST Client for FluentForms REST Services</name>
+	<description>This is a pluggable REST client based on the Jersey libraries</description>
+
+	<properties>
+		<!--  We're not tied to the AEM version, so we can use something relatively recent. -->
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
+	</properties>
+
+	<dependencies>
+		<!-- Jersey Dependencies -->
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-multipart</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+		</dependency>
+		<!-- Fluent Forms Dependency -->
+		<dependency>
+			<groupId>com._4point.aem.docservices</groupId>
+			<artifactId>rest-services.client</artifactId>
+		</dependency>
+		<!-- Testing Dependencies -->
+	</dependencies>
+</project>

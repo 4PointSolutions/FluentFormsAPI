@@ -32,7 +32,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.StatusType;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -263,7 +262,7 @@ class RestServicesDocAssemblerServiceAdapterTest {
 	
 	private static void validateFormFieldDoesNotExist(FormDataMultiPart postedData, String fieldName) {
 		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
-		assertTrue(CollectionUtils.isEmpty(pdfFields), "Expected field '" + fieldName + "' to not exist, but it did.");
+		assertTrue(pdfFields.isEmpty(), "Expected field '" + fieldName + "' to not exist, but it did.");
 	}
 
 	private enum ErrorResponseScenario {

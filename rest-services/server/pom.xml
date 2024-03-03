@@ -36,7 +36,9 @@
 	|   mvn clean install -P adobe-public,autoInstallBundle
 	|
 	 -->
-    
+  	<properties>
+		  
+	</properties>  
     <build>
         <plugins>
             <plugin>
@@ -107,6 +109,61 @@
         </plugins>
     </build>
 
+	<profiles>
+		<!-- Development profile: install only the bundle -->
+		<profile>
+			<id>autoInstallBundle</id>
+			<!-- To enable this feature for a bundle, the maven-sling-plugin (without 
+				configuration) needs to be included: <plugin> <groupId>org.apache.sling</groupId> 
+				<artifactId>maven-sling-plugin</artifactId> </plugin> -->
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.sling</groupId>
+							<artifactId>maven-sling-plugin</artifactId>
+							<executions>
+								<execution>
+									<id>install-bundle</id>
+									<goals>
+										<goal>install</goal>
+									</goals>
+								</execution>
+							</executions>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.wcm.maven</groupId>
+				<artifactId>io.wcm.maven.aem-dependencies</artifactId>
+				<version>6.5.6.0002</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.wcm</groupId>
+				<artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
+				<version>${wcm.mocks.version}</version>
+                <exclusions>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-library</artifactId>
+					</exclusion>
+				</exclusions>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+ 
     <dependencies>
         <!-- OSGi Dependencies -->
         <dependency>

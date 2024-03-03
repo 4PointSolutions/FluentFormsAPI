@@ -34,10 +34,10 @@
 	| 
 	 -->
 	<properties>
-		<!--  AEM may be running in Java 8, so compile for that until it's no longer supported. -->
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-        <maven.compiler.release>11</maven.compiler.release>
+		<!--  We're not tied to the AEM version, so we can use something relatively recent. -->
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
 	</properties>
 
     <build>
@@ -112,7 +112,7 @@
 
     <dependencies>
         <!-- OSGi Dependencies -->
-        <dependency>
+<!--        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.core</artifactId>
         </dependency>
@@ -120,12 +120,12 @@
             <groupId>org.osgi</groupId>
             <artifactId>osgi.cmpn</artifactId>
         </dependency>
-        <!-- Other Dependencies -->
-        <dependency>
+-->        <!-- Other Dependencies -->
+<!--        <dependency>
             <groupId>io.wcm</groupId>
             <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
         </dependency>
-        <dependency>
+-->        <dependency>
             <groupId>uk.org.lidalia</groupId>
             <artifactId>slf4j-test</artifactId>
         </dependency>

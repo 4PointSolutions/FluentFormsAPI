@@ -29,6 +29,7 @@
 	<modules>
 		<module>server</module>
 		<module>client</module>
+		<module>jersey-client</module>
 	</modules>
 
 	<properties>
@@ -99,6 +100,7 @@
         <jcabi-xml-version>0.27.2</jcabi-xml-version>
         <xml-unit-version>2.9.1</xml-unit-version>
         <xerces-version>2.12.2</xerces-version>
+        <wiremock.version>3.4.2</wiremock.version>
 	</properties>
 
 	<build>
@@ -389,162 +391,6 @@
 				<module>it.tests</module>
 			</modules>
 		</profile>
-		<!-- ====================================================== -->
-		<!-- A D O B E P U B L I C P R O F I L E -->
-		<!-- ====================================================== -->
-		<profile>
-			<id>adobe-public</id>
-
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-
-			<properties>
-				<releaseRepository-Id>adobe-public-releases</releaseRepository-Id>
-				<releaseRepository-Name>Adobe Public Releases</releaseRepository-Name>
-				<releaseRepository-URL>https://repo.adobe.com/nexus/content/groups/public</releaseRepository-URL>
-			</properties>
-
-			<repositories>
-				<repository>
-					<id>adobe-public-releases</id>
-					<name>Adobe Public Repository</name>
-					<url>https://repo.adobe.com/nexus/content/groups/public</url>
-					<releases>
-						<enabled>true</enabled>
-						<updatePolicy>never</updatePolicy>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-			</repositories>
-
-			<pluginRepositories>
-				<pluginRepository>
-					<id>adobe-public-releases</id>
-					<name>Adobe Public Repository</name>
-					<url>https://repo.adobe.com/nexus/content/groups/public</url>
-					<releases>
-						<enabled>true</enabled>
-						<updatePolicy>never</updatePolicy>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-			</pluginRepositories>
-		</profile>
-
-		<!-- Development profile: install only the bundle -->
-		<profile>
-			<id>autoInstallBundle</id>
-			<!-- To enable this feature for a bundle, the maven-sling-plugin (without 
-				configuration) needs to be included: <plugin> <groupId>org.apache.sling</groupId> 
-				<artifactId>maven-sling-plugin</artifactId> </plugin> -->
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.sling</groupId>
-							<artifactId>maven-sling-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>install-bundle</id>
-									<goals>
-										<goal>install</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-
-		<profile>
-			<id>autoInstallPackage</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.jackrabbit</groupId>
-							<artifactId>filevault-package-maven-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>create-package</id>
-									<goals>
-										<goal>package</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-						<plugin>
-							<groupId>com.day.jcr.vault</groupId>
-							<artifactId>content-package-maven-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>install-package</id>
-									<goals>
-										<goal>install</goal>
-									</goals>
-									<configuration>
-										<targetURL>http://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-
-		<profile>
-			<id>autoInstallPackagePublish</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.jackrabbit</groupId>
-							<artifactId>filevault-package-maven-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>create-package</id>
-									<goals>
-										<goal>package</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-						<plugin>
-							<groupId>com.day.jcr.vault</groupId>
-							<artifactId>content-package-maven-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>install-package-publish</id>
-									<goals>
-										<goal>install</goal>
-									</goals>
-									<configuration>
-										<targetURL>http://${aem.publish.host}:${aem.publish.port}/crx/packmgr/service.jsp</targetURL>
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-
 	</profiles>
 
 	<!-- ====================================================================== -->
@@ -552,25 +398,6 @@
 	<!-- ====================================================================== -->
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>io.wcm.maven</groupId>
-				<artifactId>io.wcm.maven.aem-dependencies</artifactId>
-				<version>6.5.6.0002</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>io.wcm</groupId>
-				<artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
-				<version>${wcm.mocks.version}</version>
-                <exclusions>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>hamcrest-library</artifactId>
-					</exclusion>
-				</exclusions>
-				<scope>test</scope>
-			</dependency>
 			<dependency>
 				<groupId>uk.org.lidalia</groupId>
 				<artifactId>slf4j-test</artifactId>
@@ -725,6 +552,12 @@
 			<groupId>org.pitest</groupId>
 			<artifactId>pitest-junit5-plugin</artifactId>
 			<version>${pitest.junit5.maven.plugin.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.wiremock</groupId>
+		    <artifactId>wiremock</artifactId>
+		    <version>${wiremock.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
