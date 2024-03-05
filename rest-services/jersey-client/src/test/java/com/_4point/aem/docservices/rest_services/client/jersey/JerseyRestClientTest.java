@@ -2,8 +2,12 @@ package com._4point.aem.docservices.rest_services.client.jersey;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.io.InputStream;
 import java.util.Optional;
+import java.io.ByteArrayInputStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +23,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 @WireMockTest
 class JerseyRestClientTest {
+	private static final String TEXT_HTML = "text/html";
 	private static final String FIELD1_NAME = "field1";
 	private static final String FIELD1_DATA = "field1 data";
 	private static final String FIELD2_NAME = "field2";
@@ -28,12 +33,14 @@ class JerseyRestClientTest {
 	private static final String MOCK_PDF_BYTES = "Mock PDF Bytes";
 	private static final String APPLICATION_PDF = "application/pdf";
 	private static final String ENDPOINT = "/services/OutputService/GeneratePdfOutput";
+	private static final String ERROR_BODY_TEXT = "Error Body";
 
+	private AemConfig aemConfig;
 	private RestClient underTest;
 	
 	@BeforeEach
 	void setup(WireMockRuntimeInfo wmRuntimeInfo) {
-		AemConfig aemConfig = AemConfig.builder()
+		aemConfig = AemConfig.builder()
 				   .port(wmRuntimeInfo.getHttpPort())
 				   .build();
 		
@@ -96,9 +103,194 @@ class JerseyRestClientTest {
 				);
 	}
 
+	@DisplayName("PostToServer with 1 part using byte array data")
+	@Test
+	void testPostToServer_DocumentResponseFromByteArray() throws Exception {
+		// Given
+		stubFor(post(ENDPOINT).willReturn(okForContentType(APPLICATION_PDF, MOCK_PDF_BYTES)
+											.withHeader(SAMPLE_HEADER, SAMPLE_HEADER_VALUE)
+										  ));
+	
+		// When
+		Response response = performPostToServer(FIELD1_NAME, FIELD1_DATA.getBytes(), APPLICATION_PDF).orElseThrow();
+
+		// Then
+		assertEquals(APPLICATION_PDF, response.contentType());
+		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
+		assertEquals(SAMPLE_HEADER_VALUE, response.retrieveHeader(SAMPLE_HEADER).orElseThrow());
+		verify(postRequestedFor(urlEqualTo(ENDPOINT))
+				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA))
+																.withHeader("content-type", equalTo(APPLICATION_PDF))
+										)
+				);
+	}
+
+	@DisplayName("PostToServer with 1 part using InputStream data")
+	@Test
+	void testPostToServer_DocumentResponseFromInputStream() throws Exception {
+		// Given
+		stubFor(post(ENDPOINT).willReturn(okForContentType(APPLICATION_PDF, MOCK_PDF_BYTES)
+											.withHeader(SAMPLE_HEADER, SAMPLE_HEADER_VALUE)
+										  ));
+	
+		// When
+		Response response = performPostToServer(FIELD1_NAME, new ByteArrayInputStream(FIELD1_DATA.getBytes()), TEXT_HTML).orElseThrow();
+
+		// Then
+		assertEquals(APPLICATION_PDF, response.contentType());
+		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
+		assertEquals(SAMPLE_HEADER_VALUE, response.retrieveHeader(SAMPLE_HEADER).orElseThrow());
+		verify(postRequestedFor(urlEqualTo(ENDPOINT))
+				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA))
+																.withHeader("content-type", equalTo(TEXT_HTML))
+										)
+				);
+	}
+
+	@DisplayName("When AEM returns 500 Internal Server error with no body, postToServer should throw RestClientException.")
+	@Test
+	void testPostToServer_AemReturns500NoBody() throws Exception {
+		// Given
+		stubFor(post(ENDPOINT).willReturn(serverError()));
+
+		// When
+		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+
+		// Then
+		assertThat(msg, allOf(
+				containsString("Call to server failed"),
+				containsString("500"),
+				containsString("Server Error"),
+				not(containsString(ERROR_BODY_TEXT))
+				));
+	}
+
+	@DisplayName("When AEM returns 500 Internal Server error with body, postToServer should throw RestClientException containing body.")
+	@Test
+	void testPostToServer_AemReturns500WithBody() throws Exception {
+		// Given
+		stubFor(post(ENDPOINT).willReturn(serverError().withBody(ERROR_BODY_TEXT.getBytes())));
+
+		// When
+		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+
+		// Then
+		assertThat(msg, allOf(
+				containsString("Call to server failed"),
+				containsString("500"),
+				containsString("Server Error"),
+				containsString(ERROR_BODY_TEXT)
+				));
+	}
+
+	@DisplayName("When AEM returns 200 with no entity, postToServer should throw RestClientException.")
+	@Test
+	void testPostToServer_AemReturnsNoEntity() throws Exception {
+		// Given
+		stubFor(post(ENDPOINT).willReturn(ok()));
+
+		// When
+		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		
+		// Then
+		assertThat(msg, allOf(
+				containsString("Call to server succeeded"),
+				containsString("server failed to return content")
+				));
+
+	}
+
+	@DisplayName("When AEM returns incompatible content type, postToServer should throw RestClientException.")
+	@Test
+	void testPostToServer_AemReturnsWrongContent() throws Exception {
+		// Given
+		stubFor(post(ENDPOINT).willReturn(okForContentType(TEXT_HTML, MOCK_PDF_BYTES)));
+
+		// When
+		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		
+		// Then
+		assertThat(msg, allOf(
+				containsString("Response from AEM server was not of expected type"),
+				containsString(APPLICATION_PDF),
+				containsString(TEXT_HTML)
+				));
+
+	}
+	
+	@DisplayName("When AEM returns no content type, postToServer should throw RestClientException.")
+	@Test
+	void testPostToServer_AemReturnsNoContent() throws Exception {
+		// Given
+		stubFor(post(ENDPOINT).willReturn(ok(MOCK_PDF_BYTES)));
+
+		// When
+		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		
+		// Then
+		assertThat(msg, allOf(
+				containsString("Response from AEM server was not of expected type"),
+				containsString(APPLICATION_PDF),
+				containsString("null")
+				));
+
+	}
+	
+	@DisplayName("RestClient must be able to handle multile endpoints.")
+	@Test
+	void testMultipleEndpoints() throws Exception {
+		String endPoint1 = "/services/AssemberService/GenerateHtml";
+		String mockHtmlBytes = "Mock HTML Content";
+		String endPoint2 = "/services/FormsService/GeneratePdfForm";
+		String mockPdfBytes = "Mock PDF Content";
+		// Given
+		stubFor(post(endPoint1).willReturn(okForContentType(TEXT_HTML, mockHtmlBytes)));
+		stubFor(post(endPoint2).willReturn(okForContentType(APPLICATION_PDF, mockPdfBytes)));
+		var client1 = new JerseyRestClient(aemConfig, endPoint1);
+		var client2 = new JerseyRestClient(aemConfig, endPoint2);
+
+		// When
+		Builder builder1 = client1.multipartPayloadBuilder()
+				   				 .add(FIELD1_NAME, FIELD1_DATA);
+		Builder builder2 = client2.multipartPayloadBuilder()
+				   				 .add(FIELD2_NAME, FIELD2_DATA);
+
+		try (MultipartPayload payload1 = builder1.build(); MultipartPayload payload2 = builder2.build()) {
+			var response1 = payload1.postToServer(TEXT_HTML).orElseThrow();
+			var response2 = payload2.postToServer(APPLICATION_PDF).orElseThrow();
+		
+			// Then
+			assertEquals(TEXT_HTML, response1.contentType());
+			assertEquals(mockHtmlBytes, new String(response1.data().readAllBytes()));
+			verify(postRequestedFor(urlEqualTo(endPoint1))
+					.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)))
+					);
+
+			assertEquals(APPLICATION_PDF, response2.contentType());
+			assertEquals(mockPdfBytes, new String(response2.data().readAllBytes()));
+			verify(postRequestedFor(urlEqualTo(endPoint2))
+					.withAllRequestBodyParts(aMultipart(FIELD2_NAME).withBody(equalTo(FIELD2_DATA)))
+					);
+		}
+
+	}
+	
+	
+	
 	// TODO:  Test that instantiates multiple JerseyRestClients and calls each to make sure that:
 	// a) Lazy initialization of client works
 	// b) Calling configureClient on the same client multiple times is OK.
+	
 	
 	private Optional<Response> performPostToServer(String...strings) throws RestClientException, Exception {
 		if (strings.length % 2 != 0) { 
@@ -114,4 +306,23 @@ class JerseyRestClientTest {
 			return payload.postToServer(APPLICATION_PDF);
 		}
 	}
+
+	private Optional<Response> performPostToServer(String fieldName, byte[] data, String contentType) throws RestClientException, Exception {
+		Builder builder = underTest.multipartPayloadBuilder()
+								   .add(fieldName, data, contentType);
+		
+		try (MultipartPayload payload = builder.build()) {
+			return payload.postToServer(APPLICATION_PDF);
+		}
+	}
+	
+	private Optional<Response> performPostToServer(String fieldName, InputStream data, String contentType) throws RestClientException, Exception {
+		Builder builder = underTest.multipartPayloadBuilder()
+								   .add(fieldName, data, contentType);
+		
+		try (MultipartPayload payload = builder.build()) {
+			return payload.postToServer(APPLICATION_PDF);
+		}
+	}
+	
 }

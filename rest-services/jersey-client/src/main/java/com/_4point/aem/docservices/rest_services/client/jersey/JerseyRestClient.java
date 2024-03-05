@@ -1,6 +1,5 @@
 package com._4point.aem.docservices.rest_services.client.jersey;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +26,16 @@ import jakarta.ws.rs.core.Response.StatusType;
 public class JerseyRestClient implements RestClient {
 	private final WebTarget target;
 
+	/**
+	 * Constructor for JerseyRestClient if customization of the Jersey Client object is required.
+	 * 
+	 * If the Jersey Client object does not need to be customized, 
+	 * use JerseyRestClient(AemConfig aemConfig, String target) instead.
+	 * 
+	 * @param aemConfig AEM configuration parameters
+	 * @param target REST endpoint to be called.
+	 * @param client Jersey Client object
+	 */
 	public JerseyRestClient(AemConfig aemConfig, String target, Client client) {
 		this.target = configureClient(client,aemConfig)
 						.target("http" + (aemConfig.useSsl() ? "s" : "") + "://" + aemConfig.servername() + ":" + Integer.toString(aemConfig.port()))
@@ -34,6 +43,12 @@ public class JerseyRestClient implements RestClient {
 						;
 	}
 
+	/**
+	 * Constructor for JerseyRestClient
+	 * 
+	 * @param aemConfig AEM configuration parameters
+	 * @param target REST endpoint to be called.
+	 */
 	public JerseyRestClient(AemConfig aemConfig, String target) {
 		this(aemConfig, target, getClient());
 	}
@@ -85,7 +100,7 @@ public class JerseyRestClient implements RestClient {
 					throw new RestClientException(message);
 				}
 				if (!response.hasEntity()) {
-					throw new RestClientException("Call to server succeeded but server failed to return document.  This should never happen.");
+					throw new RestClientException("Call to server succeeded but server failed to return content.  This should never happen.");
 				}
 
 				String responseContentType = response.getHeaderString(HttpHeaders.CONTENT_TYPE);
@@ -141,6 +156,9 @@ public class JerseyRestClient implements RestClient {
 		
 	}
 	
+	/**
+	 * MultipartPayload.Builder implementation code.
+	 */
 	private final class JerseyMultipartPayloadBuilder implements MultipartPayload.Builder {
 		private final FormDataMultiPart multipart = new FormDataMultiPart();
 
