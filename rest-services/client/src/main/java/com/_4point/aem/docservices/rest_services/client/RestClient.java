@@ -1,16 +1,24 @@
 package com._4point.aem.docservices.rest_services.client;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.fluentforms.api.Document;
 
 public interface RestClient {
+	public record ContentType(String contentType) {
+		public static final ContentType APPLICATION_PDF = ContentType.of("application/pdf");
+		public static final ContentType APPLICATION_XDP = ContentType.of("application/vnd.adobe.xdp+xml");
+		public static final ContentType TEXT_HTML = ContentType.of("text/html");
+		
+		public static ContentType of(String contentType) { return new ContentType(contentType); }
+	};
+	
+	/**
+	 * Payload interface is the payload to be sent to AEM.  
+	 */
 	public interface Payload {
 		
 		/**
@@ -25,7 +33,7 @@ public interface RestClient {
 		 * @return
 		 * @throws RestClientException
 		 */
-		public Optional<Response> postToServer(String acceptContentType) throws RestClientException;
+		public Optional<Response> postToServer(ContentType acceptContentType) throws RestClientException;
 		
 	}
 	public interface MultipartPayload extends Payload, AutoCloseable {
@@ -61,7 +69,7 @@ public interface RestClient {
 		 * 
 		 * @return String representation of the content type.
 		 */
-		public String contentType();
+		public ContentType contentType();
 		/**
 		 * Retrieves the InputStream for the response.  This inputStream can only be read once, so it should
 		 * only be retrieved once.

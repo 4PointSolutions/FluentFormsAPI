@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import com._4point.aem.docservices.rest_services.client.RestClient;
+import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload.Builder;
 import com._4point.aem.docservices.rest_services.client.RestClient.Response;
@@ -74,7 +75,7 @@ class JerseyRestClientTest {
 		Response response = performPostToServer(FIELD1_NAME, FIELD1_DATA, FIELD2_NAME, FIELD2_DATA, "foo", "BAR").orElseThrow();
 
 		// Then
-		assertEquals(APPLICATION_PDF, response.contentType());
+		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
 		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
 		assertTrue(response.retrieveHeader(SAMPLE_HEADER).isEmpty());
 		verify(postRequestedFor(urlEqualTo(ENDPOINT))
@@ -95,7 +96,7 @@ class JerseyRestClientTest {
 		Response response = performPostToServer(FIELD1_NAME, FIELD1_DATA).orElseThrow();
 
 		// Then
-		assertEquals(APPLICATION_PDF, response.contentType());
+		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
 		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
 		assertEquals(SAMPLE_HEADER_VALUE, response.retrieveHeader(SAMPLE_HEADER).orElseThrow());
 		verify(postRequestedFor(urlEqualTo(ENDPOINT))
@@ -115,7 +116,7 @@ class JerseyRestClientTest {
 		Response response = performPostToServer(FIELD1_NAME, FIELD1_DATA.getBytes(), APPLICATION_PDF).orElseThrow();
 
 		// Then
-		assertEquals(APPLICATION_PDF, response.contentType());
+		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
 		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
 		assertEquals(SAMPLE_HEADER_VALUE, response.retrieveHeader(SAMPLE_HEADER).orElseThrow());
 		verify(postRequestedFor(urlEqualTo(ENDPOINT))
@@ -137,7 +138,7 @@ class JerseyRestClientTest {
 		Response response = performPostToServer(FIELD1_NAME, new ByteArrayInputStream(FIELD1_DATA.getBytes()), TEXT_HTML).orElseThrow();
 
 		// Then
-		assertEquals(APPLICATION_PDF, response.contentType());
+		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
 		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
 		assertEquals(SAMPLE_HEADER_VALUE, response.retrieveHeader(SAMPLE_HEADER).orElseThrow());
 		verify(postRequestedFor(urlEqualTo(ENDPOINT))
@@ -266,17 +267,17 @@ class JerseyRestClientTest {
 				   				 .add(FIELD2_NAME, FIELD2_DATA);
 
 		try (MultipartPayload payload1 = builder1.build(); MultipartPayload payload2 = builder2.build()) {
-			var response1 = payload1.postToServer(TEXT_HTML).orElseThrow();
-			var response2 = payload2.postToServer(APPLICATION_PDF).orElseThrow();
+			var response1 = payload1.postToServer(ContentType.TEXT_HTML).orElseThrow();
+			var response2 = payload2.postToServer(ContentType.APPLICATION_PDF).orElseThrow();
 		
 			// Then
-			assertEquals(TEXT_HTML, response1.contentType());
+			assertEquals(ContentType.TEXT_HTML, response1.contentType());
 			assertEquals(mockHtmlBytes, new String(response1.data().readAllBytes()));
 			verify(postRequestedFor(urlEqualTo(endPoint1))
 					.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)))
 					);
 
-			assertEquals(APPLICATION_PDF, response2.contentType());
+			assertEquals(ContentType.APPLICATION_PDF, response2.contentType());
 			assertEquals(mockPdfBytes, new String(response2.data().readAllBytes()));
 			verify(postRequestedFor(urlEqualTo(endPoint2))
 					.withAllRequestBodyParts(aMultipart(FIELD2_NAME).withBody(equalTo(FIELD2_DATA)))
@@ -303,7 +304,7 @@ class JerseyRestClientTest {
 		}
 		
 		try (MultipartPayload payload = builder.build()) {
-			return payload.postToServer(APPLICATION_PDF);
+			return payload.postToServer(ContentType.APPLICATION_PDF);
 		}
 	}
 
@@ -312,7 +313,7 @@ class JerseyRestClientTest {
 								   .add(fieldName, data, contentType);
 		
 		try (MultipartPayload payload = builder.build()) {
-			return payload.postToServer(APPLICATION_PDF);
+			return payload.postToServer(ContentType.APPLICATION_PDF);
 		}
 	}
 	
@@ -321,7 +322,7 @@ class JerseyRestClientTest {
 								   .add(fieldName, data, contentType);
 		
 		try (MultipartPayload payload = builder.build()) {
-			return payload.postToServer(APPLICATION_PDF);
+			return payload.postToServer(ContentType.APPLICATION_PDF);
 		}
 	}
 	

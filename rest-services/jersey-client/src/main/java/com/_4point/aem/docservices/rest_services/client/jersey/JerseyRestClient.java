@@ -71,8 +71,8 @@ public class JerseyRestClient implements RestClient {
 		}
 
 		@Override
-		public String contentType() {
-			return response.getMediaType().toString();
+		public ContentType contentType() {
+			return ContentType.of(response.getMediaType().toString());
 		}
 
 		@Override
@@ -134,8 +134,8 @@ public class JerseyRestClient implements RestClient {
 		}
 
 		@Override
-		public Optional<Response> postToServer(String acceptContentType) throws RestClientException {
-			MediaType acceptMediaType = MediaType.valueOf(acceptContentType);
+		public Optional<Response> postToServer(ContentType acceptContentType) throws RestClientException {
+			MediaType acceptMediaType = MediaType.valueOf(acceptContentType.contentType());
 			jakarta.ws.rs.client.Invocation.Builder invokeBuilder = target.request().accept(acceptMediaType);
 //			if (this.correlationIdFn != null) {
 //				invokeBuilder.header(CORRELATION_ID_HTTP_HDR, this.correlationIdFn.get());
