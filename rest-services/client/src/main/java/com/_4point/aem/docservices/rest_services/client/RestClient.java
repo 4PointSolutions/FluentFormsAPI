@@ -1,5 +1,6 @@
 package com._4point.aem.docservices.rest_services.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -8,10 +9,22 @@ import java.util.Optional;
 import com._4point.aem.fluentforms.api.Document;
 
 public interface RestClient {
+	
+	/**
+	 * Returns String representing the final endpoint target location.
+	 * 
+	 * @return final endpoint target
+	 */
+	public String target();
+	
+	/**
+	 * Represents a content type / mime type used to identify the content of a response.
+	 */
 	public record ContentType(String contentType) {
 		public static final ContentType APPLICATION_PDF = ContentType.of("application/pdf");
 		public static final ContentType APPLICATION_XDP = ContentType.of("application/vnd.adobe.xdp+xml");
 		public static final ContentType TEXT_HTML = ContentType.of("text/html");
+		public static final ContentType APPLICATION_OCTET_STREAM = ContentType.of("application/octet-stream");
 		
 		public static ContentType of(String contentType) { return new ContentType(contentType); }
 	};
@@ -36,15 +49,15 @@ public interface RestClient {
 		public Optional<Response> postToServer(ContentType acceptContentType) throws RestClientException;
 		
 	}
-	public interface MultipartPayload extends Payload, AutoCloseable {
+	public interface MultipartPayload extends Payload, Closeable {
 		
 		public interface Builder {
 			Builder add(String fieldName, String fieldData);
-			Builder add(String fieldName, byte[] fieldData, String contentType);
-			Builder add(String fieldName, InputStream fieldData, String contentType);
+			Builder add(String fieldName, byte[] fieldData, ContentType contentType);
+			Builder add(String fieldName, InputStream fieldData, ContentType contentType);
 			default Builder add(String fieldName, Document document) {
 				try {
-					return add(fieldName, document.getInputStream(), document.getContentType());
+					return add(fieldName, document.getInputStream(), ContentType.of(document.getContentType()));
 				} catch (IOException e) {
 					throw new UncheckedIOException(e);
 				}
