@@ -24,7 +24,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 @WireMockTest
 class JerseyRestClientTest {
-	private static final String TEXT_HTML = "text/html";
 	private static final String FIELD1_NAME = "field1";
 	private static final String FIELD1_DATA = "field1 data";
 	private static final String FIELD2_NAME = "field2";
@@ -32,7 +31,6 @@ class JerseyRestClientTest {
 	private static final String SAMPLE_HEADER_VALUE = "sample_header_value";
 	private static final String SAMPLE_HEADER = "sample_header";
 	private static final String MOCK_PDF_BYTES = "Mock PDF Bytes";
-	private static final String APPLICATION_PDF = "application/pdf";
 	private static final String ENDPOINT = "/services/OutputService/GeneratePdfOutput";
 	private static final String ERROR_BODY_TEXT = "Error Body";
 
@@ -69,7 +67,7 @@ class JerseyRestClientTest {
 	@Test
 	void testPostToServer_DocumentResponseNoHeader() throws Exception {
 		// Given
-		stubFor(post(ENDPOINT).willReturn(okForContentType(APPLICATION_PDF, MOCK_PDF_BYTES)));
+		stubFor(post(ENDPOINT).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)));
 		
 		// When
 		Response response = performPostToServer(FIELD1_NAME, FIELD1_DATA, FIELD2_NAME, FIELD2_DATA, "foo", "BAR").orElseThrow();
@@ -88,7 +86,7 @@ class JerseyRestClientTest {
 	@Test
 	void testPostToServer_DocumentResponseWithHeader() throws Exception {
 		// Given
-		stubFor(post(ENDPOINT).willReturn(okForContentType(APPLICATION_PDF, MOCK_PDF_BYTES)
+		stubFor(post(ENDPOINT).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)
 											.withHeader(SAMPLE_HEADER, SAMPLE_HEADER_VALUE)
 										  ));
 	
@@ -108,12 +106,12 @@ class JerseyRestClientTest {
 	@Test
 	void testPostToServer_DocumentResponseFromByteArray() throws Exception {
 		// Given
-		stubFor(post(ENDPOINT).willReturn(okForContentType(APPLICATION_PDF, MOCK_PDF_BYTES)
+		stubFor(post(ENDPOINT).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)
 											.withHeader(SAMPLE_HEADER, SAMPLE_HEADER_VALUE)
 										  ));
 	
 		// When
-		Response response = performPostToServer(FIELD1_NAME, FIELD1_DATA.getBytes(), APPLICATION_PDF).orElseThrow();
+		Response response = performPostToServer(FIELD1_NAME, FIELD1_DATA.getBytes(), ContentType.APPLICATION_PDF).orElseThrow();
 
 		// Then
 		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
@@ -121,7 +119,7 @@ class JerseyRestClientTest {
 		assertEquals(SAMPLE_HEADER_VALUE, response.retrieveHeader(SAMPLE_HEADER).orElseThrow());
 		verify(postRequestedFor(urlEqualTo(ENDPOINT))
 				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA))
-																.withHeader("content-type", equalTo(APPLICATION_PDF))
+																.withHeader("content-type", equalTo(ContentType.APPLICATION_PDF.contentType()))
 										)
 				);
 	}
@@ -130,12 +128,12 @@ class JerseyRestClientTest {
 	@Test
 	void testPostToServer_DocumentResponseFromInputStream() throws Exception {
 		// Given
-		stubFor(post(ENDPOINT).willReturn(okForContentType(APPLICATION_PDF, MOCK_PDF_BYTES)
+		stubFor(post(ENDPOINT).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)
 											.withHeader(SAMPLE_HEADER, SAMPLE_HEADER_VALUE)
 										  ));
 	
 		// When
-		Response response = performPostToServer(FIELD1_NAME, new ByteArrayInputStream(FIELD1_DATA.getBytes()), TEXT_HTML).orElseThrow();
+		Response response = performPostToServer(FIELD1_NAME, new ByteArrayInputStream(FIELD1_DATA.getBytes()), ContentType.TEXT_HTML).orElseThrow();
 
 		// Then
 		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
@@ -143,7 +141,7 @@ class JerseyRestClientTest {
 		assertEquals(SAMPLE_HEADER_VALUE, response.retrieveHeader(SAMPLE_HEADER).orElseThrow());
 		verify(postRequestedFor(urlEqualTo(ENDPOINT))
 				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA))
-																.withHeader("content-type", equalTo(TEXT_HTML))
+																.withHeader("content-type", equalTo(ContentType.TEXT_HTML.contentType()))
 										)
 				);
 	}
@@ -211,7 +209,7 @@ class JerseyRestClientTest {
 	@Test
 	void testPostToServer_AemReturnsWrongContent() throws Exception {
 		// Given
-		stubFor(post(ENDPOINT).willReturn(okForContentType(TEXT_HTML, MOCK_PDF_BYTES)));
+		stubFor(post(ENDPOINT).willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), MOCK_PDF_BYTES)));
 
 		// When
 		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
@@ -221,8 +219,8 @@ class JerseyRestClientTest {
 		// Then
 		assertThat(msg, allOf(
 				containsString("Response from AEM server was not of expected type"),
-				containsString(APPLICATION_PDF),
-				containsString(TEXT_HTML)
+				containsString(ContentType.APPLICATION_PDF.contentType()),
+				containsString(ContentType.TEXT_HTML.contentType())
 				));
 
 	}
@@ -241,7 +239,7 @@ class JerseyRestClientTest {
 		// Then
 		assertThat(msg, allOf(
 				containsString("Response from AEM server was not of expected type"),
-				containsString(APPLICATION_PDF),
+				containsString(ContentType.APPLICATION_PDF.contentType()),
 				containsString("null")
 				));
 
@@ -255,8 +253,8 @@ class JerseyRestClientTest {
 		String endPoint2 = "/services/FormsService/GeneratePdfForm";
 		String mockPdfBytes = "Mock PDF Content";
 		// Given
-		stubFor(post(endPoint1).willReturn(okForContentType(TEXT_HTML, mockHtmlBytes)));
-		stubFor(post(endPoint2).willReturn(okForContentType(APPLICATION_PDF, mockPdfBytes)));
+		stubFor(post(endPoint1).willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), mockHtmlBytes)));
+		stubFor(post(endPoint2).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), mockPdfBytes)));
 		var client1 = new JerseyRestClient(aemConfig, endPoint1);
 		var client2 = new JerseyRestClient(aemConfig, endPoint2);
 
@@ -308,7 +306,7 @@ class JerseyRestClientTest {
 		}
 	}
 
-	private Optional<Response> performPostToServer(String fieldName, byte[] data, String contentType) throws RestClientException, Exception {
+	private Optional<Response> performPostToServer(String fieldName, byte[] data, ContentType contentType) throws RestClientException, Exception {
 		Builder builder = underTest.multipartPayloadBuilder()
 								   .add(fieldName, data, contentType);
 		
@@ -317,7 +315,7 @@ class JerseyRestClientTest {
 		}
 	}
 	
-	private Optional<Response> performPostToServer(String fieldName, InputStream data, String contentType) throws RestClientException, Exception {
+	private Optional<Response> performPostToServer(String fieldName, InputStream data, ContentType contentType) throws RestClientException, Exception {
 		Builder builder = underTest.multipartPayloadBuilder()
 								   .add(fieldName, data, contentType);
 		

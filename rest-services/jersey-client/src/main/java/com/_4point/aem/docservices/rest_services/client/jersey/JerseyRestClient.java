@@ -37,8 +37,8 @@ public class JerseyRestClient implements RestClient {
 	 * @param client Jersey Client object
 	 */
 	public JerseyRestClient(AemConfig aemConfig, String target, Client client) {
-		this.target = configureClient(client,aemConfig)
-						.target("http" + (aemConfig.useSsl() ? "s" : "") + "://" + aemConfig.servername() + ":" + Integer.toString(aemConfig.port()))
+		this.target = configureClient(client,aemConfig.user(), aemConfig.password())
+						.target(aemConfig.url())
 						.path(target)
 						;
 	}
@@ -53,9 +53,17 @@ public class JerseyRestClient implements RestClient {
 		this(aemConfig, target, getClient());
 	}
 
-	private static Client configureClient(Client client, AemConfig aemConfig) {
+	private static Client configureClient(Client client, String username, String password) {
 		return client.register(MultiPartFeature.class)
-					 .register(HttpAuthenticationFeature.basic(aemConfig.user(), aemConfig.password()));
+					 .register(HttpAuthenticationFeature.basic(username, password));
+	}
+	
+	public static RestClient restClient(AemConfig aemConfig, String target) {
+		return new JerseyRestClient(aemConfig, target);
+	}
+	
+	public static RestClient restClient(AemConfig aemConfig, String target, Client client) {
+		return new JerseyRestClient(aemConfig, target, client);
 	}
 	
 	@Override
@@ -150,7 +158,7 @@ public class JerseyRestClient implements RestClient {
 		}
 
 		@Override
-		public void close() throws Exception {
+		public void close() throws IOException {
 			multipart.close();
 		}
 		
@@ -169,14 +177,14 @@ public class JerseyRestClient implements RestClient {
 		}
 
 		@Override
-		public Builder add(String fieldName, byte[] fieldData, String contentType) {
-			multipart.field(fieldName, fieldData, MediaType.valueOf(contentType));
+		public Builder add(String fieldName, byte[] fieldData, ContentType contentType) {
+			multipart.field(fieldName, fieldData, MediaType.valueOf(contentType.contentType()));
 			return this;
 		}
 
 		@Override
-		public Builder add(String fieldName, InputStream fieldData, String contentType) {
-			multipart.field(fieldName, fieldData, MediaType.valueOf(contentType));
+		public Builder add(String fieldName, InputStream fieldData, ContentType contentType) {
+			multipart.field(fieldName, fieldData, MediaType.valueOf(contentType.contentType()));
 			return this;
 		}
 		
@@ -204,5 +212,10 @@ public class JerseyRestClient implements RestClient {
 	 */
 	public static Client getClient() {
 		return ClientHolder.INSTANCE;
+	}
+
+	@Override
+	public String target() {
+		return target.toString();
 	}
 }
