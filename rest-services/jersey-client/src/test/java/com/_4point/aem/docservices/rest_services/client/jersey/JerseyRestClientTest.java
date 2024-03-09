@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Optional;
 import java.io.ByteArrayInputStream;
 
@@ -14,8 +15,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
-import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload.Builder;
 import com._4point.aem.docservices.rest_services.client.RestClient.Response;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
@@ -46,6 +47,12 @@ class JerseyRestClientTest {
 		underTest = new JerseyRestClient(aemConfig, ENDPOINT);
 	}
 
+	/*
+	 * 
+	 * PostToServer Tests
+	 * 
+	 * 
+	 */
 	@DisplayName("PostToServer with 1 part and return no content in response")
 	@Test
 	void testPostToServer_NoContentResponse() throws Exception {
@@ -259,10 +266,10 @@ class JerseyRestClientTest {
 		var client2 = new JerseyRestClient(aemConfig, endPoint2);
 
 		// When
-		Builder builder1 = client1.multipartPayloadBuilder()
-				   				 .add(FIELD1_NAME, FIELD1_DATA);
-		Builder builder2 = client2.multipartPayloadBuilder()
-				   				 .add(FIELD2_NAME, FIELD2_DATA);
+		MultipartPayload.Builder builder1 = client1.multipartPayloadBuilder()
+												   .add(FIELD1_NAME, FIELD1_DATA);
+		MultipartPayload.Builder builder2 = client2.multipartPayloadBuilder()
+				   				 				   .add(FIELD2_NAME, FIELD2_DATA);
 
 		try (MultipartPayload payload1 = builder1.build(); MultipartPayload payload2 = builder2.build()) {
 			var response1 = payload1.postToServer(ContentType.TEXT_HTML).orElseThrow();
@@ -296,7 +303,7 @@ class JerseyRestClientTest {
 			throw new IllegalArgumentException("Odd number of Strings passed in, must be even. (" + strings.length + ").");
 		}
 		
-		Builder builder = underTest.multipartPayloadBuilder();
+		MultipartPayload.Builder builder = underTest.multipartPayloadBuilder();
 		for(int i = 0; i < strings.length; i+=2) {
 			builder.add(strings[i], strings[i+1]);
 		}
@@ -307,7 +314,7 @@ class JerseyRestClientTest {
 	}
 
 	private Optional<Response> performPostToServer(String fieldName, byte[] data, ContentType contentType) throws RestClientException, Exception {
-		Builder builder = underTest.multipartPayloadBuilder()
+		MultipartPayload.Builder builder = underTest.multipartPayloadBuilder()
 								   .add(fieldName, data, contentType);
 		
 		try (MultipartPayload payload = builder.build()) {
@@ -316,7 +323,7 @@ class JerseyRestClientTest {
 	}
 	
 	private Optional<Response> performPostToServer(String fieldName, InputStream data, ContentType contentType) throws RestClientException, Exception {
-		Builder builder = underTest.multipartPayloadBuilder()
+		MultipartPayload.Builder builder = underTest.multipartPayloadBuilder()
 								   .add(fieldName, data, contentType);
 		
 		try (MultipartPayload payload = builder.build()) {
@@ -324,4 +331,182 @@ class JerseyRestClientTest {
 		}
 	}
 	
+	/*
+	 * 
+	 * GetFromServer Tests
+	 * 
+	 * 
+	 */
+	
+	@DisplayName("GetFromServer with 1 query parameter and return no content in response")
+	@Test
+	void testGetFromServer_NoContentResponse() throws Exception {
+		// Given
+		stubFor(get(urlPathEqualTo(ENDPOINT)).withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA)).willReturn(noContent()));
+		
+		// When
+		Optional<Response> result = performGetFromServer(FIELD1_NAME, FIELD1_DATA);
+
+		// Then
+		assertTrue(result.isEmpty());
+
+		verify(getRequestedFor(urlPathEqualTo(ENDPOINT))
+				.withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA))
+				);
+	}
+
+	@DisplayName("GetFromServer with 2 query parameters and return no headers in response")
+	@Test
+	void testGetFromServer_DocumentResponseNoHeader() throws Exception {
+		// Given
+		stubFor(get(urlPathEqualTo(ENDPOINT))
+				    .withQueryParams(Map.of(FIELD1_NAME, equalTo(FIELD1_DATA), FIELD2_NAME, equalTo(FIELD2_DATA)))
+				    .willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), MOCK_PDF_BYTES)));
+		
+		// When
+		Response response = performGetFromServer(FIELD1_NAME, FIELD1_DATA, FIELD2_NAME, FIELD2_DATA).orElseThrow();
+
+		// Then
+		assertEquals(ContentType.TEXT_HTML, response.contentType());
+		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
+		assertTrue(response.retrieveHeader(SAMPLE_HEADER).isEmpty());
+		verify(getRequestedFor(urlPathEqualTo(ENDPOINT))
+				.withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA))
+				.withQueryParam(FIELD2_NAME, equalTo(FIELD2_DATA))
+				);
+	}
+
+	@DisplayName("GetFromServer with no query parameters and return 1 header in response")
+	@Test
+	void testGetFromServer_DocumentResponseWithHeader() throws Exception {
+		// Given
+		stubFor(get(ENDPOINT).willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), MOCK_PDF_BYTES)
+											.withHeader(SAMPLE_HEADER, SAMPLE_HEADER_VALUE)
+										  ));
+	
+		// When
+		Response response = performGetFromServer().orElseThrow();
+
+		// Then
+		assertEquals(ContentType.TEXT_HTML, response.contentType());
+		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
+		assertEquals(SAMPLE_HEADER_VALUE, response.retrieveHeader(SAMPLE_HEADER).orElseThrow());
+		verify(getRequestedFor(urlEqualTo(ENDPOINT))
+				.withoutQueryParam(FIELD1_NAME)
+				);
+	}
+
+	@DisplayName("When AEM returns 500 Internal Server error with no body, postToServer should throw RestClientException.")
+	@Test
+	void testGetFromServer_AemReturns500NoBody() throws Exception {
+		// Given
+		stubFor(get(urlPathEqualTo(ENDPOINT)).withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA)).willReturn(serverError()));
+
+		// When
+		RestClientException ex = assertThrows(RestClientException.class,()->performGetFromServer(FIELD1_NAME, FIELD1_DATA));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+
+		// Then
+		assertThat(msg, allOf(
+				containsString("Call to server failed"),
+				containsString("500"),
+				containsString("Server Error"),
+				not(containsString(ERROR_BODY_TEXT))
+				));
+	}
+
+	@DisplayName("When AEM returns 500 Internal Server error with body, postToServer should throw RestClientException containing body.")
+	@Test
+	void testGetFromServer_AemReturns500WithBody() throws Exception {
+		// Given
+		stubFor(get(urlPathEqualTo(ENDPOINT)).withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA)).willReturn(serverError().withBody(ERROR_BODY_TEXT.getBytes())));
+
+		// When
+		RestClientException ex = assertThrows(RestClientException.class,()->performGetFromServer(FIELD1_NAME, FIELD1_DATA));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+
+		// Then
+		assertThat(msg, allOf(
+				containsString("Call to server failed"),
+				containsString("500"),
+				containsString("Server Error"),
+				containsString(ERROR_BODY_TEXT)
+				));
+	}
+
+	@DisplayName("When AEM returns 200 with no entity, postToServer should throw RestClientException.")
+	@Test
+	void testGetFromServer_AemReturnsNoEntity() throws Exception {
+		// Given
+		stubFor(get(urlPathEqualTo(ENDPOINT)).withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA)).willReturn(ok()));
+
+		// When
+		RestClientException ex = assertThrows(RestClientException.class,()->performGetFromServer(FIELD1_NAME, FIELD1_DATA));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		
+		// Then
+		assertThat(msg, allOf(
+				containsString("Call to server succeeded"),
+				containsString("server failed to return content")
+				));
+
+	}
+
+	@DisplayName("When AEM returns incompatible content type, postToServer should throw RestClientException.")
+	@Test
+	void testGetFromServer_AemReturnsWrongContent() throws Exception {
+		// Given
+		stubFor(get(urlPathEqualTo(ENDPOINT)).withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA)).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)));
+
+		// When
+		RestClientException ex = assertThrows(RestClientException.class,()->performGetFromServer(FIELD1_NAME, FIELD1_DATA));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		
+		// Then
+		assertThat(msg, allOf(
+				containsString("Response from AEM server was not of expected type"),
+				containsString(ContentType.APPLICATION_PDF.contentType()),
+				containsString(ContentType.TEXT_HTML.contentType())
+				));
+
+	}
+	
+	@DisplayName("When AEM returns no content type, postToServer should throw RestClientException.")
+	@Test
+	void testGetFromServer_AemReturnsNoContent() throws Exception {
+		// Given
+		stubFor(get(urlPathEqualTo(ENDPOINT)).withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA)).willReturn(ok(MOCK_PDF_BYTES)));
+
+		// When
+		RestClientException ex = assertThrows(RestClientException.class,()->performGetFromServer(FIELD1_NAME, FIELD1_DATA));
+		String msg = ex.getMessage();
+		assertNotNull(msg);
+		
+		// Then
+		assertThat(msg, allOf(
+				containsString("Response from AEM server was not of expected type"),
+				containsString(ContentType.TEXT_HTML.contentType()),
+				containsString("null")
+				));
+
+	}
+	
+	private Optional<Response> performGetFromServer(String...strings) throws RestClientException, Exception {
+		if (strings.length % 2 != 0) { 
+			throw new IllegalArgumentException("Odd number of Strings passed in, must be even. (" + strings.length + ").");
+		}
+		
+		GetRequest.Builder builder = underTest.getRequestBuilder();
+		for(int i = 0; i < strings.length; i+=2) {
+			builder.queryParam(strings[i], strings[i+1]);
+		}
+		
+		GetRequest payload = builder.build();
+
+		return payload.getFromServer(ContentType.TEXT_HTML);
+	}
 }

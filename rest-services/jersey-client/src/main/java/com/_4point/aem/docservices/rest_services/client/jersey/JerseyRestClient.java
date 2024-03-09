@@ -3,6 +3,9 @@ package com._4point.aem.docservices.rest_services.client.jersey;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -10,7 +13,7 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import com._4point.aem.docservices.rest_services.client.RestClient;
-import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload.Builder;
+import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 
 import jakarta.ws.rs.client.Client;
@@ -171,19 +174,19 @@ public class JerseyRestClient implements RestClient {
 		private final FormDataMultiPart multipart = new FormDataMultiPart();
 
 		@Override
-		public Builder add(String fieldName, String fieldData) {
+		public MultipartPayload.Builder add(String fieldName, String fieldData) {
 			multipart.field(fieldName, fieldData);
 			return this;
 		}
 
 		@Override
-		public Builder add(String fieldName, byte[] fieldData, ContentType contentType) {
+		public MultipartPayload.Builder add(String fieldName, byte[] fieldData, ContentType contentType) {
 			multipart.field(fieldName, fieldData, MediaType.valueOf(contentType.contentType()));
 			return this;
 		}
 
 		@Override
-		public Builder add(String fieldName, InputStream fieldData, ContentType contentType) {
+		public MultipartPayload.Builder add(String fieldName, InputStream fieldData, ContentType contentType) {
 			multipart.field(fieldName, fieldData, MediaType.valueOf(contentType.contentType()));
 			return this;
 		}
@@ -217,5 +220,50 @@ public class JerseyRestClient implements RestClient {
 	@Override
 	public String target() {
 		return target.toString();
+	}
+
+	@Override
+	public GetRequest.Builder getRequestBuilder() {
+		return new JerseyGetRequestBuilder();
+	}
+	
+	private final class JerseyGetRequestBuilder implements GetRequest.Builder {
+		private record QueryParam(String name, String value) {};
+		private List<QueryParam> queryParams = new ArrayList<>();
+
+		@Override
+		public Builder queryParam(String name, String value) {
+			queryParams.add(new QueryParam(name, value));
+			return this;
+		}
+
+		@Override
+		public GetRequest build() {
+			return new JerseyGetRequest(Collections.unmodifiableList(queryParams));
+		}
+	}
+	
+	private final class JerseyGetRequest implements GetRequest {
+		private final List<JerseyGetRequestBuilder.QueryParam> queryParams;
+		
+		JerseyGetRequest(List<JerseyGetRequestBuilder.QueryParam> queryParams) {
+			this.queryParams = queryParams;
+		}
+
+		@Override
+		public Optional<Response> getFromServer(ContentType acceptContentType) throws RestClientException {
+			MediaType acceptMediaType = MediaType.valueOf(acceptContentType.contentType());
+			WebTarget localTarget = target;
+			for(var queryParam : queryParams) {
+				localTarget = localTarget.queryParam(queryParam.name, queryParam.value);
+			}
+			jakarta.ws.rs.client.Invocation.Builder invokeBuilder = localTarget.request().accept(acceptMediaType);
+			try {
+				return JerseyResponse.processResponse(invokeBuilder.get(), acceptMediaType);
+			} catch (jakarta.ws.rs.ProcessingException e) {
+				String msg = e.getMessage();
+				throw new RestClientException("Error when posting to '" + target.getUri().toString() + "'" + (msg != null ? " (" + msg + ")" : "") + ".", e); 
+			}
+		}
 	}
 }

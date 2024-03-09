@@ -49,6 +49,10 @@ public interface RestClient {
 		public Optional<Response> postToServer(ContentType acceptContentType) throws RestClientException;
 		
 	}
+	
+	/**
+	 * Represents a payload for a multipart/form-data POST
+	 */
 	public interface MultipartPayload extends Payload, Closeable {
 		
 		public interface Builder {
@@ -72,6 +76,37 @@ public interface RestClient {
 	 * @return
 	 */
 	public MultipartPayload.Builder multipartPayloadBuilder();
+	
+	/**
+	 * Represents an HTTP GET Request
+	 */
+	public interface GetRequest {
+		
+		/**
+		 * Performs an HTTP GET Request from a server
+		 * 
+		 * @param acceptContentType - expected content type
+		 * @return Response from the server (Optional.isEMpty() if server returns "No Content"
+		 * @throws RestClientException if an error occurs
+		 */
+		public Optional<Response> getFromServer(ContentType acceptContentType) throws RestClientException;
+		
+		/**
+		 * Used for building a GET request
+		 */
+		public interface Builder {
+			Builder queryParam(String name, String value);
+			GetRequest build();
+		}
+	}
+	
+	/**
+	 * Returns a builder that is used to construct a GET request.
+	 * 
+	 * @return
+	 */
+	public GetRequest.Builder getRequestBuilder();
+	
 	
 	/**
 	 * A response from the AEM Rest Service
