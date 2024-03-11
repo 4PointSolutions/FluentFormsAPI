@@ -13,7 +13,6 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import com._4point.aem.docservices.rest_services.client.RestClient;
-import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 
 import jakarta.ws.rs.client.Client;
@@ -232,7 +231,7 @@ public class JerseyRestClient implements RestClient {
 		private List<QueryParam> queryParams = new ArrayList<>();
 
 		@Override
-		public Builder queryParam(String name, String value) {
+		public JerseyGetRequestBuilder queryParam(String name, String value) {
 			queryParams.add(new QueryParam(name, value));
 			return this;
 		}
