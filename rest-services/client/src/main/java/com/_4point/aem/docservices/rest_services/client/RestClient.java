@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Optional;
+import java.util.function.Function;
 
 import com._4point.aem.fluentforms.api.Document;
 
@@ -23,8 +24,15 @@ public interface RestClient {
 	public record ContentType(String contentType) {
 		public static final ContentType APPLICATION_PDF = ContentType.of("application/pdf");
 		public static final ContentType APPLICATION_XDP = ContentType.of("application/vnd.adobe.xdp+xml");
+		public static final ContentType APPLICATION_XML = ContentType.of("application/xml");
 		public static final ContentType TEXT_HTML = ContentType.of("text/html");
 		public static final ContentType APPLICATION_OCTET_STREAM = ContentType.of("application/octet-stream");
+		public static final ContentType APPLICATION_DPL = ContentType.of("application/vnd.datamax-dpl");
+		public static final ContentType APPLICATION_IPL = ContentType.of("application/vnd.intermec-ipl");
+		public static final ContentType APPLICATION_PCL = ContentType.of("application/vnd.hp-pcl");
+		public static final ContentType APPLICATION_PS = ContentType.of("application/postscript");
+		public static final ContentType APPLICATION_TPCL = ContentType.of("application/vnd.toshiba-tpcl");
+		public static final ContentType APPLICATION_ZPL = ContentType.of("x-application/zpl");
 		
 		public static ContentType of(String contentType) { return new ContentType(contentType); }
 	};
@@ -65,6 +73,30 @@ public interface RestClient {
 				} catch (IOException e) {
 					throw new UncheckedIOException(e);
 				}
+			}
+			default Builder addIfNotNull(String fieldName, String fieldData) {
+				return fieldData != null ? add(fieldName, fieldData) : this;
+			}
+			default Builder addIfNotNull(String fieldName, byte[] fieldData, ContentType contentType) {
+				return fieldData != null ? add(fieldName, fieldData, contentType) : this;
+			}
+			default Builder addIfNotNull(String fieldName, InputStream fieldData, ContentType contentType) {
+				return fieldData != null ? add(fieldName, fieldData, contentType) : this;
+			}
+			default Builder addIfNotNull(String fieldName, Document document) {
+				return document != null ? add(fieldName, document) : this;
+			}
+			default <T> Builder transformAndAdd(String fieldName, T fieldData, Function<T, String> fn) {
+				return fieldData != null ? addIfNotNull(fieldName, fn.apply(fieldData)) : this;
+			}
+			default <T> Builder transformAndAddBytes(String fieldName, T fieldData, ContentType contentType, Function<T, byte[]> fn) {
+				return fieldData != null ? addIfNotNull(fieldName, fn.apply(fieldData), contentType) : this;
+			}
+			default <T> Builder transformAndAddInputStream(String fieldName, T fieldData, ContentType contentType, Function<T, InputStream> fn) {
+				return fieldData != null ? addIfNotNull(fieldName, fn.apply(fieldData), contentType) : this;
+			}
+			default <T> Builder addStringVersion(String fieldName, T fieldData) {
+				return fieldData != null ? addIfNotNull(fieldName, fieldData.toString()) : this;
 			}
 			MultipartPayload build();
 		}
@@ -136,28 +168,8 @@ public interface RestClient {
 		public Optional<String> retrieveHeader(String header);
 		
 	}
-	
-//	/**
-//	 * This is the base URL 
-//	 */
-//	public interface AemBaseTarget {
-//		public Target target(String path);
-//	}
-//
-//	public interface Target {
-//		
-//	}
-//	
-//	/**
-//	 * Create an AemBaseTarget from an AemConfig
-//	 * 
-//	 * @param aemConfig
-//	 * @return
-//	 */
-//	public AemBaseTarget baseTarget(AemConfig aemConfig);
-//	
-	
-	@SuppressWarnings("serial")
+
+    @SuppressWarnings("serial")
 	public static class RestClientException extends Exception {
 
 		public RestClientException() {
