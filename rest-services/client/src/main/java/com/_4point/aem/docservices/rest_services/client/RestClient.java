@@ -10,7 +10,7 @@ import java.util.function.Function;
 import com._4point.aem.fluentforms.api.Document;
 
 public interface RestClient {
-	
+	public static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	/**
 	 * Returns String representing the final endpoint target location.
 	 * 
@@ -25,6 +25,7 @@ public interface RestClient {
 		public static final ContentType APPLICATION_PDF = ContentType.of("application/pdf");
 		public static final ContentType APPLICATION_XDP = ContentType.of("application/vnd.adobe.xdp+xml");
 		public static final ContentType APPLICATION_XML = ContentType.of("application/xml");
+		public static final ContentType TEXT_PLAIN = ContentType.of("text/plain");
 		public static final ContentType TEXT_HTML = ContentType.of("text/html");
 		public static final ContentType APPLICATION_OCTET_STREAM = ContentType.of("application/octet-stream");
 		public static final ContentType APPLICATION_DPL = ContentType.of("application/vnd.datamax-dpl");
@@ -74,6 +75,13 @@ public interface RestClient {
 					throw new UncheckedIOException(e);
 				}
 			}
+			default Builder add(String fieldName, Document document, ContentType contentType) {
+				try {
+					return add(fieldName, document.getInputStream(), contentType);
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			}
 			default Builder addIfNotNull(String fieldName, String fieldData) {
 				return fieldData != null ? add(fieldName, fieldData) : this;
 			}
@@ -85,6 +93,9 @@ public interface RestClient {
 			}
 			default Builder addIfNotNull(String fieldName, Document document) {
 				return document != null ? add(fieldName, document) : this;
+			}
+			default Builder addIfNotNull(String fieldName, Document document, ContentType contentType) {
+				return document != null ? add(fieldName, document, contentType) : this;
 			}
 			default <T> Builder transformAndAdd(String fieldName, T fieldData, Function<T, String> fn) {
 				return fieldData != null ? addIfNotNull(fieldName, fn.apply(fieldData)) : this;

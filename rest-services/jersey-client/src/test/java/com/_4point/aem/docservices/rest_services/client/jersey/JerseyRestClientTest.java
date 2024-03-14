@@ -34,6 +34,7 @@ class JerseyRestClientTest {
 	private static final String MOCK_PDF_BYTES = "Mock PDF Bytes";
 	private static final String ENDPOINT = "/services/OutputService/GeneratePdfOutput";
 	private static final String ERROR_BODY_TEXT = "Error Body";
+	private static final String CORRELATION_ID_TEXT = "Correlation ID";
 
 	private AemConfig aemConfig;
 	private RestClient underTest;
@@ -44,7 +45,7 @@ class JerseyRestClientTest {
 				   .port(wmRuntimeInfo.getHttpPort())
 				   .build();
 		
-		underTest = new JerseyRestClient(aemConfig, ENDPOINT);
+		underTest = new JerseyRestClient(aemConfig, ENDPOINT, ()->CORRELATION_ID_TEXT);
 	}
 
 	/*
@@ -67,6 +68,7 @@ class JerseyRestClientTest {
 
 		verify(postRequestedFor(urlEqualTo(ENDPOINT))
 				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)))
+				.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
 				);
 	}
 
@@ -86,6 +88,7 @@ class JerseyRestClientTest {
 		verify(postRequestedFor(urlEqualTo(ENDPOINT))
 				.withRequestBodyPart(aMultipart().withName(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)).build())
 				.withRequestBodyPart(aMultipart().withName(FIELD2_NAME).withBody(equalTo(FIELD2_DATA)).build())
+				.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
 				);
 	}
 
@@ -106,6 +109,7 @@ class JerseyRestClientTest {
 		assertEquals(SAMPLE_HEADER_VALUE, response.retrieveHeader(SAMPLE_HEADER).orElseThrow());
 		verify(postRequestedFor(urlEqualTo(ENDPOINT))
 				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)))
+				.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
 				);
 	}
 
@@ -128,6 +132,7 @@ class JerseyRestClientTest {
 				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA))
 																.withHeader("content-type", equalTo(ContentType.APPLICATION_PDF.contentType()))
 										)
+				.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
 				);
 	}
 
@@ -150,6 +155,7 @@ class JerseyRestClientTest {
 				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA))
 																.withHeader("content-type", equalTo(ContentType.TEXT_HTML.contentType()))
 										)
+				.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
 				);
 	}
 
@@ -262,8 +268,8 @@ class JerseyRestClientTest {
 		// Given
 		stubFor(post(endPoint1).willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), mockHtmlBytes)));
 		stubFor(post(endPoint2).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), mockPdfBytes)));
-		var client1 = new JerseyRestClient(aemConfig, endPoint1);
-		var client2 = new JerseyRestClient(aemConfig, endPoint2);
+		var client1 = new JerseyRestClient(aemConfig, endPoint1, null);
+		var client2 = new JerseyRestClient(aemConfig, endPoint2, ()->CORRELATION_ID_TEXT);
 
 		// When
 		MultipartPayload.Builder builder1 = client1.multipartPayloadBuilder()
@@ -280,12 +286,14 @@ class JerseyRestClientTest {
 			assertEquals(mockHtmlBytes, new String(response1.data().readAllBytes()));
 			verify(postRequestedFor(urlEqualTo(endPoint1))
 					.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)))
+					.withoutHeader(RestClient.CORRELATION_ID_HTTP_HDR)
 					);
 
 			assertEquals(ContentType.APPLICATION_PDF, response2.contentType());
 			assertEquals(mockPdfBytes, new String(response2.data().readAllBytes()));
 			verify(postRequestedFor(urlEqualTo(endPoint2))
 					.withAllRequestBodyParts(aMultipart(FIELD2_NAME).withBody(equalTo(FIELD2_DATA)))
+					.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
 					);
 		}
 

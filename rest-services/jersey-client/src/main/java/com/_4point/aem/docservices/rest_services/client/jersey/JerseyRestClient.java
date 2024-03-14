@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -28,6 +29,7 @@ import jakarta.ws.rs.core.Response.StatusType;
 
 public class JerseyRestClient implements RestClient {
 	private final WebTarget target;
+	private final Supplier<String> correlationIdFn;
 
 	/**
 	 * Constructor for JerseyRestClient if customization of the Jersey Client object is required.
@@ -39,11 +41,12 @@ public class JerseyRestClient implements RestClient {
 	 * @param target REST endpoint to be called.
 	 * @param client Jersey Client object
 	 */
-	public JerseyRestClient(AemConfig aemConfig, String target, Client client) {
+	public JerseyRestClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn, Client client) {
 		this.target = configureClient(client,aemConfig.user(), aemConfig.password())
 						.target(aemConfig.url())
 						.path(target)
 						;
+		this.correlationIdFn = correlationIdFn;
 	}
 
 	/**
@@ -52,8 +55,8 @@ public class JerseyRestClient implements RestClient {
 	 * @param aemConfig AEM configuration parameters
 	 * @param target REST endpoint to be called.
 	 */
-	public JerseyRestClient(AemConfig aemConfig, String target) {
-		this(aemConfig, target, getClient());
+	public JerseyRestClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn) {
+		this(aemConfig, target, correlationIdFn, getClient());
 	}
 
 	private static Client configureClient(Client client, String username, String password) {
@@ -61,12 +64,12 @@ public class JerseyRestClient implements RestClient {
 					 .register(HttpAuthenticationFeature.basic(username, password));
 	}
 	
-	public static RestClient restClient(AemConfig aemConfig, String target) {
-		return new JerseyRestClient(aemConfig, target);
+	public static RestClient restClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn) {
+		return new JerseyRestClient(aemConfig, target, correlationIdFn);
 	}
 	
-	public static RestClient restClient(AemConfig aemConfig, String target, Client client) {
-		return new JerseyRestClient(aemConfig, target, client);
+	public static RestClient restClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn, Client client) {
+		return new JerseyRestClient(aemConfig, target, correlationIdFn, client);
 	}
 	
 	@Override
@@ -148,10 +151,9 @@ public class JerseyRestClient implements RestClient {
 		public Optional<Response> postToServer(ContentType acceptContentType) throws RestClientException {
 			MediaType acceptMediaType = MediaType.valueOf(acceptContentType.contentType());
 			jakarta.ws.rs.client.Invocation.Builder invokeBuilder = target.request().accept(acceptMediaType);
-//			if (this.correlationIdFn != null) {
-//				invokeBuilder.header(CORRELATION_ID_HTTP_HDR, this.correlationIdFn.get());
-//			}
-//			Response result;
+			if (correlationIdFn != null) {
+				invokeBuilder.header(CORRELATION_ID_HTTP_HDR, correlationIdFn.get());
+			}
 			try {
 				return JerseyResponse.processResponse(invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType())), acceptMediaType);
 			} catch (jakarta.ws.rs.ProcessingException e) {
@@ -257,7 +259,12 @@ public class JerseyRestClient implements RestClient {
 			for(var queryParam : queryParams) {
 				localTarget = localTarget.queryParam(queryParam.name, queryParam.value);
 			}
-			jakarta.ws.rs.client.Invocation.Builder invokeBuilder = localTarget.request().accept(acceptMediaType);
+			jakarta.ws.rs.client.Invocation.Builder invokeBuilder = localTarget.request()
+																			   .accept(acceptMediaType)
+																			   ;
+			if (correlationIdFn != null) {
+				invokeBuilder = invokeBuilder.header(CORRELATION_ID_HTTP_HDR, correlationIdFn.get());
+			}
 			try {
 				return JerseyResponse.processResponse(invokeBuilder.get(), acceptMediaType);
 			} catch (jakarta.ws.rs.ProcessingException e) {
