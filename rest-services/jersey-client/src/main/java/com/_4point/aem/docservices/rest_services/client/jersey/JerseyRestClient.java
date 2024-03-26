@@ -140,24 +140,35 @@ public class JerseyRestClient implements RestClient {
 	 * 
 	 */
 	private final class JerseyMultipartPayload implements MultipartPayload {
+		private final List<PayloadBuilder.NameValuePair> queryParams;
+		private final List<PayloadBuilder.NameValuePair> requestHeaders;
 		private final FormDataMultiPart multipart;
 		
-		private JerseyMultipartPayload(FormDataMultiPart multipart) {
+		private JerseyMultipartPayload(FormDataMultiPart multipart, List<PayloadBuilder.NameValuePair> queryParams, List<PayloadBuilder.NameValuePair> requestHeaders) {
 			this.multipart = multipart;
+			this.queryParams = queryParams;
+			this.requestHeaders = requestHeaders;
 		}
 
 		@Override
 		public Optional<Response> postToServer(ContentType acceptContentType) throws RestClientException {
 			MediaType acceptMediaType = MediaType.valueOf(acceptContentType.contentType());
-			jakarta.ws.rs.client.Invocation.Builder invokeBuilder = target.request().accept(acceptMediaType);
+			WebTarget localTarget = target;
+			for(var queryParam : queryParams) {
+				localTarget = localTarget.queryParam(queryParam.name, queryParam.value);
+			}
+			jakarta.ws.rs.client.Invocation.Builder invokeBuilder = localTarget.request().accept(acceptMediaType);
 			if (correlationIdFn != null) {
 				invokeBuilder.header(CORRELATION_ID_HTTP_HDR, correlationIdFn.get());
+			}
+			for(var requestHeader : requestHeaders) {
+				invokeBuilder = invokeBuilder.header(requestHeader.name, requestHeader.value);
 			}
 			try {
 				return JerseyResponse.processResponse(invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType())), acceptMediaType);
 			} catch (jakarta.ws.rs.ProcessingException e) {
 				String msg = e.getMessage();
-				throw new RestClientException("Error when posting to '" + target.getUri().toString() + "'" + (msg != null ? " (" + msg + ")" : "") + ".", e); 
+				throw new RestClientException("Error when posting to '" + localTarget.getUri().toString() + "'" + (msg != null ? " (" + msg + ")" : "") + ".", e); 
 			}
 		}
 
@@ -171,7 +182,7 @@ public class JerseyRestClient implements RestClient {
 	/**
 	 * MultipartPayload.Builder implementation code.
 	 */
-	private final class JerseyMultipartPayloadBuilder implements MultipartPayload.Builder {
+	private final class JerseyMultipartPayloadBuilder extends PayloadBuilder implements MultipartPayload.Builder {
 		private final FormDataMultiPart multipart = new FormDataMultiPart();
 
 		@Override
@@ -193,10 +204,21 @@ public class JerseyRestClient implements RestClient {
 		}
 		
 		@Override
-		public MultipartPayload build() {
-			return new JerseyMultipartPayload(multipart);
+		public JerseyMultipartPayloadBuilder queryParam(String name, String value) {
+			super.queryParam(name, value);
+			return this;
 		}
-
+		
+		@Override
+		public JerseyMultipartPayloadBuilder addHeader(String name, String value) {
+			super.addHeader(name, value);
+			return this;
+		}
+		
+		@Override
+		public MultipartPayload build() {
+			return new JerseyMultipartPayload(multipart, Collections.unmodifiableList(super.queryParams), Collections.unmodifiableList(super.requestHeaders));
+		}
 	}
 
 	/*
@@ -228,27 +250,33 @@ public class JerseyRestClient implements RestClient {
 		return new JerseyGetRequestBuilder();
 	}
 	
-	private final class JerseyGetRequestBuilder implements GetRequest.Builder {
-		private record QueryParam(String name, String value) {};
-		private List<QueryParam> queryParams = new ArrayList<>();
+	private final class JerseyGetRequestBuilder extends PayloadBuilder implements GetRequest.Builder {
 
 		@Override
 		public JerseyGetRequestBuilder queryParam(String name, String value) {
-			queryParams.add(new QueryParam(name, value));
+			super.queryParam(name, value);
+			return this;
+		}
+
+		@Override
+		public JerseyGetRequestBuilder addHeader(String name, String value) {
+			super.addHeader(name, value);
 			return this;
 		}
 
 		@Override
 		public GetRequest build() {
-			return new JerseyGetRequest(Collections.unmodifiableList(queryParams));
+			return new JerseyGetRequest(Collections.unmodifiableList(super.queryParams), Collections.unmodifiableList(super.requestHeaders));
 		}
 	}
 	
 	private final class JerseyGetRequest implements GetRequest {
-		private final List<JerseyGetRequestBuilder.QueryParam> queryParams;
+		private final List<PayloadBuilder.NameValuePair> queryParams;
+		private final List<PayloadBuilder.NameValuePair> requestHeaders;
 		
-		JerseyGetRequest(List<JerseyGetRequestBuilder.QueryParam> queryParams) {
+		JerseyGetRequest(List<PayloadBuilder.NameValuePair> queryParams, List<PayloadBuilder.NameValuePair> requestHeaders) {
 			this.queryParams = queryParams;
+			this.requestHeaders = requestHeaders;
 		}
 
 		@Override
@@ -264,6 +292,9 @@ public class JerseyRestClient implements RestClient {
 			if (correlationIdFn != null) {
 				invokeBuilder = invokeBuilder.header(CORRELATION_ID_HTTP_HDR, correlationIdFn.get());
 			}
+			for(var requestHeader : requestHeaders) {
+				invokeBuilder = invokeBuilder.header(requestHeader.name, requestHeader.value);
+			}
 			try {
 				return JerseyResponse.processResponse(invokeBuilder.get(), acceptMediaType);
 			} catch (jakarta.ws.rs.ProcessingException e) {
@@ -271,5 +302,22 @@ public class JerseyRestClient implements RestClient {
 				throw new RestClientException("Error when posting to '" + target.getUri().toString() + "'" + (msg != null ? " (" + msg + ")" : "") + ".", e); 
 			}
 		}
+	}
+	
+	private class PayloadBuilder {
+		private record NameValuePair(String name, String value) {};
+		private List<NameValuePair> queryParams = new ArrayList<>();
+		private List<NameValuePair> requestHeaders = new ArrayList<>();
+
+		public PayloadBuilder queryParam(String name, String value) {
+			queryParams.add(new NameValuePair(name, value));
+			return this;
+		}
+
+		public PayloadBuilder addHeader(String name, String value) {
+			requestHeaders.add(new NameValuePair(name, value));
+			return this;
+		}
+
 	}
 }

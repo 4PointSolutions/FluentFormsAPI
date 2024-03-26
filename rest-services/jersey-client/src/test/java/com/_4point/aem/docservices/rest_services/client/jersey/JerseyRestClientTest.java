@@ -54,40 +54,47 @@ class JerseyRestClientTest {
 	 * 
 	 * 
 	 */
-	@DisplayName("PostToServer with 1 part and return no content in response")
+	@DisplayName("PostToServer with 1 part and one query parameter and return no content in response")
 	@Test
 	void testPostToServer_NoContentResponse() throws Exception {
 		// Given
-		stubFor(post(ENDPOINT).willReturn(noContent()));
+		stubFor(post(urlPathEqualTo(ENDPOINT)).withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA)).willReturn(noContent()));
 		
 		// When
-		Optional<Response> result = performPostToServer(FIELD1_NAME, FIELD1_DATA);
+		Optional<Response> result = postToServerBuilder()
+										.queryParams(FIELD1_NAME, FIELD1_DATA)
+										.performPostToServer(FIELD1_NAME, FIELD1_DATA);
 
 		// Then
 		assertTrue(result.isEmpty());
 
-		verify(postRequestedFor(urlEqualTo(ENDPOINT))
+		verify(postRequestedFor(urlPathEqualTo(ENDPOINT))
+				.withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA))
 				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)))
 				.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
 				);
 	}
 
-	@DisplayName("PostToServer with 2 parts and return no headers in response")
+	@DisplayName("PostToServer with 2 parts, 2 query parameters and return no headers in response")
 	@Test
 	void testPostToServer_DocumentResponseNoHeader() throws Exception {
 		// Given
-		stubFor(post(ENDPOINT).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)));
+		stubFor(post(urlPathEqualTo(ENDPOINT))
+				.withQueryParams(Map.of(FIELD1_NAME, equalTo(FIELD1_DATA), FIELD2_NAME, equalTo(FIELD2_DATA)))
+				.willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)));
 		
 		// When
-		Response response = performPostToServer(FIELD1_NAME, FIELD1_DATA, FIELD2_NAME, FIELD2_DATA, "foo", "BAR").orElseThrow();
+		Response response = postToServerBuilder()
+								.queryParams(FIELD1_NAME, FIELD1_DATA, FIELD2_NAME, FIELD2_DATA)
+								.performPostToServer(FIELD1_NAME, FIELD1_DATA, FIELD2_NAME, FIELD2_DATA, "foo", "BAR").orElseThrow();
 
 		// Then
 		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
 		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
 		assertTrue(response.retrieveHeader(SAMPLE_HEADER).isEmpty());
-		verify(postRequestedFor(urlEqualTo(ENDPOINT))
-				.withRequestBodyPart(aMultipart().withName(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)).build())
+		verify(postRequestedFor(urlPathEqualTo(ENDPOINT))
 				.withRequestBodyPart(aMultipart().withName(FIELD2_NAME).withBody(equalTo(FIELD2_DATA)).build())
+				.withRequestBodyPart(aMultipart().withName(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)).build())
 				.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
 				);
 	}
@@ -101,7 +108,7 @@ class JerseyRestClientTest {
 										  ));
 	
 		// When
-		Response response = performPostToServer(FIELD1_NAME, FIELD1_DATA).orElseThrow();
+		Response response = postToServerBuilder().performPostToServer(FIELD1_NAME, FIELD1_DATA).orElseThrow();
 
 		// Then
 		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
@@ -113,16 +120,19 @@ class JerseyRestClientTest {
 				);
 	}
 
-	@DisplayName("PostToServer with 1 part using byte array data")
+	@DisplayName("PostToServer with 1 header and 1 part using byte array data")
 	@Test
 	void testPostToServer_DocumentResponseFromByteArray() throws Exception {
 		// Given
-		stubFor(post(ENDPOINT).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)
+		stubFor(post(ENDPOINT).withHeader(FIELD1_NAME, equalTo(FIELD1_DATA))
+							  				.willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)
 											.withHeader(SAMPLE_HEADER, SAMPLE_HEADER_VALUE)
 										  ));
 	
 		// When
-		Response response = performPostToServer(FIELD1_NAME, FIELD1_DATA.getBytes(), ContentType.APPLICATION_PDF).orElseThrow();
+		Response response = postToServerBuilder()
+								.headers(FIELD1_NAME, FIELD1_DATA)
+								.performPostToServer(FIELD1_NAME, FIELD1_DATA.getBytes(), ContentType.APPLICATION_PDF).orElseThrow();
 
 		// Then
 		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
@@ -145,7 +155,7 @@ class JerseyRestClientTest {
 										  ));
 	
 		// When
-		Response response = performPostToServer(FIELD1_NAME, new ByteArrayInputStream(FIELD1_DATA.getBytes()), ContentType.TEXT_HTML).orElseThrow();
+		Response response = postToServerBuilder().performPostToServer(FIELD1_NAME, new ByteArrayInputStream(FIELD1_DATA.getBytes()), ContentType.TEXT_HTML).orElseThrow();
 
 		// Then
 		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
@@ -166,7 +176,7 @@ class JerseyRestClientTest {
 		stubFor(post(ENDPOINT).willReturn(serverError()));
 
 		// When
-		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
+		RestClientException ex = assertThrows(RestClientException.class,()->postToServerBuilder().performPostToServer(FIELD1_NAME, FIELD1_DATA));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 
@@ -186,7 +196,7 @@ class JerseyRestClientTest {
 		stubFor(post(ENDPOINT).willReturn(serverError().withBody(ERROR_BODY_TEXT.getBytes())));
 
 		// When
-		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
+		RestClientException ex = assertThrows(RestClientException.class,()->postToServerBuilder().performPostToServer(FIELD1_NAME, FIELD1_DATA));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 
@@ -206,7 +216,7 @@ class JerseyRestClientTest {
 		stubFor(post(ENDPOINT).willReturn(ok()));
 
 		// When
-		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
+		RestClientException ex = assertThrows(RestClientException.class,()->postToServerBuilder().performPostToServer(FIELD1_NAME, FIELD1_DATA));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 		
@@ -225,7 +235,7 @@ class JerseyRestClientTest {
 		stubFor(post(ENDPOINT).willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), MOCK_PDF_BYTES)));
 
 		// When
-		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
+		RestClientException ex = assertThrows(RestClientException.class,()->postToServerBuilder().performPostToServer(FIELD1_NAME, FIELD1_DATA));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 		
@@ -245,7 +255,7 @@ class JerseyRestClientTest {
 		stubFor(post(ENDPOINT).willReturn(ok(MOCK_PDF_BYTES)));
 
 		// When
-		RestClientException ex = assertThrows(RestClientException.class,()->performPostToServer(FIELD1_NAME, FIELD1_DATA));
+		RestClientException ex = assertThrows(RestClientException.class,()->postToServerBuilder().performPostToServer(FIELD1_NAME, FIELD1_DATA));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 		
@@ -299,45 +309,82 @@ class JerseyRestClientTest {
 
 	}
 	
-	
-	
-	// TODO:  Test that instantiates multiple JerseyRestClients and calls each to make sure that:
-	// a) Lazy initialization of client works
-	// b) Calling configureClient on the same client multiple times is OK.
-	
-	
-	private Optional<Response> performPostToServer(String...strings) throws RestClientException, Exception {
-		if (strings.length % 2 != 0) { 
-			throw new IllegalArgumentException("Odd number of Strings passed in, must be even. (" + strings.length + ").");
-		}
-		
-		MultipartPayload.Builder builder = underTest.multipartPayloadBuilder();
-		for(int i = 0; i < strings.length; i+=2) {
-			builder.add(strings[i], strings[i+1]);
-		}
-		
-		try (MultipartPayload payload = builder.build()) {
-			return payload.postToServer(ContentType.APPLICATION_PDF);
-		}
+	private PostToServerBuilder postToServerBuilder() {
+		return new PostToServerBuilder();
 	}
+	
+	private class PostToServerBuilder {
+		private String[] queryParams = new String[0];
+		private String[] headers = new String[0];
+		
+		private PostToServerBuilder queryParams(String...strings) {
+			if (strings.length % 2 != 0) { 
+				throw new IllegalArgumentException("Odd number of Strings passed in, must be even. (" + strings.length + ").");
+			}
+			queryParams = strings;
+			return this;
+		}
+		
+		private PostToServerBuilder headers(String...strings) {
+			if (strings.length % 2 != 0) { 
+				throw new IllegalArgumentException("Odd number of Strings passed in, must be even. (" + strings.length + ").");
+			}
+			headers = strings;
+			return this;
+		}
+		
+		private Optional<Response> performPostToServer(String...strings) throws RestClientException, Exception {
+			if (strings.length % 2 != 0) { 
+				throw new IllegalArgumentException("Odd number of Strings passed in, must be even. (" + strings.length + ").");
+			}
+			
+			MultipartPayload.Builder builder = underTest.multipartPayloadBuilder();
+			for(int i = 0; i < strings.length; i+=2) {
+				builder.add(strings[i], strings[i+1]);
+			}
+			
+			addHeadersAndQueryParams(builder);
+			
+			try (MultipartPayload payload = builder.build()) {
+				return payload.postToServer(ContentType.APPLICATION_PDF);
+			}
+		}
 
-	private Optional<Response> performPostToServer(String fieldName, byte[] data, ContentType contentType) throws RestClientException, Exception {
-		MultipartPayload.Builder builder = underTest.multipartPayloadBuilder()
-								   .add(fieldName, data, contentType);
+		private Optional<Response> performPostToServer(String fieldName, byte[] data, ContentType contentType) throws RestClientException, Exception {
+			MultipartPayload.Builder builder = underTest.multipartPayloadBuilder()
+									   .add(fieldName, data, contentType);
+			
+			addHeadersAndQueryParams(builder);
+
+			try (MultipartPayload payload = builder.build()) {
+				return payload.postToServer(ContentType.APPLICATION_PDF);
+			}
+		}
 		
-		try (MultipartPayload payload = builder.build()) {
-			return payload.postToServer(ContentType.APPLICATION_PDF);
+		private Optional<Response> performPostToServer(String fieldName, InputStream data, ContentType contentType) throws RestClientException, Exception {
+			MultipartPayload.Builder builder = underTest.multipartPayloadBuilder()
+									   .add(fieldName, data, contentType);
+			
+			addHeadersAndQueryParams(builder);
+
+			try (MultipartPayload payload = builder.build()) {
+				return payload.postToServer(ContentType.APPLICATION_PDF);
+			}
+		}
+
+		MultipartPayload.Builder addHeadersAndQueryParams(MultipartPayload.Builder builder) {
+			for(int i = 0; i < queryParams.length; i+=2) {			// Add query Params
+				builder.queryParam(queryParams[i], queryParams[i+1]);
+			}
+
+			for(int i = 0; i < headers.length; i+=2) {			// Add headers
+				builder.addHeader(headers[i], headers[i+1]);
+			}
+			
+			return builder;
 		}
 	}
 	
-	private Optional<Response> performPostToServer(String fieldName, InputStream data, ContentType contentType) throws RestClientException, Exception {
-		MultipartPayload.Builder builder = underTest.multipartPayloadBuilder()
-								   .add(fieldName, data, contentType);
-		
-		try (MultipartPayload payload = builder.build()) {
-			return payload.postToServer(ContentType.APPLICATION_PDF);
-		}
-	}
 	
 	/*
 	 * 
