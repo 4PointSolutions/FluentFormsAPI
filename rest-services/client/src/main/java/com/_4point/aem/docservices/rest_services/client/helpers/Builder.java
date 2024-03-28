@@ -1,8 +1,9 @@
 package com._4point.aem.docservices.rest_services.client.helpers;
 
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
+
+import com._4point.aem.docservices.rest_services.client.RestClient;
 
 /**
  * This interface is is for a Builder object that assists in building a JAX-RS client.  It is shared between the following projects:
@@ -21,15 +22,11 @@ public interface Builder {
 
 	public Builder useSsl(boolean useSsl);
 
-	public Builder clientFactory(Supplier<Client> clientFactory);
-
 	public Builder basicAuthentication(String username, String password);
 
 	public Builder correlationId(Supplier<String> correlationIdFn);
 
 	public Supplier<String> getCorrelationIdFn();
-
-	public WebTarget createLocalTarget();
 
 	public Builder aemServerType(AemServerType serverType);
 

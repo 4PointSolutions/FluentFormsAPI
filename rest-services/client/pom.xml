@@ -125,10 +125,7 @@
             <groupId>io.wcm</groupId>
             <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
         </dependency>
--->        <dependency>
-            <groupId>uk.org.lidalia</groupId>
-            <artifactId>slf4j-test</artifactId>
-        </dependency>
+-->        
         <!-- Other Dependencies -->
         <dependency>
             <groupId>com._4point.aem</groupId>
@@ -151,10 +148,16 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
+		<!-- Testing dependencies -->
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+            <groupId>uk.org.lidalia</groupId>
+            <artifactId>slf4j-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

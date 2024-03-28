@@ -1,38 +1,30 @@
 package com._4point.aem.docservices.rest_services.client.pdfUtility;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.Mockito.*;
 import static org.hamcrest.MatcherAssert.assertThat; 
 import static org.hamcrest.Matchers.*;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.client.Invocation.Builder;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.StatusType;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-import org.apache.commons.io.IOUtils;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.client.RestClient;
+import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
+import com._4point.aem.docservices.rest_services.client.RestClient.Response;
+import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
+import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.pdfutility.services.client.PDFPropertiesOptionSpec;
@@ -41,46 +33,59 @@ import com.adobe.fd.pdfutility.services.client.RedactionOptionSpec;
 @ExtendWith(MockitoExtension.class)
 class RestServicesPdfUtilityServiceAdapterTest {
 	private final static Document DUMMY_DOC = MockDocumentFactory.GLOBAL_DUMMY_DOCUMENT;
-	private static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
+	private static final String CORRELATION_ID = "correlationId";
 
-	@Mock(answer = Answers.RETURNS_SELF) Client client;	// answers used to mock Client's fluent interface. 
-	@Mock WebTarget target;
-	@Mock Response response;
-	@Mock Builder builder;
-	@Mock StatusType statusType;
-	
-	@Captor ArgumentCaptor<String> machineName;
-	@Captor ArgumentCaptor<String> path;
-	@SuppressWarnings("rawtypes")
-	@Captor ArgumentCaptor<Entity> entity;
-	@Captor ArgumentCaptor<String> correlationId;
+
+	@Mock(stubOnly = true) TriFunction<AemConfig, String, Supplier<String>, RestClient> mockClientFactory;
+	@Mock(stubOnly = true) RestClient mockClient;
+	@Mock(stubOnly = true) MultipartPayload mockPayload;
+	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;
+	@Mock(stubOnly = true) Response mockResponse;
+
+	@Captor ArgumentCaptor<AemConfig> aemConfig;
+	@Captor ArgumentCaptor<String> servicePath;
+	@Captor ArgumentCaptor<InputStream> postBodyBytes;
+	@Captor ArgumentCaptor<ContentType> acceptableCntentType;
+	@Captor ArgumentCaptor<Supplier<String>> correlationIdFn;
+
+	@BeforeEach
+	void setup() {
+		when(mockClientFactory.apply(aemConfig.capture(), servicePath.capture(), correlationIdFn.capture())).thenReturn(mockClient);
+	}
 
 	@Test
 	void testConvertPDFtoXDP() throws Exception {
-		Document resultDoc = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
-		setUpMocks(resultDoc);
-		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder().clientFactory(()->client).build();
+		// Given
+		byte[] responseData = "response Document Data".getBytes();
+		ContentType expectedContentType = ContentType.APPLICATION_XDP;
+		setUpMocks(responseData, expectedContentType);
+		
+		// When
+		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder(mockClientFactory)
+				.correlationId(()->CORRELATION_ID)
+				.build();
 		Document result = underTest.convertPDFtoXDP(DUMMY_DOC);
 
+		// Then
 		// Make sure the correct URL is called.
-		assertThat("Expected target url contains 'PdfUtility' and 'ConvertPdfToXdp'", path.getValue(), allOf(containsString("PdfUtility"), containsString("ConvertPdfToXdp")));
+		assertThat("Expected target url contains 'PdfUtility' and 'ConvertPdfToXdp'", servicePath.getValue(), allOf(containsString("PdfUtility"), containsString("ConvertPdfToXdp")));
 
-		// Make sure that the arguments we passed in are transmitted correctly.
-		@SuppressWarnings("unchecked")
-		Entity<FormDataMultiPart> postedEntity = (Entity<FormDataMultiPart>)entity.getValue();
-		FormDataMultiPart postedData = postedEntity.getEntity();
+		// Make sure the correct data was posted.
+		assertArrayEquals(DUMMY_DOC.getInputStream().readAllBytes(), postBodyBytes.getValue().readAllBytes());
+		assertEquals(expectedContentType, acceptableCntentType.getValue());
 		
-		assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
-		validateDocumentFormField(postedData, "document", new MediaType("application", "pdf"), DUMMY_DOC.getInlineData());
+		// Make sure the response is returned transparently in the returned Document.
+		assertArrayEquals(responseData, result.getInputStream().readAllBytes());
+		assertEquals(expectedContentType.contentType(), result.getContentType());
 
-		// Make sure the response is correct.
-		assertArrayEquals(resultDoc.getInlineData(), result.getInlineData());
-		assertEquals(APPLICATION_XDP, MediaType.valueOf(result.getContentType()));
+		// Make sure correlation ID fn was passed correctly.
+		assertEquals(CORRELATION_ID, correlationIdFn.getValue().get());
+
 	}
 
 	@Test
 	void testCloneDocument() {
-		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder().build();
+		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder(mockClientFactory).build();
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.clone(DUMMY_DOC));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
@@ -89,7 +94,8 @@ class RestServicesPdfUtilityServiceAdapterTest {
 
 	@Test
 	void testConvertPDFtoXDP_nullArguments() {
-		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder().build();
+		when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder);
+		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder(mockClientFactory).build();
 		
 		NullPointerException ex = assertThrows(NullPointerException.class, ()->underTest.convertPDFtoXDP(null));
 		String msg = ex.getMessage();
@@ -100,7 +106,7 @@ class RestServicesPdfUtilityServiceAdapterTest {
 	@Test
 	void testGetPDFProperties() {
 		PDFPropertiesOptionSpec pdfPropertiesOptionSpec = Mockito.mock(PDFPropertiesOptionSpec.class);
-		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder().build();
+		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder(mockClientFactory).build();
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.getPDFProperties(DUMMY_DOC, pdfPropertiesOptionSpec ));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
@@ -109,7 +115,7 @@ class RestServicesPdfUtilityServiceAdapterTest {
 
 	@Test
 	void testMulticlone() {
-		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder().build();
+		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder(mockClientFactory).build();
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.multiclone(DUMMY_DOC, 2));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
@@ -119,7 +125,7 @@ class RestServicesPdfUtilityServiceAdapterTest {
 	@Test
 	void testRedact() {
 		RedactionOptionSpec redactOptSpec = Mockito.mock(RedactionOptionSpec.class);
-		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder().build();
+		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder(mockClientFactory).build();
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.redact(DUMMY_DOC, redactOptSpec));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
@@ -128,35 +134,19 @@ class RestServicesPdfUtilityServiceAdapterTest {
 
 	@Test
 	void testSanitize() {
-		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder().build();
+		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder(mockClientFactory).build();
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.sanitize(DUMMY_DOC));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 		assertThat(msg, allOf(containsString("sanitize"), containsString("is not implemented yet")));
 	}
 
-	private void setUpMocks(Document responseData) throws IOException {
-		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
-		when(client.target(machineName.capture())).thenReturn(target);
-		when(target.path(path.capture())).thenReturn(target);
-		when(target.request()).thenReturn(builder);
-		when(builder.accept(APPLICATION_XDP)).thenReturn(builder);
-		when(builder.post(entity.capture())).thenReturn(response);
-		when(response.getStatusInfo()).thenReturn(statusType);
-		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
-		when(response.hasEntity()).thenReturn(true);
-		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
-		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn("application/vnd.adobe.xdp+xml");
+	private void setUpMocks(byte[] responseData, ContentType expectedContentType) throws Exception {
+		when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.add(eq("document"), postBodyBytes.capture(), eq(ContentType.APPLICATION_PDF))).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.build()).thenReturn(mockPayload);
+		when(mockPayload.postToServer(acceptableCntentType.capture())).thenReturn(Optional.of(mockResponse));
+		when(mockResponse.contentType()).thenReturn(expectedContentType);
+		when(mockResponse.data()).thenReturn(new ByteArrayInputStream(responseData));
 	}
-	
-	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {
-		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
-		assertEquals(1, pdfFields.size());
-		
-		FormDataBodyPart pdfPart = pdfFields.get(0);
-		assertEquals(expectedMediaType, pdfPart.getMediaType());
-		byte[] pdfBytes = IOUtils.toByteArray((InputStream) pdfPart.getEntity());
-		assertArrayEquals(expectedData, pdfBytes);  // TODO: Need to figure out how to test for entity.
-	}
-
 }
