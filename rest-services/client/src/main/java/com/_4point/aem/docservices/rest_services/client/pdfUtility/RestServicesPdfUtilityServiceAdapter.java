@@ -49,7 +49,7 @@ public class RestServicesPdfUtilityServiceAdapter extends RestServicesServiceAda
 												 				.build()) {
 			return payload.postToServer(ContentType.APPLICATION_XDP)
 						  .map(RestServicesServiceAdapter::responseToDoc)
-						  .orElseThrow();
+						  .orElseThrow(()->new PdfUtilityException("Error - empty response from AEM server."));
 		} catch (IOException e) {
 			throw new PdfUtilityException("I/O Error while converting PDF to XDP. (" + convertPdfToXdpRestClient.target() + ").", e);
 		} catch (RestClientException e) {

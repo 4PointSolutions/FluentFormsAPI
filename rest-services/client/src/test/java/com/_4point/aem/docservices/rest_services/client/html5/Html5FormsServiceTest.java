@@ -1,49 +1,41 @@
 package com._4point.aem.docservices.rest_services.client.html5;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
-import static org.hamcrest.CoreMatchers.allOf;
+import static com._4point.testing.matchers.javalang.ExceptionMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.client.Invocation.Builder;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.Response.StatusType;
-
-import org.apache.commons.io.IOUtils;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.client.RestClient;
+import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
+import com._4point.aem.docservices.rest_services.client.RestClient.Response;
+import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
+import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
+import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService.Html5FormsServiceBuilder;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService.Html5FormsServiceException;
 import com._4point.aem.fluentforms.api.Document;
@@ -58,27 +50,26 @@ class Html5FormsServiceTest {
 	private final static String DUMMY_TEMPLATE_URL = "http://TemplateString/";
 	private final static Document DUMMY_DATA = MockDocumentFactory.GLOBAL_INSTANCE.create("Dummy Data".getBytes());
 
-	private static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	private static final String CORRELATION_ID = "correlationId";
 	private static final String TEST_MACHINE_NAME = "testmachinename";
 	private static final int TEST_MACHINE_PORT = 8080;
 	private static final String CRX_CONTENT_ROOT = "crx:/content/dam/formsanddocuments/sample-forms";
 
-	@Mock(answer = Answers.RETURNS_SELF) Client client;	// answers used to mock Client's fluent interface. 
-	@Mock WebTarget target;
-	@Mock Response response;
-	@Mock Builder builder;
-	@Mock StatusType statusType;
-	
-	@Captor ArgumentCaptor<String> machineName;
-	@Captor ArgumentCaptor<String> path;
-	@SuppressWarnings("rawtypes")
-	@Captor ArgumentCaptor<Entity> entity;
-	@Captor ArgumentCaptor<String> correlationId;
+	@Mock(stubOnly = true) TriFunction<AemConfig, String, Supplier<String>, RestClient> mockClientFactory;
+	@Mock(stubOnly = true) RestClient mockClient;
+	@Mock(stubOnly = true) MultipartPayload mockPayload;
+	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;
+	@Mock(stubOnly = true) Response mockResponse;
 
+	@Captor ArgumentCaptor<AemConfig> aemConfig;
+	@Captor ArgumentCaptor<String> servicePath;
+	@Captor ArgumentCaptor<InputStream> postBodyBytes;
+	@Captor ArgumentCaptor<ContentType> acceptableContentType;
+	@Captor ArgumentCaptor<Supplier<String>> correlationIdFn;
 
 	@BeforeEach
 	void setUp() throws Exception {
+		when(mockClientFactory.apply(aemConfig.capture(), servicePath.capture(), correlationIdFn.capture())).thenReturn(mockClient);
 	}
 
 	@FunctionalInterface
@@ -108,6 +99,10 @@ class Html5FormsServiceTest {
 		}
 
 		public boolean useSsl() {
+			return ssl;
+		}
+
+		public boolean useCorrelationId() {	// We test correlationId and SSL at the same time.
 			return ssl;
 		}
 
@@ -166,193 +161,140 @@ class Html5FormsServiceTest {
 	@EnumSource
 	void testRenderHtml5Form(HappyPath scenario) throws Exception {
 		
-		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
+		byte[] expectedResponseData = "response Document Data".getBytes();
+		setupMocks(setupMockResponse(expectedResponseData, ContentType.TEXT_HTML));
 
-		setUpJaxRsClientMocks(responseData, MediaType.TEXT_HTML_TYPE, Response.Status.OK, true);
-		
-		boolean useSSL = false;
-		boolean useCorrelationId = false;
-		if (scenario.useSsl()) {
-			useSSL = true;
-			useCorrelationId = true;
-			when(builder.header(eq(CORRELATION_ID_HTTP_HDR), correlationId.capture())).thenReturn(builder);
+		if (scenario.hasData()) {
+			when(mockPayloadBuilder.addIfNotNull(eq("data"), Mockito.any(InputStream.class), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
 		} else {
-			useSSL = false;
-			useCorrelationId = false;
+			when(mockPayloadBuilder.addIfNotNull(eq("data"), Mockito.<InputStream>isNull(), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
 		}
 
-		Html5FormsServiceBuilder svcBuilder = Html5FormsService.builder()
-															   .machineName(TEST_MACHINE_NAME)
-															   .port(TEST_MACHINE_PORT)
-															   .basicAuthentication("username", "password")
-															   .useSsl(useSSL)
-															   .clientFactory(()->client);
-		if (useCorrelationId) {
-			svcBuilder.correlationId(()->CORRELATION_ID);
+		if (scenario.templateType == HappyPath.TemplateType.URL) {
+			when(mockPayloadBuilder.addStringVersion(eq("template"), eq(PathOrUrl.from(DUMMY_TEMPLATE_URL)))).thenReturn(mockPayloadBuilder);			
+		} else {
+			when(mockPayloadBuilder.addStringVersion(eq("template"), eq(PathOrUrl.from(DUMMY_TEMPLATE_STR)))).thenReturn(mockPayloadBuilder);
 		}
-
-
-		Html5FormsService underTest = svcBuilder.build();
 		
+		Html5FormsService underTest = createAdapter(scenario);
 		
 		Document result = scenario.callRenderHtml5Form(scenario.hasData(), underTest);
-		
-		
+				
 		// Make sure the correct URL is called.
-		final String expectedPrefix = useSSL ? "https://" : "http://";
-		assertAll(
-				()->assertThat("Expected target url contains '" + expectedPrefix + "'", machineName.getValue(), containsString(expectedPrefix)),
-				()->assertThat("Expected target url contains TEST_MACHINE_NAME", machineName.getValue(), containsString(TEST_MACHINE_NAME)),
-				()->assertThat("Expected target url contains TEST_MACHINE_PORT", machineName.getValue(), containsString(Integer.toString(TEST_MACHINE_PORT))),
-				()->assertThat("Expected target url contains '/services/Html5/RenderHtml5Form'", path.getValue(), containsString("/services/Html5/RenderHtml5Form"))
-		);
+		assertThat("Expected target url contains 'Html5' and 'RenderHtml5Form'", servicePath.getValue(), allOf(containsString("Html5"), containsString("RenderHtml5Form")));
 
-		// Make sure that the arguments we passed in are transmitted correctly.
-		@SuppressWarnings("unchecked")
-		Entity<FormDataMultiPart> postedEntity = (Entity<FormDataMultiPart>)entity.getValue();
-		FormDataMultiPart postedData = postedEntity.getEntity();
-		
-		assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
-		validateTextFormField(postedData, "template", scenario.templateType == HappyPath.TemplateType.URL ? DUMMY_TEMPLATE_URL : DUMMY_TEMPLATE_STR);
-		
-		if (scenario.hasData()) {
-			validateDocumentFormField(postedData, "data", new MediaType("application", "xml"),DUMMY_DATA.getInlineData());
-		} else {
-			assertNull(postedData.getFields("data"));
-		}
-		
-		if (useCorrelationId) {
-			assertEquals(CORRELATION_ID, correlationId.getValue());
+		if (scenario.useCorrelationId()) {
+			assertEquals(CORRELATION_ID, correlationIdFn.getValue().get());
 		}
 		
 		// Make sure the response is correct.
-		assertArrayEquals(responseData.getInlineData(), result.getInlineData());
-		assertEquals(MediaType.TEXT_HTML_TYPE, MediaType.valueOf(result.getContentType()));
+		assertArrayEquals(expectedResponseData, result.getInputStream().readAllBytes());
+		assertEquals(ContentType.TEXT_HTML.contentType(), result.getContentType());
+
+		// Make sure we sent the correct contentTyoe
+		assertEquals(ContentType.TEXT_HTML, acceptableContentType.getValue());
 	}
 
-	private void setUpJaxRsClientMocks(Document responseData, MediaType produces, Status status, boolean gettingHeader) throws IOException {
-		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
-		when(client.target(machineName.capture())).thenReturn(target);
-		when(target.path(path.capture())).thenReturn(target);
-		when(target.request()).thenReturn(builder);
-		when(builder.accept(MediaType.TEXT_HTML_TYPE)).thenReturn(builder);
-		when(builder.post(entity.capture())).thenReturn(response);
-		when(response.getStatusInfo()).thenReturn(statusType);
-		when(statusType.getFamily()).thenReturn(status.getFamily());	// return status
-		if (status.getFamily() != Response.Status.Family.SUCCESSFUL) {
-			// If we're not successful, then there's a couple of other calls we need to mock.
-			when(statusType.getStatusCode()).thenReturn(status.getStatusCode());	// return status
-			when(statusType.getReasonPhrase()).thenReturn(status.getReasonPhrase());	// return status
-		} 
+	private Html5FormsService createAdapter(HappyPath scenario) {
+		Html5FormsServiceBuilder svcBuilder = Html5FormsService.builder(mockClientFactory)
+															   .machineName(TEST_MACHINE_NAME)
+															   .port(TEST_MACHINE_PORT)
+															   .basicAuthentication("username", "password")
+															   .useSsl(scenario.useSsl());
 		
-		if (responseData.isEmpty()) {
-			when(response.hasEntity()).thenReturn(false);
-		} else {
-			when(response.hasEntity()).thenReturn(true);
-			when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
+		if (scenario.useCorrelationId()) {
+			svcBuilder.correlationId(()->CORRELATION_ID);
 		}
-		if (gettingHeader) {
-			when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn(produces.toString());
-		}
+
+		return svcBuilder.build();
 	}
+
 
 	@Test
 	void testRenderHtml5FormWithFilter() throws Exception {
-		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
-
-		setUpJaxRsClientMocks(responseData, MediaType.TEXT_HTML_TYPE, Response.Status.OK, true);
+		setupMocks(setupMockResponse("response Document Data".getBytes(), ContentType.TEXT_HTML));
+		when(mockPayloadBuilder.addStringVersion(eq("template"), eq(PathOrUrl.from(DUMMY_TEMPLATE_STR)))).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.addIfNotNull(eq("data"), Mockito.any(InputStream.class), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
 		
-		Html5FormsService underTest = Html5FormsService.builder()
+		Html5FormsService underTest = Html5FormsService.builder(mockClientFactory)
 													   .machineName(TEST_MACHINE_NAME)
 													   .port(TEST_MACHINE_PORT)
 													   .basicAuthentication("username", "password")
 													   .useSsl(false)
 													   .aemServerType(AemServerType.StandardType.OSGI)
-													   .clientFactory(()->client)
 													   .addRenderResultFilter(is->new ReplacingInputStream(is, "Document", "tnemucoD"))
 													   .build();
 	
 		Document result = underTest.renderHtml5Form(DUMMY_TEMPLATE_STR, DUMMY_DATA);
 		
 		assertEquals("response tnemucoD Data", new String(result.getInlineData()));
-		assertEquals(MediaType.TEXT_HTML_TYPE, MediaType.valueOf(result.getContentType()));
+		assertEquals(ContentType.TEXT_HTML.contentType(), result.getContentType());
 	}
 	
 	@Test
-	void testRenderHtml5FormFailureStatus() throws Exception {
-		String responseString = "response Document Data";
-		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create(responseString.getBytes());
+	void testRenderHtml5FormRestClientException() throws Exception {
+		RestClientException expectedException = new RestClientException("Dummy Exception Message");
+		when(mockPayloadBuilder.addStringVersion(eq("template"), eq(PathOrUrl.from(DUMMY_TEMPLATE_STR)))).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.addIfNotNull(eq("data"), Mockito.<InputStream>isNull(), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
 
-		setUpJaxRsClientMocks(responseData, MediaType.TEXT_HTML_TYPE, Response.Status.BAD_REQUEST, false);
-
-		Html5FormsServiceBuilder svcBuilder = Html5FormsService.builder()
+		when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.build()).thenReturn(mockPayload);
+		when(mockPayload.postToServer(acceptableContentType.capture())).thenThrow(expectedException);
+		
+		Html5FormsServiceBuilder svcBuilder = Html5FormsService.builder(mockClientFactory)
 				   .machineName(TEST_MACHINE_NAME)
 				   .port(TEST_MACHINE_PORT)
-				   .basicAuthentication("username", "password")
-				   .clientFactory(()->client);
+				   .basicAuthentication("username", "password");
 
 		Html5FormsService underTest = svcBuilder.build();
 
 		Html5FormsServiceException ex = assertThrows(Html5FormsServiceException.class, ()->underTest.renderHtml5Form(DUMMY_TEMPLATE_STR));
-		String msg = ex.getMessage();
-		assertNotNull(msg);
-		assertThat(msg, allOf(containsStringIgnoringCase("Call to server failed"),
-							  containsStringIgnoringCase("400"),
-							  containsStringIgnoringCase("Bad Request"),
-							  containsStringIgnoringCase(responseString))
-							 );
-	}
-
-	@Test
-	void testRenderHtml5FormBadResponse() throws Exception {
-		String responseString = "response Document Data";
-		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create(responseString.getBytes());
-
-		setUpJaxRsClientMocks(responseData, MediaType.TEXT_PLAIN_TYPE, Response.Status.OK, true);
-
-		Html5FormsServiceBuilder svcBuilder = Html5FormsService.builder()
-				   .machineName(TEST_MACHINE_NAME)
-				   .port(TEST_MACHINE_PORT)
-				   .basicAuthentication("username", "password")
-				   .clientFactory(()->client);
-
-		Html5FormsService underTest = svcBuilder.build();
-
-		Html5FormsServiceException ex = assertThrows(Html5FormsServiceException.class, ()->underTest.renderHtml5Form(DUMMY_TEMPLATE_STR));
-		String msg = ex.getMessage();
-		assertNotNull(msg);
-		assertThat(msg, allOf(containsStringIgnoringCase("Response from AEM server was not of expected type"),
-							  containsStringIgnoringCase("text/html"),
-							  containsStringIgnoringCase(responseString),
-							  containsStringIgnoringCase("content-type='text/plain'"))
-							 );
+		assertThat(ex, allOf(exceptionMsgContainsAll("Error while POSTing to AEM server"), hasCause(expectedException)));
 	}
 
 	@Test
 	void testRenderHtml5FormBadResponseNoEntity() throws Exception {
 
-		setUpJaxRsClientMocks(SimpleDocumentFactoryImpl.emptyDocument(), MediaType.TEXT_PLAIN_TYPE, Response.Status.OK, false);
-
-		Html5FormsServiceBuilder svcBuilder = Html5FormsService.builder()
+		setupMocks(Optional.empty());
+		when(mockPayloadBuilder.addStringVersion(eq("template"), eq(PathOrUrl.from(DUMMY_TEMPLATE_STR)))).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.addIfNotNull(eq("data"), Mockito.<InputStream>isNull(), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
+		
+		Html5FormsServiceBuilder svcBuilder = Html5FormsService.builder(mockClientFactory)
 				   .machineName(TEST_MACHINE_NAME)
 				   .port(TEST_MACHINE_PORT)
-				   .basicAuthentication("username", "password")
-				   .clientFactory(()->client);
+				   .basicAuthentication("username", "password");
 
 		Html5FormsService underTest = svcBuilder.build();
 
 		Html5FormsServiceException ex = assertThrows(Html5FormsServiceException.class, ()->underTest.renderHtml5Form(DUMMY_TEMPLATE_STR));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
-		assertThat(msg, containsStringIgnoringCase("server failed to return document"));
+		assertThat(msg, containsStringIgnoringCase("Error - empty response from AEM server."));
+	}
+
+	private void setupMocks(Optional<Response> mockedResponse) throws RestClientException {
+		when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.build()).thenReturn(mockPayload);
+		when(mockPayload.postToServer(acceptableContentType.capture())).thenReturn(mockedResponse);
+	}
+	
+	private Optional<Response> setupMockResponse(byte[] responseData, ContentType expectedContentType) throws Exception {
+		when(mockResponse.contentType()).thenReturn(expectedContentType);
+		when(mockResponse.data()).thenReturn(new ByteArrayInputStream(responseData));
+		return Optional.of(mockResponse);
 	}
 
 	
 	@Nested
 	class NullArgumentTests {
 
-		Html5FormsService underTest = Html5FormsService.builder().build();
-		
+		Html5FormsService underTest;
+
+		@BeforeEach
+		void setUp() throws Exception {
+			underTest = Html5FormsService.builder(mockClientFactory).build();
+		}
+
 		@Test 
 		void testRenderHtml5Form_NullTemplateArgumentPathOrUrl() throws Exception { 
 			NullPointerException ex = assertThrows(NullPointerException.class, ()->underTest.renderHtml5Form((PathOrUrl)null));
@@ -406,24 +348,24 @@ class Html5FormsServiceTest {
 
 	}
 
-	private void validateTextFormField(FormDataMultiPart postedData, String fieldName, String expectedData) throws IOException {
-		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
-		assertEquals(1, pdfFields.size());
-
-		FormDataBodyPart pdfPart = pdfFields.get(0);
-		assertEquals(MediaType.TEXT_PLAIN_TYPE, pdfPart.getMediaType());
-		String value = (String) pdfPart.getEntity();
-		assertEquals(expectedData, value);
-	}
-	
-	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {
-		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
-		assertEquals(1, pdfFields.size());
-		
-		FormDataBodyPart pdfPart = pdfFields.get(0);
-		assertEquals(expectedMediaType, pdfPart.getMediaType());
-		byte[] pdfBytes = IOUtils.toByteArray((InputStream) pdfPart.getEntity());
-		assertArrayEquals(expectedData, pdfBytes);  // TODO: Need to figure out how to test for entity.
-	}
+//	private void validateTextFormField(FormDataMultiPart postedData, String fieldName, String expectedData) throws IOException {
+//		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
+//		assertEquals(1, pdfFields.size());
+//
+//		FormDataBodyPart pdfPart = pdfFields.get(0);
+//		assertEquals(MediaType.TEXT_PLAIN_TYPE, pdfPart.getMediaType());
+//		String value = (String) pdfPart.getEntity();
+//		assertEquals(expectedData, value);
+//	}
+//	
+//	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {
+//		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
+//		assertEquals(1, pdfFields.size());
+//		
+//		FormDataBodyPart pdfPart = pdfFields.get(0);
+//		assertEquals(expectedMediaType, pdfPart.getMediaType());
+//		byte[] pdfBytes = IOUtils.toByteArray((InputStream) pdfPart.getEntity());
+//		assertArrayEquals(expectedData, pdfBytes);  // TODO: Need to figure out how to test for entity.
+//	}
 
 }

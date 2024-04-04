@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import com._4point.aem.docservices.rest_services.client.RestClient;
@@ -18,8 +17,8 @@ import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
+import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.output.BatchOptions;
@@ -175,7 +174,7 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 
 			return payload.postToServer(getAcceptType(printConfig.getRenderType()))
 					  .map(RestServicesServiceAdapter::responseToDoc)
-					  .orElseThrow();
+					  .orElseThrow(()->new OutputServiceException("Error - empty response from AEM server."));
 		} catch (IOException e) {
 			throw new OutputServiceException("I/O Error while generating print output. (" + restClient.target() + ").", e);
 		} catch (RestClientException e) {

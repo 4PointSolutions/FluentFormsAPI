@@ -23,6 +23,7 @@ import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.Response;
+import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.fluentforms.api.Document;
@@ -45,7 +46,7 @@ class RestServicesPdfUtilityServiceAdapterTest {
 	@Captor ArgumentCaptor<AemConfig> aemConfig;
 	@Captor ArgumentCaptor<String> servicePath;
 	@Captor ArgumentCaptor<InputStream> postBodyBytes;
-	@Captor ArgumentCaptor<ContentType> acceptableCntentType;
+	@Captor ArgumentCaptor<ContentType> acceptableContentType;
 	@Captor ArgumentCaptor<Supplier<String>> correlationIdFn;
 
 	@BeforeEach
@@ -58,7 +59,9 @@ class RestServicesPdfUtilityServiceAdapterTest {
 		// Given
 		byte[] responseData = "response Document Data".getBytes();
 		ContentType expectedContentType = ContentType.APPLICATION_XDP;
-		setUpMocks(responseData, expectedContentType);
+		setupMocks(setupMockResponse(responseData, expectedContentType));
+
+		when(mockPayloadBuilder.add(eq("document"), postBodyBytes.capture(), eq(ContentType.APPLICATION_PDF))).thenReturn(mockPayloadBuilder);
 		
 		// When
 		RestServicesPdfUtilityServiceAdapter underTest = RestServicesPdfUtilityServiceAdapter.builder(mockClientFactory)
@@ -72,7 +75,7 @@ class RestServicesPdfUtilityServiceAdapterTest {
 
 		// Make sure the correct data was posted.
 		assertArrayEquals(DUMMY_DOC.getInputStream().readAllBytes(), postBodyBytes.getValue().readAllBytes());
-		assertEquals(expectedContentType, acceptableCntentType.getValue());
+		assertEquals(expectedContentType, acceptableContentType.getValue());
 		
 		// Make sure the response is returned transparently in the returned Document.
 		assertArrayEquals(responseData, result.getInputStream().readAllBytes());
@@ -141,12 +144,15 @@ class RestServicesPdfUtilityServiceAdapterTest {
 		assertThat(msg, allOf(containsString("sanitize"), containsString("is not implemented yet")));
 	}
 
-	private void setUpMocks(byte[] responseData, ContentType expectedContentType) throws Exception {
+	private void setupMocks(Optional<Response> mockedResponse) throws RestClientException {
 		when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder);
-		when(mockPayloadBuilder.add(eq("document"), postBodyBytes.capture(), eq(ContentType.APPLICATION_PDF))).thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.build()).thenReturn(mockPayload);
-		when(mockPayload.postToServer(acceptableCntentType.capture())).thenReturn(Optional.of(mockResponse));
+		when(mockPayload.postToServer(acceptableContentType.capture())).thenReturn(mockedResponse);
+	}
+	
+	private Optional<Response> setupMockResponse(byte[] responseData, ContentType expectedContentType) {
 		when(mockResponse.contentType()).thenReturn(expectedContentType);
 		when(mockResponse.data()).thenReturn(new ByteArrayInputStream(responseData));
+		return Optional.of(mockResponse);
 	}
 }

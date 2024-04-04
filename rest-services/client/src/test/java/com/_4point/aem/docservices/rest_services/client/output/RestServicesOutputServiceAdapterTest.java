@@ -1,6 +1,7 @@
 package com._4point.aem.docservices.rest_services.client.output;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static com._4point.aem.docservices.rest_services.client.helpers.AemConfigMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -258,11 +259,7 @@ class RestServicesOutputServiceAdapterTest {
 			 		  ) throws OutputServiceException, RestClientException, IOException {
 			byte[] responseData = "response Document Data".getBytes();
 
-			when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder);
-			when(mockPayloadBuilder.build()).thenReturn(mockPayload);
-			when(mockPayload.postToServer(acceptableContentType.capture())).thenReturn(Optional.of(mockResponse));
-			when(mockResponse.contentType()).thenReturn(responseContentType);
-			when(mockResponse.data()).thenReturn(new ByteArrayInputStream(responseData));
+			setupMocks(setupMockResponse(responseData, responseContentType));
 			
 			if (codePath.hasData()) {
 				when(mockPayloadBuilder.addIfNotNull(eq("data"), eq(DUMMY_DATA), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
@@ -308,6 +305,17 @@ class RestServicesOutputServiceAdapterTest {
 		 
 	 }
 
+	private void setupMocks(Optional<Response> mockedResponse) throws RestClientException {
+		when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.build()).thenReturn(mockPayload);
+		when(mockPayload.postToServer(acceptableContentType.capture())).thenReturn(mockedResponse);
+	}
+	
+	private Optional<Response> setupMockResponse(byte[] responseData, ContentType expectedContentType) {
+		when(mockResponse.contentType()).thenReturn(expectedContentType);
+		when(mockResponse.data()).thenReturn(new ByteArrayInputStream(responseData));
+		return Optional.of(mockResponse);
+	}
 
 	private RestServicesOutputServiceAdapter createAdapter(HappyPaths codePath) {
 		OutputServiceBuilder adapterBuilder = RestServicesOutputServiceAdapter.builder(mockClientFactory)
