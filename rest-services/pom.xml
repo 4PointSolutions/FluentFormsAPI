@@ -101,6 +101,7 @@
         <xml-unit-version>2.9.1</xml-unit-version>
         <xerces-version>2.12.2</xerces-version>
         <wiremock.version>3.4.2</wiremock.version>
+        <_4point-hamcrest-matchers.version>0.0.1-SNAPSHOT</_4point-hamcrest-matchers.version>
 	</properties>
 
 	<build>
@@ -558,6 +559,12 @@
 		    <groupId>org.wiremock</groupId>
 		    <artifactId>wiremock</artifactId>
 		    <version>${wiremock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com._4point.testing</groupId>
+			<artifactId>4point-hamcrest-matchers</artifactId>
+			<version>${_4point-hamcrest-matchers.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
