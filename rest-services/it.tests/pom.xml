@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com._4point.aem.docservices</groupId>
-		<artifactId>rest-services</artifactId>
+		<groupId>com.4point.aem.fluentforms</groupId>
+		<artifactId>rest-services-parent</artifactId>
 		<version>0.0.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>rest-services.it.tests</artifactId>
@@ -50,11 +50,11 @@
 			<scope>test</scope>
 		</dependency>
         <dependency>
-            <groupId>com._4point.aem</groupId>
+            <groupId>com.4point.aem.fluentforms</groupId>
             <artifactId>fluentforms.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com._4point.aem.docservices</groupId>
+            <groupId>com.4point.aem.fluentforms</groupId>
             <artifactId>rest-services.client</artifactId>
         </dependency>
 		<dependency>	<!-- PDF Library for examining PDFs we generate -->

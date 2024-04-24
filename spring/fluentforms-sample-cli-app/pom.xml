@@ -8,7 +8,7 @@
 		<version>3.1.4</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com._4point.aem.fluentforms</groupId>
+	<groupId>com.4point.aem.fluentforms</groupId>
 	<artifactId>fluentforms-sample-cli-app</artifactId>
 	<version>0.0.3-SNAPSHOT</version>
 	<name>Simple Sample App</name>
@@ -33,7 +33,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com._4point.aem.fluentforms</groupId>
+			<groupId>com.4point.aem.fluentforms</groupId>
 			<artifactId>fluentforms-spring-boot-starter</artifactId>
 			<version>0.0.3-SNAPSHOT</version>
 		</dependency>

@@ -2,7 +2,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com._4point.aem.fluentforms</groupId>
+	<groupId>com.4point.aem.fluentforms</groupId>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -36,7 +36,7 @@
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com._4point.aem.fluentforms</groupId>
+			<groupId>com.4point.aem.fluentforms</groupId>
 			<artifactId>fluentforms-spring-boot-autoconfigure</artifactId>
 			<version>${fluentforms-autoconfigure.version}</version>
 		</dependency>

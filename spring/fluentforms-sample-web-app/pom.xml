@@ -7,7 +7,7 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.1.4</version>
 	</parent>
-	<groupId>com._4point.aem.fluentforms</groupId>
+	<groupId>com.4point.aem.fluentforms</groupId>
 	<artifactId>fluentforms-sample-web-app</artifactId>
 	<version>0.0.3-SNAPSHOT</version>
 	<name>Fluent Forms Spring Boot Sample Web Application</name>
@@ -15,7 +15,11 @@
 
 	<properties>
 		<java.version>17</java.version>
+		<!-- Project Dependecies -->
+		<fluentforms-spring-boot-starter.version>0.0.3-SNAPSHOT</fluentforms-spring-boot-starter.version>
+		<!-- Testing Dependencies -->
 		<wiremock.version>3.1.0</wiremock.version>
+		<fourpoint-hamcrest-matchers.version>0.0.2-SNAPSHOT</fourpoint-hamcrest-matchers.version>
 	</properties>
 
 	<distributionManagement>
@@ -62,9 +66,9 @@
 			<artifactId>jackson-dataformat-xml</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com._4point.aem.fluentforms</groupId>
+			<groupId>com.4point.aem.fluentforms</groupId>
 			<artifactId>fluentforms-spring-boot-starter</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${fluentforms-spring-boot-starter.version}</version>
 		</dependency>
 
 		<!-- Testing Dependencies -->
@@ -80,9 +84,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com._4point.testing</groupId>
+			<groupId>com.4point.testing</groupId>
 			<artifactId>4point-hamcrest-matchers</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${fourpoint-hamcrest-matchers.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

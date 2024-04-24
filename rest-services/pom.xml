@@ -11,8 +11,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com._4point.aem.docservices</groupId>
-	<artifactId>rest-services</artifactId>
+	<groupId>com.4point.aem.fluentforms</groupId>
+	<artifactId>rest-services-parent</artifactId>
 	<packaging>pom</packaging>
 	<version>0.0.3-SNAPSHOT</version>
 	<description>AEM Document Services REST Services</description>
@@ -628,12 +628,12 @@
 			</dependency>
 			<!-- Other dependencies -->
 			<dependency>
-				<groupId>com._4point.aem</groupId>
+				<groupId>com.4point.aem.fluentforms</groupId>
 				<artifactId>fluentforms.core</artifactId>
 				<version>${fluentforms.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com._4point.aem.docservices</groupId>
+				<groupId>com.4point.aem.fluentforms</groupId>
 				<artifactId>rest-services.client</artifactId>
 				<version>${rest-services.version}</version>
 			</dependency>
