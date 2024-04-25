@@ -22,20 +22,43 @@
     <artifactId>fluentforms-parent</artifactId>
     <packaging>pom</packaging>
     <version>0.0.3-SNAPSHOT</version>
-    <description>fluent-forms-api</description>
+    <name>fluent-forms-api</name>
+    <description>FluentForms API - </description>
+	<url>https://github.com/4PointSolutions/FluentFormsAPI</url>
+	<inceptionYear>2019</inceptionYear>
 
 	<!--
 	|   This project can be built with the following command line:
-	|   mvn clean install -P adobe-public
+	|   mvn clean install
 	| 
 	|   In order to automatically install the resulting bundle, add the autoInstallBundle profile:
-	|   mvn clean install -P adobe-public,autoInstallBundle
+	|   mvn clean install -P autoInstallBundle
 	|
 	 -->
     <modules>
         <module>core</module>
         <module>examples</module>
     </modules>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>4Point Solutions</name>
+		<url>https://www.4point.com</url>
+	</organization>
+	<developers>
+		<developer>
+			<name>4Point Solutions</name>
+			<email>open.source@4point.com</email>
+			<organization>4Point Solutions Ltd.</organization>
+			<organizationUrl>https://www.4point.com</organizationUrl>
+		</developer>
+	</developers>
 
     <properties>
         <aem.host>localhost</aem.host>
@@ -66,6 +89,8 @@
         <!-- Packaging Maven plugin versions -->
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+		<maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
+		<maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
         <!-- Tools Maven plugin versions -->
         <maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
         <maven-enforcer-plugin.version>3.3.0</maven-enforcer-plugin.version>
@@ -79,6 +104,7 @@
         <content-package-maven-plugin.version>1.0.4</content-package-maven-plugin.version>
         <maven-bundle-plugin.version>5.1.8</maven-bundle-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+		<jreleaser-plugin.version>1.11.0</jreleaser-plugin.version>
         
         <!-- Mutation Testing plugin versions -->
 		<pitest.maven.plugin.version>1.15.3</pitest.maven.plugin.version>
@@ -358,53 +384,6 @@
     </build>
 
     <profiles>
-        <!-- ====================================================== -->
-        <!-- A D O B E P U B L I C P R O F I L E -->
-        <!-- ====================================================== -->
-        <profile>
-            <id>adobe-public</id>
-
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-
-            <properties>
-                <releaseRepository-Id>adobe-public-releases</releaseRepository-Id>
-                <releaseRepository-Name>Adobe Public Releases</releaseRepository-Name>
-                <releaseRepository-URL>https://repo.adobe.com/nexus/content/groups/public</releaseRepository-URL>
-            </properties>
-
-            <repositories>
-                <repository>
-                    <id>adobe-public-releases</id>
-                    <name>Adobe Public Repository</name>
-                    <url>https://repo.adobe.com/nexus/content/groups/public</url>
-                    <releases>
-                        <enabled>true</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
-
-            <pluginRepositories>
-                <pluginRepository>
-                    <id>adobe-public-releases</id>
-                    <name>Adobe Public Repository</name>
-                    <url>https://repo.adobe.com/nexus/content/groups/public</url>
-                    <releases>
-                        <enabled>true</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </pluginRepository>
-            </pluginRepositories>
-        </profile>
-
         <!-- Development profile: install only the bundle -->
         <profile>
             <id>autoInstallBundle</id>
@@ -439,97 +418,156 @@
                 </pluginManagement>
             </build>
         </profile>
-
-        <profile>
-            <id>autoInstallPackage</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.jackrabbit</groupId>
-                            <artifactId>filevault-package-maven-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <id>create-package</id>
-                                    <goals>
-                                        <goal>package</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                        </plugin>
-                        <plugin>
-                            <groupId>com.day.jcr.vault</groupId>
-                            <artifactId>content-package-maven-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <id>install-package</id>
-                                    <goals>
-                                        <goal>install</goal>
-                                    </goals>
-                                    <configuration>
-                                        <targetURL>http://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
-                                    </configuration>
-                                </execution>
-                            </executions>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-
-        <profile>
-            <id>autoInstallPackagePublish</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.jackrabbit</groupId>
-                            <artifactId>filevault-package-maven-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <id>create-package</id>
-                                    <goals>
-                                        <goal>package</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                        </plugin>
-                        <plugin>
-                            <groupId>com.day.jcr.vault</groupId>
-                            <artifactId>content-package-maven-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <id>install-package-publish</id>
-                                    <goals>
-                                        <goal>install</goal>
-                                    </goals>
-                                    <configuration>
-                                        <targetURL>http://${aem.publish.host}:${aem.publish.port}/crx/packmgr/service.jsp</targetURL>
-                                    </configuration>
-                                </execution>
-                            </executions>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-
+		<profile>
+			<!-- Profile for creating a "full" release (with ssigned versions of sources and javadocs) -->
+			<id>full</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>${maven-gpg-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<configuration>
+									<gpgArguments>
+										<arg>--pinentry-mode</arg>
+										<arg>loopback</arg>
+									</gpgArguments>
+								</configuration> 
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>${maven-source-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>${maven-javadoc-plugin.version}</version>
+						<configuration>
+							<encoding>UTF-8</encoding>
+						</configuration>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<!-- Profile for releasing code to Maven Central -->
+			<id>release</id>
+			<build>
+				<plugins>
+					<!--
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>${central-publishing-maven-plugin.version}</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+							<tokenAuth>true</tokenAuth>
+						</configuration>
+					</plugin>
+					-->
+					<plugin>
+						<groupId>org.jreleaser</groupId>
+						<artifactId>jreleaser-maven-plugin</artifactId>
+						<version>${jreleaser-plugin.version}</version>
+						<inherited>false</inherited>
+						<configuration>
+							<jreleaser>
+								<release>
+									<github>
+										<owner>4PointSolutions</owner>
+										<overwrite>true</overwrite>
+									</github>
+								</release>
+								<files>
+									<globs>
+										<glob>
+											<pattern>./target/staging-deploy/**/${project.artifactId}-${project.version}*.*</pattern>
+										</glob>
+									</globs>
+								</files>
+								<deploy>
+									<maven>
+										<github>
+											<githubPackages>
+												<active>ALWAYS</active>
+												<applyMavenCentralRules>false</applyMavenCentralRules>
+												<url>https://maven.pkg.github.com/4PointSolutions/FluentFormsAPI</url>
+												<stagingRepositories>
+													<stagingRepository>./target/staging-deploy</stagingRepository>
+												</stagingRepositories>
+											</githubPackages>
+										</github>
+										<nexus2>
+											<maven-central>
+												<active>NEVER</active>
+												<applyMavenCentralRules>true</applyMavenCentralRules>
+												<url>https://s01.oss.sonatype.org/service/local</url>
+												<stagingRepositories>
+													<stagingRepository>./target/staging-deploy</stagingRepository>
+												</stagingRepositories>
+												<sign>false</sign> <!-- Artifacts are already signed -->
+												<checksums>false</checksums> <!-- Artifacts are already checksummed --> 
+												<closeRepository>false</closeRepository>
+												<releaseRepository>false</releaseRepository>
+											</maven-central>
+										</nexus2>
+									</maven>
+								</deploy>
+							</jreleaser>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
     </profiles>
 
 	<distributionManagement>
-		<repository>
+		<snapshotRepository>
 			<id>github</id>
 			<name>4Point Solutions FluentFormsAPI Apache Maven Packages</name>
 			<url>https://maven.pkg.github.com/4PointSolutions/FluentFormsAPI</url>
+		</snapshotRepository>
+		<repository>
+			<id>localStaging</id>
+			<name>Local Staging Directory</name>
+			<url>file:./target/staging-deploy</url>
 		</repository>
 	</distributionManagement>
-	
+
+	<scm>
+		<connection>scm:git:https://github.com/4PointSolutions/FluentFormsAPI.git</connection>
+		<developerConnection>scm:git:https://github.com/4PointSolutions/FluentFormsAPI.git</developerConnection>
+		<url>https://github.com/4PointSolutions/FluentFormsAPI</url>
+		<tag>HEAD</tag>
+	</scm>
+		
     <!-- ====================================================================== -->
     <!-- D E P E N D E N C I E S -->
     <!-- ====================================================================== -->

@@ -11,12 +11,17 @@
 	<groupId>com.4point.aem.fluentforms</groupId>
 	<artifactId>fluentforms-spring-boot-autoconfigure</artifactId>
 	<version>0.0.3-SNAPSHOT</version>
-	<name>AutoConfigure Project</name>
+	<name>Fluent Forms Spring Boot AutoConfigure Project</name>
+    <description>FluentForms - Spring Boot Autoconfiguration Library</description>
+	<url>https://github.com/4PointSolutions/FluentFormsAPI</url>
+	<inceptionYear>2023</inceptionYear>
 
 	<properties>
 		<java.version>17</java.version>
 		<jasypt.spring.boot.version>3.0.5</jasypt.spring.boot.version>
 		<jasypt.maven.plugin.version>3.0.5</jasypt.maven.plugin.version>
+		<maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+		<jreleaser-plugin.version>1.11.0</jreleaser-plugin.version>
 		<fluentforms.version>0.0.3-SNAPSHOT</fluentforms.version>
 		<fp.hamcrest.matchers.version>0.0.2-SNAPSHOT</fp.hamcrest.matchers.version>
 		<wiremock.version>3.1.0</wiremock.version>
@@ -24,14 +29,46 @@
 		<pitest.junit5.maven.plugin.version>1.2.1</pitest.junit5.maven.plugin.version>
 	</properties>
 
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>4Point Solutions</name>
+		<url>https://www.4point.com</url>
+	</organization>
+	<developers>
+		<developer>
+			<name>4Point Solutions</name>
+			<email>open.source@4point.com</email>
+			<organization>4Point Solutions Ltd.</organization>
+			<organizationUrl>https://www.4point.com</organizationUrl>
+		</developer>
+	</developers>
+
 	<distributionManagement>
-		<repository>
+		<snapshotRepository>
 			<id>github</id>
 			<name>4Point Solutions FluentFormsAPI Apache Maven Packages</name>
 			<url>https://maven.pkg.github.com/4PointSolutions/FluentFormsAPI</url>
+		</snapshotRepository>
+		<repository>
+			<id>localStaging</id>
+			<name>Local Staging Directory</name>
+			<url>file:./target/staging-deploy</url>
 		</repository>
 	</distributionManagement>
 
+	<scm>
+		<connection>scm:git:https://github.com/4PointSolutions/FluentFormsAPI.git</connection>
+		<developerConnection>scm:git:https://github.com/4PointSolutions/FluentFormsAPI.git</developerConnection>
+		<url>https://github.com/4PointSolutions/FluentFormsAPI</url>
+		<tag>HEAD</tag>
+	</scm>
+	
 	<repositories>
 		<repository>
 			<id>github</id>
@@ -41,7 +78,6 @@
 			</snapshots>
 		</repository>
 	</repositories>
-
 	
 	<dependencies>
 		<!-- Project Dependencies -->
@@ -149,5 +185,133 @@
 			</plugin>
 		</plugins>
 	</build>
-
+	
+	<profiles>
+		<profile>
+			<!-- Profile for creating a "full" release (with ssigned versions of sources and javadocs) -->
+			<id>full</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>${maven-gpg-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<configuration>
+									<gpgArguments>
+										<arg>--pinentry-mode</arg>
+										<arg>loopback</arg>
+									</gpgArguments>
+								</configuration> 
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<encoding>UTF-8</encoding>
+						</configuration>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<!-- Profile for releasing code to Maven Central -->
+			<id>release</id>
+			<build>
+				<plugins>
+					<!--
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>${central-publishing-maven-plugin.version}</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+							<tokenAuth>true</tokenAuth>
+						</configuration>
+					</plugin>
+					-->
+					<plugin>
+						<groupId>org.jreleaser</groupId>
+						<artifactId>jreleaser-maven-plugin</artifactId>
+						<version>${jreleaser-plugin.version}</version>
+						<inherited>false</inherited>
+						<configuration>
+							<jreleaser>
+								<release>
+									<github>
+										<owner>4PointSolutions</owner>
+										<overwrite>true</overwrite>
+									</github>
+								</release>
+								<files>
+									<globs>
+										<glob>
+											<pattern>./target/staging-deploy/**/${project.artifactId}-${project.version}*.*</pattern>
+										</glob>
+									</globs>
+								</files>
+								<deploy>
+									<maven>
+										<github>
+											<githubPackages>
+												<active>ALWAYS</active>
+												<applyMavenCentralRules>false</applyMavenCentralRules>
+												<url>https://maven.pkg.github.com/4PointSolutions/FluentFormsAPI</url>
+												<stagingRepositories>
+													<stagingRepository>./target/staging-deploy</stagingRepository>
+												</stagingRepositories>
+											</githubPackages>
+										</github>
+										<nexus2>
+											<maven-central>
+												<active>NEVER</active>
+												<applyMavenCentralRules>true</applyMavenCentralRules>
+												<url>https://s01.oss.sonatype.org/service/local</url>
+												<stagingRepositories>
+													<stagingRepository>./target/staging-deploy</stagingRepository>
+												</stagingRepositories>
+												<sign>false</sign> <!-- Artifacts are already signed -->
+												<checksums>false</checksums> <!-- Artifacts are already checksummed --> 
+												<closeRepository>false</closeRepository>
+												<releaseRepository>false</releaseRepository>
+											</maven-central>
+										</nexus2>
+									</maven>
+								</deploy>
+							</jreleaser>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
