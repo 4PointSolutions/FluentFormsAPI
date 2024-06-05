@@ -39,3 +39,47 @@ somewhere besides the root of the web server.  Normally, all secondary resources
 be set to `/clientApp` (as in `fluentforms.rproxy.clientPrefix=/clientApp`).
 
 `fluentforms.rproxy.afBaseLocation` - TBD - This needs to be documented.
+
+
+## Encrypting Configuration Property Values (such as passwords)
+
+Some of the settings in the properties files contains usernames and passwords that, for security reasons, should not be stored in plain text. These can be encrypted using Jasypt and stored in the application.properties or profile properties files surrounded by ENC() to denote an encrypted property. The application will automatically decode these encrypted passwords if the encrypted properties are enabled.
+
+The fluentforms Spring Boot starter uses a [jasypt-spring-boot-starter](https://github.com/ulisesbocchio/jasypt-spring-boot). To enable encrypted properties, create properties in the `src/main/resources` directory of your application project and add the following properties:
+```
+jasypt.encryptor.algorithm=PBEWITHHMACSHA512ANDAES_256
+jasypt.encryptor.password=4Point
+jasypt.encryptor.iv-generator-classname=org.jasypt.iv.RandomIvGenerator
+jasypt.encryptor.salt-generator-classname=org.jasypt.salt.RandomSaltGenerator
+```
+
+To encode usernames or passwords, perform the following steps:
+
+1. Download the latest jasypt distribution release from [https://github.com/jasypt/jasypt/releases](https://github.com/jasypt/jasypt/releases) (1.9.3 at the time of this writing)
+2. Open the .zip and extract the directory to root (so creating `C:\jasypt-1.9.3`)
+3. CD into the new directory (i.e. `cd C:\jasypt-1.9.3`)
+4. Run the following command: `bin\encrypt.bat "password=4Point" "algorithm=PBEWITHHMACSHA512ANDAES_256" "saltGeneratorClassName=org.jasypt.salt.RandomSaltGenerator" "ivGeneratorClassName=org.jasypt.iv.RandomIvGenerator" "input=<username or password>"` where _\<username or password\>_ is the string you wish to encrypt.
+5. This will produce some output like this:
+```
+----ENVIRONMENT-----------------
+
+Runtime: Oracle Corporation Java HotSpot(TM) 64-Bit Server VM 11.0.12+8-LTS-237
+
+----ARGUMENTS-------------------
+
+input: testPassword
+
+password: 4Point
+
+saltGeneratorClassName: org.jasypt.salt.RandomSaltGenerator
+
+ivGeneratorClassName: org.jasypt.iv.RandomIvGenerator
+
+algorithm: PBEWITHHMACSHA512ANDAES_256
+
+----OUTPUT----------------------
+
+ZvyYeP694ZXtlp7VfjziAiayVLrnV5NiSqB4fdhDn9DZw6OMWMcN5CHBB4tCQFo+
+```
+6. Place the encoded string in the correct property within the .properties file surrounded by ENC(). For example:`fluentforms.aem.password=ENC(ZvyYeP694ZXtlp7VfjziAiayVLrnV5NiSqB4fdhDn9DZw6OMWMcN5CHBB4tCQFo+)`
+7. Restart the application
