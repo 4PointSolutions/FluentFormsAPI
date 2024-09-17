@@ -68,7 +68,11 @@ class SmokeTest {
 			
 			if (!GraphicsEnvironment.isHeadless()) {
 				Desktop desktop = Desktop.getDesktop();
-				desktop.browse(outLocation.toAbsolutePath().toUri());
+				try {
+					desktop.browse(outLocation.toAbsolutePath().toUri());
+				} catch (UnsupportedOperationException e) {
+					System.out.println("Bypassed Desktop Launch");
+				}
 			} else {
 				System.out.println("Bypassing Desktop Launch");
 			}
