@@ -27,31 +27,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.impl.UsageContext;
-import com._4point.aem.fluentforms.impl.output.OutputServiceImpl;
-import com.adobe.fd.output.api.AcrobatVersion;
+import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
+import com.adobe.fd.forms.api.AcrobatVersion;
 
 class SmokeTest {
 
     public static void main(String... args) {
 		
 		try {
-			Path outLocation = Files.createTempFile("AemOutput_SmokeTest", ".pdf");
+			Path outLocation = Files.createTempFile("AemForms_SmokeTest", ".pdf");
 			
 			// If AEM is not localhost:4502 or does not use default credentials, change the values below. 
-			var adapter = RestServicesOutputServiceAdapter.builder()
+			var adapter = RestServicesFormsServiceAdapter.builder()
 					.machineName("localhost")
 					.port(4502)
 					.basicAuthentication("admin", "admin")
 					.useSsl(false)
 					.build();
 
-			var underTest = new OutputServiceImpl(adapter, UsageContext.CLIENT_SIDE);
+			var underTest = new FormsServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 			
 			
-			var builder = underTest.generatePDFOutput()
+			var builder = underTest.renderPDFForm()
 					.setAcrobatVersion(AcrobatVersion.Acrobat_10_1)
 					.setEmbedFonts(true)
 					// Less used parameters are commented out which leaves them at default.
