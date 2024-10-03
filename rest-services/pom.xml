@@ -81,7 +81,7 @@
 		<!-- Project dependencies -->
 		<jersey.version>3.1.0</jersey.version>
 		<jaxb.version>4.0.0</jaxb.version>
-		<commons-io.version>2.7</commons-io.version>
+		<commons-io.version>2.14.0</commons-io.version>
 		<sling.servlet-helpers.version>1.2.0</sling.servlet-helpers.version>
 		<fluentforms.version>0.0.3-SNAPSHOT</fluentforms.version>
 		<rest-services.version>0.0.3-SNAPSHOT</rest-services.version>
