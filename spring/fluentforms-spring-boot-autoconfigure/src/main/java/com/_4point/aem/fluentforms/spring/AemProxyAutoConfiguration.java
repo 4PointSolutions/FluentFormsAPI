@@ -2,6 +2,7 @@ package com._4point.aem.fluentforms.spring;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
 
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
@@ -43,8 +45,8 @@ public class AemProxyAutoConfiguration {
 	 * 		JAX-RS Resources (i.e. endpoints)
 	 */
 	@Bean
-	public ResourceConfigCustomizer afProxyConfigurer(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig) {
-		return config->config.register(new AemProxyEndpoint(aemConfig, aemProxyConfig))
+	public ResourceConfigCustomizer afProxyConfigurer(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, @Autowired(required = false) SslBundles sslBundles) {
+		return config->config.register(new AemProxyEndpoint(aemConfig, aemProxyConfig, sslBundles))
 					  		 .register(new AemProxyAfSubmission())
 					  		 ;
 	}
@@ -85,8 +87,8 @@ public class AemProxyAutoConfiguration {
 	 */
 	@ConditionalOnMissingBean({AfSubmitProcessor.class, AfSubmissionHandler.class})
 	@Bean()
-	public AfSubmitProcessor aemSubmitProcessor(AemConfiguration aemConfig) {
-		return new AfSubmitAemProxyProcessor(aemConfig);
+	public AfSubmitProcessor aemSubmitProcessor(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
+		return new AfSubmitAemProxyProcessor(aemConfig, sslBundles);
 	}
 	
 	/**
@@ -105,7 +107,7 @@ public class AemProxyAutoConfiguration {
 	@ConditionalOnMissingBean(InternalAfSubmitAemProxyProcessor.class)
 	@ConditionalOnBean(AfSubmissionHandler.class)
 	@Bean
-	public InternalAfSubmitAemProxyProcessor aemProxyProcessor(AemConfiguration aemConfig) {
-		return ()->new AfSubmitAemProxyProcessor(aemConfig);
+	public InternalAfSubmitAemProxyProcessor aemProxyProcessor(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
+		return ()->new AfSubmitAemProxyProcessor(aemConfig, sslBundles);
 	}
 }

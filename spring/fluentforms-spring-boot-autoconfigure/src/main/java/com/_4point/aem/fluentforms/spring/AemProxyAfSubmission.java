@@ -16,14 +16,13 @@ import java.util.regex.Pattern;
 
 import org.glassfish.jersey.client.ChunkedInput;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
 
@@ -34,7 +33,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Context;
@@ -176,9 +174,9 @@ public class AemProxyAfSubmission {
 		private final AemConfiguration aemConfig;
 		private final Client httpClient;
 		
-		public AfSubmitAemProxyProcessor(AemConfiguration aemConfig) {
+		public AfSubmitAemProxyProcessor(AemConfiguration aemConfig, SslBundles sslBundles) {
 			this.aemConfig = aemConfig;
-	    	this.httpClient = ClientBuilder.newClient().register(HttpAuthenticationFeature.basic(aemConfig.user(), aemConfig.password())).register(MultiPartFeature.class);
+	    	this.httpClient = JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle(), aemConfig.user(), aemConfig.password());
 		}
 
 		@Override
