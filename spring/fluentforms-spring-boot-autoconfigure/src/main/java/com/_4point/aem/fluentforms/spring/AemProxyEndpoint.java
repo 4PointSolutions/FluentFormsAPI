@@ -7,27 +7,26 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import javax.naming.ConfigurationException;
+
+import org.glassfish.jersey.client.ChunkedInput;
+import org.glassfish.jersey.server.ChunkedOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.ssl.SslBundles;
+
+import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
+
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import org.glassfish.jersey.client.ChunkedInput;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.server.ChunkedOutput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
 
 /**
  * Reverse Proxy Code which reverse proxies secondary resources (.css, .js, etc.) that the browser will request.
@@ -55,10 +54,10 @@ public class AemProxyEndpoint {
     /**
      * 
      */
-    public AemProxyEndpoint(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig) {
+    public AemProxyEndpoint(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, SslBundles sslBundles) {
     	this.aemProxyConfig = aemProxyConfig;
     	this.aemConfig = aemConfig;
-    	this.httpClient = ClientBuilder.newClient().register(HttpAuthenticationFeature.basic(aemConfig.user(), aemConfig.password())).register(MultiPartFeature.class);
+    	this.httpClient = JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle(), aemConfig.user(), aemConfig.password());
 	}
 
     @Path("libs/granite/csrf/token.json")

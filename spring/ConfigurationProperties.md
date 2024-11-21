@@ -26,6 +26,9 @@ spring boot starter web site for more details.
 can be `true` or `false`.  `true` will tell FLuentForms to log in with https, `false` will result in an http connection.  This 
 property is optional, and it defaults to `false` if it is not supplied.
 
+`fluentforms.aem.sslBundle` - This is the name used to locate a Spring Security SSL Bundle that will be used as a trust store 
+for SSL HTTPS connections to AEM.  This property is optional, and it defaults to `aem` if it is not supplied.
+
 ### Adaptive Forms
 
 `fluentforms.rproxy.enabled` - This is used to enable/disable the reverse proxying of secondary resources to AEM.  If it is 
