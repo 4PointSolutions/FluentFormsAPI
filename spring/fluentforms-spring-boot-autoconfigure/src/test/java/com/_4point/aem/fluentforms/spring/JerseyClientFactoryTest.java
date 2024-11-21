@@ -2,8 +2,6 @@ package com._4point.aem.fluentforms.spring;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.security.NoSuchAlgorithmException;
-
 import javax.net.ssl.SSLContext;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
