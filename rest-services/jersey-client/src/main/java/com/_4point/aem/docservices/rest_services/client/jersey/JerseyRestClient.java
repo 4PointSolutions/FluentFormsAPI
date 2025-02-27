@@ -118,7 +118,7 @@ public class JerseyRestClient implements RestClient {
 
 				String responseContentType = response.getHeaderString(HttpHeaders.CONTENT_TYPE);
 				if ( responseContentType == null || !expectedMediaType.isCompatible(MediaType.valueOf(responseContentType))) {
-					String msg = "Response from AEM server was not of expected type(" + expectedMediaType.toString() + ").  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
+					String msg = "Response from AEM server was not of expected type (" + expectedMediaType.toString() + ").  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
 					InputStream entityStream = (InputStream) response.getEntity();
 					msg += "\n" + inputStreamtoString(entityStream);
 					throw new RestClientException(msg);
