@@ -88,14 +88,13 @@
 		<rest-services.version>0.0.3-SNAPSHOT</rest-services.version>
 
 		<!-- Testing dependencies -->
-        <mockito.version>5.10.0</mockito.version>
-        <junit.version>5.10.2</junit.version>
+        <mockito.version>5.15.2</mockito.version>
+        <junit.version>5.11.4</junit.version>
         <wcm.mocks.version>3.0.0</wcm.mocks.version> <!-- Versions later than this produce a org.reflections.ReflectionsException: Scanner TypeAnnotationsScanner was not configured error -->
         <slf4j-test.version>1.2.0</slf4j-test.version>
         <slf4j.version>1.7.26</slf4j.version>
-        <hamcrest.version>2.2</hamcrest.version>
-        <junit-addons.version>1.4</junit-addons.version>
-        <pdfbox.version>2.0.28</pdfbox.version>
+        <hamcrest.version>3.0</hamcrest.version>
+        <pdfbox.version>3.0.4</pdfbox.version>
         <jsoup.version>1.16.1</jsoup.version>
         <jcabi-xml-version>0.27.2</jcabi-xml-version>
         <xml-unit-version>2.9.1</xml-unit-version>
@@ -528,26 +527,6 @@
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<version>${mockito.version}</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit-addons</groupId>
-			<artifactId>junit-addons</artifactId>
-			<version>${junit-addons.version}</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>	<!-- Exclude this really old version of junit that junit-addons depends on -->
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-				<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends on -->
-					<groupId>xerces</groupId>
-					<artifactId>xercesImpl</artifactId>
-				</exclusion>
-				<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends on -->
-					<groupId>xerces</groupId>
-					<artifactId>xmlParserAPIs</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.pitest</groupId>
