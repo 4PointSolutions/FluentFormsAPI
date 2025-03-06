@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -108,6 +109,15 @@ public interface RestClient {
 			}
 			default <T> Builder addStringVersion(String fieldName, T fieldData) {
 				return fieldData != null ? addIfNotNull(fieldName, fieldData.toString()) : this;
+			}
+			default <T, O> Builder transformAndAddStringVersion(String fieldName, T fieldData, Function<T, O> fn) {
+				return fieldData != null ? addStringVersion(fieldName, fn.apply(fieldData)) : this;
+			}
+			default Builder addStringVersion(String fieldName, List<?> fieldData) {
+				for (Object obj : fieldData) {
+					addStringVersion(fieldName, obj);
+				}
+				return this;
 			}
 			Builder queryParam(String name, String value);
 			Builder addHeader(String name, String value);
