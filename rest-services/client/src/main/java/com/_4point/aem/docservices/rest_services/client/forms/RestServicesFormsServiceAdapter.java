@@ -153,7 +153,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 	}
 	
 	public static class FormsServiceBuilder implements Builder {
-		private BuilderImpl builder;
+		private final BuilderImpl builder;
 		
 		private FormsServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
             this.builder = new BuilderImpl(clientFactory);

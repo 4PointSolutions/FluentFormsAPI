@@ -119,7 +119,7 @@ public class RestServicesGeneratePDFServiceAdapter extends RestServicesServiceAd
 	}
 
 	public static class GeneratePDFServiceBuilder implements Builder {
-		private BuilderImpl builder;
+		private final BuilderImpl builder;
 
 		public GeneratePDFServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
 			this.builder = new BuilderImpl(clientFactory);
