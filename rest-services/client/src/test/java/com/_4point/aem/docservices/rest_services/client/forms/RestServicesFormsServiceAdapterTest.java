@@ -271,7 +271,6 @@ class RestServicesFormsServiceAdapterTest {
 	}
 
 
-	// TODO:  Add separate Builder class tests for testing the FormsByulder class
 	static class FormsServiceBuilderTests {
 		@Mock RestClient mockClient;
 
