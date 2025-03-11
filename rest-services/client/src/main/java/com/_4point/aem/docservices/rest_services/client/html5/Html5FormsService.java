@@ -32,7 +32,7 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 	private final RestClient renderHtml5FormRestClient;
 	private final Function<InputStream, InputStream> responseFilter; 
 
-	protected Html5FormsService(BuilderImpl builder, Supplier<String> correlationIdFn, Function<InputStream, InputStream> responseFilter) {
+	private Html5FormsService(BuilderImpl builder, Supplier<String> correlationIdFn, Function<InputStream, InputStream> responseFilter) {
 		super(correlationIdFn);
 		this.renderHtml5FormRestClient = builder.createClient(HTML5_SERVICE_NAME, RENDER_HTML5_METHOD_NAME);
 		this.responseFilter = responseFilter != null ? responseFilter : Function.identity();

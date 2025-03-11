@@ -62,7 +62,7 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 
 	private final RestClient secureDocumentRestClient;
 
-	RestServicesDocAssuranceServiceAdapter(BuilderImpl builder, Supplier<String> correlationIdFn) {
+	private RestServicesDocAssuranceServiceAdapter(BuilderImpl builder, Supplier<String> correlationIdFn) {
         super(correlationIdFn);;
 		this.secureDocumentRestClient = builder.createClient(SECURE_DOCUMENT_SERVICE_NAME, SECURE_DOCUMENT_METHOD_NAME);
 	}
