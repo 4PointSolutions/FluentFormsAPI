@@ -2,14 +2,18 @@ package com._4point.aem.docservices.rest_services.client.docassurance;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-
+import com._4point.aem.docservices.rest_services.client.RestClient;
+import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
+import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
+import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
+import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
@@ -20,6 +24,7 @@ import com.adobe.fd.docassurance.client.api.SignatureOptions;
 import com.adobe.fd.encryption.client.EncryptionTypeResult;
 import com.adobe.fd.readerextensions.client.GetUsageRightsResult;
 import com.adobe.fd.readerextensions.client.ReaderExtensionsOptionSpec;
+import com.adobe.fd.readerextensions.client.UsageRights;
 import com.adobe.fd.signatures.client.types.FieldMDPOptionSpec;
 import com.adobe.fd.signatures.client.types.PDFDocumentVerificationInfo;
 import com.adobe.fd.signatures.client.types.PDFSeedValueOptionSpec;
@@ -32,10 +37,6 @@ import com.adobe.fd.signatures.client.types.VerificationTime;
 import com.adobe.fd.signatures.pdf.inputs.UnlockOptions;
 import com.adobe.fd.signatures.pdf.inputs.ValidationPreferences;
 import com.adobe.fd.signatures.pki.client.types.common.RevocationCheckStyle;
-
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.Response;
 
 public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceAdapter implements TraditionalDocAssuranceService {
 
@@ -58,79 +59,62 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 	private static final String ENABLED_ONLINE_FORMS_PARAM = "usageRights.enabledOnlineForms";
 	private static final String ENABLED_SUBMIT_STANDALONE_PARAM = "usageRights.enabledSubmitStandalone";
 
-	// Only callable from Builder
-	private RestServicesDocAssuranceServiceAdapter(WebTarget target, Supplier<String> correlationId, AemServerType aemServerType) {
-		super(target, correlationId, aemServerType);
+
+	private final RestClient secureDocumentRestClient;
+
+	RestServicesDocAssuranceServiceAdapter(BuilderImpl builder, Supplier<String> correlationIdFn) {
+        super(correlationIdFn);;
+		this.secureDocumentRestClient = builder.createClient(SECURE_DOCUMENT_SERVICE_NAME, SECURE_DOCUMENT_METHOD_NAME);
 	}
+
 
 	@Override
 	public Document secureDocument(Document inDocument, EncryptionOptions encryptionOptions, SignatureOptions signatureOptions, ReaderExtensionOptions readerExtensionOptions,
 			UnlockOptions unlockOptions) throws DocAssuranceServiceException {
-		WebTarget secureDocTarget = baseTarget.path(constructStandardPath(SECURE_DOCUMENT_SERVICE_NAME, SECURE_DOCUMENT_METHOD_NAME));
-		
-		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			if (encryptionOptions != null) {
-				// TODO Implement this
-				throw new UnsupportedOperationException("Encryption support has not yet been added to FluentForms library.");
-			}
-			
-			if (signatureOptions != null) {
-				// TODO Implement this
-				throw new UnsupportedOperationException("Digital Signature support has not yet been added to FluentForms library.");
-			}
-
-			if (readerExtensionOptions != null) {
-				String credentialAlias = readerExtensionOptions.getCredentialAlias();
-				ReaderExtensionsOptionSpec reOptionsSpec = readerExtensionOptions.getReOptions();
-				
-				multipart.field(DOCUMENT_PARAM, inDocument.getInputStream(), APPLICATION_PDF);
-				multipart.field(CREDENTIAL_ALIAS_PARAM, credentialAlias);
-
-				if (reOptionsSpec != null) {
-					String message = reOptionsSpec.getMessage();
-					Boolean isModeFinal = reOptionsSpec.isModeFinal();
-					Boolean enabledBarcodeDecoding = reOptionsSpec.getUsageRights().isEnabledBarcodeDecoding();
-					Boolean enabledComments = reOptionsSpec.getUsageRights().isEnabledComments();
-					Boolean enabledCommentsOnline = reOptionsSpec.getUsageRights().isEnabledCommentsOnline();
-					Boolean enabledDigitalSignatures = reOptionsSpec.getUsageRights().isEnabledDigitalSignatures();
-					Boolean enabledDynamicFormFields = reOptionsSpec.getUsageRights().isEnabledDynamicFormFields();
-					Boolean enabledDynamicFormPages = reOptionsSpec.getUsageRights().isEnabledDynamicFormPages();
-					Boolean enabledEmbeddedFiles = reOptionsSpec.getUsageRights().isEnabledEmbeddedFiles();
-					Boolean enabledFormDateImportExport = reOptionsSpec.getUsageRights().isEnabledFormDataImportExport();
-					Boolean enabledFormFillIn = reOptionsSpec.getUsageRights().isEnabledFormFillIn();
-					Boolean enabledOnlineForms = reOptionsSpec.getUsageRights().isEnabledOnlineForms();
-					Boolean enabledSubmitStandalone = reOptionsSpec.getUsageRights().isEnabledSubmitStandalone();
-
-					// Set fields for non-null values. 
-					MultipartTransformer.create(multipart)
-										.transform((t)->message == null ? t : t.field(MESSAGE_PARAM, message))
-										.transform((t)->isModeFinal == null ? t : t.field(IS_MODE_FINAL_PARAM, isModeFinal.toString()))
-										.transform((t)->enabledBarcodeDecoding == null ? t : t.field(ENABLED_BARCODED_DECODING_PARAM, enabledBarcodeDecoding.toString()))
-										.transform((t)->enabledComments == null ? t : t.field(ENABLED_COMMENTS_PARAM, enabledComments.toString()))
-										.transform((t)->enabledCommentsOnline == null ? t : t.field(ENABLED_COMMENTS_ONLINE_PARAM, enabledCommentsOnline.toString()))
-										.transform((t)->enabledDigitalSignatures == null ? t : t.field(ENABLED_DIGITAL_SIGNATURES_PARAM, enabledDigitalSignatures.toString()))
-										.transform((t)->enabledDynamicFormFields == null ? t : t.field(ENABLED_DYNAMIC_FORM_FIELDS_PARAM, enabledDynamicFormFields.toString()))
-										.transform((t)->enabledDynamicFormPages == null ? t : t.field(ENABLED_DYNAMIC_FORM_PAGES_PARAM, enabledDynamicFormPages.toString()))
-										.transform((t)->enabledEmbeddedFiles == null ? t : t.field(ENABLED_EMBEDDED_FILES_PARAM, enabledEmbeddedFiles.toString()))
-										.transform((t)->enabledFormDateImportExport == null ? t : t.field(ENABLED_FORM_DATA_IMPORT_EXPORT_PARAM, enabledFormDateImportExport.toString()))
-										.transform((t)->enabledFormFillIn == null ? t : t.field(ENABLED_FORM_FILL_IN_PARAM, enabledFormFillIn.toString()))
-										.transform((t)->enabledOnlineForms == null ? t : t.field(ENABLED_ONLINE_FORMS_PARAM, enabledOnlineForms.toString()))
-										.transform((t)->enabledSubmitStandalone == null ? t : t.field(ENABLED_SUBMIT_STANDALONE_PARAM, enabledSubmitStandalone.toString()));
-				}
-			}
-			
-			if (unlockOptions != null) {
-				// TODO Auto-generated method stub
-			}
-
-			Response result = postToServer(secureDocTarget, multipart, APPLICATION_PDF);
-
-			return responseToDoc(result, APPLICATION_PDF, msg->new DocAssuranceServiceException(msg));			
-		} catch (IOException e) {
-			throw new DocAssuranceServiceException("I/O Error while reader extending the document. (" + baseTarget.getUri().toString() + ").", e);
-		} catch (RestServicesServiceException e) {
-			throw new DocAssuranceServiceException("Error while POSTing to server", e);
+		Objects.requireNonNull(inDocument, "Input document cannot be null.");
+		if (encryptionOptions != null) {
+			// TODO Implement this
+			throw new UnsupportedOperationException("Encryption support has not yet been added to FluentForms library.");
 		}
+
+		if (signatureOptions != null) {
+			// TODO Implement this
+			throw new UnsupportedOperationException("Digital Signature support has not yet been added to FluentForms library.");
+		}
+
+		if (unlockOptions != null) {
+			// TODO Implement this
+			throw new UnsupportedOperationException("Unlock Options support has not yet been added to FluentForms library.");
+		}
+
+		ReaderExtensionsOptionSpec reOptionsSpec = readerExtensionOptions != null ? readerExtensionOptions.getReOptions() : null;
+		String reCredentialAlias = readerExtensionOptions != null ? Objects.requireNonNull(readerExtensionOptions.getCredentialAlias(), "Reader Extensions credential alias cannot be null.") : null;
+		UsageRights reUsageOptionsSpec = reOptionsSpec != null ? reOptionsSpec.getUsageRights() : null;
+        try (MultipartPayload payload = secureDocumentRestClient.multipartPayloadBuilder()
+        														.add(DOCUMENT_PARAM, inDocument, ContentType.APPLICATION_PDF)
+        														.addIfNotNull(CREDENTIAL_ALIAS_PARAM, reCredentialAlias)
+        														.transformAndAdd(MESSAGE_PARAM, reOptionsSpec, ReaderExtensionsOptionSpec::getMessage)
+        														.transformAndAddStringVersion(IS_MODE_FINAL_PARAM, reOptionsSpec, ReaderExtensionsOptionSpec::isModeFinal)
+        														.transformAndAddStringVersion(ENABLED_BARCODED_DECODING_PARAM, reUsageOptionsSpec, UsageRights::isEnabledBarcodeDecoding)
+        														.transformAndAddStringVersion(ENABLED_COMMENTS_PARAM, reUsageOptionsSpec,  UsageRights::isEnabledComments)
+        														.transformAndAddStringVersion(ENABLED_COMMENTS_ONLINE_PARAM, reUsageOptionsSpec,  UsageRights::isEnabledCommentsOnline)
+        														.transformAndAddStringVersion(ENABLED_DIGITAL_SIGNATURES_PARAM, reUsageOptionsSpec,  UsageRights::isEnabledDigitalSignatures)
+        														.transformAndAddStringVersion(ENABLED_DYNAMIC_FORM_FIELDS_PARAM, reUsageOptionsSpec,  UsageRights::isEnabledDynamicFormFields)
+        														.transformAndAddStringVersion(ENABLED_DYNAMIC_FORM_PAGES_PARAM, reUsageOptionsSpec,  UsageRights::isEnabledDynamicFormPages)
+        														.transformAndAddStringVersion(ENABLED_EMBEDDED_FILES_PARAM, reUsageOptionsSpec,  UsageRights::isEnabledEmbeddedFiles)
+        														.transformAndAddStringVersion(ENABLED_FORM_DATA_IMPORT_EXPORT_PARAM, reUsageOptionsSpec,  UsageRights::isEnabledFormDataImportExport)
+        														.transformAndAddStringVersion(ENABLED_FORM_FILL_IN_PARAM, reUsageOptionsSpec,  UsageRights::isEnabledFormFillIn)
+        														.transformAndAddStringVersion(ENABLED_ONLINE_FORMS_PARAM, reUsageOptionsSpec,  UsageRights::isEnabledOnlineForms)
+        														.transformAndAddStringVersion(ENABLED_SUBMIT_STANDALONE_PARAM, reUsageOptionsSpec,  UsageRights::isEnabledSubmitStandalone)
+        														.build()) {
+            return payload.postToServer(ContentType.APPLICATION_PDF)
+      			 		  .map(RestServicesServiceAdapter::responseToDoc)
+      			 		  .orElseThrow();
+        } catch (IOException e) {
+            throw new DocAssuranceServiceException("I/O Error while securing document. (" + secureDocumentRestClient.target() + ").", e);
+        } catch (RestClientException e) {
+            throw new DocAssuranceServiceException("Error while POSTing to server (" + secureDocumentRestClient.target() + ").", e);
+        }
 	}
 
 	@Override
@@ -241,16 +225,15 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 	 * 
 	 * @return build object
 	 */
-	public static DocAssuranceServiceBuilder builder() {
-		return new DocAssuranceServiceBuilder();
+	public static DocAssuranceServiceBuilder builder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+		return new DocAssuranceServiceBuilder(clientFactory);
 	}
 	
 	public static class DocAssuranceServiceBuilder implements Builder {
-		private BuilderImpl builder = new BuilderImpl();
-//		private final static Supplier<Client> defaultClientFactory = ()->ClientBuilder.newClient();
+		private final BuilderImpl builder;
 		
-		private DocAssuranceServiceBuilder() {
-			super();
+		private DocAssuranceServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+			builder = new BuilderImpl(clientFactory);
 		}
 
 		@Override
@@ -272,12 +255,6 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 		}
 
 		@Override
-		public DocAssuranceServiceBuilder clientFactory(Supplier<Client> clientFactory) {
-			builder.clientFactory(clientFactory);
-			return this;
-		}
-
-		@Override
 		public DocAssuranceServiceBuilder basicAuthentication(String username, String password) {
 			builder.basicAuthentication(username, password);
 			return this;
@@ -295,11 +272,6 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 		}
 
 		@Override
-		public WebTarget createLocalTarget() {
-			return builder.createLocalTarget();
-		}
-
-		@Override
 		public DocAssuranceServiceBuilder aemServerType(AemServerType serverType) {
 			builder.aemServerType(serverType);
 			return this;
@@ -311,7 +283,7 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 		}
 
 		public RestServicesDocAssuranceServiceAdapter build() {
-			return new RestServicesDocAssuranceServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType());
+			return new RestServicesDocAssuranceServiceAdapter(builder, this.getCorrelationIdFn());
 		}
 	}
 }
