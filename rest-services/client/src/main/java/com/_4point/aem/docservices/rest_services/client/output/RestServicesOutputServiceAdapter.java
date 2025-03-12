@@ -3,8 +3,6 @@ package com._4point.aem.docservices.rest_services.client.output;
 //import static com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter.;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -20,16 +18,12 @@ import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
-import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.output.BatchOptions;
 import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
-import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.output.TraditionalOutputService;
-import com.adobe.fd.output.api.AcrobatVersion;
-import com.adobe.fd.output.api.PaginationOverride;
 import com.adobe.fd.output.api.RenderType;
 
 public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter implements TraditionalOutputService {
@@ -81,31 +75,20 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 		}
 		Objects.requireNonNull(pdfOutputOptions, "PdfOutputOptions Argument cannot be null.");
 		
-		AcrobatVersion acrobatVersion = pdfOutputOptions.getAcrobatVersion();
-		PathOrUrl contentRoot = pdfOutputOptions.getContentRoot();
-		Path debugDir = pdfOutputOptions.getDebugDir();
-		Boolean embedFonts = pdfOutputOptions.getEmbedFonts();
-		Boolean linearizedPDF = pdfOutputOptions.getLinearizedPDF();
-		Locale locale = pdfOutputOptions.getLocale();
-		Boolean retainPDFFormState = pdfOutputOptions.getRetainPDFFormState();
-		Boolean retainUnsignedSignatureFields = pdfOutputOptions.getRetainUnsignedSignatureFields();
-		Boolean taggedPDF = pdfOutputOptions.getTaggedPDF();
-		Document xci = pdfOutputOptions.getXci();
-
 		try(MultipartPayload payload = generatePdfOoutputRestClient.multipartPayloadBuilder()
 				 								 .addIfNotNull(DATA_PARAM, data, ContentType.APPLICATION_XML)
 				 								 .addIfNotNull(TEMPLATE_PARAM, template, ContentType.APPLICATION_XDP)	// We're currently labeling everything as an XDP but we accept PDFs too.
 				 								 .addIfNotNull(TEMPLATE_PARAM, templateStr)
-				 								 .addStringVersion(ACROBAT_VERSION_PARAM, acrobatVersion)
-				 								 .addStringVersion(CONTENT_ROOT_PARAM, contentRoot)
-				 								 .addStringVersion(DEBUG_DIR_PARAM, debugDir)
-				 								 .addStringVersion(EMBED_FONTS_PARAM, embedFonts)
-				 								 .addStringVersion(LINEARIZED_PDF_PARAM, linearizedPDF)
-				 								 .addStringVersion(LOCALE_PARAM, locale)
-				 								 .addStringVersion(RETAIN_PDF_FORM_STATE_PARAM, retainPDFFormState)
-				 								 .addStringVersion(RETAIN_UNSIGNED_SIGNATURE_FIELDS_PARAM, retainUnsignedSignatureFields)
-				 								 .addStringVersion(TAGGED_PDF_PARAM, taggedPDF)
-				 								 .addIfNotNull(XCI_PARAM, xci, ContentType.APPLICATION_XML)
+				 								 .addStringVersion(ACROBAT_VERSION_PARAM, pdfOutputOptions.getAcrobatVersion())
+				 								 .addStringVersion(CONTENT_ROOT_PARAM, pdfOutputOptions.getContentRoot())
+				 								 .addStringVersion(DEBUG_DIR_PARAM, pdfOutputOptions.getDebugDir())
+				 								 .addStringVersion(EMBED_FONTS_PARAM, pdfOutputOptions.getEmbedFonts())
+				 								 .addStringVersion(LINEARIZED_PDF_PARAM, pdfOutputOptions.getLinearizedPDF())
+				 								 .addStringVersion(LOCALE_PARAM, pdfOutputOptions.getLocale())
+				 								 .addStringVersion(RETAIN_PDF_FORM_STATE_PARAM, pdfOutputOptions.getRetainPDFFormState())
+				 								 .addStringVersion(RETAIN_UNSIGNED_SIGNATURE_FIELDS_PARAM, pdfOutputOptions.getRetainUnsignedSignatureFields())
+				 								 .addStringVersion(TAGGED_PDF_PARAM, pdfOutputOptions.getTaggedPDF())
+				 								 .addIfNotNull(XCI_PARAM, pdfOutputOptions.getXci(), ContentType.APPLICATION_XML)
 				 								 .build()) {
 			
 			
@@ -148,31 +131,23 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 		}
 		Objects.requireNonNull(printedOutputOptions, "PrintedOutputOptions Argument cannot be null.");
 		
-		PathOrUrl contentRoot = printedOutputOptions.getContentRoot();
-		Integer copies = printedOutputOptions.getCopies();
-		Path debugDir = printedOutputOptions.getDebugDir();
-		Locale locale = printedOutputOptions.getLocale();
-		PaginationOverride paginationOverride = printedOutputOptions.getPaginationOverride();
-		PrintConfig printConfig = printedOutputOptions.getPrintConfig();
-		Document xci = printedOutputOptions.getXci();
-		
 		var restClient = generatePrintedOutputRestClient;
 		try(MultipartPayload payload = restClient.multipartPayloadBuilder()
 												 .addIfNotNull(DATA_PARAM, data, ContentType.APPLICATION_XML)
 												 .addIfNotNull(TEMPLATE_PARAM, template, ContentType.APPLICATION_XDP)	// We're currently labeling everything as an XDP but we accept PDFs too.
 												 .addIfNotNull(TEMPLATE_PARAM, templateStr)
-				 								 .addStringVersion(CONTENT_ROOT_PARAM, contentRoot)
-				 								 .addStringVersion(COPIES_PARAM, copies)
-				 								 .addStringVersion(DEBUG_DIR_PARAM, debugDir)
-				 								 .addStringVersion(LOCALE_PARAM, locale)
-				 								 .addStringVersion(PAGINATION_OVERRIDE_PARAM, paginationOverride)
-				 								 .addStringVersion(PRINT_CONFIG_PARAM, printConfig)
-				 								 .addIfNotNull(XCI_PARAM, xci, ContentType.APPLICATION_XML)
+				 								 .addStringVersion(CONTENT_ROOT_PARAM, printedOutputOptions.getContentRoot())
+				 								 .addStringVersion(COPIES_PARAM, printedOutputOptions.getCopies())
+				 								 .addStringVersion(DEBUG_DIR_PARAM, printedOutputOptions.getDebugDir())
+				 								 .addStringVersion(LOCALE_PARAM, printedOutputOptions.getLocale())
+				 								 .addStringVersion(PAGINATION_OVERRIDE_PARAM, printedOutputOptions.getPaginationOverride())
+				 								 .addStringVersion(PRINT_CONFIG_PARAM, printedOutputOptions.getPrintConfig())
+				 								 .addIfNotNull(XCI_PARAM, printedOutputOptions.getXci(), ContentType.APPLICATION_XML)
 												 .build()
 												 ) {
 
 
-			return payload.postToServer(getAcceptType(printConfig.getRenderType()))
+			return payload.postToServer(getAcceptType(printedOutputOptions.getPrintConfig().getRenderType()))
 					  .map(RestServicesServiceAdapter::responseToDoc)
 					  .orElseThrow(()->new OutputServiceException("Error - empty response from AEM server."));
 		} catch (IOException e) {
