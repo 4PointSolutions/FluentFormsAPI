@@ -21,9 +21,11 @@ import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -326,7 +328,7 @@ public class RestServicesDocAssuranceServiceAdapterTest {
 	@Test
 	void testSecureDocument_RestClientException() throws Exception {
 		var cause = new RestClientException("cause exception");
-		var ex = mockForException(cause);
+		var ex = mockSecureDocumentForException(cause);
 		
 		assertThat(ex, allOf(ExceptionMatchers.exceptionMsgContainsAll("Error while POSTing to server"),
 							 ExceptionMatchers.hasCause(cause)
@@ -336,31 +338,31 @@ public class RestServicesDocAssuranceServiceAdapterTest {
 	@Test
 	void testSecureDocument_IOException() throws Exception {
 		var cause = new IOException("cause exception");
-		var ex = mockForException(cause);
+		var ex = mockSecureDocumentForException(cause);
 		
 		assertThat(ex, allOf(ExceptionMatchers.exceptionMsgContainsAll("I/O Error while securing document"),
 							 ExceptionMatchers.hasCause(cause)
 							));
 	}
-	
-	<T extends Exception> DocAssuranceServiceException mockForException(T exception) throws Exception {
+
+	<T extends Exception> DocAssuranceServiceException mockSecureDocumentForException(T cause) throws Exception {
 		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
 		ReaderExtensionOptions reOptions = mock(ReaderExtensionOptions.class);
 		ReaderExtensionsOptionSpec reOptionsSpec = mock(ReaderExtensionsOptionSpec.class);
 		UsageRights reUsageOptionsSpec = mock(UsageRights.class);
 		when(reOptions.getReOptions()).thenReturn(reOptionsSpec);
 		when(reOptionsSpec.getUsageRights()).thenReturn(reUsageOptionsSpec);
-		//
 		final String CREDENTIAL_ALIAS = "credentialAlias";
 		when(reOptions.getCredentialAlias()).thenReturn(CREDENTIAL_ALIAS);
 
-		when(mockPayloadBuilder.add(eq(DOCUMENT_PARAM), same(pdf), eq(ContentType.APPLICATION_PDF))).thenReturn(mockPayloadBuilder);
-		when(mockPayloadBuilder.addIfNotNull(eq(CREDENTIAL_ALIAS_PARAM), eq(CREDENTIAL_ALIAS))).thenReturn(mockPayloadBuilder);
-		when(mockPayloadBuilder.transformAndAdd(eq(MESSAGE_PARAM), same(reOptionsSpec), any())).thenReturn(mockPayloadBuilder);
-		when(mockPayloadBuilder.transformAndAddStringVersion(any(), any(), any())).thenReturn(mockPayloadBuilder);
-
-		when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder);
-		when(mockPayloadBuilder.build()).thenReturn(mockPayload);
+		return mockForException(cause, ()->underTest.secureDocument(pdf, null, null, reOptions, null));
+	}
+	
+	
+	<T extends Exception> DocAssuranceServiceException mockForException(T exception, Executable test) throws Exception {
+		MultipartPayload.Builder localMockPayloadBuilder = Mockito.mock(MultipartPayload.Builder.class, Answers.RETURNS_SELF);
+		when(mockClient.multipartPayloadBuilder()).thenReturn(localMockPayloadBuilder);
+		when(localMockPayloadBuilder.build()).thenReturn(mockPayload);
 		
 		if (exception instanceof IOException) {
 			when(mockResponse.contentType()).thenReturn(ContentType.APPLICATION_PDF);
@@ -371,7 +373,7 @@ public class RestServicesDocAssuranceServiceAdapterTest {
 			when(mockPayload.postToServer(any())).thenThrow(exception);
 		}
 		
-		return assertThrows(DocAssuranceServiceException.class, ()->underTest.secureDocument(pdf, null, null, reOptions, null));
+		return assertThrows(DocAssuranceServiceException.class, test);
 	}
 
 	private static RestServicesDocAssuranceServiceAdapter createAdapter(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
