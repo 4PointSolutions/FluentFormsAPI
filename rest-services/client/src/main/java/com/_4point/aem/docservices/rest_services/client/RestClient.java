@@ -35,6 +35,9 @@ public interface RestClient {
 		public static final ContentType APPLICATION_PS = ContentType.of("application/postscript");
 		public static final ContentType APPLICATION_TPCL = ContentType.of("application/vnd.toshiba-tpcl");
 		public static final ContentType APPLICATION_ZPL = ContentType.of("x-application/zpl");
+		public static final ContentType IMAGE_JPEG = ContentType.of("image/jpeg");
+		public static final ContentType IMAGE_PNG = ContentType.of("image/png");
+		public static final ContentType IMAGE_TIFF = ContentType.of("image/tiff");
 		
 		public static ContentType of(String contentType) { return new ContentType(contentType); }
 	};
