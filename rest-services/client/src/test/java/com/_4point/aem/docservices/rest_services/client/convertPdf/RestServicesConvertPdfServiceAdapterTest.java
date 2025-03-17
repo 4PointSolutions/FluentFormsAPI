@@ -39,8 +39,6 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService.ConvertPdfServiceException;
 import com._4point.aem.fluentforms.api.convertPdf.ToImageOptionsSpec;
 import com._4point.aem.fluentforms.api.convertPdf.ToPSOptionsSpec;
-import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
-import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com._4point.testing.matchers.javalang.ExceptionMatchers;
 import com.adobe.fd.cpdf.api.enumeration.CMYKPolicy;
@@ -129,8 +127,6 @@ public class RestServicesConvertPdfServiceAdapterTest {
 	@Mock(stubOnly = true) MultipartPayload mockPayload;
 	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;
 	@Mock(stubOnly = true) Response mockResponse;
-	@Mock(stubOnly = true) PDFOutputOptions pdfOutputOptions;
-	@Mock(stubOnly = true) PrintedOutputOptions printedOutputOptions;
 
 	@Captor ArgumentCaptor<AemConfig> aemConfig;
 	@Captor ArgumentCaptor<String> servicePath;
