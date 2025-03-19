@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -16,16 +15,21 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com._4point.aem.docservices.rest_services.client.RestClient;
+import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
+import com._4point.aem.docservices.rest_services.client.RestClient.Response;
+import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
+import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
+import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument;
 import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument.XmlDocumentException;
@@ -33,7 +37,6 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
-import com._4point.aem.fluentforms.api.assembler.LogLevel;
 import com._4point.aem.fluentforms.api.assembler.PDFAConversionOptionSpec;
 import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
 import com._4point.aem.fluentforms.api.assembler.PDFAValidationOptionSpec;
@@ -42,18 +45,6 @@ import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerResultImpl;
 import com._4point.aem.fluentforms.impl.assembler.PDFAConversionResultImpl;
 import com._4point.aem.fluentforms.impl.assembler.TraditionalDocAssemblerService;
-import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ColorSpace;
-import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Compliance;
-import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.OptionalContent;
-import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ResultLevel;
-import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Signatures;
-
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.Response.StatusType;
 
 public class RestServicesDocAssemblerServiceAdapter extends RestServicesServiceAdapter
 implements TraditionalDocAssemblerService {
@@ -63,7 +54,7 @@ implements TraditionalDocAssemblerService {
 	private static final String TO_PDFA_METHOD_NAME = "ToPdfA";
 	
 	// invoke parameters
-	private static final String DATA_PARAM_NAME = "ddx";
+	private static final String DDX_PARAM_NAME = "ddx";
 	private static final String IS_FAIL_ON_ERROR = "isFailOnError";
 	private static final String IS_VALIDATE_ONLY = "isValidateOnly";
 	private static final String IS_TAKE_OWNER_SHIP = "isTakeOwnerShip";
@@ -86,83 +77,61 @@ implements TraditionalDocAssemblerService {
 	private static final String RETAIN_PDF_FORM_STATE_PARAM = "retainPdfFormState";
 	private static final String VERIFY_PARAM = "verify";
 
+	private final RestClient invokeRestClient;
+	private final RestClient toPdfARestClient;
+
 	// Only callable from Builder
-	private RestServicesDocAssemblerServiceAdapter(WebTarget target, Supplier<String> correlationId, AemServerType aemServerType) {
-		super(target, correlationId, aemServerType);
+	private RestServicesDocAssemblerServiceAdapter(BuilderImpl builder, Supplier<String> correlationIdFn) {
+		super(correlationIdFn);
+		this.invokeRestClient = builder.createClient(ASSEMBLE_DOCUMENT_SERVICE_NAME, ASSEMBLE_DOCUMENT_METHOD_NAME);
+		this.toPdfARestClient = builder.createClient(ASSEMBLE_DOCUMENT_SERVICE_NAME, TO_PDFA_METHOD_NAME);
 	}
 
 	@Override
 	public AssemblerResult invoke(Document ddx, Map<String, Object> sourceDocuments,
 			AssemblerOptionsSpec assemblerOptionSpec) throws AssemblerServiceException {
-		WebTarget assembleDocTarget = baseTarget.path(constructStandardPath(ASSEMBLE_DOCUMENT_SERVICE_NAME, ASSEMBLE_DOCUMENT_METHOD_NAME));
+		Objects.requireNonNull(ddx, "ddx can not be null");
+		Objects.requireNonNull(sourceDocuments, "source documents map can not be null");
+		List<Map.Entry<String, Object>> sourceDocs = sourceDocuments.entrySet().stream().toList();
 
-		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM_NAME, Objects.requireNonNull(ddx, "ddx can not be null").getInputStream(), MediaType.APPLICATION_XML_TYPE);					
-			for (Entry<String, Object> param : Objects.requireNonNull(sourceDocuments, "source documents map can not be null").entrySet()) {
-				multipart.field(SOURCE_DOCUMENT_KEY, param.getKey());
-				multipart.field(SOURCE_DOCUMENT_VALUE, ((Document) param.getValue()).getInputStream(),
-						APPLICATION_PDF);
-			}
-
-			if (assemblerOptionSpec != null) {
-				Boolean isFailOnError = assemblerOptionSpec.isFailOnError();
-				Boolean isTakeOwnerShip = assemblerOptionSpec.isTakeOwnership();
-				Boolean isValidateOnly = assemblerOptionSpec.isValidateOnly();
-				LogLevel jobLogLevel =  assemblerOptionSpec.getLogLevel();
-				int firstBatesNum = assemblerOptionSpec.getFirstBatesNumber();
-				String defaultStyle = assemblerOptionSpec.getDefaultStyle();;
-				MultipartTransformer.create(multipart)
-					.transform((t) -> isFailOnError == null ? t : t.field(IS_FAIL_ON_ERROR, isFailOnError.toString()))
-					.transform((t) -> isValidateOnly == null ? t : t.field(IS_VALIDATE_ONLY, isValidateOnly.toString()))
-					.transform((t) -> isTakeOwnerShip == null ? t : t.field(IS_TAKE_OWNER_SHIP, isTakeOwnerShip.toString()))
-					.transform((t) -> jobLogLevel == null ? t : t.field(JOB_LOG_LEVEL, jobLogLevel.toString()))
-					.transform((t) -> firstBatesNum == 0 ? t : t.field(FIRST_BATES_NUMBER, String.valueOf(firstBatesNum)))
-					.transform((t) -> defaultStyle == null ? t : t.field(DEFAULT_STYLE, defaultStyle.toString()));
-			}
-
-			Response result = postToServer(assembleDocTarget, multipart, MediaType.APPLICATION_XML_TYPE);
-			StatusType resultStatus = result.getStatusInfo();
-			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
-				String msg = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='"
-						+ resultStatus.getReasonPhrase() + "'.";
-				if (result.hasEntity()) {
-					InputStream entityStream = (InputStream) result.getEntity();
-					msg += "\n" + inputStreamtoString(entityStream);
-				}
-				throw new AssemblerServiceException(msg);
-			}
-
-			if (!result.hasEntity()) {
-				throw new AssemblerServiceException("Call to server succeeded but server failed to return assemblerResult xml.  This should never happen.");
-			}
-
-			MediaType responseContentType = result.getMediaType();
-			if (responseContentType == null || !responseContentType.isCompatible(MediaType.APPLICATION_XML_TYPE)) {
-				String msg = "Response from AEM server was  " + (responseContentType != null ? "content-type='" + responseContentType.toString() + "'"
-								: "content-type was null") + ".";
-				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + inputStreamtoString(entityStream);
-				throw new AssemblerServiceException(msg);
-			}
-			AssemblerResult assemblerResult = convertXmlToAssemblerResult((InputStream)result.getEntity());
-			return assemblerResult;
-
+		try (MultipartPayload payload = invokeRestClient.multipartPayloadBuilder()
+														.add(DDX_PARAM_NAME, ddx, ContentType.APPLICATION_XML)
+														.addStrings(SOURCE_DOCUMENT_KEY, sourceDocs.stream().map(Map.Entry::getKey))
+														.addDocs(SOURCE_DOCUMENT_VALUE, sourceDocs.stream().map(e -> (Document) e.getValue()))
+														.transformAndAddStringVersion(IS_FAIL_ON_ERROR, assemblerOptionSpec, AssemblerOptionsSpec::isFailOnError)
+														.transformAndAddStringVersion(IS_VALIDATE_ONLY, assemblerOptionSpec, AssemblerOptionsSpec::isValidateOnly)
+														.transformAndAddStringVersion(IS_TAKE_OWNER_SHIP, assemblerOptionSpec, AssemblerOptionsSpec::isTakeOwnership)
+														.transformAndAddStringVersion(JOB_LOG_LEVEL, assemblerOptionSpec, AssemblerOptionsSpec::getLogLevel)
+														.transformAndAddStringVersion(FIRST_BATES_NUMBER, assemblerOptionSpec, AssemblerOptionsSpec::getFirstBatesNumber)
+														.transformAndAdd(DEFAULT_STYLE, assemblerOptionSpec, AssemblerOptionsSpec::getDefaultStyle)
+				 										.build()) {
+			return payload.postToServer(ContentType.APPLICATION_XML)
+						  .map(RestServicesDocAssemblerServiceAdapter::convertResponseToAssemblerResult)
+						  .orElseThrow();
+		} catch (XmlParsingException e) {
+			throw new AssemblerServiceException("Error while parsing xml response. (" + invokeRestClient.target() + ").", e);
 		} catch (IOException e) {
-			throw new AssemblerServiceException(
-					"I/O Error while  merging document. (" + baseTarget.getUri().toString() + ").", e);
-		} catch (RestServicesServiceException e) {
-			throw new AssemblerServiceException("Error while posting to server", e);
+			throw new AssemblerServiceException("I/O Error while securing document. (" + invokeRestClient.target() + ").", e);
+		} catch (RestClientException e) {
+			throw new AssemblerServiceException("Error while POSTing to server (" + invokeRestClient.target() + ").", e);
 		}
-
 	}
 
+	@SuppressWarnings("serial")
+	private static class XmlParsingException extends RuntimeException {
+		public XmlParsingException(String message, Throwable cause) {
+			super(message, cause);
+		}
+	}
+
+	private static AssemblerResult convertResponseToAssemblerResult(Response response) throws XmlParsingException  {
+		return convertXmlToAssemblerResult(response.data());
+	}
+	
 	// Package visibility so that it can be unit tested.
-	/* package */public static AssemblerResult convertXmlToAssemblerResult(InputStream assemblerResultXml) throws AssemblerServiceException {
+	/* package */ static AssemblerResult convertXmlToAssemblerResult(InputStream assemblerResultXml) throws XmlParsingException {
 		Map<String, Document> resultMap = new HashMap<String, Document>();
 		Map<String,List<String>> multipleResultsBlocks = new HashMap<String, List<String>>();
-		List<String> successfulBlockNames = new ArrayList<String>();
-		List<String> successfulDocumentNames = new ArrayList<String>();
-		List<String> failedBlockNames = new ArrayList<String>();
 		DocumentBuilder db;
 		byte[] bytesPdf = null;
 		try {
@@ -180,7 +149,7 @@ implements TraditionalDocAssemblerService {
 					if (contentType.isEmpty()) {
 						// Defaulting to APPLICATION_PDF is not the best choice, however
 						// it is required for backwards compatibility (since that was the initial implementation).
-						concatenatedDoc.setContentType(APPLICATION_PDF.toString());
+						concatenatedDoc.setContentType(ContentType.APPLICATION_PDF.contentType());
 					} else {
 						concatenatedDoc.setContentType(contentType);
 					}
@@ -212,7 +181,7 @@ implements TraditionalDocAssemblerService {
 							    		   getNodeValuesAsList(doc, "successfulDocumentNames", "successfulDocumentName"), // successfulDocumentNames
 							    		   Collections.emptyMap());// throwables - Not currently supported, so we return an empty map.
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new AssemblerServiceException("Error while parsing xml", e);
+			throw new XmlParsingException("Error while parsing xml", e);
 		}
 	}
 
@@ -264,12 +233,16 @@ implements TraditionalDocAssemblerService {
 	 * 
 	 * return null; }
 	 */
-	public static AssemblerServiceBuilder builder() {
-		return new AssemblerServiceBuilder();
+	public static AssemblerServiceBuilder builder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+		return new AssemblerServiceBuilder(clientFactory);
 	}
 
 	public static class AssemblerServiceBuilder implements Builder {
-		private BuilderImpl builder = new BuilderImpl();
+		private final BuilderImpl builder;
+
+		public AssemblerServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+			this.builder = new BuilderImpl(clientFactory);
+		}
 
 		@Override
 		public AssemblerServiceBuilder machineName(String machineName) {
@@ -286,12 +259,6 @@ implements TraditionalDocAssemblerService {
 		@Override
 		public AssemblerServiceBuilder useSsl(boolean useSsl) {
 			builder.useSsl(useSsl);
-			return this;
-		}
-
-		@Override
-		public AssemblerServiceBuilder clientFactory(Supplier<Client> clientFactory) {
-			builder.clientFactory(clientFactory);
 			return this;
 		}
 
@@ -313,11 +280,6 @@ implements TraditionalDocAssemblerService {
 		}
 
 		@Override
-		public WebTarget createLocalTarget() {
-			return builder.createLocalTarget();
-		}
-
-		@Override
 		public AssemblerServiceBuilder aemServerType(AemServerType serverType) {
 			builder.aemServerType(serverType);
 			return this;
@@ -329,7 +291,7 @@ implements TraditionalDocAssemblerService {
 		}
 
 		public RestServicesDocAssemblerServiceAdapter build() {
-			return new RestServicesDocAssemblerServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType());
+			return new RestServicesDocAssemblerServiceAdapter(builder, this.getCorrelationIdFn());
 		}
 	}
 
@@ -341,80 +303,39 @@ implements TraditionalDocAssemblerService {
 
 	@Override
 	public PDFAConversionResult toPDFA(Document inPdf, PDFAConversionOptionSpec options) throws AssemblerServiceException {
-			WebTarget toPdfaTarget = baseTarget.path(constructStandardPath(ASSEMBLE_DOCUMENT_SERVICE_NAME, TO_PDFA_METHOD_NAME));
+		Objects.requireNonNull(inPdf, "input PDF can not be null");
 
-			try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-				
-				multipart.field(INPUT_DOCUMENT_PARAM, Objects.requireNonNull(inPdf, "input PDF can not be null").getInputStream(), APPLICATION_PDF);
-				
-				if (options != null) {
-					
-					ColorSpace colorSpace = options.getColorSpace();
-					Compliance compliance = options.getCompliance();
-					LogLevel logLevel = options.getLogLevel();
-					List<Document> metadataSchemaExtensions = options.getMetadataSchemaExtensions();
-					OptionalContent optionalContent = options.getOptionalContent();
-					ResultLevel resultLevel = options.getResultLevel();
-					Signatures signatures = options.getSignatures();
-					Boolean removeInvalidXMPProperties = options.isRemoveInvalidXMPProperties();
-					Boolean retainPDFFormState = options.isRetainPDFFormState();
-					Boolean verify = options.isVerify();
-
-					MultipartTransformer.create(multipart)
-						.transform((t) -> colorSpace == null ? t : t.field(COLOR_SPACE_PARAM, colorSpace.toString()))
-						.transform((t) -> compliance == null ? t : t.field(COMPLIANCE_PARAM, compliance.toString()))
-						.transform((t) -> logLevel == null ? t : t.field(LOG_LEVEL_PARAM, logLevel.toString()))
-						.transform((t) -> optionalContent == null ? t : t.field(OPTIONAL_CONTENT_PARAM, optionalContent.toString()))
-						.transform((t) -> resultLevel == null ? t : t.field(RESULT_LEVEL_PARAM, resultLevel.toString()))
-						.transform((t) -> signatures == null ? t : t.field(SIGNATURES_PARAM, signatures.toString()))
-						.transform((t) -> removeInvalidXMPProperties == null ? t : t.field(REMOVE_INVALID_XMP_PARAM, removeInvalidXMPProperties.toString()))
-						.transform((t) -> retainPDFFormState == null ? t : t.field(RETAIN_PDF_FORM_STATE_PARAM, retainPDFFormState.toString()))
-						.transform((t) -> verify == null ? t : t.field(VERIFY_PARAM, verify.toString()));
-					
-					if (metadataSchemaExtensions != null) {
-						for(Document extensionsDoc : metadataSchemaExtensions) {
-							multipart.field(METADATA_EXTENSION_PARAM, extensionsDoc.getInputStream(), MediaType.APPLICATION_XML_TYPE);
-						}
-					}
-				}
-
-				Response result = postToServer(toPdfaTarget, multipart, MediaType.APPLICATION_XML_TYPE);
-				StatusType resultStatus = result.getStatusInfo();
-				if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
-					String msg = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='"
-							+ resultStatus.getReasonPhrase() + "'.";
-					if (result.hasEntity()) {
-						InputStream entityStream = (InputStream) result.getEntity();
-						msg += "\n" + inputStreamtoString(entityStream);
-					}
-					throw new AssemblerServiceException(msg);
-				}
-
-				if (!result.hasEntity()) {
-					throw new AssemblerServiceException("Call to server succeeded but server failed to return assemblerResult xml.  This should never happen.");
-				}
-
-				MediaType responseContentType = result.getMediaType();
-				if (responseContentType == null || !responseContentType.isCompatible(MediaType.APPLICATION_XML_TYPE)) {
-					String msg = "Response from AEM server was  " + (responseContentType != null ? "content-type='" + responseContentType.toString() + "'"
-									: "content-type was null") + ".";
-					InputStream entityStream = (InputStream) result.getEntity();
-					msg += "\n" + inputStreamtoString(entityStream);
-					throw new AssemblerServiceException(msg);
-				}
-				PDFAConversionResult conversionResult = convertResponseToPdfaConversionResult((InputStream)result.getEntity());
-				return conversionResult;
-			} catch (IOException e) {
-				throw new AssemblerServiceException("I/O Error while converting document. (" + baseTarget.getUri().toString() + ").", e);
-			} catch (RestServicesServiceException e) {
-				throw new AssemblerServiceException("Error while posting to server", e);
-			} catch (XmlDocumentException e) {
-				throw new AssemblerServiceException("Error extracting data from response XML.", e);
-			}
+		try (MultipartPayload payload = toPdfARestClient.multipartPayloadBuilder()
+														.add(INPUT_DOCUMENT_PARAM, inPdf, ContentType.APPLICATION_DPL)
+														.transformAndAddStringVersion(COLOR_SPACE_PARAM, options, PDFAConversionOptionSpec::getColorSpace)
+														.transformAndAddStringVersion(COMPLIANCE_PARAM, options, PDFAConversionOptionSpec::getCompliance)
+														.transformAndAddStringVersion(LOG_LEVEL_PARAM, options, PDFAConversionOptionSpec::getLogLevel)
+														.transformAndAddStringVersion(OPTIONAL_CONTENT_PARAM, options, PDFAConversionOptionSpec::getOptionalContent)
+														.transformAndAddStringVersion(RESULT_LEVEL_PARAM, options, PDFAConversionOptionSpec::getResultLevel)
+														.transformAndAddStringVersion(SIGNATURES_PARAM, options, PDFAConversionOptionSpec::getSignatures)
+														.transformAndAddStringVersion(REMOVE_INVALID_XMP_PARAM, options, PDFAConversionOptionSpec::isRemoveInvalidXMPProperties)
+														.transformAndAddStringVersion(RETAIN_PDF_FORM_STATE_PARAM, options, PDFAConversionOptionSpec::isRetainPDFFormState)
+														.transformAndAddStringVersion(VERIFY_PARAM, options, PDFAConversionOptionSpec::isVerify)
+														.transformAndAddDocs(METADATA_EXTENSION_PARAM, options, PDFAConversionOptionSpec::getMetadataSchemaExtensions)
+				 										.build()) {
+			return payload.postToServer(ContentType.APPLICATION_XML)
+						  .map(RestServicesDocAssemblerServiceAdapter::convertResponseToPdfaConversionResult)
+						  .orElseThrow();
+		} catch (XmlParsingException e) {
+			throw new AssemblerServiceException("Error while parsing xml response. (" + invokeRestClient.target() + ").", e);
+		} catch (IOException e) {
+			throw new AssemblerServiceException("I/O Error while securing document. (" + invokeRestClient.target() + ").", e);
+		} catch (RestClientException e) {
+			throw new AssemblerServiceException("Error while POSTing to server (" + invokeRestClient.target() + ").", e);
+		}
 	}
-
-	private static PDFAConversionResult convertResponseToPdfaConversionResult(InputStream entityIs) throws XmlDocumentException {
-		return convertXmlToPdfaConversionResult(XmlDocument.create(entityIs));
+	
+	private static PDFAConversionResult convertResponseToPdfaConversionResult(Response response) throws XmlParsingException {
+		try {
+			return convertXmlToPdfaConversionResult(XmlDocument.create(response.data()));
+		} catch (XmlDocumentException e) {
+			throw new XmlParsingException("Error while parsing xml", e);
+		}
 	}
 
 	private static final String TO_PDFA_RESULT_BASE_XPATH = "/ToPdfAResult";

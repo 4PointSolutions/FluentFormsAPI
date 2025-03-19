@@ -7,6 +7,7 @@ import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com._4point.aem.fluentforms.api.Document;
 
@@ -86,6 +87,26 @@ public interface RestClient {
 					throw new UncheckedIOException(e);
 				}
 			}
+			default Builder addStrings(String fieldName, List<String> fieldData) {
+				for (String obj : fieldData) {
+					add(fieldName, obj);
+				}
+				return this;
+			}
+			default Builder addDocs(String fieldName, List<Document> fieldData) {
+				for (Document obj : fieldData) {
+					add(fieldName, obj);
+				}
+				return this;
+			}
+			default Builder addStrings(String fieldName, Stream<String> fieldData) {
+				fieldData.forEach(fieldValue->add(fieldName, fieldValue));
+				return this;
+			}
+			default Builder addDocs(String fieldName, Stream<Document> fieldData) {
+				fieldData.forEach(fieldValue->add(fieldName, fieldValue));
+				return this;
+			}
 			default Builder addIfNotNull(String fieldName, String fieldData) {
 				return fieldData != null ? add(fieldName, fieldData) : this;
 			}
@@ -101,6 +122,9 @@ public interface RestClient {
 			default Builder addIfNotNull(String fieldName, Document document, ContentType contentType) {
 				return document != null ? add(fieldName, document, contentType) : this;
 			}
+			default Builder addDocsIfNotNull(String fieldName, List<Document> fieldData) {
+				return fieldData != null ? addDocs(fieldName, fieldData) : this;
+			}
 			default <T> Builder transformAndAdd(String fieldName, T fieldData, Function<T, String> fn) {
 				return fieldData != null ? addIfNotNull(fieldName, fn.apply(fieldData)) : this;
 			}
@@ -115,6 +139,9 @@ public interface RestClient {
 			}
 			default <T, O> Builder transformAndAddStringVersion(String fieldName, T fieldData, Function<T, O> fn) {
 				return fieldData != null ? addStringVersion(fieldName, fn.apply(fieldData)) : this;
+			}
+			default <T> Builder transformAndAddDocs(String fieldName, T fieldData, Function<T, List<Document>> fn) {
+				return fieldData != null ? addDocsIfNotNull(fieldName, fn.apply(fieldData)) : this;
 			}
 			default Builder addStringVersion(String fieldName, List<?> fieldData) {
 				for (Object obj : fieldData) {
