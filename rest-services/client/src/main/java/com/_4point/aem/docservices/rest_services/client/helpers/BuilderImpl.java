@@ -78,7 +78,7 @@ public class BuilderImpl implements Builder {
 		return this.aemServerType;
 	}
 
-	private RestClient createClient(String endpoint) {
+	private RestClient createClientImplementation(String endpoint) {
 		return Objects.requireNonNull(clientFactory, "Client Factory was not provided.").apply(aemConfigBuilder.build(), endpoint, correlationIdFn);
 	}
 	
@@ -87,7 +87,11 @@ public class BuilderImpl implements Builder {
 	}
 
 	public RestClient createClient(String serviceName, String methodName) {
-		return createClient(constructStandardPath(serviceName, methodName));
+		return createClientImplementation(constructStandardPath(serviceName, methodName));
+	}
+	
+	public RestClient createClient(String endpoint) {
+		return createClientImplementation(this.aemServerType.pathPrefix() + endpoint);
 	}
 	
 	@FunctionalInterface

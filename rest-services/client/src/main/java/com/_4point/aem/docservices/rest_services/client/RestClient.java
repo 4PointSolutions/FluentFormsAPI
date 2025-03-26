@@ -27,6 +27,7 @@ public interface RestClient {
 		public static final ContentType APPLICATION_PDF = ContentType.of("application/pdf");
 		public static final ContentType APPLICATION_XDP = ContentType.of("application/vnd.adobe.xdp+xml");
 		public static final ContentType APPLICATION_XML = ContentType.of("application/xml");
+		public static final ContentType APPLICATION_JSON = ContentType.of("application/json");
 		public static final ContentType TEXT_PLAIN = ContentType.of("text/plain");
 		public static final ContentType TEXT_HTML = ContentType.of("text/html");
 		public static final ContentType APPLICATION_OCTET_STREAM = ContentType.of("application/octet-stream");
@@ -193,6 +194,13 @@ public interface RestClient {
 	 */
 	public GetRequest.Builder getRequestBuilder();
 	
+	/**
+	 * Returns a builder that is used to construct a GET request.
+	 * 
+	 * @param additionalPath - additional path segments
+	 * @return
+	 */
+	public GetRequest.Builder getRequestBuilder(String additionalPath);
 	
 	/**
 	 * A response from the AEM Rest Service

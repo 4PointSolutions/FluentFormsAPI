@@ -232,6 +232,11 @@ public class RestServicesDocAssuranceServiceAdapterTest {
 			public Builder getRequestBuilder() {
 				return null;
 			}
+
+			@Override
+			public Builder getRequestBuilder(String additionalPath) {
+				return null;
+			}
 		};
 	}
 
