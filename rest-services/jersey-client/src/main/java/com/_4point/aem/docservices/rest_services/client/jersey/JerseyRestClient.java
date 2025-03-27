@@ -14,6 +14,7 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import com._4point.aem.docservices.rest_services.client.RestClient;
+import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 
 import jakarta.ws.rs.client.Client;
@@ -41,11 +42,10 @@ public class JerseyRestClient implements RestClient {
 	 * @param client Jersey Client object
 	 */
 	public JerseyRestClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn, Client client) {
-		this.target = configureClient(client,aemConfig.user(), aemConfig.password())
+		this(configureClient(client,aemConfig.user(), aemConfig.password())
 						.target(aemConfig.url())
-						.path(target)
-						;
-		this.correlationIdFn = correlationIdFn;
+						.path(target),
+			 correlationIdFn);
 	}
 
 	/**
@@ -56,6 +56,11 @@ public class JerseyRestClient implements RestClient {
 	 */
 	public JerseyRestClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn) {
 		this(aemConfig, target, correlationIdFn, getClient());
+	}
+
+	private JerseyRestClient(WebTarget target, Supplier<String> correlationIdFn) {
+		this.target = target;
+		this.correlationIdFn = correlationIdFn;
 	}
 
 	private static Client configureClient(Client client, String username, String password) {
@@ -225,7 +230,7 @@ public class JerseyRestClient implements RestClient {
 	 * Singleton Client-related code
 	 * 
 	 */
-	// Safe way to lazily initialize singeleton.  See https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom 
+	// Safe way to lazily initialize singleton.  See https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom 
 	private static class ClientHolder {
 		static final Client INSTANCE = ClientBuilder.newClient();
 	}
@@ -248,6 +253,13 @@ public class JerseyRestClient implements RestClient {
 	@Override
 	public GetRequest.Builder getRequestBuilder() {
 		return new JerseyGetRequestBuilder();
+	}
+
+	@Override
+	public Builder getRequestBuilder(String additionalPath) {
+		WebTarget updatedPath = target.path(additionalPath.startsWith("/") ? additionalPath : "/" + additionalPath);
+		// Create a GetRequestBuilder for an updated JerseyRestClient path
+		return new JerseyRestClient(updatedPath, correlationIdFn).new JerseyGetRequestBuilder();
 	}
 	
 	private final class JerseyGetRequestBuilder extends PayloadBuilder implements GetRequest.Builder {

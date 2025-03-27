@@ -13,6 +13,9 @@ import java.io.ByteArrayInputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
 import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest;
@@ -449,6 +452,25 @@ class JerseyRestClientTest {
 		verify(getRequestedFor(urlEqualTo(ENDPOINT))
 				.withoutQueryParam(FIELD1_NAME)
 				);
+	}
+
+	@DisplayName("GetFromServer with additional path parameter")
+	@ParameterizedTest
+	@ValueSource(strings = {"foo", "/foo"})
+	void testGetFromServer_AdditionalPath(String additionalPath) throws Exception {
+		// Given
+		String expectedEndpoint = ENDPOINT + "/foo";
+		stubFor(get(urlPathEqualTo(expectedEndpoint))
+				    .willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), MOCK_PDF_BYTES)));
+		
+		// When
+		Response response = underTest.getRequestBuilder(additionalPath).build().getFromServer(ContentType.TEXT_HTML).orElseThrow();
+
+		// Then
+		assertEquals(ContentType.TEXT_HTML, response.contentType());
+		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
+		assertTrue(response.retrieveHeader(SAMPLE_HEADER).isEmpty());
+		verify(getRequestedFor(urlPathEqualTo(expectedEndpoint)));
 	}
 
 	@DisplayName("When AEM returns 500 Internal Server error with no body, postToServer should throw RestClientException.")
