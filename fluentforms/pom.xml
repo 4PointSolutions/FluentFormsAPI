@@ -85,7 +85,7 @@
 		<pitest.junit5.maven.plugin.version>1.2.1</pitest.junit5.maven.plugin.version>
 
 		<!-- Testing dependencies -->
-        <mockito.version>5.8.0</mockito.version>
+        <mockito.version>4.11.0</mockito.version> <!-- Last version that supports Java 8 -->
         <junit.version>5.10.1</junit.version>
         <wcm.mocks.version>5.4.0</wcm.mocks.version>
         <slf4j-test.version>1.2.0</slf4j-test.version>

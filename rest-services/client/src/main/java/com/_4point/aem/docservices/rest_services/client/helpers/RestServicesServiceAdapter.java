@@ -11,6 +11,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 
 public abstract class RestServicesServiceAdapter {
+	private static final String PAGE_COUNT_HEADER = "com._4point.aem.rest_services.page_count";
 	protected static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	protected final Supplier<String> correlationIdFn;
 
@@ -24,6 +25,7 @@ public abstract class RestServicesServiceAdapter {
 
 	protected static Document responseToDoc(Response result, Function<InputStream, InputStream> filter) {
 		Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create(filter.apply(result.data()));
+		result.retrieveHeader(PAGE_COUNT_HEADER).ifPresent(pageCount->resultDoc.setPageCount(Long.valueOf(pageCount)));;
 		resultDoc.setContentType(result.contentType().contentType());
 		return resultDoc;
 	}

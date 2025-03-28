@@ -13,7 +13,7 @@ import com._4point.aem.docservices.rest_services.server.Exceptions.NotAcceptable
 import com._4point.aem.fluentforms.api.Document;
 
 public class ServletUtils {
-
+	public static final String PAGE_COUNT_HEADER = "com._4point.aem.rest_services.page_count";
 	// Private constructor to make sure this class doesn't get instantiated.
 	private ServletUtils() {
 	}
@@ -48,6 +48,7 @@ public class ServletUtils {
 		if (returnLength) { // We don't want to always get length do to an issue with the Adobe code (see FluentFormsAPI Issue #15).
 			response.setContentLength((int)result.length());
 		}
+		result.getPageCount().ifPresent(l->response.setHeader(PAGE_COUNT_HEADER, l.toString()));
 		ServletUtils.transfer(result.getInputStream(), response.getOutputStream());
 	}
 

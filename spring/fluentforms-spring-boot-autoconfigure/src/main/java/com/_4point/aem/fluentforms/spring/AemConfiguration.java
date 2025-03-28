@@ -22,7 +22,8 @@ public record AemConfiguration(
 	Integer port,							// "aem.port"
 	String user,							// "aem.user"
 	String password,						// "aem.password"
-	@DefaultValue("false") Boolean useSsl	// "aem.useSsl"
+	@DefaultValue("false") Boolean useSsl,	// "aem.useSsl"
+	@DefaultValue("aem") String sslBundle	// "aem.sslBundle"	- Spring SSL Bundle for trust store
 	) {
 
 	public String url() {

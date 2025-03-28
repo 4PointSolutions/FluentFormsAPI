@@ -50,6 +50,8 @@ import com.adobe.fd.output.api.PaginationOverride;
 @ExtendWith(MockitoExtension.class)
 class RestServicesOutputServiceAdapterTest {
 
+	private static final String PAGE_COUNT_HEADER = "com._4point.aem.rest_services.page_count";
+	private static final long EXPECTED_PAGE_COUNT = 23L;
 	private final static Document DUMMY_TEMPLATE_DOC = MockDocumentFactory.GLOBAL_DUMMY_DOCUMENT;
 	private final static String DUMMY_TEMPLATE_STR = "TemplateString";
 	private final static Document DUMMY_DATA = MockDocumentFactory.GLOBAL_DUMMY_DOCUMENT;
@@ -276,7 +278,7 @@ class RestServicesOutputServiceAdapterTest {
 			}
 
 			// When
-			Document printResult = codePath.isTemplateString() 
+			Document resultDoc = codePath.isTemplateString() 
 											? stringFn.apply(DUMMY_TEMPLATE_STR, codePath.hasData() ? DUMMY_DATA : null, mockOptions)
 											: docFn.apply(DUMMY_TEMPLATE_DOC, codePath.hasData() ? DUMMY_DATA : null, mockOptions);
 			
@@ -297,8 +299,9 @@ class RestServicesOutputServiceAdapterTest {
 			}
 			
 			// Make sure the response is correct.
-			assertArrayEquals(responseData, printResult.getInputStream().readAllBytes());
-			assertEquals(responseContentType.contentType(), printResult.getContentType());
+			assertArrayEquals(responseData, resultDoc.getInputStream().readAllBytes());
+			assertEquals(responseContentType.contentType(), resultDoc.getContentType());
+			assertEquals(EXPECTED_PAGE_COUNT, resultDoc.getPageCount().get());
 			
 			// Make sure we sent the correct contentTyoe
 			assertEquals(responseContentType, acceptableContentType.getValue());
@@ -314,6 +317,7 @@ class RestServicesOutputServiceAdapterTest {
 	private Optional<Response> setupMockResponse(byte[] responseData, ContentType expectedContentType) {
 		when(mockResponse.contentType()).thenReturn(expectedContentType);
 		when(mockResponse.data()).thenReturn(new ByteArrayInputStream(responseData));
+		when(mockResponse.retrieveHeader(eq(PAGE_COUNT_HEADER))).thenReturn(Optional.of(Long.toString(EXPECTED_PAGE_COUNT)));
 		return Optional.of(mockResponse);
 	}
 

@@ -20,6 +20,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -44,7 +45,8 @@ import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandl
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor.InternalAfSubmitAemProxyProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmissionTest.AemProxyAfSubmissionTestWithLocalAfSubmitProcessorTest.MockAemProxy;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -99,10 +101,6 @@ class AemProxyAfSubmissionTest {
 		return getPdfForm;
 	}
 
-	private static String getBaseUriString(int port) {
-		return getBaseUri(port).toString();
-	}
-
 	private static URI getBaseUri(int port) {
 		return URI.create("http://localhost:" + port);
 	}
@@ -121,10 +119,9 @@ class AemProxyAfSubmissionTest {
 	}
 
 	/**
-	 * Tests the AemAfSubmitProcessor
+	 * Tests the AemAfSubmitProcessor.  It utilizes an SSL connection to test the SslBundle code.
 	 * 
 	 */
-	@WireMockTest(httpPort = 8502)
 	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
 					classes = {TestApplication.class, JerseyConfig.class, AfSubmitAemProxyProcessor.class},
 					properties = {
@@ -133,10 +130,26 @@ class AemProxyAfSubmissionTest {
 						"fluentforms.aem.port=" + "8502", 
 						"fluentforms.aem.user=admin",		 
 						"fluentforms.aem.password=admin",
+						"fluentforms.aem.useSsl=true",
+						"spring.ssl.bundle.jks.aem.truststore.location=file:src/test/resources/aemforms.p12",
+						"spring.ssl.bundle.jks.aem.truststore.password=Pa$$123",
+						"spring.ssl.bundle.jks.aem.truststore.type=PKCS12"
 						}
 					)
 	public static class AemProxyAfSubmissionTestWithAemAfSubmitProcessorTest {
 
+		@RegisterExtension
+	    static WireMockExtension wm1 = WireMockExtension.newInstance()
+	            .options(WireMockConfiguration.wireMockConfig().httpsPort(8502)
+	            											   .httpDisabled(true)
+	            											   .keystorePath("src/test/resources/aemforms.p12")
+	            											   .keyManagerPassword("Pa$$123")
+	            											   .keystorePassword("Pa$$123")
+	            											   .keystoreType("PKCS12")
+	               		)
+	            .configureStaticDsl(true)		// Use with Static DSL
+	            .build();
+		
 		@LocalServerPort
 		private int port;
 		

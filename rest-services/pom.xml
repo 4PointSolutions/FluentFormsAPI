@@ -97,7 +97,7 @@
         <pdfbox.version>3.0.4</pdfbox.version>
         <jsoup.version>1.16.1</jsoup.version>
         <jcabi-xml-version>0.27.2</jcabi-xml-version>
-        <xml-unit-version>2.9.1</xml-unit-version>
+        <xml-unit-version>2.10.0</xml-unit-version>
         <xerces-version>2.12.2</xerces-version>
         <wiremock.version>3.4.2</wiremock.version>
         <_4point-hamcrest-matchers.version>0.0.1-SNAPSHOT</_4point-hamcrest-matchers.version>
