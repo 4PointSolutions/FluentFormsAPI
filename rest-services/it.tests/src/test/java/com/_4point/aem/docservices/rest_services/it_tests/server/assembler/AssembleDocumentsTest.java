@@ -29,7 +29,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDocAssemblerServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.assembler.AssemblerServiceTestHelper;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
@@ -88,7 +88,7 @@ public class AssembleDocumentsTest {
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 
-			AssemblerResult assemblerResult = RestServicesDocAssemblerServiceAdapter.convertXmlToAssemblerResult((InputStream) result.getEntity());
+			AssemblerResult assemblerResult = AssemblerServiceTestHelper.convertXmlToAssemblerResult((InputStream) result.getEntity());
 			Map<String, Document> resultDocument = assemblerResult.getDocuments();
 			byte[] resultByte = null;
 			for(Entry<String, Document> entry: resultDocument.entrySet()) {
@@ -124,7 +124,7 @@ public class AssembleDocumentsTest {
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 		
-			AssemblerResult assemblerResult = RestServicesDocAssemblerServiceAdapter.convertXmlToAssemblerResult((InputStream) result.getEntity());
+			AssemblerResult assemblerResult = AssemblerServiceTestHelper.convertXmlToAssemblerResult((InputStream) result.getEntity());
 			Map<String, Document> sourceDocuments = assemblerResult.getDocuments();
 			byte[] resultByte = null;
 			for(Entry<String, Document> entry: sourceDocuments.entrySet()) {

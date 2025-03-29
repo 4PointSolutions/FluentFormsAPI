@@ -26,7 +26,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com._4point.aem.docservices.rest_services.client.generatePDF.RestServicesGeneratePDFServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.generatePDF.GeneratePDFServiceTestHelper;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
 import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
@@ -68,7 +68,7 @@ public class GeneratePDFTest {
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 		
-			CreatePDFResult createPDFResult = RestServicesGeneratePDFServiceAdapter.convertXmlToCreatePDFResult((InputStream) result.getEntity());
+			CreatePDFResult createPDFResult = GeneratePDFServiceTestHelper.convertXmlToCreatePDFResult((InputStream) result.getEntity());
 			byte[] resultBytes = createPDFResult.getCreatedDocument().getInlineData();
 			assertNotNull(createPDFResult.getCreatedDocument().getInlineData());
 			assertEquals(APPLICATION_PDF.toString(),createPDFResult.getCreatedDocument().getContentType());
@@ -89,7 +89,7 @@ public class GeneratePDFTest {
 			assertTrue(result.hasEntity(), "Expected the response to have an entity.");
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 		
-			CreatePDFResult createPDFResult = RestServicesGeneratePDFServiceAdapter.convertXmlToCreatePDFResult((InputStream) result.getEntity());
+			CreatePDFResult createPDFResult = GeneratePDFServiceTestHelper.convertXmlToCreatePDFResult((InputStream) result.getEntity());
 			byte[] resultBytes = createPDFResult.getCreatedDocument().getInlineData();
 			assertNotNull(createPDFResult.getCreatedDocument().getInlineData());
 			assertEquals(APPLICATION_PDF.toString(),createPDFResult.getCreatedDocument().getContentType());

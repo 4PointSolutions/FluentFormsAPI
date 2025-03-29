@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -119,7 +120,7 @@ public class Pdf implements AutoCloseable {
 	}
 	public static Pdf from(byte[] docBytes) throws PdfException  {
 		 try {
-			return new Pdf(PDDocument.load(docBytes));
+			return new Pdf(Loader.loadPDF(docBytes));
 		} catch (IOException e) {
 			throw new PdfException(e);
 		}
@@ -127,7 +128,7 @@ public class Pdf implements AutoCloseable {
 	
 	public static Pdf from(InputStream docStream) throws PdfException  {
 		 try {
-			return new Pdf(PDDocument.load(docStream));
+			return new Pdf(Loader.loadPDF(docStream.readAllBytes()));
 		} catch (IOException e) {
 			throw new PdfException(e);
 		}
