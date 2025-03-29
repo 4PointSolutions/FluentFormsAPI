@@ -463,6 +463,11 @@
 				<version>${rest-services.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com._4point.aem.docservices.rest-services</groupId>
+				<artifactId>rest-services.jersey-client</artifactId>
+				<version>${rest-services.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>${commons-io.version}</version>

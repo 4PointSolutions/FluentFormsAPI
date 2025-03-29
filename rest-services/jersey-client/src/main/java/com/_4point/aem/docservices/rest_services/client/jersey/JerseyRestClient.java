@@ -16,6 +16,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
+import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -54,7 +55,7 @@ public class JerseyRestClient implements RestClient {
 	 * @param aemConfig AEM configuration parameters
 	 * @param target REST endpoint to be called.
 	 */
-	public JerseyRestClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn) {
+	private JerseyRestClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn) {
 		this(aemConfig, target, correlationIdFn, getClient());
 	}
 
@@ -68,12 +69,12 @@ public class JerseyRestClient implements RestClient {
 					 .register(HttpAuthenticationFeature.basic(username, password));
 	}
 	
-	public static RestClient restClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn) {
-		return new JerseyRestClient(aemConfig, target, correlationIdFn);
+	public static TriFunction<AemConfig, String, Supplier<String>, RestClient> factory() {
+		return (aemConfig, target, correlationIdFn)->new JerseyRestClient(aemConfig, target, correlationIdFn);
 	}
 	
-	public static RestClient restClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn, Client client) {
-		return new JerseyRestClient(aemConfig, target, correlationIdFn, client);
+	public static TriFunction<AemConfig, String, Supplier<String>, RestClient> factory(Client client) {
+		return (aemConfig, target, correlationIdFn)->new JerseyRestClient(aemConfig, target, correlationIdFn, client);
 	}
 	
 	@Override

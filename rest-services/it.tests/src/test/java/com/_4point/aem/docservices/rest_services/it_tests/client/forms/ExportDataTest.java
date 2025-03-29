@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 
 import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
@@ -41,7 +42,7 @@ class ExportDataTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		RestServicesFormsServiceAdapter adapter = RestServicesFormsServiceAdapter.builder()
+		RestServicesFormsServiceAdapter adapter = RestServicesFormsServiceAdapter.builder(JerseyRestClient.factory())
 				.machineName(TEST_MACHINE_NAME)
 				.port(TEST_MACHINE_PORT)
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)

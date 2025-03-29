@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -33,7 +34,7 @@ class RenderAdaptiveFormTest {
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		underTest = AdaptiveFormsService.builder()
+		underTest = AdaptiveFormsService.builder(JerseyRestClient.factory())
 				.machineName(TestUtils.TEST_MACHINE_NAME)
 				.port(TestUtils.TEST_MACHINE_PORT)
 				.basicAuthentication(TestUtils.TEST_USER, TestUtils.TEST_USER_PASSWORD)

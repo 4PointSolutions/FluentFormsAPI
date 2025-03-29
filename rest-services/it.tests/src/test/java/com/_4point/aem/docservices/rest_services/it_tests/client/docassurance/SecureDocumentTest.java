@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.docassurance.RestServicesDocAssuranceServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
@@ -22,7 +23,7 @@ public class SecureDocumentTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		RestServicesDocAssuranceServiceAdapter adapter = RestServicesDocAssuranceServiceAdapter.builder()
+		RestServicesDocAssuranceServiceAdapter adapter = RestServicesDocAssuranceServiceAdapter.builder(JerseyRestClient.factory())
 		                                                     .machineName(TEST_MACHINE_NAME)
 		                                                     .port(TEST_MACHINE_PORT)
 		                                                     .basicAuthentication(TEST_USER, TEST_USER_PASSWORD)

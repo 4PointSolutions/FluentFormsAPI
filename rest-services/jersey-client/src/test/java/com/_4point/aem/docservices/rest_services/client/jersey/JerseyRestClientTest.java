@@ -48,7 +48,7 @@ class JerseyRestClientTest {
 				   .port(wmRuntimeInfo.getHttpPort())
 				   .build();
 		
-		underTest = new JerseyRestClient(aemConfig, ENDPOINT, ()->CORRELATION_ID_TEXT);
+		underTest = JerseyRestClient.factory().apply(aemConfig, ENDPOINT, ()->CORRELATION_ID_TEXT);
 	}
 
 	/*
@@ -281,8 +281,8 @@ class JerseyRestClientTest {
 		// Given
 		stubFor(post(endPoint1).willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), mockHtmlBytes)));
 		stubFor(post(endPoint2).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), mockPdfBytes)));
-		var client1 = new JerseyRestClient(aemConfig, endPoint1, null);
-		var client2 = new JerseyRestClient(aemConfig, endPoint2, ()->CORRELATION_ID_TEXT);
+		var client1 = JerseyRestClient.factory().apply(aemConfig, endPoint1, null);
+		var client2 = JerseyRestClient.factory().apply(aemConfig, endPoint2, ()->CORRELATION_ID_TEXT);
 
 		// When
 		MultipartPayload.Builder builder1 = client1.multipartPayloadBuilder()

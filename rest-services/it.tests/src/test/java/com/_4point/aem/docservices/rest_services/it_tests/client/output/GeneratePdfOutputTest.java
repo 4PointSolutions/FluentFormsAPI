@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
 import com._4point.aem.docservices.rest_services.it_tests.Pdf;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
@@ -30,7 +31,7 @@ class GeneratePdfOutputTest {
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		RestServicesOutputServiceAdapter adapter = RestServicesOutputServiceAdapter.builder()
+		RestServicesOutputServiceAdapter adapter = RestServicesOutputServiceAdapter.builder(JerseyRestClient.factory())
 				.machineName("172.18.110.22")
 				.port(4502)
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDocAssemblerServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.it_tests.Pdf;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
@@ -44,7 +45,7 @@ public class AssembleDocumentsTest {
 	private AssemblerService underTest;
 	@BeforeEach
 	void setUp() throws Exception {
-		RestServicesDocAssemblerServiceAdapter adapter = RestServicesDocAssemblerServiceAdapter.builder()
+		RestServicesDocAssemblerServiceAdapter adapter = RestServicesDocAssemblerServiceAdapter.builder(JerseyRestClient.factory())
 				.machineName(TEST_MACHINE_NAME)
 				.port(TEST_MACHINE_PORT)
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)

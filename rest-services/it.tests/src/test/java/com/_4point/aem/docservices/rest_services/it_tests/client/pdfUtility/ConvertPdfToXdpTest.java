@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.client.pdfUtility.RestServicesPdfUtilityServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
@@ -27,7 +28,7 @@ class ConvertPdfToXdpTest {
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		RestServicesPdfUtilityServiceAdapter adapter = RestServicesPdfUtilityServiceAdapter.builder()
+		RestServicesPdfUtilityServiceAdapter adapter = RestServicesPdfUtilityServiceAdapter.builder(JerseyRestClient.factory())
 				.machineName(TEST_MACHINE_NAME)
 				.port(TEST_MACHINE_PORT)
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)

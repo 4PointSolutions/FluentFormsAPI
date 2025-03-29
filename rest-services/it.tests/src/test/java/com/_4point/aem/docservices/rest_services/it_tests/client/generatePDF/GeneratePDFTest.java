@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.generatePDF.RestServicesGeneratePDFServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService.GeneratePDFServiceException;
@@ -24,7 +25,7 @@ public class GeneratePDFTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		RestServicesGeneratePDFServiceAdapter adapter = RestServicesGeneratePDFServiceAdapter.builder()
+		RestServicesGeneratePDFServiceAdapter adapter = RestServicesGeneratePDFServiceAdapter.builder(JerseyRestClient.factory())
 				.machineName(TEST_MACHINE_NAME)
 				.port(TEST_MACHINE_PORT)
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)

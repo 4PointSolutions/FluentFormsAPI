@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.it_tests.HtmlFormDocument;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
@@ -26,7 +27,7 @@ class RenderHtml5FormTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		underTest = Html5FormsService.builder()
+		underTest = Html5FormsService.builder(JerseyRestClient.factory())
 				.machineName(TestUtils.TEST_MACHINE_NAME)
 				.port(TestUtils.TEST_MACHINE_PORT)
 				.basicAuthentication(TestUtils.TEST_USER, TestUtils.TEST_USER_PASSWORD)
