@@ -40,7 +40,7 @@ import com._4point.aem.docservices.rest_services.client.RestClient.RestClientExc
 import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
 import com._4point.aem.fluentforms.api.docassurance.EncryptionOptions;
@@ -80,7 +80,7 @@ public class RestServicesDocAssuranceServiceAdapterTest {
 	private static final String ENABLED_SUBMIT_STANDALONE_PARAM = "usageRights.enabledSubmitStandalone";
 	
 
-	@Mock(stubOnly = true) TriFunction<AemConfig, String, Supplier<String>, RestClient> mockClientFactory;
+	@Mock(stubOnly = true) RestClientFactory mockClientFactory;
 	@Mock(stubOnly = true) RestClient mockClient;
 	@Mock(stubOnly = true) MultipartPayload mockPayload;
 	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;
@@ -381,7 +381,7 @@ public class RestServicesDocAssuranceServiceAdapterTest {
 		return assertThrows(DocAssuranceServiceException.class, test);
 	}
 
-	private static RestServicesDocAssuranceServiceAdapter createAdapter(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	private static RestServicesDocAssuranceServiceAdapter createAdapter(RestClientFactory clientFactory) {
 		return RestServicesDocAssuranceServiceAdapter.builder(clientFactory)
 											  .machineName(TEST_MACHINE_NAME)
 											  .port(TEST_MACHINE_PORT)

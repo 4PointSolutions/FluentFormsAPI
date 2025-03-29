@@ -15,12 +15,11 @@ import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.Response;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
-import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
@@ -186,7 +185,7 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 	 * 
 	 * @return
 	 */
-	public static AdaptiveFormsServiceBuilder builder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	public static AdaptiveFormsServiceBuilder builder(RestClientFactory clientFactory) {
 		return new AdaptiveFormsServiceBuilder(clientFactory);
 	}
 	
@@ -195,7 +194,7 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		private Function<InputStream, InputStream> renderResultFilter; 
 		
 		// Prevent it from being instantiated outside of this class
-		private AdaptiveFormsServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+		private AdaptiveFormsServiceBuilder(RestClientFactory clientFactory) {
 			this.builder = new BuilderImpl(clientFactory);
 		}
 

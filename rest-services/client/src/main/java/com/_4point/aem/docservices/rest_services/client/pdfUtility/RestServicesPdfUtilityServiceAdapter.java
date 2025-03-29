@@ -9,11 +9,10 @@ import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
-import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService.PdfUtilityException;
@@ -78,14 +77,14 @@ public class RestServicesPdfUtilityServiceAdapter extends RestServicesServiceAda
 		throw new UnsupportedOperationException("sanitize is not implemented yet.");
 	}
 	
-	public static PdfUtilityServiceBuilder builder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	public static PdfUtilityServiceBuilder builder(RestClientFactory clientFactory) {
 		return new PdfUtilityServiceBuilder(clientFactory);
 	}
 
 	public static class PdfUtilityServiceBuilder implements Builder {
 		private final BuilderImpl builder;
 
-		private PdfUtilityServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+		private PdfUtilityServiceBuilder(RestClientFactory clientFactory) {
 			this.builder = new BuilderImpl(clientFactory);
 		}
 

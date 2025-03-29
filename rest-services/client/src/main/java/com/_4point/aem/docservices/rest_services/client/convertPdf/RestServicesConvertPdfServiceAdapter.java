@@ -13,11 +13,10 @@ import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.Response;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
-import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService.ConvertPdfServiceException;
@@ -271,14 +270,14 @@ public class RestServicesConvertPdfServiceAdapter extends RestServicesServiceAda
 	 * 
 	 * @return build object
 	 */
-	public static ConvertPdfServiceBuilder builder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	public static ConvertPdfServiceBuilder builder(RestClientFactory clientFactory) {
 		return new ConvertPdfServiceBuilder(clientFactory);
 	}
 	
 	public static class ConvertPdfServiceBuilder implements Builder {
 		private BuilderImpl builder;
 
-		private ConvertPdfServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+		private ConvertPdfServiceBuilder(RestClientFactory clientFactory) {
 			this.builder = new BuilderImpl(clientFactory);
 		}
 

@@ -19,11 +19,10 @@ import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.Response;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
-import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
@@ -114,14 +113,14 @@ public class RestServicesGeneratePDFServiceAdapter extends RestServicesServiceAd
 		}
 	}
 
-	public static GeneratePDFServiceBuilder builder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	public static GeneratePDFServiceBuilder builder(RestClientFactory clientFactory) {
 		return new GeneratePDFServiceBuilder(clientFactory);
 	}
 
 	public static class GeneratePDFServiceBuilder implements Builder {
 		private final BuilderImpl builder;
 
-		public GeneratePDFServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+		public GeneratePDFServiceBuilder(RestClientFactory clientFactory) {
 			this.builder = new BuilderImpl(clientFactory);
 		}
 

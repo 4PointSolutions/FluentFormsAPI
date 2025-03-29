@@ -35,7 +35,7 @@ import com._4point.aem.docservices.rest_services.client.RestClient.Response;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
@@ -53,7 +53,7 @@ class RestServicesFormsServiceAdapterTest {
 	private static final String TEST_MACHINE_NAME = "testmachinename";
 	private static final int TEST_MACHINE_PORT = 8080;
 	
-	@Mock(stubOnly = true) TriFunction<AemConfig, String, Supplier<String>, RestClient> mockClientFactory;
+	@Mock(stubOnly = true) RestClientFactory mockClientFactory;
 	@Mock(stubOnly = true) RestClient mockClient;
 	@Mock(stubOnly = true) MultipartPayload mockPayload;
 	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;
@@ -248,7 +248,7 @@ class RestServicesFormsServiceAdapterTest {
 		fail("Not yet implemented");
 	}
 
-	private static RestServicesFormsServiceAdapter createAdapter(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	private static RestServicesFormsServiceAdapter createAdapter(RestClientFactory clientFactory) {
 		return RestServicesFormsServiceAdapter.builder(clientFactory)
 											  .machineName(TEST_MACHINE_NAME)
 											  .port(TEST_MACHINE_PORT)

@@ -25,7 +25,7 @@ import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayl
 import com._4point.aem.docservices.rest_services.client.RestClient.Response;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.testing.MockDocumentFactory;
 import com.adobe.fd.pdfutility.services.client.PDFPropertiesOptionSpec;
@@ -37,7 +37,7 @@ class RestServicesPdfUtilityServiceAdapterTest {
 	private static final String CORRELATION_ID = "correlationId";
 
 
-	@Mock(stubOnly = true) TriFunction<AemConfig, String, Supplier<String>, RestClient> mockClientFactory;
+	@Mock(stubOnly = true) RestClientFactory mockClientFactory;
 	@Mock(stubOnly = true) RestClient mockClient;
 	@Mock(stubOnly = true) MultipartPayload mockPayload;
 	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;

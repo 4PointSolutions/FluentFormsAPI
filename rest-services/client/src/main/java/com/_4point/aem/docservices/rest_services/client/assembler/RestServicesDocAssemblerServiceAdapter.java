@@ -25,11 +25,10 @@ import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.Response;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
-import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument;
 import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument.XmlDocumentException;
@@ -233,14 +232,14 @@ implements TraditionalDocAssemblerService {
 	 * 
 	 * return null; }
 	 */
-	public static AssemblerServiceBuilder builder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	public static AssemblerServiceBuilder builder(RestClientFactory clientFactory) {
 		return new AssemblerServiceBuilder(clientFactory);
 	}
 
 	public static class AssemblerServiceBuilder implements Builder {
 		private final BuilderImpl builder;
 
-		public AssemblerServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+		public AssemblerServiceBuilder(RestClientFactory clientFactory) {
 			this.builder = new BuilderImpl(clientFactory);
 		}
 

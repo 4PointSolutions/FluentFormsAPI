@@ -34,7 +34,7 @@ import com._4point.aem.docservices.rest_services.client.RestClient.Response;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService.ConvertPdfServiceException;
 import com._4point.aem.fluentforms.api.convertPdf.ToImageOptionsSpec;
@@ -122,7 +122,7 @@ public class RestServicesConvertPdfServiceAdapterTest {
 ////	private static final MediaType APPLICATION_TIFF = new MediaType("image", "tiff");
 //	private static final MediaType APPLICATION_PS = new MediaType("application", "postscript");
 
-	@Mock(stubOnly = true) TriFunction<AemConfig, String, Supplier<String>, RestClient> mockClientFactory;
+	@Mock(stubOnly = true) RestClientFactory mockClientFactory;
 	@Mock(stubOnly = true) RestClient mockClient;
 	@Mock(stubOnly = true) MultipartPayload mockPayload;
 	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;
@@ -385,7 +385,7 @@ public class RestServicesConvertPdfServiceAdapterTest {
 		return assertThrows(ConvertPdfServiceException.class, test);
 	}
 	
-	private static RestServicesConvertPdfServiceAdapter createAdapter(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	private static RestServicesConvertPdfServiceAdapter createAdapter(RestClientFactory clientFactory) {
 		return RestServicesConvertPdfServiceAdapter.builder(clientFactory)
 											  .machineName(TEST_MACHINE_NAME)
 											  .port(TEST_MACHINE_PORT)

@@ -12,11 +12,10 @@ import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
-import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -114,7 +113,7 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 	 * 
 	 * @return builder object
 	 */
-	public static Html5FormsServiceBuilder builder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	public static Html5FormsServiceBuilder builder(RestClientFactory clientFactory) {
 		return new Html5FormsServiceBuilder(clientFactory);
 	}
 	
@@ -123,7 +122,7 @@ public class Html5FormsService extends RestServicesServiceAdapter {
 		private Function<InputStream, InputStream> renderResultFilter; 
 
 		// Prevent it from being instantiated outside of this class
-		private Html5FormsServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+		private Html5FormsServiceBuilder(RestClientFactory clientFactory) {
 			this.builder = new BuilderImpl(clientFactory);
 		}
 

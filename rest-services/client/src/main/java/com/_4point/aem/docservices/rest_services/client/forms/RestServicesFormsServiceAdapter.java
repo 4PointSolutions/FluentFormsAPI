@@ -8,11 +8,10 @@ import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
-import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
@@ -148,14 +147,14 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 	 * 
 	 * @return build object
 	 */
-	public static FormsServiceBuilder builder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	public static FormsServiceBuilder builder(RestClientFactory clientFactory) {
 		return new FormsServiceBuilder(clientFactory);
 	}
 	
 	public static class FormsServiceBuilder implements Builder {
 		private final BuilderImpl builder;
 		
-		private FormsServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+		private FormsServiceBuilder(RestClientFactory clientFactory) {
             this.builder = new BuilderImpl(clientFactory);
         }
 

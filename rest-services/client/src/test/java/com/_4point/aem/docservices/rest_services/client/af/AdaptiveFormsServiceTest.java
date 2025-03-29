@@ -1,10 +1,8 @@
 package com._4point.aem.docservices.rest_services.client.af;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
@@ -38,7 +36,7 @@ import com._4point.aem.docservices.rest_services.client.RestClient.RestClientExc
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService.AdaptiveFormsServiceException;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -57,7 +55,7 @@ class AdaptiveFormsServiceTest {
 	private static final String TEST_MACHINE_NAME = "testmachinename";
 	private static final int TEST_MACHINE_PORT = 8080;
 
-	@Mock(stubOnly = true) TriFunction<AemConfig, String, Supplier<String>, RestClient> mockClientFactory;
+	@Mock(stubOnly = true) RestClientFactory mockClientFactory;
 	@Mock(stubOnly = true) RestClient mockClient;
 	@Mock(stubOnly = true) MultipartPayload mockPayload;
 	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;
@@ -236,7 +234,7 @@ class AdaptiveFormsServiceTest {
 		assertEquals(ContentType.TEXT_HTML.contentType(), result.getContentType());
 	}	
 	
-	private static AdaptiveFormsService createAdapter(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	private static AdaptiveFormsService createAdapter(RestClientFactory clientFactory) {
 		return AdaptiveFormsService.builder(clientFactory)
 											  .machineName(TEST_MACHINE_NAME)
 											  .port(TEST_MACHINE_PORT)
@@ -337,7 +335,7 @@ class AdaptiveFormsServiceTest {
 	@ExtendWith(MockitoExtension.class)
 	static class NullArgumentTests {
 
-		@Mock(stubOnly = true) TriFunction<AemConfig, String, Supplier<String>, RestClient> mockClientFactory;
+		@Mock(stubOnly = true) RestClientFactory mockClientFactory;
 		@Mock(stubOnly = true) RestClient mockClient;
 
 		AdaptiveFormsService underTest;

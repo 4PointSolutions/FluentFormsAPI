@@ -44,7 +44,7 @@ import com._4point.aem.docservices.rest_services.client.RestClient.RestClientExc
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerOptionsSpec;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
@@ -75,7 +75,7 @@ class RestServicesDocAssemblerServiceAdapterTest {
 //	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 //	private static final MediaType APPLICATION_XML = new MediaType("application", "xml");
 	
-	@Mock(stubOnly = true) TriFunction<AemConfig, String, Supplier<String>, RestClient> mockClientFactory;
+	@Mock(stubOnly = true) RestClientFactory mockClientFactory;
 	@Mock(stubOnly = true) RestClient mockClient;
 	@Mock(stubOnly = true) MultipartPayload mockPayload;
 	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;
@@ -637,7 +637,7 @@ class RestServicesDocAssemblerServiceAdapterTest {
 		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll("isPDFA has not been implemented yet."));
 	}
 	
-	private static RestServicesDocAssemblerServiceAdapter createAdapter(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	private static RestServicesDocAssemblerServiceAdapter createAdapter(RestClientFactory clientFactory) {
 		return RestServicesDocAssemblerServiceAdapter.builder(clientFactory)
 											  .machineName(TEST_MACHINE_NAME)
 											  .port(TEST_MACHINE_PORT)

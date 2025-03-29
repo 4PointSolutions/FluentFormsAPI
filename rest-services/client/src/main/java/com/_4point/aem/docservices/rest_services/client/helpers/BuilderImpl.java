@@ -1,7 +1,6 @@
 package com._4point.aem.docservices.rest_services.client.helpers;
 
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com._4point.aem.docservices.rest_services.client.RestClient;
@@ -18,7 +17,7 @@ import com._4point.aem.docservices.rest_services.client.RestClient;
 public class BuilderImpl implements Builder {
 	private static final String SERVICES_URL_PREFIX = "/services";
 
-	private final TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory;
+	private final RestClientFactory clientFactory;
 	private final AemConfig.SimpleAemConfigBuilder aemConfigBuilder = new AemConfig.SimpleAemConfigBuilder();
 	private Supplier<String> correlationIdFn = null;
 	private AemServerType aemServerType = AemServerType.StandardType.OSGI;	// Defaults to OSGi but can be overridden.
@@ -28,7 +27,7 @@ public class BuilderImpl implements Builder {
 	}
 
 	// TODO:  Convert to TriFunction (maybe if correlation ID function is present?)
-	public BuilderImpl(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	public BuilderImpl(RestClientFactory clientFactory) {
 		this.clientFactory = clientFactory;
 	}
 
@@ -92,16 +91,5 @@ public class BuilderImpl implements Builder {
 	
 	public RestClient createClient(String endpoint) {
 		return createClientImplementation(this.aemServerType.pathPrefix() + endpoint);
-	}
-	
-	@FunctionalInterface
-	public interface TriFunction<T, U, V, R> {
-
-	    R apply(T t, U u, V v);
-
-	    default <K> TriFunction<T, U, V, K> andThen(Function<? super R, ? extends K> after) {
-	        Objects.requireNonNull(after);
-	        return (T t, U u, V v) -> after.apply(apply(t, u, v));
-	    }
 	}
 }

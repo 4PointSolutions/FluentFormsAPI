@@ -16,7 +16,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest.Builder;
 import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -69,11 +69,11 @@ public class JerseyRestClient implements RestClient {
 					 .register(HttpAuthenticationFeature.basic(username, password));
 	}
 	
-	public static TriFunction<AemConfig, String, Supplier<String>, RestClient> factory() {
+	public static RestClientFactory factory() {
 		return (aemConfig, target, correlationIdFn)->new JerseyRestClient(aemConfig, target, correlationIdFn);
 	}
 	
-	public static TriFunction<AemConfig, String, Supplier<String>, RestClient> factory(Client client) {
+	public static RestClientFactory factory(Client client) {
 		return (aemConfig, target, correlationIdFn)->new JerseyRestClient(aemConfig, target, correlationIdFn, client);
 	}
 	

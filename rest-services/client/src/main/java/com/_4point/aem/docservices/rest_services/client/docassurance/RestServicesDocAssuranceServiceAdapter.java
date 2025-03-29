@@ -9,11 +9,10 @@ import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
-import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl.TriFunction;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
@@ -225,14 +224,14 @@ public class RestServicesDocAssuranceServiceAdapter extends RestServicesServiceA
 	 * 
 	 * @return build object
 	 */
-	public static DocAssuranceServiceBuilder builder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+	public static DocAssuranceServiceBuilder builder(RestClientFactory clientFactory) {
 		return new DocAssuranceServiceBuilder(clientFactory);
 	}
 	
 	public static class DocAssuranceServiceBuilder implements Builder {
 		private final BuilderImpl builder;
 		
-		private DocAssuranceServiceBuilder(TriFunction<AemConfig, String, Supplier<String>, RestClient> clientFactory) {
+		private DocAssuranceServiceBuilder(RestClientFactory clientFactory) {
 			builder = new BuilderImpl(clientFactory);
 		}
 

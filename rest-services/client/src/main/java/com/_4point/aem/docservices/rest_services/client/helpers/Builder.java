@@ -1,6 +1,7 @@
 package com._4point.aem.docservices.rest_services.client.helpers;
 
-import java.util.function.BiFunction;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com._4point.aem.docservices.rest_services.client.RestClient;
@@ -31,4 +32,18 @@ public interface Builder {
 	public Builder aemServerType(AemServerType serverType);
 
 	public AemServerType getAemServerType();
+	
+	public interface RestClientFactory extends TriFunction<AemConfig, String, Supplier<String>, RestClient> {}
+	
+	@FunctionalInterface
+	public interface TriFunction<T, U, V, R> {
+
+	    R apply(T t, U u, V v);
+
+	    default <K> TriFunction<T, U, V, K> andThen(Function<? super R, ? extends K> after) {
+	        Objects.requireNonNull(after);
+	        return (T t, U u, V v) -> after.apply(apply(t, u, v));
+	    }
+	}
+
 }
