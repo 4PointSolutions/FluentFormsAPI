@@ -101,6 +101,7 @@
         <xerces-version>2.12.2</xerces-version>
         <wiremock.version>3.4.2</wiremock.version>
         <_4point-hamcrest-matchers.version>0.0.1-SNAPSHOT</_4point-hamcrest-matchers.version>
+        <junit-addons.version>1.4</junit-addons.version>
 	</properties>
 
 	<build>
@@ -492,6 +493,26 @@
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>${jaxb.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>junit-addons</groupId>
+				<artifactId>junit-addons</artifactId>
+				<version>${junit-addons.version}</version>
+				<scope>test</scope>
+				<exclusions>
+					<exclusion>	<!-- Exclude this really old version of junit that junit-addons depends on -->
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends on -->
+						<groupId>xerces</groupId>
+						<artifactId>xercesImpl</artifactId>
+					</exclusion>
+					<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends on -->
+						<groupId>xerces</groupId>
+						<artifactId>xmlParserAPIs</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
