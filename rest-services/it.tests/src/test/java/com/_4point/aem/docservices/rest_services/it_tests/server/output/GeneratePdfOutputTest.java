@@ -22,12 +22,13 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.docservices.rest_services.it_tests.AbstractAemContainerTest;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
-class GeneratePdfOutputTest {
+class GeneratePdfOutputTest extends AbstractAemContainerTest {
 
 	private static final String GENERATE_PDF_OUTPUT_PATH = TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/OutputService/GeneratePdfOutput";
-	private static final String GENERATE_PDF_OUTPUT_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + GENERATE_PDF_OUTPUT_PATH;
+	private static final String GENERATE_PDF_OUTPUT_URL = "http://" + aemHost() + ":" + aemPort() + GENERATE_PDF_OUTPUT_PATH;
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	private static final String CRX_CONTENT_ROOT = "crx:/content/dam/formsanddocuments/sample-forms";

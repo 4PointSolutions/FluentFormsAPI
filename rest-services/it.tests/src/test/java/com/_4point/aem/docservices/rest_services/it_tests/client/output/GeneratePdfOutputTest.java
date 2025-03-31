@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
+import com._4point.aem.docservices.rest_services.it_tests.AbstractAemContainerTest;
 import com._4point.aem.docservices.rest_services.it_tests.Pdf;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
@@ -23,7 +24,7 @@ import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.output.OutputServiceImpl;
 import com.adobe.fd.output.api.AcrobatVersion;
 
-class GeneratePdfOutputTest {
+class GeneratePdfOutputTest extends AbstractAemContainerTest {
 
 	private static final String CRX_CONTENT_ROOT = "crx:/content/dam/formsanddocuments/sample-forms";
 
@@ -32,8 +33,8 @@ class GeneratePdfOutputTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		RestServicesOutputServiceAdapter adapter = RestServicesOutputServiceAdapter.builder(JerseyRestClient.factory())
-				.machineName("172.18.110.22")
-				.port(4502)
+				.machineName(aemHost())
+				.port(aemPort())
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
 				.useSsl(false)
 				.aemServerType(TEST_MACHINE_AEM_TYPE)
