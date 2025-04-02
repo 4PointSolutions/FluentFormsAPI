@@ -176,7 +176,7 @@ class RestServicesFormsServiceAdapterTest {
 		PDFFormRenderOptions pdfFormRenderOptions = codePath.emptyOptions ? new PDFFormRenderOptionsImpl() : getNonDefaultPdfRenderOptions();
 		
 		when(mockPayloadBuilder.addIfNotNull(eq("template"), codePath.templateString ? eq(templateFilename) : isNull())).thenReturn(mockPayloadBuilder);
-		when(mockPayloadBuilder.addIfNotNull(eq("template"), codePath.templateString ? isNull() : same(templateDoc), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.addIfNotNull(eq("template"), codePath.templateString ? isNull() : same(templateDoc), eq(ContentType.APPLICATION_XDP))).thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.addIfNotNull(eq("data"), codePath.hasData ? same(data) : isNull(), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.addStringVersion(eq("renderOptions.acrobatVersion"), eq(pdfFormRenderOptions.getAcrobatVersion()))).thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.addStringVersion(eq("renderOptions.cacheStrategy"), eq(pdfFormRenderOptions.getCacheStrategy()))).thenReturn(mockPayloadBuilder);

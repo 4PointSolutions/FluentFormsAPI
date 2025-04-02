@@ -145,8 +145,10 @@ public interface RestClient {
 				return fieldData != null ? addDocsIfNotNull(fieldName, fn.apply(fieldData)) : this;
 			}
 			default Builder addStringVersion(String fieldName, List<?> fieldData) {
-				for (Object obj : fieldData) {
-					addStringVersion(fieldName, obj);
+				if (fieldData != null) {
+					for (Object obj : fieldData) {
+						addStringVersion(fieldName, obj);
+					}
 				}
 				return this;
 			}

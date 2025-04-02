@@ -18,6 +18,7 @@ import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
+import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
 import com.adobe.fd.forms.api.DataFormat;
 
@@ -67,7 +68,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 
             return payload.postToServer(ContentType.APPLICATION_XML)
             			  .map(RestServicesServiceAdapter::responseToDoc)
-            			  .orElseThrow();
+            			  .orElse(SimpleDocumentFactoryImpl.emptyDocument());	// If there was no response, return an empty document.
         } catch (IOException e) {
             throw new FormsServiceException("I/O Error while exporting data. (" + exportDataRestClient.target() + ").", e);
         } catch (RestClientException e) {
@@ -101,7 +102,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
     	var xci = pdfFormRenderOptions.getXci();
         try (MultipartPayload payload = renderFormRestClient.multipartPayloadBuilder()
                 .addIfNotNull(TEMPLATE_PARAM, urlOrfilename)							// Since this is internal, we know that one of these two will be null
-                .addIfNotNull(TEMPLATE_PARAM, template, ContentType.APPLICATION_XML)
+                .addIfNotNull(TEMPLATE_PARAM, template, ContentType.APPLICATION_XDP)
                 .addIfNotNull(DATA_PARAM, data, ContentType.APPLICATION_XML)
                 .addStringVersion(ACROBAT_VERSION_PARAM, pdfFormRenderOptions.getAcrobatVersion())
                 .addStringVersion(CACHE_STRATEGY_PARAM, pdfFormRenderOptions.getCacheStrategy())
