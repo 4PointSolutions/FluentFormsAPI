@@ -95,6 +95,11 @@
 			<artifactId>awaitility</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.4point.aem</groupId>
+			<artifactId>aem-package-manager-api</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>

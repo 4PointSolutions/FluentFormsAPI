@@ -19,16 +19,19 @@ import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import com._4point.aem.docservices.rest_services.it_tests.AbstractAemContainerTest;
+import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
-class GeneratePdfOutputTest extends AbstractAemContainerTest {
+@Tag("server-tests")
+class GeneratePdfOutputTest {
 
 	private static final String GENERATE_PDF_OUTPUT_PATH = TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/OutputService/GeneratePdfOutput";
-	private static final String GENERATE_PDF_OUTPUT_URL = "http://" + aemHost() + ":" + aemPort() + GENERATE_PDF_OUTPUT_PATH;
+	private static final String GENERATE_PDF_OUTPUT_URL = "http://" + AemInstance.AEM_1.aemHost() + ":" + AemInstance.AEM_1.aemPort() + GENERATE_PDF_OUTPUT_PATH;
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 	private static final String CRX_CONTENT_ROOT = "crx:/content/dam/formsanddocuments/sample-forms";
@@ -49,6 +52,11 @@ class GeneratePdfOutputTest extends AbstractAemContainerTest {
 	private static final boolean SAVE_OUTPUT = false;
 	
 	private WebTarget target;
+
+	@BeforeAll
+	static void setUpAll() throws Exception {
+		AemInstance.AEM_1.prepareForTests();
+	}
 
 	@BeforeEach
 	void setUp() throws Exception {

@@ -4,12 +4,15 @@ import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.docassurance.RestServicesDocAssuranceServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
+import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
@@ -17,19 +20,25 @@ import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssur
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl;
 
+@Tag("client-tests")
 public class SecureDocumentTest {
 
 	private DocAssuranceService underTest; 
 
+	@BeforeAll
+	static void setUpAll() throws Exception {
+		AemInstance.AEM_1.prepareForTests();
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
 		RestServicesDocAssuranceServiceAdapter adapter = RestServicesDocAssuranceServiceAdapter.builder(JerseyRestClient.factory())
-		                                                     .machineName(TEST_MACHINE_NAME)
-		                                                     .port(TEST_MACHINE_PORT)
-		                                                     .basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
-		                                                     .useSsl(false)
-		                                                     .aemServerType(TEST_MACHINE_AEM_TYPE)
-		                                                     .build();
+															.machineName(AemInstance.AEM_1.aemHost())
+															.port(AemInstance.AEM_1.aemPort())
+		                                                    .basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
+		                                                    .useSsl(false)
+		                                                    .aemServerType(TEST_MACHINE_AEM_TYPE)
+		                                                    .build();
 
 		underTest = new DocAssuranceServiceImpl(adapter);
 	}
@@ -56,7 +65,7 @@ public class SecureDocumentTest {
 		                                  .done()
 		                              .done()
 		                          .done()
-		                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF.toFile()));
+		                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "testReaderExtendPDF_AllArgs_Client.pdf", true, true, true);
 	}
@@ -68,7 +77,7 @@ public class SecureDocumentTest {
 			Document pdfResult =  underTest.secureDocument()
 			                          .readerExtensionsOptions("recred")
 			                          .done()
-			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF.toFile()));
+			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
 			assertThat("Expected an error to be thrown.", pdfResult.getInlineData().length > 0);
 		} catch (DocAssuranceServiceException e) {
 			assertThat(e.getMessage(), containsStringIgnoringCase("Internal Error while reader extending a PDF."));
@@ -84,7 +93,7 @@ public class SecureDocumentTest {
 			Document pdfResult =  underTest.secureDocument()
 			                          .readerExtensionsOptions("bad")
 			                          .done()
-			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF.toFile()));
+			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
 			assertThat("Expected an error to be thrown.", pdfResult.getInlineData().length > 0);
 		} catch (DocAssuranceServiceException e) {
 			assertThat(e.getMessage(), containsStringIgnoringCase("Internal Error while reader extending a PDF."));
@@ -99,7 +108,7 @@ public class SecureDocumentTest {
 			Document pdfResult =  underTest.secureDocument()
 			                          .readerExtensionsOptions(null)
 			                          .done()
-			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF.toFile()));
+			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
 			assertThat("Expected an error to be thrown.", pdfResult.getInlineData().length > 0);
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage(), containsStringIgnoringCase("Credential Alias provided in Reader Extension options cannot be null."));
@@ -113,7 +122,7 @@ public class SecureDocumentTest {
 			Document pdfResult =  underTest.secureDocument()
 			                          .readerExtensionsOptions("")
 			                          .done()
-			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF.toFile()));
+			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
 			assertThat("Expected an error to be thrown.", pdfResult.getInlineData().length > 0);
 		} catch (DocAssuranceServiceException e) {
 			assertThat(e.getMessage(), containsStringIgnoringCase("Internal Error while reader extending a PDF."));
@@ -128,7 +137,7 @@ public class SecureDocumentTest {
 			Document pdfResult =  underTest.secureDocument()
 			                          .readerExtensionsOptions("recred")
 			                          .done()
-			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML.toFile()));
+			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML));
 			assertThat("Expected an error to be thrown.", pdfResult.getInlineData().length > 0);
 		} catch (DocAssuranceServiceException e) {
 			assertThat(e.getMessage(), containsStringIgnoringCase("Internal Error while reader extending a PDF."));

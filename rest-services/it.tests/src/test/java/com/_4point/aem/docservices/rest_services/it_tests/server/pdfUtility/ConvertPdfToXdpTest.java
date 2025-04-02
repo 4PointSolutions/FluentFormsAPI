@@ -21,13 +21,16 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
+@Tag("server-tests")
 class ConvertPdfToXdpTest {
 	private static final String CONVERT_PDF_TO_XDP_PATH = TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/PdfUtility/ConvertPdfToXdp";
-	private static final String CONVERT_PDF_TO_XDP_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + CONVERT_PDF_TO_XDP_PATH;
+	private static final String CONVERT_PDF_TO_XDP_URL = "http://" + AemInstance.AEM_1.aemHost() + ":" + AemInstance.AEM_1.aemPort() + CONVERT_PDF_TO_XDP_PATH;
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 
@@ -39,6 +42,7 @@ class ConvertPdfToXdpTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
+		AemInstance.AEM_1.prepareForTests();
 		HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(TEST_USER, TEST_USER_PASSWORD); // default AEM passwords
 		target = ClientBuilder.newClient().register(feature).register(MultiPartFeature.class)
 				.target(CONVERT_PDF_TO_XDP_URL);

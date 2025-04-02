@@ -104,6 +104,7 @@
         <junit-addons.version>1.4</junit-addons.version>
         <testcontainers.version>1.20.6</testcontainers.version>
         <awaitility.version>4.3.0</awaitility.version>
+        <aem-package-manager-api.version>0.0.1-SNAPSHOT</aem-package-manager-api.version>
 	</properties>
 
 	<build>
@@ -531,6 +532,12 @@
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
 				<version>${awaitility.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.4point.aem</groupId>
+				<artifactId>aem-package-manager-api</artifactId>
+				<version>${aem-package-manager-api.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>

@@ -2,6 +2,7 @@ package com._4point.aem.docservices.rest_services.it_tests.client.forms;
 
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -16,21 +17,26 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 
 import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
+import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
+import com._4point.testing.matchers.javalang.ExceptionMatchers;
 import com.adobe.fd.forms.api.DataFormat;
 
+@Tag("client-tests")
 class ExportDataTest {
 
 	private static final String APPLICATION_XML = "application/xml";
@@ -40,11 +46,16 @@ class ExportDataTest {
 	Document document;
 	private static final boolean SAVE_RESULTS = false;
 
+	@BeforeAll
+	static void setUpAll() throws Exception {
+		AemInstance.AEM_1.prepareForTests();
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
 		RestServicesFormsServiceAdapter adapter = RestServicesFormsServiceAdapter.builder(JerseyRestClient.factory())
-				.machineName(TEST_MACHINE_NAME)
-				.port(TEST_MACHINE_PORT)
+				.machineName(AemInstance.AEM_1.aemHost())
+				.port(AemInstance.AEM_1.aemPort())
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
 				.useSsl(false)
 				.aemServerType(TEST_MACHINE_AEM_TYPE)
@@ -86,20 +97,19 @@ class ExportDataTest {
 	@DisplayName("Test exportData() Non-interactive PDF.")
 	void testExportDataNonInteractive() throws Exception {
 
-		Document pdforxdp = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_WITHOUT_DATA_PDF.toFile());
+		Document pdforxdp = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_WITHOUT_DATA_PDF);
 		DataFormat dataformat = com.adobe.fd.forms.api.DataFormat.XmlData;
 		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->underTest.exportData(pdforxdp, dataformat));
-		String msg = ex.getMessage();
-		assertNotNull(msg);
-		assertTrue(msg.contains("500 Internal Error while importing data"));
-		assertTrue(msg.contains("Internal Error while importing data"));
+		
+		assertThat(ex, ExceptionMatchers.exceptionMsgContainsAll("Error while POSTing to server", "/services/FormsService/ExportData"));
+		ex.printStackTrace();
 	}
 
 	@Test
 	@DisplayName("Test exportData() NoData PDF.")
 	void testExportDataNoData() throws Exception {
 
-		Document pdforxdp = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_PDF.toFile());
+		Document pdforxdp = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_PDF);
 		DataFormat dataformat = com.adobe.fd.forms.api.DataFormat.XmlData;
 		Optional<Document> pdfResult = underTest.exportData(pdforxdp, dataformat);
 

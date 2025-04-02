@@ -31,6 +31,27 @@ public class TestUtils {
 	public static final String TEST_USER = "admin";
 	public static final String TEST_USER_PASSWORD = "admin";
 	
+	// Set this to true to use TestContainers for the integration tests.
+	//  The integration tests will run against an AEM instance running in a Docker container otherwise they will run against a local AEM instance.
+	public static final boolean USE_TESTCONTAINERS = false;
+	// Status of TestContainers support.
+	//		AEM Integration test issues:
+	//		* Sample Adaptive Form not deployed - Causes AF Rendering test to fail
+	//		* JSAFE not configured - Causes Assembler test to fail
+	//		* Sample XDP not deployed - Causes HTML5, PDF and Print rendering tests to fail
+	//		* GeneratePrintedOutput test AllArgs seems to want D:\FluentForms\Forms - Need to fix tests
+	//		* Reader Extensions not configured - Causes Reader Extensions test to fail
+	//		* OpenOffice not installed - causes GeneratePdf tests to fail
+	//
+	//		Tests that pass:
+	//		* DataCacheService Tests
+	//		* GeneratePrintedOutput Form Doc tests
+	//		* GeneratePdfOutput Form Doc tests
+	//		* Import Data tests
+	//		* RenderPdfForm Form Doc tests
+	//		* Export Data tests
+	//		* ConvertPdfToXDP tests
+	
 	private static final String SAMPLE_FORM_PDF_NAME = "SampleForm.pdf";
 	private static final String SAMPLE_FORM_XDP_NAME = "SampleForm.xdp";
 	private static final String SAMPLE_FORM_WITH_DATA_PDF_NAME = "SampleFormWithData.pdf";
