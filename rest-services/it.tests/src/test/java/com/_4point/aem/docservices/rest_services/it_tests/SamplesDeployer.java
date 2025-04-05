@@ -6,6 +6,15 @@ import java.nio.file.Paths;
 import com._4point.aem.package_manager.FormsAndDocumentsClient;
 import com._4point.aem.package_manager.FormsAndDocumentsClientEx;
 
+/**
+ * Used for deploying sample files to AEM for testing purposes.  This includes the following files:
+ *  - SampleForm.xdp (deployed to remote file system for testing PDF rendering using a file reference)
+ *  - SampleForm.xdp (deployed to /content/dam/formsanddocuments/sample-forms for CRX testing0
+ *  - Sample0002test.zip (deployed to /content/dam/formsanddocuments for adaptive forms testing)
+ *  
+ *  Possible future things:
+ *  - Deploy ReaderExtensions credentials
+ */
 public class SamplesDeployer {
 	private final FormsAndDocumentsClientEx client;
 	

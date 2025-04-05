@@ -16,7 +16,9 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
 public enum AemInstance {
-	AEM_1(TestUtils.USE_TESTCONTAINERS);	// Change parameter to false to disable TestContainers and use local AEM instance..
+	AEM_1(TestUtils.USE_TESTCONTAINERS); // Change parameter to false to disable TestContainers and use local AEM instance..,
+	
+	private static final String LOCALHOST = "localhost";
 	
 	// These tests require an AEM container image with AEM forms installed.  Since AEM is proprietary, it is not possible to obtain this
 	// through public images.  By default, this uses a private image hosted in the 4PointSolutions-PS GitHub organization.  If you are not
@@ -76,7 +78,7 @@ public enum AemInstance {
 	public static void deploySampleFiles(Integer mappedPort) {
 		System.out.println("Deploying sample files...");
 
-		SamplesDeployer deployer = new SamplesDeployer("localhost", mappedPort, TestUtils.TEST_USER, TestUtils.TEST_USER_PASSWORD);
+		SamplesDeployer deployer = new SamplesDeployer(LOCALHOST, mappedPort, TestUtils.TEST_USER, TestUtils.TEST_USER_PASSWORD);
 		
 		deployer.deployXdp(Paths.get("src", "test", "resources", "SampleForm.xdp"), "sample-forms");
 		deployer.deployAf(Paths.get("src", "test", "resources", "sample00002test.zip"));
@@ -85,10 +87,23 @@ public enum AemInstance {
 	}
 
 	public String aemHost() {
-		return aemContainer != null ? "localhost" : TestUtils.TEST_MACHINE_NAME;
+		return aemContainer != null ? LOCALHOST : TestUtils.TEST_MACHINE_NAME;
 	}
+
 	public Integer aemPort() {
 		return aemContainer != null ? aemContainer.getMappedPort(4502) : Integer.parseInt(TestUtils.TEST_MACHINE_PORT_STR) ;
+	}
+
+	/**
+	 * Is AEM running locally or remotely? 
+	 * 
+	 * If is is running in a container, then it is considered remote (because it does not have access to the local file system).
+	 * If AEM is running locally, then local file paths can be used, otherwise remote file paths will need to be used for some tests.
+	 * 
+	 * @return
+	 */
+	public boolean isLocal() {
+		return aemContainer == null && aemHost().equalsIgnoreCase(LOCALHOST);
 	}
 
 	private static boolean aemIsUp(HttpClient restClient, HttpRequest request) {
