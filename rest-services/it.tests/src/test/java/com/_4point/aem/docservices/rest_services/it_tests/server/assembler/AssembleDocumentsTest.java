@@ -1,10 +1,13 @@
 package com._4point.aem.docservices.rest_services.it_tests.server.assembler;
+
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -29,6 +32,8 @@ import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
 import com._4point.aem.fluentforms.api.assembler.LogLevel;
+import com._4point.testing.matchers.aem.Pdf;
+import com._4point.testing.matchers.aem.Pdf.PdfException;
 
 @Tag("server-tests")
 public class AssembleDocumentsTest {
@@ -47,7 +52,7 @@ public class AssembleDocumentsTest {
 	private static final String SOURCE_DOCUMENT_KEY = "sourceDocumentMap.key";
 	private static final String SOURCE_DOCUMENT_VALUE = "sourceDocumentMap.value";
 
-	private static final boolean SAVE_RESULTS = false;
+	private static final boolean SAVE_RESULTS = true;
 
 	private WebTarget target;
 
@@ -65,8 +70,8 @@ public class AssembleDocumentsTest {
 
 	@Test
 	void testAssembleDocuments_AllArgs() throws Exception {
-		byte[] samplePdf1 = SAMPLE_FORM_PDF.toString().getBytes();
-		byte[] samplePdf2 = SAMPLE_FORM_PDF.toString().getBytes();
+		byte[] samplePdf1 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
+		byte[] samplePdf2 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM_NAME, SAMPLE_FORM_DDX.toFile(), MediaType.APPLICATION_XML_TYPE)
 			.field(IS_FAIL_ON_ERROR, String.valueOf(Boolean.FALSE))
@@ -76,13 +81,11 @@ public class AssembleDocumentsTest {
 			.field(DEFAULT_STYLE, "")
 			.field(FIRST_BATES_NUMBER, Integer.toString(0));
 
-			Map<String, Object> inputs = new HashMap<String, Object>();
-			inputs.put("File0.pdf", samplePdf1);
-			inputs.put("File1.pdf", samplePdf2);	
-			inputs.forEach((docName, doc) -> {
-				multipart.field(SOURCE_DOCUMENT_KEY, docName);
-				multipart.field(SOURCE_DOCUMENT_VALUE, (byte[]) doc, APPLICATION_PDF);
-			});
+			Map.of("File0.pdf", samplePdf1, "File1.pdf", samplePdf2)
+			   .forEach((docName, doc) -> {
+				   multipart.field(SOURCE_DOCUMENT_KEY, docName);
+				   multipart.field(SOURCE_DOCUMENT_VALUE, (byte[]) doc, APPLICATION_PDF);
+			   });
 
 			Response result = target.request()
 					.accept(APPLICATION_XML)
@@ -91,15 +94,7 @@ public class AssembleDocumentsTest {
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 
 			AssemblerResult assemblerResult = AssemblerServiceTestHelper.convertXmlToAssemblerResult((InputStream) result.getEntity());
-			Map<String, Document> resultDocument = assemblerResult.getDocuments();
-			byte[] resultByte = null;
-			for(Entry<String, Document> entry: resultDocument.entrySet()) {
-				if(entry.getKey().equals("concatenatedPDF.pdf")) {
-					resultByte = entry.getValue().getInlineData();
-					assertNotNull(resultByte);
-					assertEquals(APPLICATION_PDF.toString(),entry.getValue().getContentType());
-				}			
-			}
+			byte[] resultByte = validateAssemblerResult(assemblerResult);
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultByte, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testAssembleDocumentPDFWithAllArguments_result.pdf")));
 			}		
@@ -109,17 +104,15 @@ public class AssembleDocumentsTest {
 	
 	@Test
 	void testAssembleDocuments_JustWithDDXandInputDocuments() throws Exception {
-		byte[] samplePdf1 = SAMPLE_FORM_PDF.toString().getBytes();
-		byte[] samplePdf2 = SAMPLE_FORM_PDF.toString().getBytes();
+		byte[] samplePdf1 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
+		byte[] samplePdf2 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM_NAME, SAMPLE_FORM_DDX.toFile(), MediaType.APPLICATION_XML_TYPE);
-			Map<String, Object> inputs = new HashMap<String, Object>();
-			inputs.put("File0.pdf", samplePdf1);
-			inputs.put("File1.pdf", samplePdf2);	
-			inputs.forEach((docName, doc) -> {
-				multipart.field(SOURCE_DOCUMENT_KEY, docName);
-				multipart.field(SOURCE_DOCUMENT_VALUE, (byte[]) doc, APPLICATION_PDF);
-			});
+			Map.of("File0.pdf", samplePdf1, "File1.pdf", samplePdf2)
+			   .forEach((docName, doc) -> {
+				   multipart.field(SOURCE_DOCUMENT_KEY, docName);
+				   multipart.field(SOURCE_DOCUMENT_VALUE, (byte[]) doc, APPLICATION_PDF);
+			   });
 			Response result = target.request()
 					.accept(APPLICATION_XML)
 					.post(Entity.entity(multipart, multipart.getMediaType()));
@@ -127,23 +120,27 @@ public class AssembleDocumentsTest {
 			assertEquals(Response.Status.OK.getStatusCode(), result.getStatus(), () -> "Expected response to be 'OK', entity='" + TestUtils.readEntityToString(result) + "'.");
 		
 			AssemblerResult assemblerResult = AssemblerServiceTestHelper.convertXmlToAssemblerResult((InputStream) result.getEntity());
-			Map<String, Document> sourceDocuments = assemblerResult.getDocuments();
-			byte[] resultByte = null;
-			for(Entry<String, Document> entry: sourceDocuments.entrySet()) {
-				if(entry.getKey().equals("concatenatedPDF.pdf")) {
-					resultByte = entry.getValue().getInlineData();
-					assertNotNull(resultByte);
-					assertEquals(APPLICATION_PDF.toString(),entry.getValue().getContentType());
-				}			
-			}
+			byte[] resultByte = validateAssemblerResult(assemblerResult);
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultByte, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testAssembleDocumentPDF_result.pdf")));
 			}		
 
 		}
 	}
+
+	private byte[] validateAssemblerResult(AssemblerResult assemblerResult) throws IOException, PdfException {
+		Map<String, Document> sourceDocuments = assemblerResult.getDocuments();
+		for(Entry<String, Document> entry: sourceDocuments.entrySet()) {
+			if(entry.getKey().equals("concatenatedPDF.pdf")) {
+				byte[] resultByte = entry.getValue().getInputStream().readAllBytes();
+				assertNotNull(resultByte);
+				assertEquals(APPLICATION_PDF.toString(),entry.getValue().getContentType());
+				assertThat(resultByte.length, greaterThan(0));
+				Pdf.from(resultByte);	// Ensure that the byte array is a valid PDF
+				return resultByte;
+			}			
+		}
+		fail("Expected the assembler result to contain a document named 'concatenatedPDF.pdf'.");
+		throw new IllegalStateException("Routine should fail before this point.");
+	}
 }
-
-
-
-
