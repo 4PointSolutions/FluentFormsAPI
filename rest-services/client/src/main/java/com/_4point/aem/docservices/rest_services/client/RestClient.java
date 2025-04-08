@@ -76,7 +76,8 @@ public interface RestClient {
 			Builder add(String fieldName, InputStream fieldData, ContentType contentType);
 			default Builder add(String fieldName, Document document) {
 				try {
-					return add(fieldName, document.getInputStream(), ContentType.of(document.getContentType()));
+					String contentType = document.getContentType();
+					return add(fieldName, document.getInputStream(), contentType != null ? ContentType.of(contentType) : ContentType.APPLICATION_OCTET_STREAM);
 				} catch (IOException e) {
 					throw new UncheckedIOException(e);
 				}
