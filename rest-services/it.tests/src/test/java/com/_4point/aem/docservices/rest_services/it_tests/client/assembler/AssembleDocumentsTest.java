@@ -7,9 +7,7 @@ import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 import static com._4point.testing.matchers.javalang.ExceptionMatchers.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -18,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.MultipleFailuresError;
 
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDocAssemblerServiceAdapter;
@@ -70,38 +69,36 @@ public class AssembleDocumentsTest {
 	@Test
 	@DisplayName("Test AssembleDocuments() Happy Path.")
 	void testAssembleDocuments() throws Exception {
-		byte[] samplePdf1 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
-		byte[] samplePdf2 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
-
 		AssemblerResult assemblerResult	= underTest.invoke()
-												   .add("File0.pdf", DOC_FACTORY.create(samplePdf1))
-												   .add("File1.pdf", DOC_FACTORY.create(samplePdf2).setContentType("application/pdf"))
+												   .add("File0.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF))
+												   .add("File1.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF).setContentType("application/pdf"))
 												   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_DDX));
 
 		Map<String, Document> resultDocuments = assemblerResult.getDocuments();
 		validateResultMap(resultDocuments);
 	}
 
-	private void validateResultMap(Map<String, Document> resultDocument) throws IOException, PdfException {
-		for(Entry<String, Document> entry: resultDocument.entrySet()){
+	private void validateResultMap(Map<String, Document> resultMap) throws IOException, PdfException {
+		for(Entry<String, Document> entry: resultMap.entrySet()){
 			if(entry.getKey().equals("concatenatedPDF.pdf")) {
-				byte[] resultByte = entry.getValue().getInlineData();
-				assertNotNull(resultByte);
-				Pdf pdfResult = Pdf.from(resultByte);	// Validate that it's a real PDF.
-				assertAll(
-						()->assertEquals(ContentType.APPLICATION_PDF.contentType(), entry.getValue().getContentType()),
-						()->assertThat(pdfResult.getProducer(), not(emptyOrNullString()))
-						);
+				validateResultDoc(entry.getValue());
 			}		
 		}
+	}
+
+	private static void validateResultDoc(Document resultDoc) throws IOException, PdfException, MultipleFailuresError {
+		byte[] resultByte = resultDoc.getInputStream().readAllBytes();
+		assertNotNull(resultByte);
+		Pdf pdfResult = Pdf.from(resultByte);	// Validate that it's a real PDF.
+		assertAll(
+				()->assertEquals(ContentType.APPLICATION_PDF.contentType(), resultDoc.getContentType()),
+				()->assertThat(pdfResult.getProducer(), not(emptyOrNullString()))
+				);
 	}
 	
 	@Test
 	@DisplayName("Test AssembleDocuments() with all arguments Happy Path.")
 	void testAssembleDocuments_withAllArgs() throws Exception {
-		byte[] samplePdf1 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
-		byte[] samplePdf2 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
-		
 		AssemblerResult assemblerResult	= underTest.invoke()
 				.setDefaultStyle("")
 				.setFailOnError(Boolean.FALSE)
@@ -109,8 +106,8 @@ public class AssembleDocumentsTest {
 				.setLogLevel(LogLevel.ALL)
 				.setTakeOwnership(Boolean.FALSE)
 				.setValidateOnly(Boolean.FALSE)
-				.add("File0.pdf", DOC_FACTORY.create(samplePdf1).setContentType("application/pdf"))
-				.add("File1.pdf", DOC_FACTORY.create(samplePdf2))
+				.add("File0.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF).setContentType("application/pdf"))
+				.add("File1.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF))
 				.executeOn(DOC_FACTORY.create(SAMPLE_FORM_DDX));
 
 		Map<String, Document> resultDocuments = assemblerResult.getDocuments();
@@ -120,11 +117,9 @@ public class AssembleDocumentsTest {
 	@Test
 	@DisplayName("Test testAssembleDocuments with bad data.")
 	void testAssembleDocuments_BadData() throws Exception {
-		byte[] samplePdf1 = Files.readAllBytes(SAMPLE_FORM_PDF);
-		byte[] samplePdf2 = Files.readAllBytes(SAMPLE_FORM_PDF);
-		Map<String, Object> sourceDocuments = new HashMap<String, Object>();
-		sourceDocuments.put("File0.pdf", DOC_FACTORY.create(samplePdf1));
-		sourceDocuments.put("File1.pdf", DOC_FACTORY.create(samplePdf2));	
+		Map<String, Object> sourceDocuments = Map.of("File0.pdf", DOC_FACTORY.create(SAMPLE_FORM_PDF),
+													 "File1.pdf", DOC_FACTORY.create(SAMPLE_FORM_PDF)
+													);
 		AssemblerOptionsSpecImpl assemblerOptionsSpecImpl = new AssemblerOptionsSpecImpl();
 		assemblerOptionsSpecImpl.setLogLevel(LogLevel.ALL);
 		AssemblerServiceException ex = assertThrows(AssemblerServiceException.class, ()->underTest.invoke(DOC_FACTORY.create(SAMPLE_FORM_DOCX), sourceDocuments, assemblerOptionsSpecImpl));
