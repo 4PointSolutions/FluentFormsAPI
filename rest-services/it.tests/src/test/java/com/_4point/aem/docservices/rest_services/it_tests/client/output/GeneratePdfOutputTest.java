@@ -12,6 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
@@ -121,7 +124,9 @@ class GeneratePdfOutputTest {
 
 
 	@Test
-	@DisplayName("Test generatePdfOutput() Just Form.  From Windows Machine")
+	@EnabledOnOs(OS.WINDOWS)
+	@EnabledIf("targetIsLinux")
+	@DisplayName("Test generatePdfOutput() Just Form with Linux Path.  From Windows Machine")
 	void testGeneratePdfOutput_JustForm() throws Exception {
 //		Path formPath = Paths.get("/home/aem_user/u000/AEM/Forms/RUNTIME/Invoices/EN/Invoice_GB_PD.xdp");
 		URL formPath = new URL("file:/home/aem_user/u000/AEM/Forms/RUNTIME/Invoices/EN/Invoice_GB_PD.xdp");
@@ -134,7 +139,9 @@ class GeneratePdfOutputTest {
 	}
 
 	@Test
-	@DisplayName("Test generatePdfOutput() Just Form.  From Windows Machine")
+	@EnabledOnOs(OS.WINDOWS)
+	@EnabledIf("targetIsLinux")
+	@DisplayName("Test generatePdfOutput() Just Form with Linux ContentRoot.  From Windows Machine")
 	void testGeneratePdfOutput_JustFormContentRoot() throws Exception {
 		Path contentPath = Paths.get("\\","home", "aem_user", "u000","AEM","Forms","RUNTIME","Invoices","EN");
 		Path formPath = Paths.get("Invoice_GB_PD.xdp");
@@ -146,6 +153,8 @@ class GeneratePdfOutputTest {
 		
 //		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
 	}
-
-
+	
+	boolean targetIsLinux() {
+		return AemInstance.AEM_1.isLinux();
+	}
 }

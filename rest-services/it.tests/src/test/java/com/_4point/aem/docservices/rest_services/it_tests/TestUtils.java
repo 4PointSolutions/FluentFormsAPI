@@ -31,26 +31,30 @@ public class TestUtils {
 	public static final String TEST_USER = "admin";
 	public static final String TEST_USER_PASSWORD = "admin";
 	
-	// Set this to true to use TestContainers for the integration tests.
+	public enum AemTargetType {
+		LOCAL,			// Running on local machine (assumes that the port is TEST_MACHINE_PORT)	
+		REMOTE_WINDOWS, // Running on remote Windows machine (assumes that machine name is TEST_MACHINE_NAME and port is TEST_MACHINE_PORT) 
+		REMOTE_LINUX, 	// Running on remote Linux machine (assumes that machine name is TEST_MACHINE_NAME and port is TEST_MACHINE_PORT)
+		TESTCONTAINERS; // Running on local testcontainers image (gets port from TestContainers)
+	}
+	
+	// Set this to indicate the type of machine that AEM is running on:
 	//  The integration tests will run against an AEM instance running in a Docker container otherwise they will run against a local AEM instance.
-	public static final boolean USE_TESTCONTAINERS = false;
-	// Status of TestContainers support.
+	public static final AemTargetType AEM_TARGET_TYPE = AemTargetType.LOCAL; 
+	// Status of LOCAL AEM Target support.
 	//		AEM Integration test issues:
-	//		* Sample Adaptive Form not deployed - Causes AF Rendering test to fail
-	//		* JSAFE not configured - Causes Assembler test to fail
-	//		* Sample XDP not deployed - Causes HTML5, PDF and Print rendering tests to fail
-	//		* GeneratePrintedOutput test AllArgs seems to want D:\FluentForms\Forms - Need to fix tests
-	//		* Reader Extensions not configured - Causes Reader Extensions test to fail
+	//		* Sample JSON Adaptive Form not deployed - Causes JSON AF Rendering test to fail
+	//		* Sample XDP not copied to target file system - Causes GeneratePdfOututTest "For mWindows Machine" rendering test failures
+	//		* Reader Extensions not configured - Causes Reader Extensions (Secure Document) tests to fail
 	//		* OpenOffice not installed - causes GeneratePdf tests to fail
 	//
-	//		Tests that pass:
-	//		* DataCacheService Tests
-	//		* GeneratePrintedOutput Form Doc tests
-	//		* GeneratePdfOutput Form Doc tests
-	//		* Import Data tests
-	//		* RenderPdfForm Form Doc tests
-	//		* Export Data tests
-	//		* ConvertPdfToXDP tests
+	// Status of TestContainers support.
+	//		AEM Integration test issues (in addition to those above)::
+	//		* Sample Adaptive Form not deployed - Causes AF Rendering test to fail (should be fixed in latest AEM image)
+	//		* JSAFE not configured - Causes Assembler test to fail (should be fixed in latest AEM image)
+	//		* Sample XDP not deployed - Causes HTML5, PDF and Print rendering tests to fail (should be fixed in latest AEM image)
+	//		* GeneratePrintedOutput test AllArgs seems to want D:\FluentForms\Forms - Need to fix tests
+	//		* Generate HTLML5 test fails because proteted mode is on - Need to fix AEM image creation code to set this.
 	
 	private static final String SAMPLE_FORM_PDF_NAME = "SampleForm.pdf";
 	private static final String SAMPLE_FORM_XDP_NAME = "SampleForm.xdp";
@@ -93,6 +97,7 @@ public class TestUtils {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	public static void validatePdfResult(byte[] pdfBytes, String testResultFilename, boolean dynamic, boolean interactive, boolean hasRights)
 			throws IOException, Exception, PdfException {
 		if (SAVE_RESULTS == true) {

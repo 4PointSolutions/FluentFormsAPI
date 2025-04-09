@@ -15,8 +15,15 @@ import org.awaitility.Awaitility;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import com._4point.aem.docservices.rest_services.it_tests.TestUtils.AemTargetType;
+
+/**
+ * This singleton defines the AEM instance that is being used for the integration tests.
+ * 
+ * Change the value of TestUtils.AEM_TARGET_TYPE in the TestUtils class to tell the tests what type of AEM instance we're testing against.
+ */
 public enum AemInstance {
-	AEM_1(TestUtils.USE_TESTCONTAINERS); // Change parameter to false to disable TestContainers and use local AEM instance..,
+	AEM_1(TestUtils.AEM_TARGET_TYPE); // Change parameter to false to disable TestContainers and use local AEM instance..,
 	
 	private static final String LOCALHOST = "localhost";
 	
@@ -24,21 +31,23 @@ public enum AemInstance {
 	// through public images.  By default, this uses a private image hosted in the 4PointSolutions-PS GitHub organization.  If you are not
 	// part of that prg, you will have to supply your own image.
 	private static final String AEM_IMAGE_NAME = "ghcr.io/4pointsolutions-ps/aem:aem65sp21";
+	private final TestUtils.AemTargetType targetType;
 	private final GenericContainer<?> aemContainer;
 	private final AtomicBoolean preparedForTests = new AtomicBoolean(false);
 
-	private AemInstance(boolean useTestContainers) {
-		this(useTestContainers ? new GenericContainer<>(DockerImageName.parse(AEM_IMAGE_NAME))
+	@SuppressWarnings("resource")
+	private AemInstance(TestUtils.AemTargetType targetType) {
+		this(targetType, targetType == AemTargetType.TESTCONTAINERS ? new GenericContainer<>(DockerImageName.parse(AEM_IMAGE_NAME))
 																	   .withReuse(true)
 																	   .withExposedPorts(4502)
 							   : null);
 	}
 
-	private AemInstance(GenericContainer<?> aemContainer) {
+	private AemInstance(TestUtils.AemTargetType targetType, GenericContainer<?> aemContainer) {
+		this.targetType = targetType;
 		this.aemContainer = aemContainer;
 		if (aemContainer != null) {
 			aemContainer.start();
-
 		}
 	}
 
@@ -86,14 +95,37 @@ public enum AemInstance {
 		System.out.println("Sample files deployed.");
 	}
 
+	/**
+	 * Host name where AEM is running
+	 * 
+	 * @return
+	 */
 	public String aemHost() {
-		return aemContainer != null ? LOCALHOST : TestUtils.TEST_MACHINE_NAME;
+		return switch (targetType) {
+		case LOCAL, TESTCONTAINERS -> LOCALHOST;
+		case REMOTE_WINDOWS, REMOTE_LINUX -> TestUtils.TEST_MACHINE_NAME;
+		};
 	}
 
+	/**
+	 * Port where AEM is running.
+	 * 
+	 * @return
+	 */
 	public Integer aemPort() {
-		return aemContainer != null ? aemContainer.getMappedPort(4502) : Integer.parseInt(TestUtils.TEST_MACHINE_PORT_STR) ;
+		return switch (targetType) {
+		case LOCAL, REMOTE_WINDOWS, REMOTE_LINUX -> Integer.parseInt(TestUtils.TEST_MACHINE_PORT_STR);
+		case TESTCONTAINERS -> aemContainer.getMappedPort(4502);
+		};
 	}
 
+	public Boolean isLinux() {
+		return switch (targetType) {
+		case LOCAL -> !System.getProperty("os.name").toLowerCase().contains("windows");	// Treat MAC as Linux
+		case REMOTE_WINDOWS -> false;
+		case REMOTE_LINUX, TESTCONTAINERS -> true;
+		};
+	}
 	/**
 	 * Is AEM running locally or remotely? 
 	 * 
