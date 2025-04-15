@@ -18,9 +18,11 @@ import com._4point.aem.docservices.rest_services.client.docassurance.RestService
 import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.generatePDF.RestServicesGeneratePDFServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.FormsFeederUrlFilterBuilder;
 import com._4point.aem.docservices.rest_services.client.helpers.StandardFormsFeederUrlFilters;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.pdfUtility.RestServicesPdfUtilityServiceAdapter;
 import com._4point.aem.fluentforms.api.DocumentFactory;
@@ -41,6 +43,8 @@ import com._4point.aem.fluentforms.impl.generatePDF.GeneratePDFServiceImpl;
 import com._4point.aem.fluentforms.impl.output.OutputServiceImpl;
 import com._4point.aem.fluentforms.impl.pdfUtility.PdfUtilityServiceImpl;
 
+import jakarta.ws.rs.client.Client;
+
 /**
  * AutoConfiguration for the FluentForms Rest Services Client library.
  * 
@@ -52,21 +56,30 @@ import com._4point.aem.fluentforms.impl.pdfUtility.PdfUtilityServiceImpl;
 @AutoConfiguration
 @EnableConfigurationProperties(AemConfiguration.class)
 public class FluentFormsAutoConfiguration {
-	
+	//  // TODO: Either call JerseuRestClient.factory(JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle())) or create SpringRestClient
+//	private static final BiFunction<SslBundles, String, RestClientFactory> restClientFactory = (b, s)->JerseyRestClient.factory(JerseyClientFactory.createClient(b, s)); 
+	                        
 	@SuppressWarnings("unchecked")
-	private <T extends Builder> T setAemFields(T builder, AemConfiguration aemConfig, SslBundles sslBundles) {
+	private <T extends Builder> T setAemFields(T builder, AemConfiguration aemConfig) {
 		return (T)(builder.machineName(aemConfig.servername())
 						  .port(aemConfig.port())
 						  .basicAuthentication(aemConfig.user(), aemConfig.password())
 						  .useSsl(aemConfig.useSsl())
-						  .clientFactory(()->JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle()))
+//						  .clientFactory(()->JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle()))
 				  );
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public AdaptiveFormsService adaptiveFormsService(AemConfiguration aemConfig, Function<InputStream, InputStream> afInputStreamFilter, @Autowired(required = false) SslBundles sslBundles) {
-		return setAemFields(AdaptiveFormsService.builder(), aemConfig, sslBundles)
+	public RestClientFactory restClientFactory(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
+		Client jerseyClient = JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle());	// Create custom Jersey Client with SSL bundle
+		return JerseyRestClient.factory(jerseyClient); // Create a RestClientFactory using JerseyClient implementation
+	}
+	
+	@ConditionalOnMissingBean
+	@Bean
+	public AdaptiveFormsService adaptiveFormsService(AemConfiguration aemConfig, Function<InputStream, InputStream> afInputStreamFilter, RestClientFactory restClientFactory) {
+		return setAemFields(AdaptiveFormsService.builder(restClientFactory), aemConfig)
 				.addRenderResultFilter(afInputStreamFilter)
 				.build();
 	}
@@ -86,58 +99,58 @@ public class FluentFormsAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public AssemblerService assemblerService(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
-		RestServicesDocAssemblerServiceAdapter adapter = setAemFields(RestServicesDocAssemblerServiceAdapter.builder(), aemConfig, sslBundles).build();
+	public AssemblerService assemblerService(AemConfiguration aemConfig, RestClientFactory restClientFactory) {
+		RestServicesDocAssemblerServiceAdapter adapter = setAemFields(RestServicesDocAssemblerServiceAdapter.builder(restClientFactory), aemConfig).build();
 		return new AssemblerServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public DocAssuranceService docAssuranceService(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
-		RestServicesDocAssuranceServiceAdapter adapter = setAemFields(RestServicesDocAssuranceServiceAdapter.builder(), aemConfig, sslBundles).build();
+	public DocAssuranceService docAssuranceService(AemConfiguration aemConfig, RestClientFactory restClientFactory) {
+		RestServicesDocAssuranceServiceAdapter adapter = setAemFields(RestServicesDocAssuranceServiceAdapter.builder(restClientFactory), aemConfig).build();
 		return new DocAssuranceServiceImpl(adapter);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public FormsService formsService(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
-		RestServicesFormsServiceAdapter adapter = setAemFields(RestServicesFormsServiceAdapter.builder(), aemConfig, sslBundles).build();
+	public FormsService formsService(AemConfiguration aemConfig, RestClientFactory restClientFactory) {
+		RestServicesFormsServiceAdapter adapter = setAemFields(RestServicesFormsServiceAdapter.builder(restClientFactory), aemConfig).build();
 		return new FormsServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public GeneratePDFService generatePDFService(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
-		RestServicesGeneratePDFServiceAdapter adapter = setAemFields(RestServicesGeneratePDFServiceAdapter.builder(), aemConfig, sslBundles).build();
+	public GeneratePDFService generatePDFService(AemConfiguration aemConfig, RestClientFactory restClientFactory) {
+		RestServicesGeneratePDFServiceAdapter adapter = setAemFields(RestServicesGeneratePDFServiceAdapter.builder(restClientFactory), aemConfig).build();
 		return new GeneratePDFServiceImpl(adapter);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public Html5FormsService html5FormsService(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, @Autowired(required = false) SslBundles sslBundles) {
-		return setAemFields(Html5FormsService.builder(), aemConfig, sslBundles)
+	public Html5FormsService html5FormsService(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, RestClientFactory restClientFactory) {
+		return setAemFields(Html5FormsService.builder(restClientFactory), aemConfig)
 				.addRenderResultFilter(afInputStreamFilter(aemProxyConfig))
 				.build();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public OutputService outputService(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
-		RestServicesOutputServiceAdapter adapter = setAemFields(RestServicesOutputServiceAdapter.builder(), aemConfig, sslBundles).build();
+	public OutputService outputService(AemConfiguration aemConfig, RestClientFactory restClientFactory) {
+		RestServicesOutputServiceAdapter adapter = setAemFields(RestServicesOutputServiceAdapter.builder(restClientFactory), aemConfig).build();
 		return new OutputServiceImpl(adapter, UsageContext.CLIENT_SIDE);
 	}
 	
 	@ConditionalOnMissingBean
 	@Bean
-	public PdfUtilityService pdfUtilityService(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
-		RestServicesPdfUtilityServiceAdapter adapter = setAemFields(RestServicesPdfUtilityServiceAdapter.builder(), aemConfig, sslBundles).build();
+	public PdfUtilityService pdfUtilityService(AemConfiguration aemConfig, RestClientFactory restClientFactory) {
+		RestServicesPdfUtilityServiceAdapter adapter = setAemFields(RestServicesPdfUtilityServiceAdapter.builder(restClientFactory), aemConfig).build();
 		return new PdfUtilityServiceImpl(adapter);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public ConvertPdfService convertPdfService(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
-		RestServicesConvertPdfServiceAdapter adapter = setAemFields(RestServicesConvertPdfServiceAdapter.builder(), aemConfig, sslBundles).build();
+	public ConvertPdfService convertPdfService(AemConfiguration aemConfig, RestClientFactory restClientFactory) {
+		RestServicesConvertPdfServiceAdapter adapter = setAemFields(RestServicesConvertPdfServiceAdapter.builder(restClientFactory), aemConfig).build();
 		return new ConvertPdfServiceImpl(adapter);
 	}
 	
