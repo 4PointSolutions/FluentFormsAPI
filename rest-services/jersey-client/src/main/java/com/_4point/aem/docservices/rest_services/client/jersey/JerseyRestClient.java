@@ -42,7 +42,7 @@ public class JerseyRestClient implements RestClient {
 	 * @param target REST endpoint to be called.
 	 * @param client Jersey Client object
 	 */
-	public JerseyRestClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn, Client client) {
+	private JerseyRestClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn, Client client) {
 		this(configureClient(client,aemConfig.user(), aemConfig.password())
 						.target(aemConfig.url())
 						.path(target),
@@ -312,7 +312,7 @@ public class JerseyRestClient implements RestClient {
 				return JerseyResponse.processResponse(invokeBuilder.get(), acceptMediaType);
 			} catch (jakarta.ws.rs.ProcessingException e) {
 				String msg = e.getMessage();
-				throw new RestClientException("Error when posting to '" + target.getUri().toString() + "'" + (msg != null ? " (" + msg + ")" : "") + ".", e); 
+				throw new RestClientException("Error when getting from '" + target.getUri().toString() + "'" + (msg != null ? " (" + msg + ")" : "") + ".", e); 
 			}
 		}
 	}
