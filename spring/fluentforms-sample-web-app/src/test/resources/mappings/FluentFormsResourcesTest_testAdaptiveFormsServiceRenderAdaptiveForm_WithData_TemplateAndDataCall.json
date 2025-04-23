@@ -2,7 +2,7 @@
   "id" : "c82c2d16-1590-474c-9bc7-7e922a55af9c",
   "name" : "content_forms_af_sample00002testhtml",
   "request" : {
-    "url" : "/content/forms/af/sample00002test.html?wcmmode=disabled&dataRef=service%3A%2F%2FFFPrefillService%2F5af0580b-5977-4b18-b400-abf439c7c216",
+    "urlPattern": "/content/forms/af/sample00002test.html\\?wcmmode=disabled&dataRef=service(%3A%2F%2F|://)FFPrefillService(%2F|/)5af0580b-5977-4b18-b400-abf439c7c216",
     "method" : "GET"
   },
   "response" : {

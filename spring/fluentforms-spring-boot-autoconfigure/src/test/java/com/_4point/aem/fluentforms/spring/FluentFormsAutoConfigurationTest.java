@@ -18,8 +18,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
+import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService;
@@ -28,6 +32,7 @@ import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
+import com._4point.aem.fluentforms.spring.rest_services.client.SpringRestClientRestClient;
 
 @SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
 				properties = {
@@ -90,6 +95,12 @@ class FluentFormsAutoConfigurationTest {
 	}
 	
 	@Test
+	void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
+		RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
+		assertTrue(client instanceof JerseyRestClient, "RestClientFactory should return a JerseyRestClient by default");
+	}
+
+	@Test
 	void testAfInputStreamFilterFactory(@Autowired Function<InputStream, InputStream> afInputStreamFilter) throws Exception {
 		final String INPUT_STRING = "/etc.clientlibs/foobar";
 		final String EXPECTED_RESULT_STRING = "/aem/etc.clientlibs/foobar";
@@ -104,8 +115,7 @@ class FluentFormsAutoConfigurationTest {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
-	}
-	
+	}	
 	
 	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
 			properties = {
@@ -126,10 +136,8 @@ class FluentFormsAutoConfigurationTest {
 			assertNotNull(afInputStreamFilter);
 			assertEquals(EXPECTED_RESULT_STRING, applyStreamFilter(INPUT_STRING, afInputStreamFilter)); 
 		}
-		
 	}
-	
-	
+		
 	private static String applyStreamFilter(String inputString, Function<InputStream, InputStream> afInputStreamFilter) {
 		try (InputStream is = afInputStreamFilter.apply(stringToInputStream(inputString))) {
 			return inputStreamToString(is);
@@ -148,5 +156,52 @@ class FluentFormsAutoConfigurationTest {
 			        .lines()
 			        .collect(Collectors.joining("\n"));
 		return result;
+	}
+
+	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+			properties = {
+					"fluentforms.aem.servername=localhost", 
+					"fluentforms.aem.port=4502", 
+					"fluentforms.aem.user=admin",		 
+					"fluentforms.aem.password=admin",
+					"fluentforms.restclient=springrestclient"	// Configure for Spring RestClient
+					})
+	public static class SpringRestClientTest {
+		
+		@Test
+		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
+			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
+			assertTrue(client instanceof SpringRestClientRestClient, "RestClientFactory should return a SpringRestClientRestClient when configured to do so");
+		}
+	}
+
+	private static AemConfig toAemConfig(AemConfiguration config) {
+		return new AemConfig() {
+
+			@Override
+			public String servername() {
+				return config.servername();
+			}
+
+			@Override
+			public Integer port() {
+				return config.port();
+			}
+
+			@Override
+			public String user() {
+				return config.user();
+			}
+
+			@Override
+			public String password() {
+				return config.password();
+			}
+
+			@Override
+			public Boolean useSsl() {
+				return config.useSsl();
+			}
+		};
 	}
 }

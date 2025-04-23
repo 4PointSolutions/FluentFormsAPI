@@ -43,6 +43,15 @@ be set to `/clientApp` (as in `fluentforms.rproxy.clientPrefix=/clientApp`).
 
 `fluentforms.rproxy.afBaseLocation` - TBD - This needs to be documented.
 
+### Rest Client Properties
+
+Fluent Forms can be configured to use one of two different REST client libraries.  It can use either the Jersey client libraries or the Spring RestClient libraries.  it was originally developed to use the Jersey client libraries however this some drawbacks - firstly, the Spring requires special configuration when you combine it with libraries that use  the built in Spring Web Mechanisms (e.g. Spring MVC, Spring Boot Activator, etc. - see [https://docs.spring.io/spring-boot/how-to/jersey.html](https://docs.spring.io/spring-boot/how-to/jersey.html)). Secondly, Spring Jersey is an extra dependency that duplicates functionality that is already available in the Spring Framework, so it causes some jar bloat.
+
+The intention is to eventually eliminate Jersey as a required dependency (and make it an optional dependency).
+
+A FluentForms application can choose which library it wishes to use based on a configuration value.
+
+`fluentforms.restclient` - This is used to specify which REST client library will be used to make REST calls to AEM.  It can have one of the following values: `springrestclient` - To use the Spring Framework REST client, or `jersey` to use the Spring Jersey libraries.  If omitted, the application setting defaults to `jersey` for backwards compatibility however this is likely to change at some point in the future to use the `springrestclient` by default.. 
 
 ## Encrypting Configuration Property Values (such as passwords)
 
