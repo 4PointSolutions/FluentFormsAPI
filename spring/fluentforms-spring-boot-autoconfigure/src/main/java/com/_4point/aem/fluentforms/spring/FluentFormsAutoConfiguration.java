@@ -95,6 +95,9 @@ public class FluentFormsAutoConfiguration {
 			return restClientSsl.fromBundle(sslBundleName);
 		} catch (NoSuchSslBundleException e) {
 			// Default to normal SSL context (which includes the default trust store)
+			// This is not ideal since misspelling the bundle name silently fails, but is required to avoid breaking existing code.  
+			// At dome point it should probably be changed to let the exception pass and only use the default SSL context 
+			// if the SSL bundle name is empty.
 			return b->{}; // No-op;
 		}
 	}
