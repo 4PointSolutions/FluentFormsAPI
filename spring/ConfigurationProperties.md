@@ -95,3 +95,19 @@ ZvyYeP694ZXtlp7VfjziAiayVLrnV5NiSqB4fdhDn9DZw6OMWMcN5CHBB4tCQFo+
 ```
 6. Place the encoded string in the correct property within the .properties file surrounded by ENC(). For example:`fluentforms.aem.password=ENC(ZvyYeP694ZXtlp7VfjziAiayVLrnV5NiSqB4fdhDn9DZw6OMWMcN5CHBB4tCQFo+)`
 7. Restart the application
+
+## Configuring HTTPS/SSL Trust Stores
+
+Application trust stores must be configured using [standard Spring SSL Bundles mechanisms](https://docs.spring.io/spring-boot/reference/features/ssl.html).  The bundle name is set by the `fluentforms.aem.sslBundle` property (outlined above).  If it is not specified, then it defaults to "`aem`".
+
+Here is a example configuration that uses the default name.
+
+```
+# AEM Coordinates for FluentForms libraries
+# Note:  You will need to have a 'trusted' certificate installed on your AEM instance to use SSL.
+fluentforms.aem.useSsl=true
+fluentforms.aem.port=8443
+spring.ssl.bundle.jks.aem.truststore.location=file:/home/aem_user/aemforms.p12
+spring.ssl.bundle.jks.aem.truststore.password=some_password
+spring.ssl.bundle.jks.aem.truststore.type=PKCS12
+```
