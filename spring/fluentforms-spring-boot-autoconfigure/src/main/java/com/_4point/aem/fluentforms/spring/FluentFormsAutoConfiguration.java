@@ -1,6 +1,7 @@
 package com._4point.aem.fluentforms.spring;
 
 import java.io.InputStream;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,11 +9,14 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.ssl.NoSuchSslBundleException;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.web.client.RestClient;
 
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
 import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDocAssemblerServiceAdapter;
@@ -79,11 +83,22 @@ public class FluentFormsAutoConfiguration {
 	@ConditionalOnProperty(prefix="fluentforms", name="restclient", havingValue="springrestclient", matchIfMissing=false )
 	@ConditionalOnMissingBean
 	@Bean
-	public RestClientFactory springRestClientFactory(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
-		// TODO: Figure out how to configure Spring RestClient with SSL bundle (if required - it may not be)
-		return SpringRestClientRestClient.factory(); // Create a RestClientFactory using Spring RestClient implementation
+	public RestClientFactory springRestClientFactory(AemConfiguration aemConfig, RestClient.Builder restClientBuilder, RestClientSsl restClientSsl) {
+		return SpringRestClientRestClient.factory(aemConfig.useSsl() ? restClientBuilder.apply(getSslBundle(aemConfig.sslBundle(), restClientSsl))
+																	 : restClientBuilder
+												); // Create a RestClientFactory using Spring RestClient implementation
 	}
 
+
+	private Consumer<org.springframework.web.client.RestClient.Builder> getSslBundle(String sslBundleName, RestClientSsl restClientSsl) {
+		try {
+			return restClientSsl.fromBundle(sslBundleName);
+		} catch (NoSuchSslBundleException e) {
+			// Default to normal SSL context (which includes the default trust store)
+			return b->{}; // No-op;
+		}
+	}
+	
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(org.glassfish.jersey.client.JerseyClient.class)
 	public static class JerseyRestClientConfiguration {

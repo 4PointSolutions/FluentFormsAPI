@@ -34,10 +34,6 @@ public class SpringRestClientRestClient implements RestClient {
 	private final String target;
 	private final Supplier<String> correlationIdFn;
 	
-	private SpringRestClientRestClient(AemConfig aemConfig, String target, Supplier<String> correlationIdFn) {
-		this(createSpringRestClient(aemConfig, target), getTarget(aemConfig, target), correlationIdFn);
-	}
-
 	private SpringRestClientRestClient(org.springframework.web.client.RestClient springRestClient, String target,	Supplier<String> correlationIdFn) {
 		this.springRestClient = springRestClient;
 		this.target = target;
@@ -65,16 +61,24 @@ public class SpringRestClientRestClient implements RestClient {
 	}
 
 	public static RestClientFactory factory() {
-		return (aemConfig, target, correlationIdFn)->new SpringRestClientRestClient(aemConfig, target, correlationIdFn);
+		return factory(org.springframework.web.client.RestClient.builder());
 	}
 
-	private static org.springframework.web.client.RestClient createSpringRestClient(AemConfig aemConfig, String target) {
+	public static RestClientFactory factory(org.springframework.web.client.RestClient.Builder builder) {
+		return (aemConfig, target, correlationIdFn) -> 
+					new SpringRestClientRestClient(createSpringRestClient(aemConfig, target, builder), target, correlationIdFn);
+	}
+
+	private static org.springframework.web.client.RestClient createSpringRestClient(
+			AemConfig aemConfig, 
+			String target, 
+			org.springframework.web.client.RestClient.Builder builder
+			) {
 		ClientHttpRequestInterceptor basicAuth = new BasicAuthenticationInterceptor(aemConfig.user(), aemConfig.password());
-		
-		return org.springframework.web.client.RestClient.builder()
-														.baseUrl(getTarget(aemConfig, target))
-														.requestInterceptor(basicAuth)
-														.build();
+
+		return builder.baseUrl(getTarget(aemConfig, target))
+					  .requestInterceptor(basicAuth)
+					  .build();
 	}
 	
 	private static String getTarget(AemConfig aemConfig, String additionalPath) {
