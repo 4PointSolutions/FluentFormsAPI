@@ -29,7 +29,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-@WireMockTest(httpPort = FluentFormsResourcesTest.WIREMOCK_PORT)
+@WireMockTest(httpPort = FluentFormsResourcesTest.WIREMOCK_HTTP_PORT)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class AfSubmissionHandlerTest {
 	public static final String AF_TEMPLATE_NAME = "sample00002test";
