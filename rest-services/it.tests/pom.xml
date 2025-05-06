@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com._4point.aem.docservices</groupId>
 		<artifactId>rest-services</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.0.3</version>
 	</parent>
 	<artifactId>rest-services.it.tests</artifactId>
 	<name>Integration Tests</name>
