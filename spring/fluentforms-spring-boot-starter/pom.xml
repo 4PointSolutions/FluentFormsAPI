@@ -29,6 +29,16 @@
 		</repository>
 	</distributionManagement>
 	
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/4PointSolutions/*</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<!-- Project Dependencies -->
 		<dependency>
