@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.5</version>
+		<version>3.3.11</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com._4point.aem.fluentforms</groupId>
@@ -18,10 +18,10 @@
 		<jasypt.spring.boot.version>3.0.5</jasypt.spring.boot.version>
 		<jasypt.maven.plugin.version>3.0.5</jasypt.maven.plugin.version>
 		<fluentforms.version>0.0.4-SNAPSHOT</fluentforms.version>
-		<fp.hamcrest.matchers.version>0.0.1-SNAPSHOT</fp.hamcrest.matchers.version>
-		<wiremock.version>3.1.0</wiremock.version>
+		<fp.hamcrest.matchers.version>0.0.4-SNAPSHOT</fp.hamcrest.matchers.version>
+		<wiremock.version>3.13.0</wiremock.version>
 		<pitest.maven.plugin.version>1.15.3</pitest.maven.plugin.version>
-		<pitest.junit5.maven.plugin.version>1.2.1</pitest.junit5.maven.plugin.version>
+		<pitest.junit5.maven.plugin.version>1.2.2</pitest.junit5.maven.plugin.version>
 	</properties>
 
 	<distributionManagement>
@@ -92,7 +92,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com._4point.testing</groupId>
+			<groupId>com.4point.testing</groupId>
 			<artifactId>4point-hamcrest-matchers</artifactId>
 			<version>${fp.hamcrest.matchers.version}</version>
 			<scope>test</scope>
