@@ -1,39 +1,30 @@
 package com._4point.aem.docservices.rest_services.client.forms;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Locale;
+import java.util.Objects;
 import java.util.function.Supplier;
 
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-
+import com._4point.aem.docservices.rest_services.client.RestClient;
+import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
+import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
-import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
-import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
+import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
-import com.adobe.fd.forms.api.AcrobatVersion;
-import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
-import com.adobe.fd.forms.api.RenderAtClient;
-
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter implements TraditionalFormsService {
 
-	private static final String FORM_SERVICE_NAME = "FormsService";
+	private static final String FORMS_SERVICE_NAME = "FormsService";
 	private static final String IMPORT_DATA_METHOD_NAME = "ImportData";
 	private static final String RENDER_PDF_FORM_METHOD_NAME = "RenderPdfForm";
 	private static final String EXPORT_DATA_METHOD_NAME="ExportData";
@@ -50,131 +41,100 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 	private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
 	private static final String TAGGED_PDF_PARAM = "renderOptions.taggedPdf";
 	private static final String XCI_PARAM = "renderOptions.xci";
+	private static final String DATA_FORMAT_PARAM = "dataformat";
+	private static final String PDF_OR_XDP_PARAM = "pdforxdp";
 	
+	private final RestClient renderFormRestClient;
+    private final RestClient importDataRestClient;
+    private final RestClient exportDataRestClient;
+    
 	// Only callable from Builder
-	private RestServicesFormsServiceAdapter(WebTarget target, Supplier<String> correlationId, AemServerType aemServerType) {
-		super(target, correlationId, aemServerType);
-	}
+    private RestServicesFormsServiceAdapter(BuilderImpl builder, Supplier<String> correlationIdFn) {
+        super(correlationIdFn);
+        this.renderFormRestClient = builder.createClient(FORMS_SERVICE_NAME, RENDER_PDF_FORM_METHOD_NAME);
+        this.importDataRestClient = builder.createClient(FORMS_SERVICE_NAME, IMPORT_DATA_METHOD_NAME);
+        this.exportDataRestClient = builder.createClient(FORMS_SERVICE_NAME, EXPORT_DATA_METHOD_NAME);
+    }
 
-	@Override
-	public Document exportData(Document pdfOrXdp, DataFormat dataFormat) throws FormsServiceException {
-		if (pdfOrXdp == null &&dataFormat == null) {
-			throw new FormsServiceException("Internal Error, must provide document and its dataformat");
-		}
-		WebTarget exportDataTarget = baseTarget.path(constructStandardPath(FORM_SERVICE_NAME, EXPORT_DATA_METHOD_NAME));
-		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field("pdforxdp", pdfOrXdp.getInputStream(), APPLICATION_PDF)
-			 .field("dataformat", DataFormat.XmlData.name());
-			
-		Response result = postToServer(exportDataTarget, multipart, MediaType.APPLICATION_XML_TYPE);//xml
-		
-		
-		return responseToDoc(result, MediaType.APPLICATION_XML_TYPE, msg->new FormsServiceException(msg));
-	} catch (IOException e) {
-		throw new FormsServiceException("I/O Error while exporting data. (" + baseTarget.getUri().toString() + ").", e);
-	} catch (RestServicesServiceException e) {
-		throw new FormsServiceException("Error while POSTing to server", e);
-	}
-}
+    @Override
+    public Document exportData(Document pdfOrXdp, DataFormat dataFormat) throws FormsServiceException {
+        Objects.requireNonNull(pdfOrXdp, "Document cannot be null.");
+        Objects.requireNonNull(dataFormat, "Data format cannot be null.");
 
-	@Override
-	public Document importData(Document pdf, Document data) throws FormsServiceException {
-		WebTarget importDataTarget = baseTarget.path(constructStandardPath(FORM_SERVICE_NAME, IMPORT_DATA_METHOD_NAME));
-		
-		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE)
-					 .field(PDF_PARAM, pdf.getInputStream(), APPLICATION_PDF);
+        try (MultipartPayload payload = exportDataRestClient.multipartPayloadBuilder()
+                .add(PDF_OR_XDP_PARAM, pdfOrXdp, ContentType.APPLICATION_PDF)
+                .addStringVersion(DATA_FORMAT_PARAM, dataFormat)
+                .build()) {
 
-			Response result = postToServer(importDataTarget, multipart, APPLICATION_PDF);
-			
-			return responseToDoc(result, APPLICATION_PDF, msg->new FormsServiceException(msg));			
-		} catch (IOException e) {
-			throw new FormsServiceException("I/O Error while importing data. (" + baseTarget.getUri().toString() + ").", e);
-		} catch (RestServicesServiceException e) {
-			throw new FormsServiceException("Error while POSTing to server", e);
-		}
-	}
+            return payload.postToServer(ContentType.APPLICATION_XML)
+            			  .map(RestServicesServiceAdapter::responseToDoc)
+            			  .orElse(SimpleDocumentFactoryImpl.emptyDocument());	// If there was no response, return an empty document.
+        } catch (IOException e) {
+            throw new FormsServiceException("I/O Error while exporting data. (" + exportDataRestClient.target() + ").", e);
+        } catch (RestClientException e) {
+            throw new FormsServiceException("Error while POSTing to server (" + exportDataRestClient.target() + ").", e);
+        }
+    }
 
-	
-	private Document internalRenderPDFForm(String urlOrfilename, Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException {
-		if (urlOrfilename != null && template != null) {
-			throw new FormsServiceException("Internal Error, must provide one or the other of template String or Document but not both.");
-		}
-		if ((urlOrfilename == null && template == null) || (urlOrfilename != null && template != null)) {
-			throw new FormsServiceException("Internal Error, must provide one or the other of template String or Document.");
-		}
-		WebTarget renderPdfTarget = baseTarget.path(constructStandardPath(FORM_SERVICE_NAME, RENDER_PDF_FORM_METHOD_NAME));
-		
-		AcrobatVersion acrobatVersion = pdfFormRenderOptions.getAcrobatVersion();
-		CacheStrategy cacheStrategy = pdfFormRenderOptions.getCacheStrategy();
-		PathOrUrl contentRoot = pdfFormRenderOptions.getContentRoot();
-		Path debugDir = pdfFormRenderOptions.getDebugDir();
-		Boolean embedFonts = pdfFormRenderOptions.getEmbedFonts();
-		Locale locale = pdfFormRenderOptions.getLocale();
-		RenderAtClient renderAtClient = pdfFormRenderOptions.getRenderAtClient();
-		List<AbsoluteOrRelativeUrl> submitUrls = pdfFormRenderOptions.getSubmitUrls();
-		Boolean taggedPDF = pdfFormRenderOptions.getTaggedPDF();
-		Document xci = pdfFormRenderOptions.getXci();
-		
-		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			if (data != null) {
-				multipart.field(DATA_PARAM, data.getInputStream(), MediaType.APPLICATION_XML_TYPE);
-			}
-			if (urlOrfilename != null) {
-				multipart.field(TEMPLATE_PARAM, urlOrfilename);
-			}
-			if (template != null) {
-				multipart.field(TEMPLATE_PARAM, template.getInputStream(), APPLICATION_XDP);
-			}
-					 
-			// This code sets the individual fields if they are not null. 
-			MultipartTransformer.create(multipart)
-								.transform((t)->acrobatVersion == null ? t : t.field(ACROBAT_VERSION_PARAM, acrobatVersion.toString()))
-								.transform((t)->cacheStrategy == null  ? t : t.field(CACHE_STRATEGY_PARAM, cacheStrategy.toString()))
-								.transform((t)->contentRoot == null ? t : t.field(CONTENT_ROOT_PARAM, contentRoot.toString()))
-								.transform((t)->debugDir == null ? t : t.field(DEBUG_DIR_PARAM, debugDir.toString()))
-								.transform((t)->embedFonts == null ? t : t.field(EMBED_FONTS_PARAM, embedFonts.toString()))
-								.transform((t)->locale == null ? t : t.field(LOCALE_PARAM, locale.toString()))
-								.transform((t)->renderAtClient == null ? t : t.field(RENDER_AT_CLIENT_PARAM, renderAtClient.toString()))
-								.transform((t)->taggedPDF == null ? t : t.field(TAGGED_PDF_PARAM, taggedPDF.toString()))
-								.transform((t)->submitUrls == null ? t : setSubmitUrls(t, SUBMIT_URL_PARAM, submitUrls))
-								.transform((t)->{
-									try {
-										return xci == null ? t : t.field(XCI_PARAM, xci.getInlineData(), MediaType.APPLICATION_XML_TYPE);
-									} catch (IOException e) {
-										// if we encounter an exception, then we just don't add this field.  This should of error shouldn't ever happen.
-										return t;
-									}
-								})
-								;
+    @Override
+    public Document importData(Document pdf, Document data) throws FormsServiceException {
+        Objects.requireNonNull(pdf, "PDF document cannot be null.");
+        Objects.requireNonNull(data, "Data document cannot be null.");
 
-			Response result = postToServer(renderPdfTarget, multipart, APPLICATION_PDF);
-			
-			return responseToDoc(result, APPLICATION_PDF, msg->new FormsServiceException(msg));			
-		} catch (IOException e) {
-			throw new FormsServiceException("I/O Error while rendering PDF. (" + baseTarget.getUri().toString() + ").", e);
-		} catch (RestServicesServiceException e) {
-			throw new FormsServiceException("Error while POSTing to server", e);
-		}
-		
-	}
+        try (MultipartPayload payload = importDataRestClient.multipartPayloadBuilder()
+                .add(PDF_PARAM, pdf, ContentType.APPLICATION_PDF)
+                .add(DATA_PARAM, data, ContentType.APPLICATION_XML)
+                .build()) {
 
-	private MultipartTransformer setSubmitUrls(MultipartTransformer t, String submitUrlParam, List<AbsoluteOrRelativeUrl> submitUrls) {
-		for (AbsoluteOrRelativeUrl submitUrl : submitUrls) {
-			t = t.field(SUBMIT_URL_PARAM, submitUrl.toString());
-		}
-		return t;
-	}
+            return payload.postToServer(ContentType.APPLICATION_PDF)
+                    .map(RestServicesServiceAdapter::responseToDoc)
+                    .orElseThrow();
+        } catch (IOException e) {
+            throw new FormsServiceException("I/O Error while importing data. (" + importDataRestClient.target() + ").", e);
+        } catch (RestClientException e) {
+            throw new FormsServiceException("Error while POSTing to server (" + importDataRestClient.target() + ").", e);
+        }
+    }
 
+    private Document internalRenderPDFForm(String urlOrfilename, Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions) throws FormsServiceException {
+    	Objects.requireNonNull(pdfFormRenderOptions, "PdfFormRenderOptions cannot be null.");
+
+    	var xci = pdfFormRenderOptions.getXci();
+        try (MultipartPayload payload = renderFormRestClient.multipartPayloadBuilder()
+                .addIfNotNull(TEMPLATE_PARAM, urlOrfilename)							// Since this is internal, we know that one of these two will be null
+                .addIfNotNull(TEMPLATE_PARAM, template, ContentType.APPLICATION_XDP)
+                .addIfNotNull(DATA_PARAM, data, ContentType.APPLICATION_XML)
+                .addStringVersion(ACROBAT_VERSION_PARAM, pdfFormRenderOptions.getAcrobatVersion())
+                .addStringVersion(CACHE_STRATEGY_PARAM, pdfFormRenderOptions.getCacheStrategy())
+                .addStringVersion(CONTENT_ROOT_PARAM, pdfFormRenderOptions.getContentRoot())
+                .addStringVersion(DEBUG_DIR_PARAM, pdfFormRenderOptions.getDebugDir())
+                .addStringVersion(EMBED_FONTS_PARAM, pdfFormRenderOptions.getEmbedFonts())
+                .addStringVersion(LOCALE_PARAM, pdfFormRenderOptions.getLocale())
+                .addStringVersion(RENDER_AT_CLIENT_PARAM, pdfFormRenderOptions.getRenderAtClient())
+                .addStringVersion(SUBMIT_URL_PARAM, pdfFormRenderOptions.getSubmitUrls())
+                .addStringVersion(TAGGED_PDF_PARAM, pdfFormRenderOptions.getTaggedPDF())
+                .addIfNotNull(XCI_PARAM, xci, ContentType.APPLICATION_XML)
+                .build()) {
+
+            return payload.postToServer(ContentType.APPLICATION_PDF)
+                    .map(RestServicesServiceAdapter::responseToDoc)
+                    .orElseThrow();
+        } catch (IOException e) {
+            throw new FormsServiceException("I/O Error while rendering form. (" + renderFormRestClient.target() + ").", e);
+        } catch (RestClientException e) {
+            throw new FormsServiceException("Error while POSTing to server (" + renderFormRestClient.target() + ").", e);
+        }
+    }
+    
 	@Override
 	public Document renderPDFForm(String urlOrfilename, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException {
-		return internalRenderPDFForm(urlOrfilename, null, data, pdfFormRenderOptions);
+		return internalRenderPDFForm(Objects.requireNonNull(urlOrfilename, "Template string cannot be null."), null, data, pdfFormRenderOptions);
 	}
 	@Override
 	public Document renderPDFForm(Document template, Document data, PDFFormRenderOptions pdfFormRenderOptions)
 			throws FormsServiceException {
-		return internalRenderPDFForm(null, template, data, pdfFormRenderOptions);
+		return internalRenderPDFForm(null, Objects.requireNonNull(template, "Template document cannot be null."), data, pdfFormRenderOptions);
 	}
 
 	@Override
@@ -188,17 +148,16 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 	 * 
 	 * @return build object
 	 */
-	public static FormsServiceBuilder builder() {
-		return new FormsServiceBuilder();
+	public static FormsServiceBuilder builder(RestClientFactory clientFactory) {
+		return new FormsServiceBuilder(clientFactory);
 	}
 	
 	public static class FormsServiceBuilder implements Builder {
-		private BuilderImpl builder = new BuilderImpl();
-//		private final static Supplier<Client> defaultClientFactory = ()->ClientBuilder.newClient();
+		private final BuilderImpl builder;
 		
-		private FormsServiceBuilder() {
-			super();
-		}
+		private FormsServiceBuilder(RestClientFactory clientFactory) {
+            this.builder = new BuilderImpl(clientFactory);
+        }
 
 		@Override
 		public FormsServiceBuilder machineName(String machineName) {
@@ -215,12 +174,6 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 		@Override
 		public FormsServiceBuilder useSsl(boolean useSsl) {
 			builder.useSsl(useSsl);
-			return this;
-		}
-
-		@Override
-		public FormsServiceBuilder clientFactory(Supplier<Client> clientFactory) {
-			builder.clientFactory(clientFactory);
 			return this;
 		}
 
@@ -242,11 +195,6 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 		}
 
 		@Override
-		public WebTarget createLocalTarget() {
-			return builder.createLocalTarget();
-		}
-
-		@Override
 		public FormsServiceBuilder aemServerType(AemServerType serverType) {
 			builder.aemServerType(serverType);
 			return this;
@@ -258,7 +206,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
 		}
 
 		public RestServicesFormsServiceAdapter build() {
-			return new RestServicesFormsServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType());
+			return new RestServicesFormsServiceAdapter(builder, this.getCorrelationIdFn());
 		}
 	}
 }

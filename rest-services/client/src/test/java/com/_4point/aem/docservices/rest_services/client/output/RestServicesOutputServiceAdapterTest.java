@@ -2,50 +2,44 @@ package com._4point.aem.docservices.rest_services.client.output;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static com._4point.aem.docservices.rest_services.client.helpers.AemConfigMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.client.Invocation.Builder;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.StatusType;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.allOf;
-
-import org.apache.commons.io.IOUtils;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com._4point.aem.docservices.rest_services.client.RestClient;
+import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
+import com._4point.aem.docservices.rest_services.client.RestClient.Response;
+import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
+import com._4point.aem.docservices.rest_services.client.helpers.AemConfig;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter.OutputServiceBuilder;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.output.BatchOptions;
+import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
 import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
@@ -62,39 +56,33 @@ class RestServicesOutputServiceAdapterTest {
 	private final static String DUMMY_TEMPLATE_STR = "TemplateString";
 	private final static Document DUMMY_DATA = MockDocumentFactory.GLOBAL_DUMMY_DOCUMENT;
 
-	private static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
 	private static final String CORRELATION_ID = "correlationId";
 	private static final String TEST_MACHINE_NAME = "testmachinename";
 	private static final int TEST_MACHINE_PORT = 8080;
 
-	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
-	private static final MediaType APPLICATION_PCL = new MediaType("application", "vnd.hp-pcl");
-//	private static final MediaType APPLICATION_DPL = new MediaType("application", "vnd.datamax-dpl");
-//	private static final MediaType APPLICATION_IPL = new MediaType("application", "vnd.intermec-ipl");
-//	private static final MediaType APPLICATION_PS = new MediaType("application", "postscript");
-//	private static final MediaType APPLICATION_TPCL = new MediaType("application", "vnd.toshiba-tpcl");
-//	private static final MediaType APPLICATION_ZPL = new MediaType("x-application", "zpl");
+	@Mock(stubOnly = true) RestClientFactory mockClientFactory;
+	@Mock(stubOnly = true) RestClient mockClient;
+	@Mock(stubOnly = true) MultipartPayload mockPayload;
+	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;
+	@Mock(stubOnly = true) Response mockResponse;
+	@Mock(stubOnly = true) PDFOutputOptions pdfOutputOptions;
+	@Mock(stubOnly = true) PrintedOutputOptions printedOutputOptions;
 
-	@Mock(answer = Answers.RETURNS_SELF) Client client;	// answers used to mock Client's fluent interface. 
-	@Mock WebTarget target;
-	@Mock Response response;
-	@Mock Builder builder;
-	@Mock StatusType statusType;
-	
-	@Captor ArgumentCaptor<String> machineName;
-	@Captor ArgumentCaptor<String> path;
-	@SuppressWarnings("rawtypes")
-	@Captor ArgumentCaptor<Entity> entity;
-	@Captor ArgumentCaptor<String> correlationId;
-
-	
+	@Captor ArgumentCaptor<AemConfig> aemConfig;
+	@Captor ArgumentCaptor<String> servicePath;
+	@Captor ArgumentCaptor<InputStream> postBodyBytes;
+	@Captor ArgumentCaptor<ContentType> acceptableContentType;
+	@Captor ArgumentCaptor<Supplier<String>> correlationIdFn;
+		
 	@BeforeEach
-	void setUp() throws Exception {
+	void setup() {
+		when(mockClientFactory.apply(aemConfig.capture(), servicePath.capture(), correlationIdFn.capture())).thenReturn(mockClient);
 	}
+
 
 	@Test
 	void testGeneratePDFOutput_NullArguments() throws Exception {
-		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder().build();
+		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder(mockClientFactory).build();
 		
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePDFOutput((Document)null, null, null));
 		assertThat(ex1.getMessage(), containsStringIgnoringCase("template"));
@@ -112,7 +100,7 @@ class RestServicesOutputServiceAdapterTest {
 
 	@Test
 	void testGeneratePrintedOutput_NullArguments() throws Exception {
-		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder().build();
+		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder(mockClientFactory).build();
 		
 		NullPointerException ex1 = assertThrows(NullPointerException.class, ()->underTest.generatePrintedOutput((Document)null, null, null));
 		assertThat(ex1.getMessage(), containsStringIgnoringCase("template"));
@@ -158,7 +146,11 @@ class RestServicesOutputServiceAdapterTest {
 			this.emptyOptions = emptyOptions;
 		}
 
-		public boolean isSsl() {
+		public boolean useSsl() {
+			return ssl;
+		}
+
+		public boolean useCorrelationId() {	// We test correlationId and SSL at the same time.
 			return ssl;
 		}
 
@@ -170,7 +162,7 @@ class RestServicesOutputServiceAdapterTest {
 			return templateString;
 		}
 
-		public boolean hasemptyOptions() {
+		public boolean hasEmptyOptions() {
 			return emptyOptions;
 		}
 	};
@@ -178,40 +170,8 @@ class RestServicesOutputServiceAdapterTest {
 	@ParameterizedTest
 	@EnumSource(HappyPaths.class)
 	void testGeneratePDFOutput_HappyPath(HappyPaths codePath) throws Exception {
-		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes())
-																   .setPageCount(EXPECTED_PAGE_COUNT);
-
-		setUpMocks(responseData);
-		
-		boolean useSSL = false;
-		boolean useCorrelationId = false;
-		if (codePath.isSsl()) {
-			useSSL = true;
-			useCorrelationId = true;
-			when(builder.header(eq(CORRELATION_ID_HTTP_HDR), correlationId.capture())).thenReturn(builder);
-		} else {
-			useSSL = false;
-			useCorrelationId = false;
-		}
-
-		OutputServiceBuilder adapterBuilder = RestServicesOutputServiceAdapter.builder()
-					.machineName(TEST_MACHINE_NAME)
-					.port(TEST_MACHINE_PORT)
-					.basicAuthentication("username", "password")
-					.useSsl(useSSL)
-					.aemServerType(AemServerType.StandardType.JEE)
-					.clientFactory(()->client);
-
-		if (useCorrelationId) {
-			adapterBuilder.correlationId(()->CORRELATION_ID);
-		}
-
-		RestServicesOutputServiceAdapter underTest = adapterBuilder.build();
-
-		Document pdf = MockDocumentFactory.GLOBAL_INSTANCE.create("pdf Document Data".getBytes());
-
-		PDFOutputOptions pdfOutputOptions = Mockito.mock(PDFOutputOptions.class);
-		if (!codePath.hasemptyOptions()) {
+		if (!codePath.hasEmptyOptions()) {
+			// Stub the values for pdfOutputOptions
 			when(pdfOutputOptions.getAcrobatVersion()).thenReturn(AcrobatVersion.Acrobat_10_1);
 			when(pdfOutputOptions.getContentRoot()).thenReturn(Mockito.mock(PathOrUrl.class));
 			when(pdfOutputOptions.getDebugDir()).thenReturn(Mockito.mock(Path.class));
@@ -222,100 +182,41 @@ class RestServicesOutputServiceAdapterTest {
 			when(pdfOutputOptions.getRetainUnsignedSignatureFields()).thenReturn(Boolean.TRUE);
 			when(pdfOutputOptions.getTaggedPDF()).thenReturn(Boolean.TRUE);
 			when(pdfOutputOptions.getXci()).thenReturn(Mockito.mock(Document.class));
-		}
-		
-		Document pdfResult;
-		if (codePath.isTemplateString()) {
-			pdfResult = underTest.generatePDFOutput(DUMMY_TEMPLATE_STR, codePath.hasData() ? DUMMY_DATA : null, pdfOutputOptions);
+			
+			// Setup the expected calls to mockPayloadBuilder
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.acrobatVersion"), eq(AcrobatVersion.Acrobat_10_1))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.contentRoot"), Mockito.any(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.debugDir"), Mockito.any(Path.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.embedFonts"), eq(Boolean.TRUE))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.linearizedPdf"), eq(Boolean.TRUE))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.locale"), eq(Locale.CANADA_FRENCH))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.retainPdfFormState"), eq(Boolean.TRUE))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.retainUnsignedSignatureFields"), eq(Boolean.TRUE))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.taggedPdf"), eq(Boolean.TRUE))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addIfNotNull(eq("outputOptions.xci"), Mockito.any(Document.class), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
 		} else {
-			pdfResult = underTest.generatePDFOutput(DUMMY_TEMPLATE_DOC, codePath.hasData() ? DUMMY_DATA : null, pdfOutputOptions);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.acrobatVersion"), isNull(AcrobatVersion.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.contentRoot"), isNull(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.debugDir"), isNull(Path.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.embedFonts"), eq(Boolean.FALSE))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.linearizedPdf"), eq(Boolean.FALSE))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.locale"), isNull(Locale.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.retainPdfFormState"), eq(Boolean.FALSE))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.retainUnsignedSignatureFields"), eq(Boolean.FALSE))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.taggedPdf"), eq(Boolean.FALSE))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addIfNotNull(eq("outputOptions.xci"), isNull(Document.class), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
 		}
-		
-		// Make sure the correct URL is called.
-		final String expectedPrefix = useSSL ? "https://" : "http://";
-		assertAll(
-				()->assertThat("Expected target url contains '" + expectedPrefix + "'", machineName.getValue(), containsString(expectedPrefix)),
-				()->assertThat("Expected target url contains TEST_MACHINE_NAME", machineName.getValue(), containsString(TEST_MACHINE_NAME)),
-				()->assertThat("Expected target url contains TEST_MACHINE_PORT", machineName.getValue(), containsString(Integer.toString(TEST_MACHINE_PORT))),
-				()->assertThat("Expected target url contains 'GeneratePdfOutput'", path.getValue(), containsString("GeneratePdfOutput"))
-		);
 
-		// Make sure that the arguments we passed in are transmitted correctly.
-		@SuppressWarnings("unchecked")
-		Entity<FormDataMultiPart> postedEntity = (Entity<FormDataMultiPart>)entity.getValue();
-		FormDataMultiPart postedData = postedEntity.getEntity();
-		
-		assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
-		if (codePath.isTemplateString()) {
-			validateTextFormField(postedData, "template", DUMMY_TEMPLATE_STR);
-		} else {
-			validateDocumentFormField(postedData, "template", new MediaType("application", "vnd.adobe.xdp+xml"), DUMMY_TEMPLATE_DOC.getInlineData());
-		}
-		if (codePath.hasData()) {
-			validateDocumentFormField(postedData, "data", new MediaType("application", "xml"), DUMMY_DATA.getInlineData());
-		} else {
-			assertNull(postedData.getFields("data"));
-		}
-		
-		if (useCorrelationId) {
-			assertEquals(CORRELATION_ID, correlationId.getValue());
-		}
-		
-		// Make sure the response is correct.
-		assertArrayEquals(responseData.getInlineData(), pdfResult.getInlineData());
-		assertEquals(APPLICATION_PDF, MediaType.valueOf(pdfResult.getContentType()));
-		assertEquals(EXPECTED_PAGE_COUNT, pdfResult.getPageCount().get());
+		RestServicesOutputServiceAdapter underTest = createAdapter(codePath);
+
+		runTest(codePath, pdfOutputOptions, underTest::generatePDFOutput, underTest::generatePDFOutput, ContentType.APPLICATION_PDF);
 	}
-	
-	private void setUpMocks(Document responseData) throws IOException {
-		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
-		when(client.target(machineName.capture())).thenReturn(target);
-		when(target.path(path.capture())).thenReturn(target);
-		when(target.request()).thenReturn(builder);
-		when(builder.accept(APPLICATION_PDF)).thenReturn(builder);
-		when(builder.post(entity.capture())).thenReturn(response);
-		when(response.getStatusInfo()).thenReturn(statusType);
-		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
-		when(response.hasEntity()).thenReturn(true);
-		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
-		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn("application/pdf");
-		when(response.getHeaderString(PAGE_COUNT_HEADER)).thenReturn(Long.toString(EXPECTED_PAGE_COUNT));
-	}
-	
+
 	@ParameterizedTest
 	@EnumSource(HappyPaths.class)
 	void testGeneratePrintedOutput_HappyPath(HappyPaths codePath) throws Exception {
-		Document responseData = MockDocumentFactory.GLOBAL_INSTANCE.create("response Document Data".getBytes());
-
-		setUpPrintMocks(responseData, APPLICATION_PCL);
-		
-		boolean useSSL = false;
-		boolean useCorrelationId = false;
-		if (codePath.isSsl()) {
-			useSSL = true;
-			useCorrelationId = true;
-			when(builder.header(eq(CORRELATION_ID_HTTP_HDR), correlationId.capture())).thenReturn(builder);
-		} else {
-			useSSL = false;
-			useCorrelationId = false;
-		}
-
-		 OutputServiceBuilder adapterBuilder = RestServicesOutputServiceAdapter.builder()
-					.machineName(TEST_MACHINE_NAME)
-					.port(TEST_MACHINE_PORT)
-					.basicAuthentication("username", "password")
-					.useSsl(useSSL)
-					.aemServerType(AemServerType.StandardType.JEE)
-					.clientFactory(()->client);
-
-		if (useCorrelationId) {
-			adapterBuilder.correlationId(()->CORRELATION_ID);
-		}
-
-		RestServicesOutputServiceAdapter underTest = adapterBuilder.build();
-
-		PrintedOutputOptions printedOutputOptions = Mockito.mock(PrintedOutputOptions.class);
-		if (!codePath.hasemptyOptions()) {
+		if (!codePath.hasEmptyOptions()) {
+			// Stub the values for pdfOutputOptions
 			when(printedOutputOptions.getContentRoot()).thenReturn(Mockito.mock(PathOrUrl.class));
 			when(printedOutputOptions.getCopies()).thenReturn(1);
 			when(printedOutputOptions.getDebugDir()).thenReturn(Mockito.mock(Path.class));
@@ -323,91 +224,121 @@ class RestServicesOutputServiceAdapterTest {
 			when(printedOutputOptions.getPaginationOverride()).thenReturn(PaginationOverride.duplexLongEdge);
 			when(printedOutputOptions.getPrintConfig()).thenReturn(PrintConfig.HP_PCL_5e);
 			when(printedOutputOptions.getXci()).thenReturn(Mockito.mock(Document.class));
-		}
-		else {
+			
+			// Setup the expected calls to mockPayloadBuilder
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.contentRoot"), Mockito.any(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.copies"), eq(Integer.valueOf(1)))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.debugDir"), Mockito.any(Path.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.locale"), eq(Locale.CANADA_FRENCH))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.paginationOverride"), eq(PaginationOverride.duplexLongEdge))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.printConfig"), eq(PrintConfig.HP_PCL_5e))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addIfNotNull(eq("outputOptions.xci"), Mockito.any(Document.class), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
+		} else {
 			// Mandatory entry in PrintedOutputOptions.
 			when(printedOutputOptions.getPrintConfig()).thenReturn(PrintConfig.HP_PCL_5e);
+			
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.contentRoot"), isNull(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.copies"), eq(Integer.valueOf(0)))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.debugDir"), isNull(Path.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.locale"), isNull(Locale.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.paginationOverride"), isNull(PaginationOverride.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.printConfig"), eq(PrintConfig.HP_PCL_5e))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addIfNotNull(eq("outputOptions.xci"), isNull(Document.class), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
 		}
-		
-		Document printResult;
-		if (codePath.isTemplateString()) {
-			printResult = underTest.generatePrintedOutput(DUMMY_TEMPLATE_STR, codePath.hasData() ? DUMMY_DATA : null, printedOutputOptions);
-		} else {
-			printResult = underTest.generatePrintedOutput(DUMMY_TEMPLATE_DOC, codePath.hasData() ? DUMMY_DATA : null, printedOutputOptions);
-		}
-		
-		// Make sure the correct URL is called.
-		final String expectedPrefix = useSSL ? "https://" : "http://";
-		assertAll(
-				()->assertThat("Expected target url contains '" + expectedPrefix + "'", machineName.getValue(), containsString(expectedPrefix)),
-				()->assertThat("Expected target url contains TEST_MACHINE_NAME", machineName.getValue(), containsString(TEST_MACHINE_NAME)),
-				()->assertThat("Expected target url contains TEST_MACHINE_PORT", machineName.getValue(), containsString(Integer.toString(TEST_MACHINE_PORT))),
-				()->assertThat("Expected target url contains 'GeneratePrintedOutput'", path.getValue(), containsString("GeneratePrintedOutput"))
-		);
 
-		// Make sure that the arguments we passed in are transmitted correctly.
-		@SuppressWarnings("unchecked")
-		Entity<FormDataMultiPart> postedEntity = (Entity<FormDataMultiPart>)entity.getValue();
-		FormDataMultiPart postedData = postedEntity.getEntity();
-		
-		assertEquals(MediaType.MULTIPART_FORM_DATA_TYPE, postedEntity.getMediaType());
-		if (codePath.isTemplateString()) {
-			validateTextFormField(postedData, "template", DUMMY_TEMPLATE_STR);
-		} else {
-			validateDocumentFormField(postedData, "template", new MediaType("application", "vnd.adobe.xdp+xml"), DUMMY_TEMPLATE_DOC.getInlineData());
-		}
-		if (codePath.hasData()) {
-			validateDocumentFormField(postedData, "data", new MediaType("application", "xml"), DUMMY_DATA.getInlineData());
-		} else {
-			assertNull(postedData.getFields("data"));
-		}
-		
-		if (useCorrelationId) {
-			assertEquals(CORRELATION_ID, correlationId.getValue());
-		}
-		
-		// Make sure the response is correct.
-		assertArrayEquals(responseData.getInlineData(), printResult.getInlineData());
-		assertEquals(APPLICATION_PCL, MediaType.valueOf(printResult.getContentType()));
-	}
-	
-	private void setUpPrintMocks(Document responseData, MediaType mimeType) throws IOException {
-		// TODO: Change this based on https://maciejwalkowiak.com/mocking-fluent-interfaces/
-		when(client.target(machineName.capture())).thenReturn(target);
-		when(target.path(path.capture())).thenReturn(target);
-		when(target.request()).thenReturn(builder);
-		when(builder.accept(mimeType)).thenReturn(builder);
-		when(builder.post(entity.capture())).thenReturn(response);
-		when(response.getStatusInfo()).thenReturn(statusType);
-		when(statusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);	// return Successful
-		when(response.hasEntity()).thenReturn(true);
-		when(response.getEntity()).thenReturn(new ByteArrayInputStream(responseData.getInlineData()));
-		when(response.getHeaderString(HttpHeaders.CONTENT_TYPE)).thenReturn(mimeType.toString());
-	}
-	
-	private void validateTextFormField(FormDataMultiPart postedData, String fieldName, String expectedData) throws IOException {
-		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
-		assertEquals(1, pdfFields.size());
+		RestServicesOutputServiceAdapter underTest = createAdapter(codePath);
 
-		FormDataBodyPart pdfPart = pdfFields.get(0);
-		assertEquals(MediaType.TEXT_PLAIN_TYPE, pdfPart.getMediaType());
-		String value = (String) pdfPart.getEntity();
-		assertEquals(expectedData, value);
+		runTest(codePath, printedOutputOptions, underTest::generatePrintedOutput, underTest::generatePrintedOutput, ContentType.APPLICATION_PCL);
+	}
+
+	// Since both generatePdfOutput and generatePrintedOutput are so similar and they produce the same results (a Document object),
+	// the setup and test code can be combined into into one common function,
+	private <T> void runTest(HappyPaths codePath, 
+			 		  T mockOptions, 
+			 		  TriFunctionWithException<Document, Document, T, Document, OutputServiceException> docFn,
+			 		  TriFunctionWithException<String, Document, T, Document, OutputServiceException> stringFn,
+			 		  ContentType responseContentType
+			 		  ) throws OutputServiceException, RestClientException, IOException {
+			byte[] responseData = "response Document Data".getBytes();
+
+			setupMocks(setupMockResponse(responseData, responseContentType));
+			
+			if (codePath.hasData()) {
+				when(mockPayloadBuilder.addIfNotNull(eq("data"), eq(DUMMY_DATA), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
+			} else {
+				when(mockPayloadBuilder.addIfNotNull(eq("data"), Mockito.<Document>isNull(), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
+			}
+
+			if (codePath.isTemplateString()) {
+				when(mockPayloadBuilder.addIfNotNull(eq("template"), eq(DUMMY_TEMPLATE_STR))).thenReturn(mockPayloadBuilder);
+				when(mockPayloadBuilder.addIfNotNull(eq("template"), Mockito.<Document>isNull(), eq(ContentType.APPLICATION_XDP))).thenReturn(mockPayloadBuilder);
+			} else {
+				when(mockPayloadBuilder.addIfNotNull(eq("template"), Mockito.<String>isNull())).thenReturn(mockPayloadBuilder);
+				when(mockPayloadBuilder.addIfNotNull(eq("template"), eq(DUMMY_TEMPLATE_DOC), eq(ContentType.APPLICATION_XDP))).thenReturn(mockPayloadBuilder);
+			}
+
+			// When
+			Document resultDoc = codePath.isTemplateString() 
+											? stringFn.apply(DUMMY_TEMPLATE_STR, codePath.hasData() ? DUMMY_DATA : null, mockOptions)
+											: docFn.apply(DUMMY_TEMPLATE_DOC, codePath.hasData() ? DUMMY_DATA : null, mockOptions);
+			
+			// Then
+			// Make sure the correct URL is called.
+			assertThat("Expected target url contains 'OutputService' and 'GeneratePdfOutput'", servicePath.getAllValues().get(0), allOf(containsString("OutputService"), containsString("GeneratePdfOutput")));
+
+			assertThat(aemConfig.getValue(), allOf(
+					useSsl(equalTo(codePath.useSsl())),
+					servername(equalTo(TEST_MACHINE_NAME)),
+					port(equalTo(TEST_MACHINE_PORT))
+					));
+			
+			// Make sure that the arguments we passed in are transmitted correctly.
+			
+			if (codePath.useCorrelationId()) {
+				assertEquals(CORRELATION_ID, correlationIdFn.getValue().get());
+			}
+			
+			// Make sure the response is correct.
+			assertArrayEquals(responseData, resultDoc.getInputStream().readAllBytes());
+			assertEquals(responseContentType.contentType(), resultDoc.getContentType());
+			assertEquals(EXPECTED_PAGE_COUNT, resultDoc.getPageCount().get());
+			
+			// Make sure we sent the correct contentTyoe
+			assertEquals(responseContentType, acceptableContentType.getValue());
+		 
+	 }
+
+	private void setupMocks(Optional<Response> mockedResponse) throws RestClientException {
+		when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.build()).thenReturn(mockPayload);
+		when(mockPayload.postToServer(acceptableContentType.capture())).thenReturn(mockedResponse);
 	}
 	
-	private void validateDocumentFormField(FormDataMultiPart postedData, String fieldName, MediaType expectedMediaType, byte[] expectedData) throws IOException {
-		List<FormDataBodyPart> pdfFields = postedData.getFields(fieldName);
-		assertEquals(1, pdfFields.size());
-		
-		FormDataBodyPart pdfPart = pdfFields.get(0);
-		assertEquals(expectedMediaType, pdfPart.getMediaType());
-		byte[] pdfBytes = IOUtils.toByteArray((InputStream) pdfPart.getEntity());
-		assertArrayEquals(expectedData, pdfBytes);  // TODO: Need to figure out how to test for entity.
+	private Optional<Response> setupMockResponse(byte[] responseData, ContentType expectedContentType) {
+		when(mockResponse.contentType()).thenReturn(expectedContentType);
+		when(mockResponse.data()).thenReturn(new ByteArrayInputStream(responseData));
+		when(mockResponse.retrieveHeader(eq(PAGE_COUNT_HEADER))).thenReturn(Optional.of(Long.toString(EXPECTED_PAGE_COUNT)));
+		return Optional.of(mockResponse);
+	}
+
+	private RestServicesOutputServiceAdapter createAdapter(HappyPaths codePath) {
+		OutputServiceBuilder adapterBuilder = RestServicesOutputServiceAdapter.builder(mockClientFactory)
+					.machineName(TEST_MACHINE_NAME)
+					.port(TEST_MACHINE_PORT)
+					.basicAuthentication("username", "password")
+					.useSsl(codePath.useSsl())
+					.aemServerType(AemServerType.StandardType.JEE);
+
+		if (codePath.useCorrelationId()) {
+			adapterBuilder.correlationId(()->CORRELATION_ID);
+		}
+
+		return adapterBuilder.build();
 	}
 	
 	@Test
 	void testGeneratePDFOutputBatch() {
-		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder().build();
+		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder(mockClientFactory).build();
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.generatePDFOutputBatch(Collections.emptyMap(), Collections.emptyMap(), mock(PDFOutputOptions.class), mock(BatchOptions.class)));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
@@ -416,10 +347,16 @@ class RestServicesOutputServiceAdapterTest {
 
 	@Test
 	void testGeneratePrintedOutputBatch() {
-		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder().build();
+		RestServicesOutputServiceAdapter underTest = RestServicesOutputServiceAdapter.builder(mockClientFactory).build();
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, ()->underTest.generatePrintedOutputBatch(Collections.emptyMap(), Collections.emptyMap(), mock(PrintedOutputOptions.class), mock(BatchOptions.class)));
 		String msg = ex.getMessage();
 		assertNotNull(msg);
 		assertThat(msg, allOf(containsString("generatePrintedOutputBatch"), containsString("is not implemented yet")));
 	}
+	
+	@FunctionalInterface
+	public interface TriFunctionWithException<T, U, V, R, E extends Exception> {
+	    R apply(T t, U u, V v) throws E;
+	}
+
 }

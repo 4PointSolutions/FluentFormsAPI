@@ -1,68 +1,35 @@
 package com._4point.aem.docservices.rest_services.client.convertPdf;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Map.Entry;
 import java.util.function.Supplier;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.StatusType;
-import jakarta.ws.rs.core.Response.Status.Family;
-
-import org.glassfish.jersey.media.multipart.ContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._4point.aem.docservices.rest_services.client.RestClient;
+import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
+import com._4point.aem.docservices.rest_services.client.RestClient.Response;
+import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
-import com._4point.aem.docservices.rest_services.client.helpers.MultipartTransformer;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService.ConvertPdfServiceException;
 import com._4point.aem.fluentforms.api.convertPdf.ToImageOptionsSpec;
 import com._4point.aem.fluentforms.api.convertPdf.ToPSOptionsSpec;
-import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.convertPdf.TraditionalConvertPdfService;
-import com.adobe.fd.cpdf.api.enumeration.CMYKPolicy;
-import com.adobe.fd.cpdf.api.enumeration.Color;
-import com.adobe.fd.cpdf.api.enumeration.ColorCompression;
-import com.adobe.fd.cpdf.api.enumeration.ColorSpace;
-import com.adobe.fd.cpdf.api.enumeration.FontInclusion;
-import com.adobe.fd.cpdf.api.enumeration.GrayScaleCompression;
-import com.adobe.fd.cpdf.api.enumeration.GrayScalePolicy;
 import com.adobe.fd.cpdf.api.enumeration.ImageConvertFormat;
-import com.adobe.fd.cpdf.api.enumeration.Interlace;
-import com.adobe.fd.cpdf.api.enumeration.JPEGFormat;
-import com.adobe.fd.cpdf.api.enumeration.LineWeight;
-import com.adobe.fd.cpdf.api.enumeration.MonochromeCompression;
-import com.adobe.fd.cpdf.api.enumeration.PNGFilter;
-import com.adobe.fd.cpdf.api.enumeration.PSLevel;
-import com.adobe.fd.cpdf.api.enumeration.PageSize;
-import com.adobe.fd.cpdf.api.enumeration.RGBPolicy;
-import com.adobe.fd.cpdf.api.enumeration.Style;
 
 public class RestServicesConvertPdfServiceAdapter extends RestServicesServiceAdapter implements TraditionalConvertPdfService {
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	private static final int DEFAULT_BUFFER_SIZE = 8192 * 4;	// 32Kb buffer
+	private static final Logger logger = LoggerFactory.getLogger(RestServicesConvertPdfServiceAdapter.class);
 	
-	private static final MediaType APPLICATION_JPEG = new MediaType("image", "jpg");
-	private static final MediaType APPLICATION_PS = new MediaType("application", "postscript");
 	private static final String CONVERT_PDF_SERVICE_NAME = "ConvertPdfService";
 	private static final String TO_IMAGE_METHOD_NAME = "ToImage";
-	private static final String IMAGE_PARAM = "IMAGE";
 	private static final String TO_PS_METHOD_NAME = "ToPS";
 	private static final String PDF_PARAM = "inPdfDoc";
 
@@ -112,230 +79,189 @@ public class RestServicesConvertPdfServiceAdapter extends RestServicesServiceAda
 	private static final String TRIM_MARKS_PARAM = "toPSOptionsSpec.trimMarks";
 	private static final String USE_MAX_JPEG_IMAGE_RESOLUTION_PARAM = "toPSOptionsSpec.useMaxJPEGImageResolution";
 
+	private final RestClient toImageRestClient;
+	private final RestClient toPsRestClient;
+	
 	// Can only be called from Builder.
-	private RestServicesConvertPdfServiceAdapter(WebTarget baseTarget, Supplier<String> correlationIdFn, AemServerType aemServerType) {
-		super(baseTarget, correlationIdFn, aemServerType);
+	private RestServicesConvertPdfServiceAdapter(BuilderImpl builder, Supplier<String> correlationIdFn) {
+		super(correlationIdFn);
+		this.toImageRestClient = builder.createClient(CONVERT_PDF_SERVICE_NAME, TO_IMAGE_METHOD_NAME);
+		this.toPsRestClient = builder.createClient(CONVERT_PDF_SERVICE_NAME, TO_PS_METHOD_NAME);
 	}
 
 	@Override
 	public List<Document> toImage(Document inPdfDoc, ToImageOptionsSpec toImageOptionsSpec) throws ConvertPdfServiceException {
-		WebTarget toImageTarget = baseTarget.path(constructStandardPath(CONVERT_PDF_SERVICE_NAME, TO_IMAGE_METHOD_NAME));
-		if (inPdfDoc == null) {
-			throw new NullPointerException("inPdfDoc cannot be null.");
-		}
-		Objects.requireNonNull(toImageOptionsSpec, "ToImageOptionsSpec argument cannot be null.");
+		Objects.requireNonNull(inPdfDoc, "inPdfDoc parameter cannot be null.");
+		Objects.requireNonNull(toImageOptionsSpec, "ToImageOptionsSpec parameter cannot be null.");
+		ImageConvertFormat imageConvertFormat = Objects.requireNonNull(toImageOptionsSpec.getImageConvertFormat(), "ImageConvertFormat cannot be null.");
 		
-		CMYKPolicy cmykPolicy = toImageOptionsSpec.getCmykPolicy();
-		ColorCompression colorCompression = toImageOptionsSpec.getColorCompression();
-		ColorSpace colorSpace = toImageOptionsSpec.getColorSpace();
-		PNGFilter filter = toImageOptionsSpec.getFilter();
-		JPEGFormat format = toImageOptionsSpec.getFormat();
-		GrayScaleCompression grayScaleCompression = toImageOptionsSpec.getGrayScaleCompression();
-		GrayScalePolicy grayScalePolicy = toImageOptionsSpec.getGrayScalePolicy();
-		ImageConvertFormat imageConvertFormat = toImageOptionsSpec.getImageConvertFormat();
-		Objects.requireNonNull(imageConvertFormat, "ImageConvertFormat cannot be null.");
-		String imageSizeHeight = toImageOptionsSpec.getImageSizeHeight();
-		String imageSizeWidth = toImageOptionsSpec.getImageSizeWidth();
-		Interlace interlace = toImageOptionsSpec.getInterlace();
-		MonochromeCompression monochrome = toImageOptionsSpec.getMonochrome();
-		Boolean multiPageTiff = toImageOptionsSpec.getMultiPageTiff();
-		String pageRange = toImageOptionsSpec.getPageRange();
-		String resolution = toImageOptionsSpec.getResolution();
-		RGBPolicy rgbPolicy = toImageOptionsSpec.getRgbPolicy();
-		Integer rowsPerStrip = toImageOptionsSpec.getRowsPerStrip();
-		Integer tileSize = toImageOptionsSpec.getTileSize();
-		Boolean includeComments = toImageOptionsSpec.isIncludeComments();
-		Boolean useLegacyImageSizeBehvior = toImageOptionsSpec.isUseLegacyImageSizeBehavior();
-		
-		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(PDF_PARAM, inPdfDoc.getInputStream(), APPLICATION_PDF);
-
-			// This code sets the individual fields if they are not null. 
-			MultipartTransformer.create(multipart)
-								.transform((t)->cmykPolicy == null ? t : t.field(CMYK_POLICY_PARAM, cmykPolicy.toString()))
-								.transform((t)->colorCompression == null ? t : t.field(COLOR_COMPRESSION_PARAM, colorCompression.toString()))
-								.transform((t)->colorSpace == null ? t : t.field(COLOR_SPACE_PARAM, colorSpace.toString()))
-								.transform((t)->filter == null ? t : t.field(PNG_FILTER_PARAM, filter.toString()))
-								.transform((t)->format == null ? t : t.field(JPEG_FORMAT_PARAM, format.toString()))
-								.transform((t)->grayScaleCompression == null ? t : t.field(GRAY_SCALE_COMPRESSION_PARAM, grayScaleCompression.toString()))
-								.transform((t)->grayScalePolicy == null ? t : t.field(GRAY_SCALE_POLICY_PARAM, grayScalePolicy.toString()))
-								.transform((t)->imageConvertFormat == null ? t : t.field(IMAGE_CONVERT_FORMAT_PARAM, imageConvertFormat.toString()))
-								.transform((t)->imageSizeHeight == null ? t : t.field(IMAGE_SIZE_HEIGHT_PARAM, imageSizeHeight))
-								.transform((t)->imageSizeWidth == null ? t : t.field(IMAGE_SIZE_WIDTH_PARAM, imageSizeWidth))
-								.transform((t)->interlace == null ? t : t.field(INTERLACE_PARAM, interlace.toString()))
-								.transform((t)->monochrome == null ? t : t.field(MONOCHROME_COMPRESSION_PARAM, monochrome.toString()))
-								.transform((t)->multiPageTiff == null ? t : t.field(MULTI_PAGE_TIFF_PARAM, multiPageTiff.toString()))
-								.transform((t)->pageRange == null ? t : t.field(IMAGE_PAGE_RANGE_PARAM, pageRange))
-								.transform((t)->resolution == null ? t : t.field(RESOLUTION_PARAM, resolution))
-								.transform((t)->rgbPolicy == null ? t : t.field(RGB_POLICY_PARAM, rgbPolicy.toString()))
-								.transform((t)->rowsPerStrip == null ? t : t.field(ROWS_PER_STRIP_PARAM, rowsPerStrip.toString()))
-								.transform((t)->tileSize == null ? t : t.field(TILE_SIZE_PARAM, tileSize.toString()))
-								.transform((t)->includeComments == null ? t : t.field(IMAGE_INCLUDE_COMMENTS_PARAM, includeComments.toString()))
-								.transform((t)->useLegacyImageSizeBehvior == null ? t : t.field(USE_LEGACY_IMAGE_SIZE_BEHAVIOR_PARAM, useLegacyImageSizeBehvior.toString()))
-								;
-			
-			Response result = postToServer(toImageTarget, multipart, MediaType.MULTIPART_FORM_DATA_TYPE);
-			
-			StatusType resultStatus = result.getStatusInfo();
-			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
-				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
-				if (result.hasEntity()) {
-					InputStream entityStream = (InputStream) result.getEntity();
-					message += "\n" + inputStreamtoString(entityStream);
-				}
-				throw new ConvertPdfServiceException(message);
-			}
-			if (!result.hasEntity()) {
-				throw new ConvertPdfServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
-			}
-
-			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if ( responseContentType == null || !MediaType.MULTIPART_FORM_DATA_TYPE.isCompatible(MediaType.valueOf(responseContentType))) {
-				String msg = "Response from AEM server was not a multipart form.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
-				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + inputStreamtoString(entityStream);
-				throw new ConvertPdfServiceException(msg);
-			}
-
-			List<Document> resultDocList = new ArrayList<Document>();
-			FormDataMultiPart resultDoc = result.readEntity(FormDataMultiPart.class);
-			for (Entry<String, List<FormDataBodyPart>> entry : resultDoc.getFields().entrySet()) {
-				String name = entry.getKey();
-				for(FormDataBodyPart part : entry.getValue()) {
-					if (part.isSimple()) {
-						logger.debug("Found simple Form Data Part '" + name + "' (" + part.getName() + ").");
-					} else {
-						logger.debug("Found complex Form Data Part '" + name + "' (" + part.getName() + "/" + part.getContentDisposition() + ").");
-						ContentDisposition contentDisposition = part.getContentDisposition();
-						String fileName = contentDisposition.getFileName();
-						if (fileName != null) {
-							resultDocList.add(SimpleDocumentFactoryImpl.getFactory().create(part.getEntityAs(InputStream.class)));
-						}
-					}
-				}
-			}
-			
-//			List<Document> resultDocList = Collections.emptyList();
-//			for (BodyPart bodyPart : resultDoc.getBodyParts()) {
-//				
-//			}
-			return resultDocList;
+		try (MultipartPayload payload = toImageRestClient.multipartPayloadBuilder()
+        												 .add(PDF_PARAM, inPdfDoc, ContentType.APPLICATION_PDF)
+        												 .addStringVersion(CMYK_POLICY_PARAM, toImageOptionsSpec.getCmykPolicy())
+        												 .addStringVersion(COLOR_COMPRESSION_PARAM, toImageOptionsSpec.getColorCompression())
+        												 .addStringVersion(COLOR_SPACE_PARAM, toImageOptionsSpec.getColorSpace())
+        												 .addStringVersion(PNG_FILTER_PARAM, toImageOptionsSpec.getFilter())
+        												 .addStringVersion(JPEG_FORMAT_PARAM, toImageOptionsSpec.getFormat())
+        												 .addStringVersion(GRAY_SCALE_COMPRESSION_PARAM, toImageOptionsSpec.getGrayScaleCompression())
+        												 .addStringVersion(GRAY_SCALE_POLICY_PARAM, toImageOptionsSpec.getGrayScalePolicy())
+        												 .addStringVersion(IMAGE_CONVERT_FORMAT_PARAM, imageConvertFormat)
+        												 .addIfNotNull(IMAGE_SIZE_HEIGHT_PARAM, toImageOptionsSpec.getImageSizeHeight())
+        												 .addIfNotNull(IMAGE_SIZE_WIDTH_PARAM, toImageOptionsSpec.getImageSizeWidth())
+        												 .addStringVersion(INTERLACE_PARAM, toImageOptionsSpec.getInterlace())
+        												 .addStringVersion(MONOCHROME_COMPRESSION_PARAM, toImageOptionsSpec.getMonochrome())
+        												 .addStringVersion(MULTI_PAGE_TIFF_PARAM, toImageOptionsSpec.getMultiPageTiff())
+        												 .addIfNotNull(IMAGE_PAGE_RANGE_PARAM, toImageOptionsSpec.getPageRange())
+        												 .addIfNotNull(RESOLUTION_PARAM, toImageOptionsSpec.getResolution())
+        												 .addStringVersion(RGB_POLICY_PARAM, toImageOptionsSpec.getRgbPolicy())
+        												 .addStringVersion(ROWS_PER_STRIP_PARAM, toImageOptionsSpec.getRowsPerStrip())
+        												 .addStringVersion(TILE_SIZE_PARAM, toImageOptionsSpec.getTileSize())
+        												 .addStringVersion(IMAGE_INCLUDE_COMMENTS_PARAM, toImageOptionsSpec.isIncludeComments())
+        												 .addStringVersion(USE_LEGACY_IMAGE_SIZE_BEHAVIOR_PARAM, toImageOptionsSpec.isUseLegacyImageSizeBehavior())
+														 .build()) {
+			return payload.postToServer(toContentType(imageConvertFormat))
+						  .map(RestServicesConvertPdfServiceAdapter::responseToDocList)
+						  .orElseThrow();
 		} catch (IOException e) {
-			throw new ConvertPdfServiceException("I/O Error while generating an image. (" + baseTarget.getUri().toString() + ").", e);
-		} catch (RestServicesServiceException e) {
-			throw new ConvertPdfServiceException("Error while POSTing to server", e);
+			throw new ConvertPdfServiceException("I/O Error while securing document. (" + toImageRestClient.target() + ").", e);
+		} catch (RestClientException e) {
+			throw new ConvertPdfServiceException("Error while POSTing to server (" + toImageRestClient.target() + ").", e);
 		}
-	}
-//	
-//	private static byte[] readAllBytes(InputStream is) throws IOException {
-//		ByteArrayOutputStream out = new ByteArrayOutputStream();
-//        transfer(is, out);
-//        return out.toByteArray();
-//	}
-//	
-//	private static void transfer(InputStream is, OutputStream out) throws IOException {
-//		byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-//        int read;
-//        while ((read = is.read(buffer, 0, DEFAULT_BUFFER_SIZE)) >= 0) {
-//            out.write(buffer, 0, read);
-//        }
-//	}
 
+
+//		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
+//			multipart.field(PDF_PARAM, inPdfDoc.getInputStream(), APPLICATION_PDF);
+//
+//			// This code sets the individual fields if they are not null. 
+//			MultipartTransformer.create(multipart)
+//								.transform((t)->cmykPolicy == null ? t : t.field(CMYK_POLICY_PARAM, cmykPolicy.toString()))
+//								.transform((t)->colorCompression == null ? t : t.field(COLOR_COMPRESSION_PARAM, colorCompression.toString()))
+//								.transform((t)->colorSpace == null ? t : t.field(COLOR_SPACE_PARAM, colorSpace.toString()))
+//								.transform((t)->filter == null ? t : t.field(PNG_FILTER_PARAM, filter.toString()))
+//								.transform((t)->format == null ? t : t.field(JPEG_FORMAT_PARAM, format.toString()))
+//								.transform((t)->grayScaleCompression == null ? t : t.field(GRAY_SCALE_COMPRESSION_PARAM, grayScaleCompression.toString()))
+//								.transform((t)->grayScalePolicy == null ? t : t.field(GRAY_SCALE_POLICY_PARAM, grayScalePolicy.toString()))
+//								.transform((t)->imageConvertFormat == null ? t : t.field(IMAGE_CONVERT_FORMAT_PARAM, imageConvertFormat.toString()))
+//								.transform((t)->imageSizeHeight == null ? t : t.field(IMAGE_SIZE_HEIGHT_PARAM, imageSizeHeight))
+//								.transform((t)->imageSizeWidth == null ? t : t.field(IMAGE_SIZE_WIDTH_PARAM, imageSizeWidth))
+//								.transform((t)->interlace == null ? t : t.field(INTERLACE_PARAM, interlace.toString()))
+//								.transform((t)->monochrome == null ? t : t.field(MONOCHROME_COMPRESSION_PARAM, monochrome.toString()))
+//								.transform((t)->multiPageTiff == null ? t : t.field(MULTI_PAGE_TIFF_PARAM, multiPageTiff.toString()))
+//								.transform((t)->pageRange == null ? t : t.field(IMAGE_PAGE_RANGE_PARAM, pageRange))
+//								.transform((t)->resolution == null ? t : t.field(RESOLUTION_PARAM, resolution))
+//								.transform((t)->rgbPolicy == null ? t : t.field(RGB_POLICY_PARAM, rgbPolicy.toString()))
+//								.transform((t)->rowsPerStrip == null ? t : t.field(ROWS_PER_STRIP_PARAM, rowsPerStrip.toString()))
+//								.transform((t)->tileSize == null ? t : t.field(TILE_SIZE_PARAM, tileSize.toString()))
+//								.transform((t)->includeComments == null ? t : t.field(IMAGE_INCLUDE_COMMENTS_PARAM, includeComments.toString()))
+//								.transform((t)->useLegacyImageSizeBehvior == null ? t : t.field(USE_LEGACY_IMAGE_SIZE_BEHAVIOR_PARAM, useLegacyImageSizeBehvior.toString()))
+//								;
+//			
+//			Response result = postToServer(toImageTarget, multipart, MediaType.MULTIPART_FORM_DATA_TYPE);
+//			
+//			StatusType resultStatus = result.getStatusInfo();
+//			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
+//				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
+//				if (result.hasEntity()) {
+//					InputStream entityStream = (InputStream) result.getEntity();
+//					message += "\n" + inputStreamtoString(entityStream);
+//				}
+//				throw new ConvertPdfServiceException(message);
+//			}
+//			if (!result.hasEntity()) {
+//				throw new ConvertPdfServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
+//			}
+//
+//			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
+//			if ( responseContentType == null || !MediaType.MULTIPART_FORM_DATA_TYPE.isCompatible(MediaType.valueOf(responseContentType))) {
+//				String msg = "Response from AEM server was not a multipart form.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
+//				InputStream entityStream = (InputStream) result.getEntity();
+//				msg += "\n" + inputStreamtoString(entityStream);
+//				throw new ConvertPdfServiceException(msg);
+//			}
+//
+//			List<Document> resultDocList = new ArrayList<Document>();
+//			FormDataMultiPart resultDoc = result.readEntity(FormDataMultiPart.class);
+//			for (Entry<String, List<FormDataBodyPart>> entry : resultDoc.getFields().entrySet()) {
+//				String name = entry.getKey();
+//				for(FormDataBodyPart part : entry.getValue()) {
+//					if (part.isSimple()) {
+//						logger.debug("Found simple Form Data Part '" + name + "' (" + part.getName() + ").");
+//					} else {
+//						logger.debug("Found complex Form Data Part '" + name + "' (" + part.getName() + "/" + part.getContentDisposition() + ").");
+//						ContentDisposition contentDisposition = part.getContentDisposition();
+//						String fileName = contentDisposition.getFileName();
+//						if (fileName != null) {
+//							resultDocList.add(SimpleDocumentFactoryImpl.getFactory().create(part.getEntityAs(InputStream.class)));
+//						}
+//					}
+//				}
+//			}
+//			
+////			List<Document> resultDocList = Collections.emptyList();
+////			for (BodyPart bodyPart : resultDoc.getBodyParts()) {
+////				
+////			}
+//			return resultDocList;
+//		} catch (IOException e) {
+//			throw new ConvertPdfServiceException("I/O Error while generating an image. (" + baseTarget.getUri().toString() + ").", e);
+//		} catch (RestServicesServiceException e) {
+//			throw new ConvertPdfServiceException("Error while POSTing to server", e);
+//		}
+	}
+
+	private static List<Document> responseToDocList(Response result)  {
+		// TODO Set up code that handles one document and produces error for more than one doc.
+		return List.of(RestServicesServiceAdapter.responseToDoc(result));
+	}
+
+	private static ContentType toContentType(ImageConvertFormat imageConvertFormat) {
+		return switch (imageConvertFormat) {
+			case JPEG -> ContentType.IMAGE_JPEG;
+			case PNG -> ContentType.IMAGE_PNG;
+			case TIFF -> ContentType.IMAGE_TIFF;
+			case JPEG2K -> ContentType.IMAGE_JPEG;
+		};
+	}
+	
 	@Override
 	public Document toPS(Document inPdfDoc, ToPSOptionsSpec toPSOptionsSpec) throws ConvertPdfServiceException {
-		WebTarget toImageTarget = baseTarget.path(constructStandardPath(CONVERT_PDF_SERVICE_NAME, TO_PS_METHOD_NAME));
-		if (inPdfDoc == null) {
-			throw new NullPointerException("inPdfDoc cannot be null.");
-		}
-		Objects.requireNonNull(toPSOptionsSpec, "ToPSOptionsSpec Argument cannot be null.");
+		Objects.requireNonNull(inPdfDoc, "inPdfDoc argument cannot be null.");
+		Objects.requireNonNull(toPSOptionsSpec, "ToPSOptionsSpec argument cannot be null.");
 		
-		Color color = toPSOptionsSpec.getColor();
-		FontInclusion fontInclusion = toPSOptionsSpec.getFontInclusion();
-		LineWeight lineWeight = toPSOptionsSpec.getLineWeight();
-		String pageRange = toPSOptionsSpec.getPageRange();
-		PageSize pageSize = toPSOptionsSpec.getPageSize();
-		String pageSizeHeight = toPSOptionsSpec.getPageSizeHeight();
-		String pageSizeWidth = toPSOptionsSpec.getPageSizeWidth();
-		PSLevel psLevel = toPSOptionsSpec.getPsLevel();
-		Style style = toPSOptionsSpec.getStyle();
-		Boolean allowBinaryContent = toPSOptionsSpec.isAllowBinaryContent();
-		Boolean bleedMarks = toPSOptionsSpec.isBleedMarks();
-		Boolean colorBars = toPSOptionsSpec.isColorBars();
-		Boolean convertTrueTypeToType1 = toPSOptionsSpec.isConvertTrueTypeToType1();
-		Boolean emitCIDFontType2 = toPSOptionsSpec.isEmitCIDFontType2();
-		Boolean emitPSFormObjects = toPSOptionsSpec.isEmitPSFormObjects();
-		Boolean expandToFit = toPSOptionsSpec.isExpandToFit();
-		Boolean includeComments = toPSOptionsSpec.isIncludeComments();
-		Boolean legacyToSimplePSFlag = toPSOptionsSpec.isLegacyToSimplePSFlag();
-		Boolean pageInformation = toPSOptionsSpec.isPageInformation();
-		Boolean registrationMarks = toPSOptionsSpec.isRegistrationMarks();
-		Boolean reverse = toPSOptionsSpec.isReverse();
-		Boolean rotateAndCenter = toPSOptionsSpec.isRotateAndCenter();
-		Boolean shrinkToFit = toPSOptionsSpec.isShrinkToFit();
-		Boolean trimMarks = toPSOptionsSpec.isTrimMarks();
-		Boolean useMaxJPEGImageResolution = toPSOptionsSpec.isUseMaxJPEGImageResolution();
-		
-		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(PDF_PARAM, inPdfDoc.getInputStream(), APPLICATION_PDF);
-
-			// This code sets the individual fields if they are not null. 
-			MultipartTransformer.create(multipart)
-								.transform((t)->color == null ? t : t.field(COLOR_PARAM, color.toString()))
-								.transform((t)->fontInclusion == null ? t : t.field(FONT_INCLUSION_PARAM, fontInclusion.toString()))
-								.transform((t)->lineWeight == null ? t : t.field(LINE_WEIGHT_PARAM, lineWeight.toString()))
-								.transform((t)->pageRange == null ? t : t.field(PS_PAGE_RANGE_PARAM, pageRange))
-								.transform((t)->pageSize == null ? t : t.field(PAGE_SIZE_PARAM, pageSize.toString()))
-								.transform((t)->pageSizeHeight == null ? t : t.field(PAGE_SIZE_HEIGHT_PARAM, pageSizeHeight))
-								.transform((t)->pageSizeWidth == null ? t : t.field(PAGE_SIZE_WIDTH_PARAM, pageSizeWidth))
-								.transform((t)->psLevel == null ? t : t.field(PS_LEVEL_PARAM, psLevel.toString()))
-								.transform((t)->style == null ? t : t.field(STYLE_PARAM, style.toString()))
-								.transform((t)->allowBinaryContent == null ? t : t.field(ALLOW_BINARY_CONTENT_PARAM, allowBinaryContent.toString()))
-								.transform((t)->bleedMarks == null ? t : t.field(BLEED_MARKS_PARAM, bleedMarks.toString()))
-								.transform((t)->colorBars == null ? t : t.field(COLOR_BARS_PARAM, colorBars.toString()))
-								.transform((t)->convertTrueTypeToType1 == null ? t : t.field(CONVERT_TRUE_TYPE_TO_TYPE1_PARAM, convertTrueTypeToType1.toString()))
-								.transform((t)->emitCIDFontType2 == null ? t : t.field(EMIT_CID_FONT_TYPE2_PARAM, emitCIDFontType2.toString()))
-								.transform((t)->emitPSFormObjects == null ? t : t.field(EMIT_PS_FORM_OBJECTS_PARAM, emitPSFormObjects.toString()))
-								.transform((t)->expandToFit == null ? t : t.field(EXPAND_TO_FIT_PARAM, expandToFit.toString()))
-								.transform((t)->includeComments == null ? t : t.field(PS_INCLUDE_COMMENTS_PARAM, includeComments.toString()))
-								.transform((t)->legacyToSimplePSFlag == null ? t : t.field(LEGACY_TO_SIMPLE_PS_FLAG_PARAM, legacyToSimplePSFlag.toString()))
-								.transform((t)->pageInformation == null ? t : t.field(PAGE_INFORMATION_PARAM, pageInformation.toString()))
-								.transform((t)->registrationMarks == null ? t : t.field(REGISTRATION_MARKS_PARAM, registrationMarks.toString()))
-								.transform((t)->reverse == null ? t : t.field(REVERSE_PARAM, reverse.toString()))
-								.transform((t)->rotateAndCenter == null ? t : t.field(ROTATE_AND_CENTER_PARAM, rotateAndCenter.toString()))
-								.transform((t)->shrinkToFit == null ? t : t.field(SHRINK_TO_FIT_PARAM, shrinkToFit.toString()))
-								.transform((t)->trimMarks == null ? t : t.field(TRIM_MARKS_PARAM, trimMarks.toString()))
-								.transform((t)->useMaxJPEGImageResolution == null ? t : t.field(USE_MAX_JPEG_IMAGE_RESOLUTION_PARAM, useMaxJPEGImageResolution.toString()));
-			
-			Response result = postToServer(toImageTarget, multipart, APPLICATION_PS);
-			
-			StatusType resultStatus = result.getStatusInfo();
-			if (!Family.SUCCESSFUL.equals(resultStatus.getFamily())) {
-				String message = "Call to server failed, statusCode='" + resultStatus.getStatusCode() + "', reason='" + resultStatus.getReasonPhrase() + "'.";
-				if (result.hasEntity()) {
-					InputStream entityStream = (InputStream) result.getEntity();
-					message += "\n" + inputStreamtoString(entityStream);
-				}
-				throw new ConvertPdfServiceException(message);
-			}
-			if (!result.hasEntity()) {
-				throw new ConvertPdfServiceException("Call to server succeeded but server failed to return document.  This should never happen.");
-			}
-
-			String responseContentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			if ( responseContentType == null || !APPLICATION_PS.isCompatible(MediaType.valueOf(responseContentType))) {
-				String msg = "Response from AEM server was not PostScript.  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
-				InputStream entityStream = (InputStream) result.getEntity();
-				msg += "\n" + inputStreamtoString(entityStream);
-				throw new ConvertPdfServiceException(msg);
-			}
-
-			Document resultDoc = SimpleDocumentFactoryImpl.getFactory().create((InputStream) result.getEntity());
-			resultDoc.setContentType(APPLICATION_PS.toString());
-			return resultDoc;
+		try (MultipartPayload payload = toImageRestClient.multipartPayloadBuilder()
+														 .add(PDF_PARAM, inPdfDoc, ContentType.APPLICATION_PDF)
+														 .addStringVersion(COLOR_PARAM, toPSOptionsSpec.getColor())
+														 .addStringVersion(FONT_INCLUSION_PARAM, toPSOptionsSpec.getFontInclusion())
+														 .addStringVersion(LINE_WEIGHT_PARAM, toPSOptionsSpec.getLineWeight())
+														 .addIfNotNull(PS_PAGE_RANGE_PARAM, toPSOptionsSpec.getPageRange())
+														 .addStringVersion(PAGE_SIZE_PARAM, toPSOptionsSpec.getPageSize())
+														 .addIfNotNull(PAGE_SIZE_HEIGHT_PARAM, toPSOptionsSpec.getPageSizeHeight())
+														 .addIfNotNull(PAGE_SIZE_WIDTH_PARAM, toPSOptionsSpec.getPageSizeWidth())
+														 .addStringVersion(PS_LEVEL_PARAM, toPSOptionsSpec.getPsLevel())
+														 .addStringVersion(STYLE_PARAM, toPSOptionsSpec.getStyle())
+														 .addStringVersion(ALLOW_BINARY_CONTENT_PARAM, toPSOptionsSpec.isAllowBinaryContent())
+														 .addStringVersion(BLEED_MARKS_PARAM, toPSOptionsSpec.isBleedMarks())
+														 .addStringVersion(COLOR_BARS_PARAM, toPSOptionsSpec.isColorBars())
+														 .addStringVersion(CONVERT_TRUE_TYPE_TO_TYPE1_PARAM, toPSOptionsSpec.isConvertTrueTypeToType1())
+														 .addStringVersion(EMIT_CID_FONT_TYPE2_PARAM, toPSOptionsSpec.isEmitCIDFontType2())
+														 .addStringVersion(EMIT_PS_FORM_OBJECTS_PARAM, toPSOptionsSpec.isEmitPSFormObjects())
+														 .addStringVersion(EXPAND_TO_FIT_PARAM, toPSOptionsSpec.isExpandToFit())
+														 .addStringVersion(PS_INCLUDE_COMMENTS_PARAM, toPSOptionsSpec.isIncludeComments())
+														 .addStringVersion(LEGACY_TO_SIMPLE_PS_FLAG_PARAM, toPSOptionsSpec.isLegacyToSimplePSFlag())
+														 .addStringVersion(PAGE_INFORMATION_PARAM, toPSOptionsSpec.isPageInformation())
+														 .addStringVersion(REGISTRATION_MARKS_PARAM, toPSOptionsSpec.isRegistrationMarks())
+														 .addStringVersion(REVERSE_PARAM, toPSOptionsSpec.isReverse())
+														 .addStringVersion(ROTATE_AND_CENTER_PARAM, toPSOptionsSpec.isRotateAndCenter())
+														 .addStringVersion(SHRINK_TO_FIT_PARAM, toPSOptionsSpec.isShrinkToFit())
+														 .addStringVersion(TRIM_MARKS_PARAM, toPSOptionsSpec.isTrimMarks())
+														 .addStringVersion(USE_MAX_JPEG_IMAGE_RESOLUTION_PARAM, toPSOptionsSpec.isUseMaxJPEGImageResolution())
+				 										 .build()) {
+			return payload.postToServer(ContentType.APPLICATION_PS)
+						  .map(RestServicesServiceAdapter::responseToDoc)
+						  .orElseThrow();
 		} catch (IOException e) {
-			throw new ConvertPdfServiceException("I/O Error while generating PostScript output. (" + baseTarget.getUri().toString() + ").", e);
-		} catch (RestServicesServiceException e) {
-			throw new ConvertPdfServiceException("Error while POSTing to server", e);
+			throw new ConvertPdfServiceException("I/O Error while securing document. (" + toPsRestClient.target() + ").", e);
+		} catch (RestClientException e) {
+			throw new ConvertPdfServiceException("Error while POSTing to server (" + toPsRestClient.target() + ").", e);
 		}
 	}
 
@@ -344,12 +270,16 @@ public class RestServicesConvertPdfServiceAdapter extends RestServicesServiceAda
 	 * 
 	 * @return build object
 	 */
-	public static ConvertPdfServiceBuilder builder() {
-		return new ConvertPdfServiceBuilder();
+	public static ConvertPdfServiceBuilder builder(RestClientFactory clientFactory) {
+		return new ConvertPdfServiceBuilder(clientFactory);
 	}
 	
 	public static class ConvertPdfServiceBuilder implements Builder {
-		private BuilderImpl builder = new BuilderImpl();
+		private BuilderImpl builder;
+
+		private ConvertPdfServiceBuilder(RestClientFactory clientFactory) {
+			this.builder = new BuilderImpl(clientFactory);
+		}
 
 		@Override
 		public ConvertPdfServiceBuilder machineName(String machineName) {
@@ -366,12 +296,6 @@ public class RestServicesConvertPdfServiceAdapter extends RestServicesServiceAda
 		@Override
 		public ConvertPdfServiceBuilder useSsl(boolean useSsl) {
 			builder.useSsl(useSsl);
-			return this;
-		}
-
-		@Override
-		public ConvertPdfServiceBuilder clientFactory(Supplier<Client> clientFactory) {
-			builder.clientFactory(clientFactory);
 			return this;
 		}
 
@@ -393,11 +317,6 @@ public class RestServicesConvertPdfServiceAdapter extends RestServicesServiceAda
 		}
 
 		@Override
-		public WebTarget createLocalTarget() {
-			return builder.createLocalTarget();
-		}
-
-		@Override
 		public ConvertPdfServiceBuilder aemServerType(AemServerType serverType) {
 			builder.aemServerType(serverType);
 			return this;
@@ -409,7 +328,7 @@ public class RestServicesConvertPdfServiceAdapter extends RestServicesServiceAda
 		}
 
 		public RestServicesConvertPdfServiceAdapter build() {
-			return new RestServicesConvertPdfServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType());
+			return new RestServicesConvertPdfServiceAdapter(builder, this.getCorrelationIdFn());
 		}
 	}
 }

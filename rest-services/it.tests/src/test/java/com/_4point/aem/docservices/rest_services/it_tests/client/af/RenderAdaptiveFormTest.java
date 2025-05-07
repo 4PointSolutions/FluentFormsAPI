@@ -1,9 +1,6 @@
 package com._4point.aem.docservices.rest_services.it_tests.client.af;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,15 +10,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
+import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 
+@Tag("client-tests")
 class RenderAdaptiveFormTest {
 
 	private static final String SAMPLE_AF_NAME = "sample00002test";
@@ -31,11 +33,16 @@ class RenderAdaptiveFormTest {
 	
 	private static final boolean SAVE_RESULTS = false;
 	
+	@BeforeAll
+	static void setUpAll() throws Exception {
+		AemInstance.AEM_1.prepareForTests();
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
-		underTest = AdaptiveFormsService.builder()
-				.machineName(TestUtils.TEST_MACHINE_NAME)
-				.port(TestUtils.TEST_MACHINE_PORT)
+		underTest = AdaptiveFormsService.builder(JerseyRestClient.factory())
+				.machineName(AemInstance.AEM_1.aemHost())
+				.port(AemInstance.AEM_1.aemPort())
 				.basicAuthentication(TestUtils.TEST_USER, TestUtils.TEST_USER_PASSWORD)
 				.useSsl(false)
 				.aemServerType(TestUtils.TEST_MACHINE_AEM_TYPE)
@@ -91,7 +98,7 @@ class RenderAdaptiveFormTest {
 	@Test
 	void testRenderAdaptiveFormPathOrUrlDocument() throws Exception {
 		PathOrUrl template = PathOrUrl.from(SAMPLE_AF_NAME);
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML.toFile());
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML);
 		data.setContentTypeIfEmpty("application/xml");
 		
 		Document result = underTest.renderAdaptiveForm(template, data);
@@ -108,7 +115,7 @@ class RenderAdaptiveFormTest {
 	@Test
 	void testRenderAdaptiveFormStringDocument() throws Exception {
 		String template = SAMPLE_AF_NAME;
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML.toFile());
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML);
 		data.setContentTypeIfEmpty("application/xml");
 		
 		Document result = underTest.renderAdaptiveForm(template, data);
@@ -125,7 +132,7 @@ class RenderAdaptiveFormTest {
 	@Test
 	void testRenderAdaptiveFormPathDocument() throws Exception {
 		Path template = Paths.get(SAMPLE_AF_NAME);
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML.toFile());
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML);
 		data.setContentTypeIfEmpty("application/xml");
 		
 		Document result = underTest.renderAdaptiveForm(template, data);
@@ -142,7 +149,7 @@ class RenderAdaptiveFormTest {
 	@Test
 	void testRenderAdaptiveFormStringJsonDocument() throws Exception {
 		String template = SAMPLE_JSON_AF_NAME;
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_JSON.toFile());
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_JSON);
 		data.setContentTypeIfEmpty("application/json");
 		
 		Document result = underTest.renderAdaptiveForm(template, data);

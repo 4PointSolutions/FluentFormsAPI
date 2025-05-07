@@ -5,10 +5,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.client.pdfUtility.RestServicesPdfUtilityServiceAdapter;
+import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
@@ -20,16 +24,22 @@ import com.jcabi.xml.XMLDocument;
 
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 
+@Tag("client-tests")
 class ConvertPdfToXdpTest {
 
 	private final Document DUMMY_DOC = SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF);
 	private PdfUtilityService underTest;
 	
+	@BeforeAll
+	static void setUpAll() throws Exception {
+		AemInstance.AEM_1.prepareForTests();
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
-		RestServicesPdfUtilityServiceAdapter adapter = RestServicesPdfUtilityServiceAdapter.builder()
-				.machineName(TEST_MACHINE_NAME)
-				.port(TEST_MACHINE_PORT)
+		RestServicesPdfUtilityServiceAdapter adapter = RestServicesPdfUtilityServiceAdapter.builder(JerseyRestClient.factory())
+				.machineName(AemInstance.AEM_1.aemHost())
+				.port(AemInstance.AEM_1.aemPort())
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
 				.useSsl(false)
 				.aemServerType(TEST_MACHINE_AEM_TYPE)

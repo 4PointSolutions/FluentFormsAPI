@@ -29,6 +29,7 @@
 	<modules>
 		<module>server</module>
 		<module>client</module>
+		<module>jersey-client</module>
 	</modules>
 
 	<properties>
@@ -69,9 +70,9 @@
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-sling-plugin.version>2.4.2</maven-sling-plugin.version>
         <htl-maven-plugin.version>2.0.2-1.4.0</htl-maven-plugin.version>
-        <filevault-package-maven-plugin.version>1.3.2</filevault-package-maven-plugin.version>
+        <filevault-package-maven-plugin.version>1.3.6</filevault-package-maven-plugin.version>
         <content-package-maven-plugin.version>1.0.4</content-package-maven-plugin.version>
-        <maven-bundle-plugin.version>5.1.8</maven-bundle-plugin.version>
+        <maven-bundle-plugin.version>5.1.9</maven-bundle-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
 
         <!-- Mutation Testing plugin versions -->
@@ -87,18 +88,23 @@
 		<rest-services.version>0.0.4-SNAPSHOT</rest-services.version>
 
 		<!-- Testing dependencies -->
-        <mockito.version>5.10.0</mockito.version>
-        <junit.version>5.10.2</junit.version>
+        <mockito.version>5.15.2</mockito.version>
+        <junit.version>5.11.4</junit.version>
         <wcm.mocks.version>3.0.0</wcm.mocks.version> <!-- Versions later than this produce a org.reflections.ReflectionsException: Scanner TypeAnnotationsScanner was not configured error -->
         <slf4j-test.version>1.2.0</slf4j-test.version>
         <slf4j.version>1.7.26</slf4j.version>
-        <hamcrest.version>2.2</hamcrest.version>
-        <junit-addons.version>1.4</junit-addons.version>
-        <pdfbox.version>2.0.28</pdfbox.version>
+        <hamcrest.version>3.0</hamcrest.version>
+        <pdfbox.version>3.0.4</pdfbox.version>
         <jsoup.version>1.16.1</jsoup.version>
         <jcabi-xml-version>0.27.2</jcabi-xml-version>
         <xml-unit-version>2.10.0</xml-unit-version>
         <xerces-version>2.12.2</xerces-version>
+        <wiremock.version>3.4.2</wiremock.version>
+        <_4point-hamcrest-matchers.version>0.0.1-SNAPSHOT</_4point-hamcrest-matchers.version>
+        <junit-addons.version>1.4</junit-addons.version>
+        <testcontainers.version>1.20.6</testcontainers.version>
+        <awaitility.version>4.3.0</awaitility.version>
+        <aem-package-manager-api.version>0.0.1-SNAPSHOT</aem-package-manager-api.version>
 	</properties>
 
 	<build>
@@ -157,10 +163,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
 			</plugin>
     	    <plugin>
                 <groupId>org.jacoco</groupId>
@@ -346,6 +348,7 @@
                                         <artifactId>maven-bundle-plugin</artifactId>
                                         <versionRange>[1.1,)</versionRange>
                                         <goals>
+                                            <goal>manifest</goal>
                                             <goal>bundle</goal>
                                             <goal>install</goal>
                                         </goals>
@@ -392,162 +395,6 @@
 				<module>it.tests</module>
 			</modules>
 		</profile>
-		<!-- ====================================================== -->
-		<!-- A D O B E P U B L I C P R O F I L E -->
-		<!-- ====================================================== -->
-		<profile>
-			<id>adobe-public</id>
-
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-
-			<properties>
-				<releaseRepository-Id>adobe-public-releases</releaseRepository-Id>
-				<releaseRepository-Name>Adobe Public Releases</releaseRepository-Name>
-				<releaseRepository-URL>https://repo.adobe.com/nexus/content/groups/public</releaseRepository-URL>
-			</properties>
-
-			<repositories>
-				<repository>
-					<id>adobe-public-releases</id>
-					<name>Adobe Public Repository</name>
-					<url>https://repo.adobe.com/nexus/content/groups/public</url>
-					<releases>
-						<enabled>true</enabled>
-						<updatePolicy>never</updatePolicy>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-			</repositories>
-
-			<pluginRepositories>
-				<pluginRepository>
-					<id>adobe-public-releases</id>
-					<name>Adobe Public Repository</name>
-					<url>https://repo.adobe.com/nexus/content/groups/public</url>
-					<releases>
-						<enabled>true</enabled>
-						<updatePolicy>never</updatePolicy>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-			</pluginRepositories>
-		</profile>
-
-		<!-- Development profile: install only the bundle -->
-		<profile>
-			<id>autoInstallBundle</id>
-			<!-- To enable this feature for a bundle, the maven-sling-plugin (without 
-				configuration) needs to be included: <plugin> <groupId>org.apache.sling</groupId> 
-				<artifactId>maven-sling-plugin</artifactId> </plugin> -->
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.sling</groupId>
-							<artifactId>maven-sling-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>install-bundle</id>
-									<goals>
-										<goal>install</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-
-		<profile>
-			<id>autoInstallPackage</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.jackrabbit</groupId>
-							<artifactId>filevault-package-maven-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>create-package</id>
-									<goals>
-										<goal>package</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-						<plugin>
-							<groupId>com.day.jcr.vault</groupId>
-							<artifactId>content-package-maven-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>install-package</id>
-									<goals>
-										<goal>install</goal>
-									</goals>
-									<configuration>
-										<targetURL>http://${aem.host}:${aem.port}/crx/packmgr/service.jsp</targetURL>
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-
-		<profile>
-			<id>autoInstallPackagePublish</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.jackrabbit</groupId>
-							<artifactId>filevault-package-maven-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>create-package</id>
-									<goals>
-										<goal>package</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-						<plugin>
-							<groupId>com.day.jcr.vault</groupId>
-							<artifactId>content-package-maven-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>install-package-publish</id>
-									<goals>
-										<goal>install</goal>
-									</goals>
-									<configuration>
-										<targetURL>http://${aem.publish.host}:${aem.publish.port}/crx/packmgr/service.jsp</targetURL>
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-
 	</profiles>
 
 	<!-- ====================================================================== -->
@@ -555,25 +402,6 @@
 	<!-- ====================================================================== -->
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>io.wcm.maven</groupId>
-				<artifactId>io.wcm.maven.aem-dependencies</artifactId>
-				<version>6.5.6.0002</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>io.wcm</groupId>
-				<artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
-				<version>${wcm.mocks.version}</version>
-                <exclusions>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>hamcrest-library</artifactId>
-					</exclusion>
-				</exclusions>
-				<scope>test</scope>
-			</dependency>
 			<dependency>
 				<groupId>uk.org.lidalia</groupId>
 				<artifactId>slf4j-test</artifactId>
@@ -638,6 +466,11 @@
 				<version>${rest-services.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com._4point.aem.docservices.rest-services</groupId>
+				<artifactId>rest-services.jersey-client</artifactId>
+				<version>${rest-services.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>${commons-io.version}</version>
@@ -668,6 +501,44 @@
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>${jaxb.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>junit-addons</groupId>
+				<artifactId>junit-addons</artifactId>
+				<version>${junit-addons.version}</version>
+				<scope>test</scope>
+				<exclusions>
+					<exclusion>	<!-- Exclude this really old version of junit that junit-addons depends on -->
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends on -->
+						<groupId>xerces</groupId>
+						<artifactId>xercesImpl</artifactId>
+					</exclusion>
+					<exclusion>	<!-- Exclude this really old version of xerces that junit-addons depends on -->
+						<groupId>xerces</groupId>
+						<artifactId>xmlParserAPIs</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>${testcontainers.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.awaitility</groupId>
+				<artifactId>awaitility</artifactId>
+				<version>${awaitility.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.4point.aem</groupId>
+				<artifactId>aem-package-manager-api</artifactId>
+				<version>${aem-package-manager-api.version}</version>
+				<scope>test</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -705,15 +576,21 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>junit-addons</groupId>
-			<artifactId>junit-addons</artifactId>
-			<version>${junit-addons.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.pitest</groupId>
 			<artifactId>pitest-junit5-plugin</artifactId>
 			<version>${pitest.junit5.maven.plugin.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.wiremock</groupId>
+		    <artifactId>wiremock</artifactId>
+		    <version>${wiremock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com._4point.testing</groupId>
+			<artifactId>4point-hamcrest-matchers</artifactId>
+			<version>${_4point-hamcrest-matchers.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

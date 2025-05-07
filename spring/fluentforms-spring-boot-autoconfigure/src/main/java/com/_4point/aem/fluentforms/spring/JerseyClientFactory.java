@@ -35,6 +35,7 @@ public class JerseyClientFactory {
 				return ClientBuilder.newBuilder().sslContext(sslContext).build();
 			} catch (NoSuchSslBundleException e)  {
 				// Eat the exception and fall through to the default client
+				// Default the SSL context (which includes the default trust store)
 			}
 		}
 		logger.info("Creating default client");

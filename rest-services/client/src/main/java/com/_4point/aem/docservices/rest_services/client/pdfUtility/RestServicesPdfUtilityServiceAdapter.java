@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-
+import com._4point.aem.docservices.rest_services.client.RestClient;
+import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
+import com._4point.aem.docservices.rest_services.client.RestClient.RestClientException;
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
 import com._4point.aem.docservices.rest_services.client.helpers.Builder;
+import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.helpers.BuilderImpl;
 import com._4point.aem.docservices.rest_services.client.helpers.RestServicesServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
@@ -20,20 +23,17 @@ import com.adobe.fd.pdfutility.services.client.RedactionOptionSpec;
 import com.adobe.fd.pdfutility.services.client.RedactionResult;
 import com.adobe.fd.pdfutility.services.client.SanitizationResult;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.Response;
-
 public class RestServicesPdfUtilityServiceAdapter extends RestServicesServiceAdapter implements TraditionalPdfUtilityService {
 
 	private static final String PDF_UTILITY_SERVICE_NAME = "PdfUtility";
 	private static final String CONVERT_PDF_TO_XDP_METHOD_NAME = "ConvertPdfToXdp";
-
 	private static final String DOCUMENT_PARAM_NAME = "document";
+	
+	private final RestClient convertPdfToXdpRestClient;
 
-	// Only callable from Builder
-	private RestServicesPdfUtilityServiceAdapter(WebTarget baseTarget, Supplier<String> correlationIdFn, AemServerType aemServerType) {
-		super(baseTarget, correlationIdFn, aemServerType);
+	private RestServicesPdfUtilityServiceAdapter(BuilderImpl builder, Supplier<String> correlationIdFn) {
+		super(correlationIdFn);
+		this.convertPdfToXdpRestClient = builder.createClient(PDF_UTILITY_SERVICE_NAME, CONVERT_PDF_TO_XDP_METHOD_NAME);
 	}
 
 	@Override
@@ -43,17 +43,16 @@ public class RestServicesPdfUtilityServiceAdapter extends RestServicesServiceAda
 
 	@Override
 	public Document convertPDFtoXDP(Document doc) throws PdfUtilityException {
-		WebTarget convertPdfTarget = baseTarget.path(constructStandardPath(PDF_UTILITY_SERVICE_NAME, CONVERT_PDF_TO_XDP_METHOD_NAME));
-		
-		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DOCUMENT_PARAM_NAME, Objects.requireNonNull(doc, "document parameter cannot be null.").getInputStream(), APPLICATION_PDF);			
-			Response result = postToServer(convertPdfTarget, multipart, APPLICATION_XDP);
-			
-			return responseToDoc(result, APPLICATION_XDP, msg->new PdfUtilityException(msg));
+		try(MultipartPayload payload = convertPdfToXdpRestClient.multipartPayloadBuilder()
+												 				.add(DOCUMENT_PARAM_NAME, Objects.requireNonNull(doc, "document parameter cannot be null.").getInputStream(), ContentType.APPLICATION_PDF)
+												 				.build()) {
+			return payload.postToServer(ContentType.APPLICATION_XDP)
+						  .map(RestServicesServiceAdapter::responseToDoc)
+						  .orElseThrow(()->new PdfUtilityException("Error - empty response from AEM server."));
 		} catch (IOException e) {
-			throw new PdfUtilityException("I/O Error while converting PDF to XDP. (" + baseTarget.getUri().toString() + ").", e);
-		} catch (RestServicesServiceException e) {
-			throw new PdfUtilityException("Error while POSTing to server (" + baseTarget.getUri().toString() + ").", e);
+			throw new PdfUtilityException("I/O Error while converting PDF to XDP. (" + convertPdfToXdpRestClient.target() + ").", e);
+		} catch (RestClientException e) {
+			throw new PdfUtilityException("Error while POSTing to server (" + convertPdfToXdpRestClient.target() + ").", e);
 		}
 	}
 
@@ -78,12 +77,16 @@ public class RestServicesPdfUtilityServiceAdapter extends RestServicesServiceAda
 		throw new UnsupportedOperationException("sanitize is not implemented yet.");
 	}
 	
-	public static PdfUtilityServiceBuilder builder() {
-		return new PdfUtilityServiceBuilder();
+	public static PdfUtilityServiceBuilder builder(RestClientFactory clientFactory) {
+		return new PdfUtilityServiceBuilder(clientFactory);
 	}
 
 	public static class PdfUtilityServiceBuilder implements Builder {
-		private BuilderImpl builder = new BuilderImpl();
+		private final BuilderImpl builder;
+
+		private PdfUtilityServiceBuilder(RestClientFactory clientFactory) {
+			this.builder = new BuilderImpl(clientFactory);
+		}
 
 		@Override
 		public PdfUtilityServiceBuilder machineName(String machineName) {
@@ -100,12 +103,6 @@ public class RestServicesPdfUtilityServiceAdapter extends RestServicesServiceAda
 		@Override
 		public PdfUtilityServiceBuilder useSsl(boolean useSsl) {
 			builder.useSsl(useSsl);
-			return this;
-		}
-
-		@Override
-		public PdfUtilityServiceBuilder clientFactory(Supplier<Client> clientFactory) {
-			builder.clientFactory(clientFactory);
 			return this;
 		}
 
@@ -127,11 +124,6 @@ public class RestServicesPdfUtilityServiceAdapter extends RestServicesServiceAda
 		}
 
 		@Override
-		public WebTarget createLocalTarget() {
-			return builder.createLocalTarget();
-		}
-
-		@Override
 		public PdfUtilityServiceBuilder aemServerType(AemServerType serverType) {
 			builder.aemServerType(serverType);
 			return this;
@@ -143,7 +135,7 @@ public class RestServicesPdfUtilityServiceAdapter extends RestServicesServiceAda
 		}
 		
 		public RestServicesPdfUtilityServiceAdapter build() {
-			return new RestServicesPdfUtilityServiceAdapter(this.createLocalTarget(), this.getCorrelationIdFn(), this.getAemServerType());
+			return new RestServicesPdfUtilityServiceAdapter(builder, this.getCorrelationIdFn());
 		}
 	}
 }

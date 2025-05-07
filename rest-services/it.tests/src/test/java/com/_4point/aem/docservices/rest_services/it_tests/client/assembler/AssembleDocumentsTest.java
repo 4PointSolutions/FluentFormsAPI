@@ -4,21 +4,27 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
+import static com._4point.testing.matchers.javalang.ExceptionMatchers.*;
 
+import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import jakarta.ws.rs.core.MediaType;
-
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.MultipleFailuresError;
 
+import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
 import com._4point.aem.docservices.rest_services.client.assembler.RestServicesDocAssemblerServiceAdapter;
 import com._4point.aem.docservices.rest_services.client.helpers.XmlDocument;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
+import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.docservices.rest_services.it_tests.Pdf;
+import com._4point.aem.docservices.rest_services.it_tests.Pdf.PdfException;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.assembler.AssemblerResult;
@@ -37,16 +43,21 @@ import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.OptionalContent;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.ResultLevel;
 import com.adobe.fd.assembler.client.PDFAConversionOptionSpec.Signatures;
 
-
+@Tag("client-tests")
 public class AssembleDocumentsTest {
 	private static final DocumentFactory DOC_FACTORY = SimpleDocumentFactoryImpl.getFactory();
-	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private AssemblerService underTest;
+
+	@BeforeAll
+	static void setUpAll() throws Exception {
+		AemInstance.AEM_1.prepareForTests();
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
-		RestServicesDocAssemblerServiceAdapter adapter = RestServicesDocAssemblerServiceAdapter.builder()
-				.machineName(TEST_MACHINE_NAME)
-				.port(TEST_MACHINE_PORT)
+		RestServicesDocAssemblerServiceAdapter adapter = RestServicesDocAssemblerServiceAdapter.builder(JerseyRestClient.factory())
+				.machineName(AemInstance.AEM_1.aemHost())
+				.port(AemInstance.AEM_1.aemPort())
 				.basicAuthentication(TEST_USER, TEST_USER_PASSWORD)
 				.useSsl(false)
 				.aemServerType(TEST_MACHINE_AEM_TYPE)
@@ -58,33 +69,36 @@ public class AssembleDocumentsTest {
 	@Test
 	@DisplayName("Test AssembleDocuments() Happy Path.")
 	void testAssembleDocuments() throws Exception {
-		byte[] samplePdf1 = SAMPLE_FORM_PDF.toString().getBytes();
-		byte[] samplePdf2 = SAMPLE_FORM_PDF.toString().getBytes();
-		Map<String, Object> inputs = new HashMap<String, Object>();
-		inputs.put("File0.pdf", DOC_FACTORY.create(samplePdf1));
-		inputs.put("File1.pdf", DOC_FACTORY.create(samplePdf2));	
+		AssemblerResult assemblerResult	= underTest.invoke()
+												   .add("File0.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF))
+												   .add("File1.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF).setContentType("application/pdf"))
+												   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_DDX));
 
-		AssemblerResult assemblerResult	= underTest.invoke().executeOn(DOC_FACTORY.create(SAMPLE_FORM_DDX.toFile()), inputs);
-		Map<String, Document> resultDocument = assemblerResult.getDocuments();
-		byte[] resultByte = null;
-		for(Entry<String, Document> entry: resultDocument.entrySet()){
+		Map<String, Document> resultDocuments = assemblerResult.getDocuments();
+		validateResultMap(resultDocuments);
+	}
+
+	private void validateResultMap(Map<String, Document> resultMap) throws IOException, PdfException {
+		for(Entry<String, Document> entry: resultMap.entrySet()){
 			if(entry.getKey().equals("concatenatedPDF.pdf")) {
-				resultByte = entry.getValue().getInlineData();
-				assertNotNull(resultByte);
-				assertEquals(APPLICATION_PDF.toString(), entry.getValue().getContentType());
+				validateResultDoc(entry.getValue());
 			}		
 		}
+	}
+
+	private static void validateResultDoc(Document resultDoc) throws IOException, PdfException, MultipleFailuresError {
+		byte[] resultByte = resultDoc.getInputStream().readAllBytes();
+		assertNotNull(resultByte);
+		Pdf pdfResult = Pdf.from(resultByte);	// Validate that it's a real PDF.
+		assertAll(
+				()->assertEquals(ContentType.APPLICATION_PDF.contentType(), resultDoc.getContentType()),
+				()->assertThat(pdfResult.getProducer(), not(emptyOrNullString()))
+				);
 	}
 	
 	@Test
 	@DisplayName("Test AssembleDocuments() with all arguments Happy Path.")
 	void testAssembleDocuments_withAllArgs() throws Exception {
-		byte[] samplePdf1 = SAMPLE_FORM_PDF.toString().getBytes();
-		byte[] samplePdf2 = SAMPLE_FORM_PDF.toString().getBytes();
-		Map<String, Object> inputs = new HashMap<String, Object>();
-		inputs.put("File0.pdf", DOC_FACTORY.create(samplePdf1));
-		inputs.put("File1.pdf", DOC_FACTORY.create(samplePdf2));	
-		
 		AssemblerResult assemblerResult	= underTest.invoke()
 				.setDefaultStyle("")
 				.setFailOnError(Boolean.FALSE)
@@ -92,39 +106,32 @@ public class AssembleDocumentsTest {
 				.setLogLevel(LogLevel.ALL)
 				.setTakeOwnership(Boolean.FALSE)
 				.setValidateOnly(Boolean.FALSE)
-				.executeOn(DOC_FACTORY.create(SAMPLE_FORM_DDX.toFile()), inputs);
-		Map<String, Document> resultDocument = assemblerResult.getDocuments();
-		byte[] resultByte = null;
-		for(Entry<String, Document> entry: resultDocument.entrySet()){
-			if(entry.getKey().equals("concatenatedPDF.pdf")) {
-				resultByte = entry.getValue().getInlineData();
-				assertNotNull(resultByte);
-				assertEquals(APPLICATION_PDF.toString(), entry.getValue().getContentType());
-			}	
-		}
+				.add("File0.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF).setContentType("application/pdf"))
+				.add("File1.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF))
+				.executeOn(DOC_FACTORY.create(SAMPLE_FORM_DDX));
+
+		Map<String, Document> resultDocuments = assemblerResult.getDocuments();
+		validateResultMap(resultDocuments);
 	}
 	
 	@Test
 	@DisplayName("Test testAssembleDocuments with bad data.")
 	void testAssembleDocuments_BadData() throws Exception {
-		byte[] samplePdf1 = SAMPLE_FORM_PDF.toString().getBytes();
-		byte[] samplePdf2 = SAMPLE_FORM_PDF.toString().getBytes();
-		Map<String, Object> sourceDocuments = new HashMap<String, Object>();
-		sourceDocuments.put("File0.pdf", DOC_FACTORY.create(samplePdf1));
-		sourceDocuments.put("File1.pdf", DOC_FACTORY.create(samplePdf2));	
+		Map<String, Object> sourceDocuments = Map.of("File0.pdf", DOC_FACTORY.create(SAMPLE_FORM_PDF),
+													 "File1.pdf", DOC_FACTORY.create(SAMPLE_FORM_PDF)
+													);
 		AssemblerOptionsSpecImpl assemblerOptionsSpecImpl = new AssemblerOptionsSpecImpl();
 		assemblerOptionsSpecImpl.setLogLevel(LogLevel.ALL);
-		AssemblerServiceException ex = assertThrows(AssemblerServiceException.class, ()->underTest.invoke(DOC_FACTORY.create(SAMPLE_FORM_DOCX.toFile()), sourceDocuments, assemblerOptionsSpecImpl));
-		String msg = ex.getMessage();
-		assertNotNull(msg);
-		assertTrue(msg.contains("Call to server failed"));
+		AssemblerServiceException ex = assertThrows(AssemblerServiceException.class, ()->underTest.invoke(DOC_FACTORY.create(SAMPLE_FORM_DOCX), sourceDocuments, assemblerOptionsSpecImpl));
+
+		assertThat(ex, exceptionMsgContainsAll("Error while POSTing to server"));
 	}
 	
 	@Test
 	@DisplayName("Test ToPdfA() Happy Path.")
 	void testToPdfA() throws Exception {
 		PDFAConversionResult result = underTest.toPDFA()
-											   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_PDF.toFile()));
+											   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_PDF));
 		Document pdfaDocument = result.getPDFADocument();
 		Document conversionLog = result.getConversionLog();
 		Document jobLog = result.getJobLog();
@@ -151,7 +158,7 @@ public class AssembleDocumentsTest {
 											   .setRetainPDFFormState(true)
 											   .setSignatures(Signatures.ARCHIVE_ALWAYS)
 											   .setVerify(true)
-											   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_PDF.toFile()));
+											   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_PDF));
 		Document pdfaDocument = result.getPDFADocument();
 		Document conversionLog = result.getConversionLog();
 		Document jobLog = result.getJobLog();

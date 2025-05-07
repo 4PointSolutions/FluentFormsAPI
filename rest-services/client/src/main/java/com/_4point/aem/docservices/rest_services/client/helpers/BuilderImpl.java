@@ -1,13 +1,9 @@
 package com._4point.aem.docservices.rest_services.client.helpers;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.WebTarget;
-
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import com._4point.aem.docservices.rest_services.client.RestClient;
 
 /**
  * This class provides an implementation of the Builder interface that assists in building a JAX-RS client.  It is shared between the following projects:
@@ -19,47 +15,43 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
  *
  */
 public class BuilderImpl implements Builder {
-	private final static Supplier<Client> defaultClientFactory = ()->ClientBuilder.newClient();
-	
-	private String machineName = "localhost";
-	private int port = 4502;
-	private HttpAuthenticationFeature authFeature = null;
-	private boolean useSsl = false;
-	private Supplier<Client> clientFactory = defaultClientFactory;
+	private static final String SERVICES_URL_PREFIX = "/services";
+
+	private final RestClientFactory clientFactory;
+	private final AemConfig.SimpleAemConfigBuilder aemConfigBuilder = new AemConfig.SimpleAemConfigBuilder();
 	private Supplier<String> correlationIdFn = null;
 	private AemServerType aemServerType = AemServerType.StandardType.OSGI;	// Defaults to OSGi but can be overridden.
 
-	public BuilderImpl() {
-		super();
+	public interface Method {
+		String mathodName();
+	}
+
+	// TODO:  Convert to TriFunction (maybe if correlation ID function is present?)
+	public BuilderImpl(RestClientFactory clientFactory) {
+		this.clientFactory = clientFactory;
 	}
 
 	@Override
 	public BuilderImpl machineName(String machineName) {
-		this.machineName = machineName;
+		this.aemConfigBuilder.serverName(machineName);
 		return this;
 	}
 
 	@Override
 	public BuilderImpl port(int port) {
-		this.port = port;
+		this.aemConfigBuilder.port(port);
 		return this;
 	}
 
 	@Override
 	public BuilderImpl useSsl(boolean useSsl) {
-		this.useSsl = useSsl;
-		return this;
-	}
-
-	@Override
-	public BuilderImpl clientFactory(Supplier<Client> clientFactory) {
-		this.clientFactory = clientFactory;
+		this.aemConfigBuilder.useSsl(useSsl);
 		return this;
 	}
 
 	@Override
 	public BuilderImpl basicAuthentication(String username, String password) {
-		this.authFeature = HttpAuthenticationFeature.basic(username, password);
+		this.aemConfigBuilder.ussr(username).password(password);
 		return this;
 	}
 
@@ -75,17 +67,6 @@ public class BuilderImpl implements Builder {
 	}
 
 	@Override
-	public WebTarget createLocalTarget() {
-		Client client = clientFactory.get();
-		client.register(MultiPartFeature.class);
-		if (this.authFeature != null) {
-			client.register(authFeature);
-		}
-		WebTarget localTarget = client.target("http" + (useSsl ? "s" : "") + "://" + machineName + ":" + Integer.toString(port));
-		return localTarget;
-	}
-
-	@Override
 	public Builder aemServerType(AemServerType serverType) {
 		this.aemServerType = serverType;
 		return this;
@@ -96,4 +77,19 @@ public class BuilderImpl implements Builder {
 		return this.aemServerType;
 	}
 
+	private RestClient createClientImplementation(String endpoint) {
+		return Objects.requireNonNull(clientFactory, "Client Factory was not provided.").apply(aemConfigBuilder.build(), endpoint, correlationIdFn);
+	}
+	
+	private String constructStandardPath(String serviceName, String methodName) {
+		return this.aemServerType.pathPrefix() + SERVICES_URL_PREFIX + "/" + serviceName + "/" + methodName;
+	}
+
+	public RestClient createClient(String serviceName, String methodName) {
+		return createClientImplementation(constructStandardPath(serviceName, methodName));
+	}
+	
+	public RestClient createClient(String endpoint) {
+		return createClientImplementation(this.aemServerType.pathPrefix() + endpoint);
+	}
 }

@@ -20,11 +20,15 @@ import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
+@Tag("server-tests")
 class RenderPdfFormTest {
 
 	private static final String CRX_CONTENT_ROOT = "crx:/content/dam/formsanddocuments/sample-forms";
@@ -39,13 +43,18 @@ class RenderPdfFormTest {
 	private static final String SUBMIT_URL_PARAM = "renderOptions.submitUrl";
 	private static final String TAGGED_PDF_PARAM = "renderOptions.taggedPdf";
 	private static final String XCI_PARAM = "renderOptions.xci";
-	private static final String RENDER_PDF_FORM_URL = "http://" + TEST_MACHINE_NAME + ":" + TEST_MACHINE_PORT_STR + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/FormsService/RenderPdfForm";
+	private static final String RENDER_PDF_FORM_URL = "http://" + AemInstance.AEM_1.aemHost() + ":" + AemInstance.AEM_1.aemPort() + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/FormsService/RenderPdfForm";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private static final MediaType APPLICATION_XDP = new MediaType("application", "vnd.adobe.xdp+xml");
 
 	private static final boolean SAVE_OUTPUT = false;
 	
 	private WebTarget target;
+
+	@BeforeAll
+	static void setUpAll() throws Exception {
+		AemInstance.AEM_1.prepareForTests();
+	}
 
 	@BeforeEach
 	void setUp() throws Exception {

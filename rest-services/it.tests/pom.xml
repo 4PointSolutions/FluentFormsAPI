@@ -31,8 +31,15 @@
 	|   all the SecureDocument/testReaderExtendPDF tests to pass.
 	 -->
 
+	<properties>
+		<!--  AEM may be running in Java 8, so compile for that until it's no longer supported. -->
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
+	</properties>
+
 	<dependencies>
-		<dependency>
+<!--		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-client</artifactId>
 		</dependency>
@@ -44,6 +51,7 @@
 			<groupId>org.glassfish.jersey.inject</groupId>
 			<artifactId>jersey-hk2</artifactId>
 		</dependency>
+-->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -57,6 +65,11 @@
             <groupId>com._4point.aem.docservices</groupId>
             <artifactId>rest-services.client</artifactId>
         </dependency>
+		<dependency>
+			<groupId>com._4point.aem.docservices.rest-services</groupId>
+			<artifactId>rest-services.jersey-client</artifactId>
+		</dependency>
+		<!-- Testing -->
 		<dependency>	<!-- PDF Library for examining PDFs we generate -->
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
@@ -70,6 +83,21 @@
 		<dependency>
 			<groupId>com.jcabi</groupId>
 			<artifactId>jcabi-xml</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.4point.aem</groupId>
+			<artifactId>aem-package-manager-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -43,6 +43,15 @@ be set to `/clientApp` (as in `fluentforms.rproxy.clientPrefix=/clientApp`).
 
 `fluentforms.rproxy.afBaseLocation` - TBD - This needs to be documented.
 
+### Rest Client Properties
+
+Fluent Forms can be configured to use one of two different REST client libraries.  It can use either the Jersey client libraries or the Spring RestClient libraries.  it was originally developed to use the Jersey client libraries however this some drawbacks - firstly, the Spring requires special configuration when you combine it with libraries that use  the built in Spring Web Mechanisms (e.g. Spring MVC, Spring Boot Activator, etc. - see [https://docs.spring.io/spring-boot/how-to/jersey.html](https://docs.spring.io/spring-boot/how-to/jersey.html)). Secondly, Spring Jersey is an extra dependency that duplicates functionality that is already available in the Spring Framework, so it causes some jar bloat.
+
+The intention is to eventually eliminate Jersey as a required dependency (and make it an optional dependency).
+
+A FluentForms application can choose which library it wishes to use based on a configuration value.
+
+`fluentforms.restclient` - This is used to specify which REST client library will be used to make REST calls to AEM.  It can have one of the following values: `springrestclient` - To use the Spring Framework REST client, or `jersey` to use the Spring Jersey libraries.  If omitted, the application setting defaults to `jersey` for backwards compatibility however this is likely to change at some point in the future to use the `springrestclient` by default.. 
 
 ## Encrypting Configuration Property Values (such as passwords)
 
@@ -86,3 +95,19 @@ ZvyYeP694ZXtlp7VfjziAiayVLrnV5NiSqB4fdhDn9DZw6OMWMcN5CHBB4tCQFo+
 ```
 6. Place the encoded string in the correct property within the .properties file surrounded by ENC(). For example:`fluentforms.aem.password=ENC(ZvyYeP694ZXtlp7VfjziAiayVLrnV5NiSqB4fdhDn9DZw6OMWMcN5CHBB4tCQFo+)`
 7. Restart the application
+
+## Configuring HTTPS/SSL Trust Stores
+
+Application trust stores must be configured using [standard Spring SSL Bundles mechanisms](https://docs.spring.io/spring-boot/reference/features/ssl.html).  The bundle name is set by the `fluentforms.aem.sslBundle` property (outlined above).  If it is not specified, then it defaults to "`aem`".
+
+Here is a example configuration that uses the default name.
+
+```
+# AEM Coordinates for FluentForms libraries
+# Note:  You will need to have a 'trusted' certificate installed on your AEM instance to use SSL.
+fluentforms.aem.useSsl=true
+fluentforms.aem.port=8443
+spring.ssl.bundle.jks.aem.truststore.location=file:/home/aem_user/aemforms.p12
+spring.ssl.bundle.jks.aem.truststore.password=some_password
+spring.ssl.bundle.jks.aem.truststore.type=PKCS12
+```
