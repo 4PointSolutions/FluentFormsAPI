@@ -1,0 +1,26 @@
+# Just builds the starter
+name: Spring Boot Starter Only CI
+
+on: 
+  workflow_dispatch:
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21 for Shared Runner
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '21'
+        cache: 'maven'
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+    - name: Publish Starter to GitHub Packages Apache Maven
+      run: mvn -B deploy -s $GITHUB_WORKSPACE/settings.xml --file spring/fluentforms-spring-boot-starter
+      env:
+       GITHUB_TOKEN: ${{ github.token }}
+  

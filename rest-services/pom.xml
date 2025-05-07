@@ -14,7 +14,7 @@
 	<groupId>com._4point.aem.docservices</groupId>
 	<artifactId>rest-services</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<description>AEM Document Services REST Services</description>
 
 	<!--
@@ -84,8 +84,8 @@
 		<jaxb.version>4.0.0</jaxb.version>
 		<commons-io.version>2.7</commons-io.version>
 		<sling.servlet-helpers.version>1.2.0</sling.servlet-helpers.version>
-		<fluentforms.version>0.0.3-SNAPSHOT</fluentforms.version>
-		<rest-services.version>0.0.3-SNAPSHOT</rest-services.version>
+		<fluentforms.version>0.0.4-SNAPSHOT</fluentforms.version>
+		<rest-services.version>0.0.4-SNAPSHOT</rest-services.version>
 
 		<!-- Testing dependencies -->
         <mockito.version>5.15.2</mockito.version>

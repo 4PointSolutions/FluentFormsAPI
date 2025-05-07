@@ -10,15 +10,15 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>fluentforms-spring-boot-starter</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<name>FluentForms Spring Boot Starter</name>
 	<description>Spring Boot starter for FluentForms library</description>
 	<properties>
 		<java.version>17</java.version>
 		<jasypt.spring.boot.version>3.0.5</jasypt.spring.boot.version>
 		<jasypt.maven.plugin.version>3.0.5</jasypt.maven.plugin.version>
-		<fluentforms.version>0.0.3-SNAPSHOT</fluentforms.version>
-		<fluentforms-autoconfigure.version>0.0.3-SNAPSHOT</fluentforms-autoconfigure.version>
+		<fluentforms.version>0.0.4-SNAPSHOT</fluentforms.version>
+		<fluentforms-autoconfigure.version>0.0.4-SNAPSHOT</fluentforms-autoconfigure.version>
 	</properties>
 
 	<distributionManagement>
@@ -29,6 +29,16 @@
 		</repository>
 	</distributionManagement>
 	
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/4PointSolutions/*</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<!-- Project Dependencies -->
 		<dependency>
