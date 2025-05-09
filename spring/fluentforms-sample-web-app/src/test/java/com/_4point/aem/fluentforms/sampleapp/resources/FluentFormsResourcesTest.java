@@ -164,6 +164,39 @@ class FluentFormsResourcesTest {
 		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE)));
 	}
 
+	@Test
+	void testHtml5FormsServiceRenderHtml5Form_NoData() {
+		Response response = ClientBuilder.newClient()
+										 .target(getBaseUri(port))
+										 .path("/FluentForms/Html5FormsServiceRenderHtml5Form")
+										 .queryParam("form", SAMPLE_FILES_DIR.resolve("SampleForm.xdp").toAbsolutePath())
+										 .request()
+										 .get();
+		
+		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE)));
+	}
+
+	@Test
+	void testHtml5FormsServiceRenderHtmlForm_WithData() {
+		Client client = ClientBuilder.newClient();
+		String dataKeyValue = "testHtml5FormsServiceRenderHtmlForm_WithData";
+		Response dataResponse = client.target(getBaseUri(port))
+								  .path("/FluentForms/SaveData")
+								  .queryParam("dataKey", dataKeyValue)
+								  .request()
+								  .post(Entity.xml(readXmlData()));
+		assertThat(dataResponse, allOf(isStatus(Status.NO_CONTENT)));
+
+		Response response = client.target(getBaseUri(port))
+								  .path("/FluentForms/Html5FormsServiceRenderHtml5Form")
+								  .queryParam("form", SAMPLE_FILES_DIR.resolve("SampleForm.xdp").toAbsolutePath())
+								  .queryParam("dataKey", dataKeyValue)
+								  .request()
+								  .get();
+		
+		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE)));
+	}
+
 	private byte[] readXmlData() {
 		Path sampleData = SAMPLE_FILES_DIR.resolve("SampleForm_data.xml");
 		try {

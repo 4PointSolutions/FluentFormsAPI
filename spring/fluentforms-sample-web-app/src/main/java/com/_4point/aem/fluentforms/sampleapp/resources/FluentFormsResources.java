@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService.AdaptiveFormsServiceException;
 import com._4point.aem.docservices.rest_services.client.helpers.AemDataFormat;
+import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService;
+import com._4point.aem.docservices.rest_services.client.html5.Html5FormsService.Html5FormsServiceException;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
@@ -235,4 +237,26 @@ public class FluentFormsResources {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
+
+	@Autowired
+	Html5FormsService html5FormService;
+	
+	@Path("/Html5FormsServiceRenderHtml5Form")
+	@GET
+	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
+	public Response htmlFormsServiceRenderHtml5Form(@QueryParam("form") String templateName, @QueryParam("dataKey") String key) throws Html5FormsServiceException, IOException {
+		log.atInfo().addArgument(templateName).addArgument(key).log("Entered html5FormsServiceRenderHtml5Form with template='{}', dataKey='{}'");
+		if (templateName == null) return Response.status(Status.BAD_REQUEST).build();
+		if (adaptiveFormsService == null) return Response.serverError().build();
+		if (key != null && !dataService.exists(key)) Response.status(Status.BAD_REQUEST).build();
+		
+		Optional<Document> data = retreiveData(key);
+		
+		Document result = data.isPresent() ? html5FormService.renderHtml5Form(templateName, data.orElseThrow())
+										   : html5FormService.renderHtml5Form(templateName);
+		
+		log.atInfo().log("Exiting html5FormsServiceRenderHtml5Form");
+		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
+	}
+
 }
