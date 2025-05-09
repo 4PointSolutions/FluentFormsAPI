@@ -239,9 +239,9 @@ class FluentFormsResourcesTest {
 	// client can connect to the server using SSL.  The test is not working because of various issuesL
 	//   1. We can't use WireMock's internal self-sign SSL certificate because we don't have access to it.  Using a separate
 	//      SSL cert we generate ourselves would require a lot of additional configuration.
-	//   2. Configurng the Spring Boot SSL properties is problematic becuase the annotations must be constants.
+	//   2. Configuring the Spring Boot SSL properties is problematic because the annotations must be constants.
 	//
-	//  For the time being I will leave this in to remind furutre developers that this is a problem.  Maybe it will become easier as
+	//  For the time being I will leave this in to remind future developers that this is a problem.  Maybe it will become easier as
 	//  new versions become available.
 	
 //	@WireMockTest(httpsPort = FluentFormsResourcesHttpsTest.WIREMOCK_HTTPS_PORT, httpsEnabled = true, httpPort = FluentFormsResourcesTest.WIREMOCK_HTTP_PORT)
