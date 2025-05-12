@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.naming.ConfigurationException;
@@ -125,39 +126,22 @@ public class AemProxyEndpoint {
 								.path(AEM_APP_PREFIX + remainder);
 		logger.atDebug().log(()->"Proxying GET request for target '" + webTarget.getUri().toString() + "'.");
 		Response result = webTarget.request()
-		   .get();
+								    .get();
 		if (logger.isDebugEnabled()) {
 			result.getHeaders().forEach((h, l)->logger.atDebug().log("For " + webTarget.getUri().toString() + ", Header:" + h + "=" + l.stream().map(o->(String)o).collect(Collectors.joining("','", "'", "'"))));
 		}
 
 		logger.atDebug().log(()->"Returning GET response from target '" + webTarget.getUri().toString() + "' status code=" + result.getStatus() + ".");
-		
+		Function<InputStream, InputStream> filter = switch (remainder) {
+		 	case "etc.clientlibs/clientlibs/granite/utils.js" -> this::substituteAfBaseLocation;
+			case "etc.clientlibs/fd/xfaforms/clientlibs/profile.js" -> {
+				yield is -> is;
+				} // No filtering needed
+			default -> is -> is; // No filtering needed
+		};
 		return Response.fromResponse(result)
 					   .header("Transfer-Encoding", null)			// Remove the Transfer-Encoding header
-					   .entity(result.readEntity(InputStream.class))
-					   .build();
-    }
-
-    /**
-     * The following routine replaces a line in the utils.js file to enable links with absolute URLs.
-     * 
-     * @return
-     */
-    @Path("/etc.clientlibs/clientlibs/granite/utils.js")
-    @GET
-    public Response proxyGet_Utils_Js() {
-    	logger.atDebug().log("Proxying Utils GET request. remainder=/etc.clientlibs/clientlibs/granite/utils.js");
-		WebTarget webTarget = httpClient.target(aemConfig.url())
-								.path(AEM_APP_PREFIX + "etc.clientlibs/clientlibs/granite/utils.js");
-		logger.atDebug().log(()->"Proxying Utils GET request for target '" + webTarget.getUri().toString() + "'.");
-		Response result = webTarget.request()
-		   .get();
-		
-//		System.out.println("Received GET response from target '" + webTarget.getUri().toString() + "'. contentType='" + result.getMediaType().toString() + "'.  transfer-encoding='" + result.getHeaderString("Transfer-Encoding") + "'.");
-		logger.atDebug().log(()->"Returning Utils GET response from target '" + webTarget.getUri().toString() + "' status code=" + result.getStatus() + ".");
-		
-		return Response.fromResponse(result)
-					   .entity(substituteAfBaseLocation(result.readEntity(InputStream.class)))
+					   .entity(filter.apply(result.readEntity(InputStream.class)))
 					   .build();
     }
 
@@ -178,9 +162,19 @@ public class AemProxyEndpoint {
     	if (aemProxyConfig.afBaseLocation().isBlank()) {
     		return is;
     	} else {
-    		return new ReplacingInputStream(is, "contextPath = result[1];", "contextPath = \""+ aemProxyConfig.afBaseLocation() + "\" + result[1];");
+    		String target = "contextPath = result[1];";
+			String replacement = "contextPath = \""+ aemProxyConfig.afBaseLocation() + "\" + result[1];";
+			logger.atDebug().log("Altering granite/utils.js to replace '{}' with '{}'", target, replacement);
+			return new ReplacingInputStream(is, target, replacement);
     	}
     }
+    
+	private InputStream fixTogglesDotJsonLocation(InputStream is) {
+		String target = "\"/etc.clientlibs/toggles.json\"";
+		String replacement = "\"/aem/etc.clientlibs/toggles.json\"";
+		logger.atDebug().log("Altering profile.js to replace '{}' with '{}'", target, replacement);
+		return new ReplacingInputStream(is, target, replacement);
+	}
     
     @Path("{remainder : .+}")
     @POST

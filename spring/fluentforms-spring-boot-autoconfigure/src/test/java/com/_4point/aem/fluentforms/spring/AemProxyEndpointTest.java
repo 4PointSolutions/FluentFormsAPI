@@ -32,7 +32,8 @@ properties = {
 "jasypt.encryptor.algorithm=PBEWITHHMACSHA512ANDAES_256",
 "jasypt.encryptor.password=4Point",
 "jasypt.encryptor.iv-generator-classname=org.jasypt.iv.RandomIvGenerator",
-"jasypt.encryptor.salt-generator-classname=org.jasypt.salt.RandomSaltGenerator"
+"jasypt.encryptor.salt-generator-classname=org.jasypt.salt.RandomSaltGenerator",
+"logging.level.com._4point.aem.fluentforms.spring.AemProxyEndpoint=DEBUG"
 })
 class AemProxyEndpointTest {
 	static final int WIREMOCK_PORT = 5504;
