@@ -28,7 +28,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
-import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.fluentforms.sampleapp.FluentFormsSpringApplication;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
@@ -114,8 +113,8 @@ class AemProxyEndpointTest {
 	    		"/etc.clientlibs/fd/xfaforms/clientlibs/I18N/en.js",
 	    		"/etc.clientlibs/fd/xfaforms/clientlibs/profile.css",
 	    		"/etc.clientlibs/fd/xfaforms/clientlibs/profile.js",
-	    		"/etc.clientlibs/clientlibs/granite/jquery/granite/csrf.js"
-	    		/* "/etc.clientlibs/toggles.json", */ // This fails because of FluentForm issue #52, uncomment this when that is fixed.
+	    		"/etc.clientlibs/clientlibs/granite/jquery/granite/csrf.js",
+	    		"/etc.clientlibs/toggles.json"
 	    		)
 	    	.forEach(url->verify(getRequestedFor(urlPathEqualTo(url))));
 	}
