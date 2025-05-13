@@ -134,9 +134,7 @@ public class AemProxyEndpoint {
 		logger.atDebug().log(()->"Returning GET response from target '" + webTarget.getUri().toString() + "' status code=" + result.getStatus() + ".");
 		Function<InputStream, InputStream> filter = switch (remainder) {
 		 	case "etc.clientlibs/clientlibs/granite/utils.js" -> this::substituteAfBaseLocation;
-			case "etc.clientlibs/fd/xfaforms/clientlibs/profile.js" -> {
-				yield is -> is;
-				} // No filtering needed
+			case "etc.clientlibs/fd/xfaforms/clientlibs/profile.js" -> this::fixTogglesDotJsonLocation;
 			default -> is -> is; // No filtering needed
 		};
 		return Response.fromResponse(result)

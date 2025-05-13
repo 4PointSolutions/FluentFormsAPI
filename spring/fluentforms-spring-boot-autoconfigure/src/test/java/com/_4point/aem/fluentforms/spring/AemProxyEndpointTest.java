@@ -1,8 +1,10 @@
 package com._4point.aem.fluentforms.spring;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static java.util.Objects.requireNonNullElse;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +13,8 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.FieldSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -45,7 +48,11 @@ class AemProxyEndpointTest {
 	static final String AF_BASE_LOCATION = "/aem";
 
 	// The following is a string that contains all possible values that may be modified by the AemProxyEndpoint.
-	private static final String MODIFICATION_TARGETS = "'contextPath = result[1];' | ''";	// Must not contain commas because it is used in CsvSource.
+	private static final String MODIFICATION_TARGETS_FORMAT_STR = """
+			'contextPath = %sresult[1];'
+			'"%s/etc.clientlibs/toggles.json"'
+			""";
+	private static final String MODIFICATION_TARGETS = MODIFICATION_TARGETS_FORMAT_STR.formatted("", "");
 
 	@LocalServerPort
 	private int port;
@@ -65,7 +72,7 @@ class AemProxyEndpointTest {
 			"/lc/libs/granite/csrf/token.json",
 			})
 	@Timeout(value = 10, unit = TimeUnit.SECONDS)	// The token tests sometimes hang so we set a timeout.
-	@DisabledOnOs(OS.LINUX)							// The hanging only seems to happen on Linux. (i.e. GitHub actions) so let's skip it there.
+	@DisabledOnOs(OS.LINUX)							// The hanging is most problematic for GitHub Action builds so let's skip it there.
 	void testProxyUnmodifiedGet_FotToken(String endpoint) {
 		// Given
 		String aemResponseText = "Value of token should be unmodified. " + MODIFICATION_TARGETS;
@@ -78,7 +85,6 @@ class AemProxyEndpointTest {
 			"/etc.clientlibs/fd/xfaforms/clientlibs/I18N/en.js",
 			"/etc.clientlibs/fd/xfaforms/clientlibs/I18N/en_US.js",
 			"/etc.clientlibs/fd/xfaforms/clientlibs/profile.css",
-			"/etc.clientlibs/fd/xfaforms/clientlibs/profile.js",
 			})
 	void testProxyUnmodifiedGet(String endpoint) {
 		// Given
@@ -86,13 +92,17 @@ class AemProxyEndpointTest {
 		runTest(endpoint, aemResponseText, aemResponseText);
 	}
 
+	final static List<Arguments> MODIFIED_GET_ARGUMENTS = List.of(
+			Arguments.of("/etc.clientlibs/clientlibs/granite/utils.js", "\"" + AF_BASE_LOCATION + "\" + ", ""),
+			Arguments.of("/etc.clientlibs/fd/xfaforms/clientlibs/profile.js", "", "/aem")
+			);
+
 	@ParameterizedTest
-	@CsvSource({
-			"/etc.clientlibs/clientlibs/granite/utils.js, Value should be modified. 'contextPath = \"" + AF_BASE_LOCATION + "\" + result[1];' | ''"
-			})
-	void testProxyModifiedGet(String endpoint, String expectedResult) {
+	@FieldSource("MODIFIED_GET_ARGUMENTS")
+	void testProxyModifiedGet(String endpoint, String modValueUtilsJs, String modValueProfileJs) {
 		// Given
 		String aemResponseText = "Value should be modified. " + MODIFICATION_TARGETS;
+		String expectedResult = "Value should be modified. " + MODIFICATION_TARGETS_FORMAT_STR.formatted(requireNonNullElse(modValueUtilsJs, ""), requireNonNullElse(modValueProfileJs, ""));
 		runTest(endpoint, aemResponseText, expectedResult);
 	}
 
