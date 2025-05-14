@@ -97,9 +97,11 @@ public class AemProxyEndpoint {
 					output.write(chunk);
 					logger.debug("Returning GET chunk for CSRF token.");
 				}
+				logger.debug("Finished GETting chunks for CSRF token. Exiting Thread");
 			} catch (IllegalStateException | IOException e) {
 				e.printStackTrace();
 			}
+			logger.debug("Exiting Thread.");
 		});
 		
         logger.atDebug().log("Returning GET response for CSRF token.");
