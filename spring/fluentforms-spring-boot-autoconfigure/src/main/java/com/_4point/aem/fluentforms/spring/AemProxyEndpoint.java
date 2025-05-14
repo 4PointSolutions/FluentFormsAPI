@@ -91,13 +91,13 @@ public class AemProxyEndpoint {
 		final ChunkedOutput<byte[]> output = new ChunkedOutput<byte[]>(byte[].class);
 		
 		taskExecutor.execute(() -> {
-			try (chunkedInput; output) {
+			try (result; chunkedInput; output) {
 				byte[] chunk;
 				while ((chunk = chunkedInput.read()) != null) {
 					output.write(chunk);
 					logger.debug("Returning GET chunk for CSRF token.");
 				}
-				logger.debug("Finished GETting chunks for CSRF token. Exiting Thread");
+				logger.debug("Finished GETting chunks for CSRF token.");
 			} catch (IllegalStateException | IOException e) {
 				e.printStackTrace();
 			}
