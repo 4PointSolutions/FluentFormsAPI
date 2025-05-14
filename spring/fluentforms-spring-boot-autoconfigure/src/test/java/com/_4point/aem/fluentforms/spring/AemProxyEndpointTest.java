@@ -5,13 +5,9 @@ import static java.util.Objects.requireNonNullElse;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.FieldSource;
@@ -70,17 +66,6 @@ class AemProxyEndpointTest {
 	@ValueSource(strings = {
 			"/libs/granite/csrf/token.json", 
 			"/lc/libs/granite/csrf/token.json",
-			})
-	@Timeout(value = 10, unit = TimeUnit.SECONDS)	// The token tests sometimes hang so we set a timeout.
-	@DisabledOnOs(OS.LINUX)							// The hanging is most problematic for GitHub Action builds so let's skip it there.
-	void testProxyUnmodifiedGet_FotToken(String endpoint) {
-		// Given
-		String aemResponseText = "Value of token should be unmodified. " + MODIFICATION_TARGETS;
-		runTest(endpoint, aemResponseText, aemResponseText);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
 			"/etc.clientlibs/clientlibs/granite/jquery/granite/csrf.js",
 			"/etc.clientlibs/fd/xfaforms/clientlibs/I18N/en.js",
 			"/etc.clientlibs/fd/xfaforms/clientlibs/I18N/en_US.js",

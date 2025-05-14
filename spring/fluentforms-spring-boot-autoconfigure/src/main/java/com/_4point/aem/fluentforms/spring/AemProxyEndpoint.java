@@ -14,6 +14,7 @@ import org.glassfish.jersey.server.ChunkedOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ssl.SslBundles;
+import org.springframework.core.task.TaskExecutor;
 
 import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
 
@@ -51,14 +52,16 @@ public class AemProxyEndpoint {
 
 	private final AemProxyConfiguration aemProxyConfig;
 	private final AemConfiguration aemConfig;
+	private final TaskExecutor taskExecutor;
 
     /**
      * 
      */
-    public AemProxyEndpoint(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, SslBundles sslBundles) {
+    public AemProxyEndpoint(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, SslBundles sslBundles, TaskExecutor taskExecutor) {
     	this.aemProxyConfig = aemProxyConfig;
     	this.aemConfig = aemConfig;
     	this.httpClient = JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle(), aemConfig.user(), aemConfig.password());
+		this.taskExecutor = taskExecutor;
 	}
 
     @Path("libs/granite/csrf/token.json")
@@ -87,22 +90,17 @@ public class AemProxyEndpoint {
 		final ChunkedInput<byte[]> chunkedInput = result.readEntity(new GenericType<ChunkedInput<byte[]>>() {});
 		final ChunkedOutput<byte[]> output = new ChunkedOutput<byte[]>(byte[].class);
 		
-		new Thread() {
-            public void run() {
-            	try {
-					try (chunkedInput; output) {
-					    byte[] chunk;
- 
-					    while ((chunk = chunkedInput.read()) != null) {
-					        output.write(chunk);
-					        logger.debug("Returning GET chunk for CSRF token.");
-					    }
-					}
-				} catch (IllegalStateException | IOException e) {
-					e.printStackTrace();
+		taskExecutor.execute(() -> {
+			try (chunkedInput; output) {
+				byte[] chunk;
+				while ((chunk = chunkedInput.read()) != null) {
+					output.write(chunk);
+					logger.debug("Returning GET chunk for CSRF token.");
 				}
-            }
-        }.start();
+			} catch (IllegalStateException | IOException e) {
+				e.printStackTrace();
+			}
+		});
 		
         logger.atDebug().log("Returning GET response for CSRF token.");
 		return output;

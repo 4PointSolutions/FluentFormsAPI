@@ -13,6 +13,8 @@ import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
@@ -40,17 +42,28 @@ public class AemProxyAutoConfiguration {
 	 * @param aemProxyConfig
 	 * 		AEM proxy-specific configuration typically configured using application.properties files.
 	 * 		This is typically injected by the Spring Framework.
+	 * @param aemProxyTaskExecutor 
 	 * @return
 	 * 		JAX-RS Resource configuration customizer that is used by the spring-jersey starter to configure
 	 * 		JAX-RS Resources (i.e. endpoints)
 	 */
 	@Bean
-	public ResourceConfigCustomizer afProxyConfigurer(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, @Autowired(required = false) SslBundles sslBundles) {
-		return config->config.register(new AemProxyEndpoint(aemConfig, aemProxyConfig, sslBundles))
+	public ResourceConfigCustomizer afProxyConfigurer(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, @Autowired(required = false) SslBundles sslBundles, TaskExecutor aemProxyTaskExecutor) {
+		return config->config.register(new AemProxyEndpoint(aemConfig, aemProxyConfig, sslBundles, aemProxyTaskExecutor))
 					  		 .register(new AemProxyAfSubmission())
 					  		 ;
 	}
 	
+	/**
+	 * Supply a TaskExecutor for use by the AemProxyEndpoint.  This is used to process csrf token requests because they are Chunked.
+	 * 
+	 * @return the taskeExecutor that will be used to process csrf token requests.
+	 */
+	@Bean
+	public TaskExecutor aemProxyTaskExecutor() {
+		return new SimpleAsyncTaskExecutor("AemProxy-");
+	}
+
 	/**
 	 * Supply a AfSubmitLocalProcessor if the user has not already supplied one *and* there is an 
 	 * available AfSubmissionHandler
