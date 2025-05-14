@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.ssl.SslBundles;
+import org.springframework.boot.system.JavaVersion;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -61,7 +62,10 @@ public class AemProxyAutoConfiguration {
 	 */
 	@Bean
 	public TaskExecutor aemProxyTaskExecutor() {
-		return new SimpleAsyncTaskExecutor("AemProxy-");
+		var executor = new SimpleAsyncTaskExecutor("AemProxy-");
+		// Use virtual threads if available.  This will be the default for Java 21 and later.
+		executor.setVirtualThreads(JavaVersion.getJavaVersion().isEqualOrNewerThan(JavaVersion.TWENTY_ONE));
+		return executor;
 	}
 
 	/**
