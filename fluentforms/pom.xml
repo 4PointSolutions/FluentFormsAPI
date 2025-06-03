@@ -51,9 +51,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         
 		<!--  AEM may be running in Java 8, so compile for that until it's no longer supported. -->
-		<maven.compiler.source>8</maven.compiler.source>
-		<maven.compiler.target>8</maven.compiler.target>
-        <maven.compiler.release>8</maven.compiler.release>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
 
         <!-- Core Maven plugin versions -->
         <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
@@ -72,13 +72,13 @@
         <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
 
         <!-- Other Maven plugin versions -->
-        <jacoco-maven-plugin.version>0.8.9</jacoco-maven-plugin.version>
-        <maven-sling-plugin.version>2.4.2</maven-sling-plugin.version>
-        <htl-maven-plugin.version>2.0.2-1.4.0</htl-maven-plugin.version>
-        <filevault-package-maven-plugin.version>1.3.2</filevault-package-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <maven-sling-plugin.version>3.0.2</maven-sling-plugin.version>
+        <htl-maven-plugin.version>2.0.4-1.4.0</htl-maven-plugin.version>
+        <filevault-package-maven-plugin.version>1.4.0</filevault-package-maven-plugin.version>
         <content-package-maven-plugin.version>1.0.4</content-package-maven-plugin.version>
-        <maven-bundle-plugin.version>5.1.8</maven-bundle-plugin.version>
-        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+        <maven-bundle-plugin.version>6.0.0</maven-bundle-plugin.version>
+        <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
         
         <!-- Mutation Testing plugin versions -->
 		<pitest.maven.plugin.version>1.15.3</pitest.maven.plugin.version>

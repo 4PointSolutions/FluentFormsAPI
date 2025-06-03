@@ -56,19 +56,9 @@
                         <Sling-Model-Packages>com._4point.aem.fluentforms.core</Sling-Model-Packages>
                         <_dsannotations>*</_dsannotations>
                         <_metatypeannotations>*</_metatypeannotations>
-                        <!-- Allow the processing of SCR annotations via a bnd plugin -->
-                        <_plugin>org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory}</_plugin>
                     </instructions>
                 </configuration>
-                <dependencies>
-                    <!-- Add a dependency to the bnd plugin -->
-                    <dependency>
-                        <groupId>org.apache.felix</groupId>
-                        <artifactId>org.apache.felix.scr.bnd</artifactId>
-                        <version>1.9.4</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
+	        </plugin>
         </plugins>
     </build>
 	<dependencies>
