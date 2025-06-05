@@ -16,7 +16,7 @@ jobs:
     - name: Set up JDK 21 for Shared Runner
       uses: actions/setup-java@v4
       with:
-        distribution: 'zulu'
+        distribution: 'oracle'
         java-version: '21'
         cache: 'maven'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
