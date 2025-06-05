@@ -81,7 +81,7 @@ public class CreatePDFTest {
 		createResult.setCreatedDocument(mockDocumentFactory.create(templateData.getBytes()));
 		MockTraditionalGeneratePDFService generatePDFResultMock = mockGeneratePdf(createResult);
 
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		request.addRequestParameter(DATA_PARAM_NAME, templateData);
 		request.addRequestParameter(FILE_EXTENSION, "docx");
@@ -114,7 +114,7 @@ public class CreatePDFTest {
 		createResult.setCreatedDocument(mockDocumentFactory.create(templateData.getBytes()));
 		MockTraditionalGeneratePDFService generatePDFResultMock = mockGeneratePdf(createResult);
 
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		request.addRequestParameter(DATA_PARAM_NAME, templateData);
 		request.addRequestParameter(FILE_EXTENSION, "docx");
@@ -143,7 +143,7 @@ public class CreatePDFTest {
 		createResult.setCreatedDocument(mockDocumentFactory.create(templateData.getBytes()));
 		MockTraditionalGeneratePDFService generatePDFResultMock = mockGeneratePdf(createResult);
 
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		request.addRequestParameter(DATA_PARAM_NAME, templateData);
 		request.addRequestParameter(FILE_EXTENSION, "docx");
@@ -167,7 +167,8 @@ public class CreatePDFTest {
 				(Supplier<TraditionalGeneratePDFService>) () -> (TraditionalGeneratePDFService) ExceptionalMockTraditionalGeneratePDFService
 				.create(exceptionMessage));
 
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		request.addRequestParameter(DATA_PARAM_NAME, templateData);
 		request.addRequestParameter(FILE_EXTENSION, "docx");

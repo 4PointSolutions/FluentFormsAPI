@@ -109,7 +109,7 @@ public class GeneratePrintedOutputTest {
 		MockTraditionalOutputService generatePrintedOutputMock = mockGeneratePrintedOutput(resultDataBytes, printer.getContentType());
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -148,7 +148,7 @@ public class GeneratePrintedOutputTest {
 		MockTraditionalOutputService generatePrintedOutputMock = mockGeneratePrintedOutput(resultDataBytes, printer.getContentType());
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);

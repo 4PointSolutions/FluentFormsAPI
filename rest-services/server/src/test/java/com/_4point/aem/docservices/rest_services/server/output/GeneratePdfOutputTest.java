@@ -88,7 +88,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -130,7 +130,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData, ContentType.APPLICATION_XDP.toString());
@@ -171,7 +171,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData, ContentType.APPLICATION_PDF.toString());
@@ -213,7 +213,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 
@@ -267,7 +267,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -321,7 +321,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -347,7 +347,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -373,7 +373,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -394,7 +394,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		String badFormName = "bar.xdp";
@@ -419,7 +419,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -442,7 +442,7 @@ class GeneratePdfOutputTest {
 		String exceptionMessage = "Exception Message";
 		junitx.util.PrivateAccessor.setField(underTest, "outputServiceFactory", (Supplier<TraditionalOutputService>)()->(TraditionalOutputService)ExceptionalMockTraditionalOutputService.create(exceptionMessage));
 
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -467,7 +467,7 @@ class GeneratePdfOutputTest {
 		MockTraditionalOutputService generatePdfMock = mockGeneratePdf(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 

@@ -51,7 +51,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Core Maven plugin versions -->
-        <maven-clean-plugin.version>3.4.1</maven-clean-plugin.version>
+        <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
@@ -76,33 +76,33 @@
         <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
 
         <!-- Mutation Testing plugin versions -->
-		<pitest.maven.plugin.version>1.15.3</pitest.maven.plugin.version>
-		<pitest.junit5.maven.plugin.version>1.2.1</pitest.junit5.maven.plugin.version>
+		<pitest.maven.plugin.version>1.19.4</pitest.maven.plugin.version>
+		<pitest.junit5.maven.plugin.version>1.2.2</pitest.junit5.maven.plugin.version>
 
 		<!-- Project dependencies -->
-		<jersey.version>3.1.0</jersey.version>
-		<jaxb.version>4.0.0</jaxb.version>
-		<commons-io.version>2.7</commons-io.version>
-		<sling.servlet-helpers.version>1.2.0</sling.servlet-helpers.version>
+		<jersey.version>3.1.10</jersey.version>
+		<jaxb.version>4.0.2</jaxb.version>
+		<commons-io.version>2.19.0</commons-io.version>
+		<sling.servlet-helpers.version>1.4.6</sling.servlet-helpers.version>
 		<fluentforms.version>0.0.4-SNAPSHOT</fluentforms.version>
 		<rest-services.version>0.0.4-SNAPSHOT</rest-services.version>
 
 		<!-- Testing dependencies -->
-        <mockito.version>5.15.2</mockito.version>
-        <junit.version>5.11.4</junit.version>
-        <wcm.mocks.version>3.0.0</wcm.mocks.version> <!-- Versions later than this produce a org.reflections.ReflectionsException: Scanner TypeAnnotationsScanner was not configured error -->
+        <mockito.version>5.18.0</mockito.version>
+        <junit.version>5.13.0</junit.version>
+        <wcm.mocks.version>5.6.10</wcm.mocks.version> <!-- Versions later than this produce a org.reflections.ReflectionsException: Scanner TypeAnnotationsScanner was not configured error -->
         <slf4j-test.version>1.2.0</slf4j-test.version>
-        <slf4j.version>1.7.26</slf4j.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <hamcrest.version>3.0</hamcrest.version>
-        <pdfbox.version>3.0.4</pdfbox.version>
-        <jsoup.version>1.16.1</jsoup.version>
-        <jcabi-xml-version>0.27.2</jcabi-xml-version>
+        <pdfbox.version>3.0.5</pdfbox.version>
+        <jsoup.version>1.20.1</jsoup.version>
+        <jcabi-xml-version>0.35.0</jcabi-xml-version>
         <xml-unit-version>2.10.0</xml-unit-version>
         <xerces-version>2.12.2</xerces-version>
         <wiremock.version>3.4.2</wiremock.version>
         <_4point-hamcrest-matchers.version>0.0.1-SNAPSHOT</_4point-hamcrest-matchers.version>
         <junit-addons.version>1.4</junit-addons.version>
-        <testcontainers.version>1.20.6</testcontainers.version>
+        <testcontainers.version>1.21.1</testcontainers.version>
         <awaitility.version>4.3.0</awaitility.version>
         <aem-package-manager-api.version>0.0.1-SNAPSHOT</aem-package-manager-api.version>
 	</properties>
@@ -454,6 +454,14 @@
 				<version>${xerces-version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency> 
+				<!-- io.wcm.testing.aem-mock.junit5 uses an old version  that contains javax.xml.parser and javax.xml.transform - this causes conflicts -->
+				<groupId>org.apache.sling</groupId>
+				<artifactId>org.apache.sling.xss</artifactId>
+				<version>2.4.6</version>
+				<scope>test</scope>
+			</dependency>
+
 			<!-- Other dependencies -->
 			<dependency>
 				<groupId>com._4point.aem</groupId>
@@ -588,7 +596,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com._4point.testing</groupId>
+			<groupId>com.4point.testing</groupId>
 			<artifactId>4point-hamcrest-matchers</artifactId>
 			<version>${_4point-hamcrest-matchers.version}</version>
 			<scope>test</scope>

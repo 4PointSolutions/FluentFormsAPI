@@ -95,7 +95,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -136,7 +136,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(TEMPLATE_PARAM, templateData, ContentType.APPLICATION_XDP.toString());
@@ -178,7 +178,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 
@@ -232,7 +232,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -286,7 +286,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -311,7 +311,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -337,7 +337,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -363,7 +363,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -384,7 +384,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		String badFormName = "bar.xdp";
@@ -409,7 +409,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(TEMPLATE_PARAM, templateData);
@@ -434,7 +434,7 @@ class RenderPdfFormTest {
 		junitx.util.PrivateAccessor.setField(underTest, "formServiceFactory", (Supplier<TraditionalFormsService>)()->(TraditionalFormsService)ExceptionalMockTraditionalFormsService.create(exceptionMessage));
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 
@@ -460,7 +460,7 @@ class RenderPdfFormTest {
 		MockTraditionalFormsService renderPdfMock = mockRenderForm(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 

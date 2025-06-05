@@ -57,7 +57,7 @@ class ConvertPdfToXdpTest {
 		byte[] resultDataBytes = resultData.getBytes();
 		MockTraditionalPdfUtilityService mockService = mockPdfUtilityService(resultDataBytes);
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		request.addRequestParameter(DOCUMENT_PARAM_NAME, inputData.getBytes(), APPLICATION_PDF, null);

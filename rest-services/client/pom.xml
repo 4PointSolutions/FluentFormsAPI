@@ -50,21 +50,6 @@
     </build>
 
     <dependencies>
-        <!-- OSGi Dependencies -->
-<!--        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>osgi.cmpn</artifactId>
-        </dependency>
--->        <!-- Other Dependencies -->
-<!--        <dependency>
-            <groupId>io.wcm</groupId>
-            <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
-        </dependency>
--->        
         <!-- Other Dependencies -->
         <dependency>
             <groupId>com._4point.aem</groupId>

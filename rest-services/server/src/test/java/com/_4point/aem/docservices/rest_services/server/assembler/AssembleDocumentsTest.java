@@ -104,7 +104,7 @@ public class AssembleDocumentsTest {
 		inputs.put("File0.pdf", samplePdf1);
 		inputs.put("File1.pdf", samplePdf2);
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(DATA_PARAM_NAME, templateData);
@@ -155,7 +155,7 @@ public class AssembleDocumentsTest {
 		inputs.put("File0.pdf", samplePdf1);
 		inputs.put("File1.pdf", samplePdf2);
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(DATA_PARAM_NAME, templateData);		
@@ -200,7 +200,7 @@ public class AssembleDocumentsTest {
 		inputs.put("File0.pdf", samplePdf1);
 		inputs.put("File1.pdf", samplePdf2);
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(DATA_PARAM_NAME, templateData);
@@ -235,7 +235,7 @@ public class AssembleDocumentsTest {
 		inputs.put("File0.pdf", samplePdf1);
 		inputs.put("File1.pdf", samplePdf2);
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 	    request.addRequestParameter(DATA_PARAM_NAME, templateData);
@@ -271,7 +271,7 @@ public class AssembleDocumentsTest {
 		inputs.put("File0.pdf", samplePdf1);
 		inputs.put("File1.pdf", samplePdf2);
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		request.addRequestParameter(DATA_PARAM_NAME, templateData);

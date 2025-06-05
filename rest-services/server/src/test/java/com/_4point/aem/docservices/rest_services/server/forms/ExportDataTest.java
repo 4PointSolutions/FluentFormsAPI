@@ -76,7 +76,7 @@ class ExportDataTest {
 		MockTraditionalFormsService exportDataMock = mockExportData(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		// Set request parameters
@@ -114,7 +114,7 @@ class ExportDataTest {
 		MockTraditionalFormsService exportDataMock = mockExportData(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		// Set request parameters
@@ -148,7 +148,7 @@ class ExportDataTest {
 	@Test
 	void testDoPost_NoDataArg(AemContext context) throws ServletException, IOException, FormsServiceException, NoSuchFieldException {
 		mockExportData(new byte[0]);
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		// Create inputs
@@ -172,7 +172,7 @@ class ExportDataTest {
 		mockExportData(resultDataBytes);
 
 		
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
 		// Set request parameters

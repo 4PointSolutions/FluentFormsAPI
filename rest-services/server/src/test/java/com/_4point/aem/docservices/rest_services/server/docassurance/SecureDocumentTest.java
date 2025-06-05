@@ -79,7 +79,7 @@ public class SecureDocumentTest {
 		byte[] resultDataBytes = resultData.getBytes();
 		MockTraditionalDocAssuranceService readerExtendPdfMock =  mockReaderExtendPdf(resultDataBytes);
 
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		Map<String, Object> parameterMap = new HashMap<>();
@@ -144,7 +144,7 @@ public class SecureDocumentTest {
 		byte[] resultDataBytes = resultData.getBytes();
 		MockTraditionalDocAssuranceService readerExtendPdfMock =  mockReaderExtendPdf(resultDataBytes);
 
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.bundleContext());
+		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(aemContext.resourceResolver(), aemContext.bundleContext());
 		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 		
 		Map<String, Object> parameterMap = new HashMap<>();

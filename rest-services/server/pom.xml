@@ -194,7 +194,13 @@
             <groupId>io.wcm</groupId>
             <artifactId>io.wcm.testing.aem-mock.junit5</artifactId>
 			<scope>test</scope>
-        </dependency>
+<!--			<exclusions>
+				<exclusion>
+					<groupId>org.apache.sling</groupId>		Exclude this because it contains javax.xml.parsers and javax.xml.transform which conflicts with JDK module 
+					<artifactId>org.apache.sling.xss</artifactId>
+				</exclusion>
+			</exclusions>
+-->        </dependency>
         <dependency>
             <groupId>uk.org.lidalia</groupId>
             <artifactId>slf4j-test</artifactId>
@@ -208,11 +214,6 @@
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-matchers</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
 			<scope>test</scope>
 		</dependency>
         <dependency>
