@@ -52,11 +52,6 @@
 			<artifactId>jersey-hk2</artifactId>
 		</dependency>
 -->
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<scope>test</scope>
-		</dependency>
         <dependency>
             <groupId>com._4point.aem</groupId>
             <artifactId>fluentforms.core</artifactId>

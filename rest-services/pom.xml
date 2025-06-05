@@ -82,7 +82,6 @@
 		<!-- Project dependencies -->
 		<jersey.version>3.1.10</jersey.version>
 		<jaxb.version>4.0.2</jaxb.version>
-		<commons-io.version>2.19.0</commons-io.version>
 		<sling.servlet-helpers.version>1.4.6</sling.servlet-helpers.version>
 		<fluentforms.version>0.0.4-SNAPSHOT</fluentforms.version>
 		<rest-services.version>0.0.4-SNAPSHOT</rest-services.version>
@@ -477,11 +476,6 @@
 				<groupId>com._4point.aem.docservices.rest-services</groupId>
 				<artifactId>rest-services.jersey-client</artifactId>
 				<version>${rest-services.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons-io.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.sling</groupId>
