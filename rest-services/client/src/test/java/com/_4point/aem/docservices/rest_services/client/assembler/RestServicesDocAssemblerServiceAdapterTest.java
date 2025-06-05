@@ -22,7 +22,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -182,7 +181,6 @@ class RestServicesDocAssemblerServiceAdapterTest {
 	}
 
 
-	@Nested
 	static class ConvertXmlToAssemblerResultTests {
 		@ParameterizedTest
 		@MethodSource("testXmls")
