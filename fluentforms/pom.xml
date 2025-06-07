@@ -92,6 +92,7 @@
         <slf4j.version>2.0.17</slf4j.version>
         <hamcrest.version>3.0</hamcrest.version>
         <equalsverifier.version>3.17.5</equalsverifier.version>
+        <xmlunit.version>2.10.2</xmlunit.version>
         
         <!-- Project dependecies -->
         <aemfd.client.sdk.version>6.1.152</aemfd.client.sdk.version> <!-- fluentforms requires AEM 6.5 SP12 or later -->
@@ -568,6 +569,28 @@
 				<version>${equalsverifier.version}</version>
 				<scope>test</scope>
 			</dependency>
+	        <dependency>
+	            <groupId>org.xmlunit</groupId>
+	            <artifactId>xmlunit-core</artifactId>
+	            <version>${xmlunit.version}</version>
+	            <scope>test</scope>
+	        </dependency>
+	        <dependency>
+	            <groupId>org.xmlunit</groupId>
+	            <artifactId>xmlunit-matchers</artifactId>
+	            <version>${xmlunit.version}</version>
+	            <scope>test</scope>
+	            <exclusions> <!-- Exclude older versions of hamcrest use the explicit one. -->
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-library</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-core</artifactId>
+					</exclusion>
+				</exclusions>
+	        </dependency>
 			<!-- AEM Forms SDK -->
             <dependency>
 			  <groupId>com.adobe.aemfd</groupId>
