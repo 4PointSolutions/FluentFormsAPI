@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.fluentforms.api.output.PrintConfig;
+import com._4point.aem.fluentforms.impl.XciImpl;
 import com.adobe.fd.output.api.PaginationOverride;
 
 class PrintedOutputOptionsImplTest {
@@ -44,8 +45,11 @@ class PrintedOutputOptionsImplTest {
 		underTest.setLocale(Locale.CANADA_FRENCH);
 		underTest.setPaginationOverride(PaginationOverride.duplexShortEdge);
 		underTest.setPrintConfig(PrintConfig.ZPL600);
-		// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
-//		underTest.setXci(new MockDocumentFactory().create(new byte[0]));
+		underTest.setXci(
+				new XciImpl.XciBuilderImpl().pdf()
+											.embedFonts(true)
+											.buildDestination()
+							.build());
 
 		assertNotEmpty(underTest);
 	}
@@ -59,7 +63,9 @@ class PrintedOutputOptionsImplTest {
 		assertNotEquals(emptyPrintedOutputOptions.getPaginationOverride(), adobePrintedOutputOptions.getPaginationOverride());
 		assertNotNull(adobePrintedOutputOptions.getPrintConfig());
 		assertNotEquals(emptyPrintedOutputOptions.getPrintConfig(), adobePrintedOutputOptions.getPrintConfig());
-//		assertNotEquals(emptyPrintedOutputOptions.getXci(), adobePrintedOutputOptions.getXci());
+		// We can't test the creation of XCI document because that would require a real Adobe implementation to be available,
+		// so we just make sure that the XCI object is not null.
+		assertNotNull(printedOutputOptions.getXci());
 	}
 
 }

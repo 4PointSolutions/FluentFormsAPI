@@ -36,10 +36,6 @@ import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
 import com._4point.aem.fluentforms.impl.UsageContext;
-import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
-import com._4point.aem.fluentforms.impl.forms.PDFFormRenderOptionsImpl;
-import com._4point.aem.fluentforms.impl.forms.TraditionalFormsService;
-import com._4point.aem.fluentforms.impl.forms.ValidationOptionsImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
@@ -522,7 +518,9 @@ class FormsServiceImplTest {
 								   .setRenderAtClient(RenderAtClient.NO)
 								   .setSubmitUrl(new URL("http://example.com"))
 								   .setTaggedPDF(true)
-								   .setXci(data)
+								   .xci()
+								   		.embedFonts(true)
+								   		.done()
 								   .executeOn(filePath, data);
 
 		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
@@ -552,7 +550,9 @@ class FormsServiceImplTest {
 									   .setRenderAtClient(RenderAtClient.NO)
 									   .setSubmitUrl(new URL("http://example.com"))
 									   .setTaggedPDF(true)
-									   .setXci(data)
+									   .xci()
+									   		.embedFonts(true)
+									   		.done()
 									   .executeOn(filePath, data);
 
 		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
@@ -582,7 +582,9 @@ class FormsServiceImplTest {
 									   .setLocale(Locale.JAPAN)
 									   .setSubmitUrl(new URL("http://example.com"))
 									   .setTaggedPDF(true)
-									   .setXci(data)
+									   .xci()
+								   			.embedFonts(true)
+								   			.done()
 									   .executeOn(filePath, data);
 
 		assertEquals(filePath.getFileName(), Paths.get(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");
@@ -627,7 +629,9 @@ class FormsServiceImplTest {
 				   .setRenderAtClient(RenderAtClient.NO)
 				   .setSubmitUrl(new URL("http://example.com"))
 				   .setTaggedPDF(true)
-				   .setXci(data)
+				   .xci()
+				   		.embedFonts(true)
+				   		.done()
 				   .executeOn(fileUrl, data);
 
 		assertEquals(fileUrl, new URL(svc.getTemplateArg()), "Expected the template filename passed to AEM would match the filename used.");

@@ -14,6 +14,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.Transformable;
+import com._4point.aem.fluentforms.api.Xci;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
@@ -136,6 +137,14 @@ public interface FormsService {
 		@Override
 		public RenderPDFFormArgumentBuilder setXci(Document xci);
 
+		@Override
+		public default RenderPDFFormArgumentBuilder setXci(Xci xci) {
+			PDFFormRenderOptionsSetter.super.setXci(xci);
+			return this;
+		}
+
+		public XciArgumentBuilder xci();
+
 		public Document executeOn(PathOrUrl template, Document data) throws FormsServiceException, FileNotFoundException;
 
 		public Document executeOn(Path template, Document data) throws FormsServiceException, FileNotFoundException;
@@ -211,6 +220,11 @@ public interface FormsService {
 		default public Document executeOn(Document template) throws FormsServiceException {
 			return executeOn(template, (Document)null);
 		};
+		
+		public interface XciArgumentBuilder {
+			XciArgumentBuilder embedFonts(boolean embedFonts);
+			RenderPDFFormArgumentBuilder done();
+		}
 	}
 	
 	public static interface ValidateArgumentBuilder extends ValidationOptionsSetter, Transformable<ValidateArgumentBuilder> {

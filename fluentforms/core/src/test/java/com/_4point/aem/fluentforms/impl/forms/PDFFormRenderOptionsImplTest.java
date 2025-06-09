@@ -2,6 +2,7 @@ package com._4point.aem.fluentforms.impl.forms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -12,8 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
-import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
-import com._4point.aem.fluentforms.impl.forms.PDFFormRenderOptionsImpl;
+import com._4point.aem.fluentforms.impl.XciImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.RenderAtClient;
@@ -58,12 +58,14 @@ class PDFFormRenderOptionsImplTest {
 		underTest.setRenderAtClient(RenderAtClient.NO);
 		underTest.setSubmitUrl(new URL(EXPECTED_SUBMIT_URL));
 		underTest.setTaggedPDF(true);
-		// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
-//		underTest.setXci(new MockDocumentFactory().create(new byte[0]));
+		underTest.setXci(
+				new XciImpl.XciBuilderImpl().pdf()
+											.embedFonts(true)
+											.buildDestination()
+							.build());
 		
 		
 		assertNotEmpty(underTest);
-//		assertNotEquals(emptyPDFFormRenderOptions.getXci(), adobePDFFormRenderOptions.getXci());
 	}
 
 	/* package */ static void assertNotEmpty(PDFFormRenderOptions pdfFormRenderOptions) {
@@ -78,6 +80,9 @@ class PDFFormRenderOptionsImplTest {
 		assertNotEquals(emptyPDFFormRenderOptions.getSubmitUrls(), adobePDFFormRenderOptions.getSubmitUrls());
 		assertEquals(EXPECTED_SUBMIT_URL, adobePDFFormRenderOptions.getSubmitUrls().get(0));
 		assertNotEquals(emptyPDFFormRenderOptions.getTaggedPDF(), adobePDFFormRenderOptions.getTaggedPDF());
+		// We can't test the creation of XCI document because that would require a real Adobe implementation to be available,
+		// so we just make sure that the XCI object is not null.
+		assertNotNull(pdfFormRenderOptions.getXci());
 	}
 
 	// TODO: Test PDFFormRenderOptionsSetter default methods here

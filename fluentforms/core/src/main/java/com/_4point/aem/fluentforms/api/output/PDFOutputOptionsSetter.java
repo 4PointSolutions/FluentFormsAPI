@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
+import com._4point.aem.fluentforms.api.Xci;
 import com.adobe.fd.output.api.AcrobatVersion;
 
 public interface PDFOutputOptionsSetter {
@@ -37,5 +38,9 @@ public interface PDFOutputOptionsSetter {
 	PDFOutputOptionsSetter setTaggedPDF(boolean isTagged);
 
 	PDFOutputOptionsSetter setXci(Document xci);
+
+	default PDFOutputOptionsSetter setXci(Xci xci) {
+		return setXci(xci.toDocument());
+	}
 
 }

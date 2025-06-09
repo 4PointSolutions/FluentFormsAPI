@@ -14,6 +14,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.Transformable;
+import com._4point.aem.fluentforms.api.Xci;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com.adobe.fd.output.api.AcrobatVersion;
 import com.adobe.fd.output.api.PaginationOverride;
@@ -110,6 +111,14 @@ public interface OutputService {
 		@Override
 		GeneratePdfOutputArgumentBuilder setXci(Document xci);
 		
+		@Override
+		default GeneratePdfOutputArgumentBuilder setXci(Xci xci) {
+			PDFOutputOptionsSetter.super.setXci(xci);
+			return this;
+		}
+
+		public XciArgumentBuilder xci();
+
 		public Document executeOn(PathOrUrl template, Document data) throws OutputServiceException, FileNotFoundException;
 
 		public Document executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException;
@@ -185,6 +194,11 @@ public interface OutputService {
 		default public Document executeOn(Document template) throws OutputServiceException {
 			return executeOn(template, (Document)null);
 		};
+		
+		public interface XciArgumentBuilder {
+			XciArgumentBuilder embedFonts(boolean embedFonts);
+			GeneratePdfOutputArgumentBuilder done();
+		}
 	}
 
 	public static interface GeneratePrintedOutputArgumentBuilder extends PrintedOutputOptionsSetter, Transformable<GeneratePrintedOutputArgumentBuilder> {
@@ -221,13 +235,59 @@ public interface OutputService {
 
 		@Override
 		GeneratePrintedOutputArgumentBuilder setXci(Document xci);
+
+		@Override
+		default GeneratePrintedOutputArgumentBuilder setXci(Xci xci) {
+            PrintedOutputOptionsSetter.super.setXci(xci);
+            return this;
+        }
 		
+		public XciArgumentBuilder xci();
+
+		/**
+		 * Merges the provided template with the provided data and returns the generated
+		 * output.
+		 * 
+		 * @param template The template to merge data into.
+		 * @param data     The data to merge with the template.
+		 * @return The generated output document.
+		 * @throws OutputServiceException If an error occurs during processing.
+		 * @throws FileNotFoundException  If the template file is not found.
+		 */
 		public Document executeOn(PathOrUrl template, Document data) throws OutputServiceException, FileNotFoundException;
 
+		/**
+		 * Merges the provided template with the provided data and returns the generated
+		 * output.
+		 * 
+		 * @param template The template to merge data into.
+		 * @param data     The data to merge with the template.
+		 * @return The generated output document.
+		 * @throws OutputServiceException If an error occurs during processing.
+		 * @throws FileNotFoundException  If the template file is not found.
+		 */
 		public Document executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException;
 		
+		/**
+		 * Merges the provided template with the provided data and returns the generated
+		 * output.
+		 * 
+		 * @param template The template to merge data into.
+		 * @param data     The data to merge with the template.
+		 * @return The generated output document.
+		 * @throws OutputServiceException If an error occurs during processing.
+		 */
 		public Document executeOn(URL template, Document data) throws OutputServiceException;
 
+		/**
+		 * Merges the provided template with the provided data and returns the generated
+		 * output.
+		 * 
+		 * @param template The template to merge data into.
+		 * @param data     The data to merge with the template.
+		 * @return The generated output document.
+		 * @throws FileNotFoundException  If the template file is not found.
+		 */
 		public Document executeOn(Document template, Document data) throws OutputServiceException;
 		
 		default public Document executeOn(PathOrUrl template, byte[] data) throws OutputServiceException, FileNotFoundException {
@@ -298,6 +358,11 @@ public interface OutputService {
 			return executeOn(template, (Document)null);
 		};
 
+		public interface XciArgumentBuilder {
+			XciArgumentBuilder embedPclFonts(boolean embedFonts);
+			XciArgumentBuilder embedPsFonts(boolean embedFonts);
+			GeneratePrintedOutputArgumentBuilder done();
+		}
 	}
 
 	public static interface GeneratePdfOutputBatchArgumentBuilder extends PDFOutputOptionsSetter, BatchArgumentBuilder, Transformable<GeneratePdfOutputArgumentBuilder> {
@@ -344,7 +409,15 @@ public interface OutputService {
 		@Override
 		GeneratePdfOutputBatchArgumentBuilder setXci(Document xci);
 		
-		// TODO:  Fix up the executeOns to overload the options.
+		@Override
+		default GeneratePdfOutputBatchArgumentBuilder setXci(Xci xci) {
+			PDFOutputOptionsSetter.super.setXci(xci);
+			return this;
+		}
+
+		public XciArgumentBuilder xci();
+
+	// TODO:  Fix up the executeOns to overload the options.
 		public BatchResult executeOn(PathOrUrl template, Document data) throws OutputServiceException, FileNotFoundException;
 
 		public BatchResult executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException;
@@ -387,6 +460,10 @@ public interface OutputService {
 			return executeOn(template, (Document) null);
 		};
 
+		public interface XciArgumentBuilder {
+			XciArgumentBuilder embedFonts(boolean embedFonts);
+			GeneratePdfOutputBatchArgumentBuilder done();
+		}
 	}
 
 	public static interface GeneratePrintedOutputBatchArgumentBuilder extends PrintedOutputOptionsSetter, BatchArgumentBuilder, Transformable<GeneratePrintedOutputArgumentBuilder> {
@@ -424,7 +501,15 @@ public interface OutputService {
 		@Override
 		GeneratePrintedOutputBatchArgumentBuilder setXci(Document xci);
 		
-		// TODO:  Fix up the executeOns to overload the options.
+		@Override
+		default GeneratePrintedOutputBatchArgumentBuilder setXci(Xci xci) {
+			PrintedOutputOptionsSetter.super.setXci(xci);
+			return this;
+		}
+
+		public XciArgumentBuilder xci();
+
+	// TODO:  Fix up the executeOns to overload the options.
 		public BatchResult executeOn(PathOrUrl template, Document data) throws OutputServiceException, FileNotFoundException;
 
 		public BatchResult executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException;
@@ -466,7 +551,12 @@ public interface OutputService {
 		default public BatchResult executeOn(URL template) throws OutputServiceException {
 			return executeOn(template, (Document)null);
 		};
-
+		
+		public interface XciArgumentBuilder {
+			XciArgumentBuilder embedPclFonts(boolean embedFonts);
+			XciArgumentBuilder embedPsFonts(boolean embedFonts);
+			GeneratePrintedOutputBatchArgumentBuilder done();
+		}
 	}
 
 	public static interface BatchArgumentBuilder {

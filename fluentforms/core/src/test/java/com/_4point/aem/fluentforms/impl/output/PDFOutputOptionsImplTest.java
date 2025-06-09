@@ -8,7 +8,9 @@ import java.util.Locale;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com._4point.aem.fluentforms.api.Xci;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
+import com._4point.aem.fluentforms.impl.XciImpl;
 import com.adobe.fd.output.api.AcrobatVersion;
 
 
@@ -51,8 +53,11 @@ class PDFOutputOptionsImplTest {
 		underTest.setRetainPDFFormState(true);
 		underTest.setRetainUnsignedSignatureFields(true);
 		underTest.setTaggedPDF(true);
-		// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
-//		underTest.setXci(new MockDocumentFactory().create(new byte[0]));
+		underTest.setXci(
+				new XciImpl.XciBuilderImpl().pdf()
+											.embedFonts(true)
+											.buildDestination()
+							.build());
 
 		assertNotEmpty(underTest);
 	}
@@ -68,7 +73,9 @@ class PDFOutputOptionsImplTest {
 		assertNotEquals(emptyPDFOutputOptions.getRetainPDFFormState(), adobePDFOutputOptions.getRetainPDFFormState());
 		assertNotEquals(emptyPDFOutputOptions.getRetainUnsignedSignatureFields(), adobePDFOutputOptions.getRetainUnsignedSignatureFields());
 		assertNotEquals(emptyPDFOutputOptions.getTaggedPDF(), adobePDFOutputOptions.getTaggedPDF());
-//		assertNotEquals(emptyPDFOutputOptions.getXci(), adobePDFOutputOptions.getXci());
+		// We can't test the creation of XCI document because that would require a real Adobe implementation to be available,
+		// so we just make sure that the XCI object is not null.
+		assertNotNull(pdfOutputOptions.getXci());
 	}
 
 }

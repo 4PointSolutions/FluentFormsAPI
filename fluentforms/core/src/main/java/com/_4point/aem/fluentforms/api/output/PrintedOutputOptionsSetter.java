@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
+import com._4point.aem.fluentforms.api.Xci;
 import com.adobe.fd.output.api.PaginationOverride;
 
 public interface PrintedOutputOptionsSetter {
@@ -32,4 +33,7 @@ public interface PrintedOutputOptionsSetter {
 
 	PrintedOutputOptionsSetter setXci(Document xci);
 
+	default PrintedOutputOptionsSetter setXci(Xci xci) {
+		return setXci(xci.toDocument());
+	}
 }

@@ -12,12 +12,14 @@ import java.util.Optional;
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
+import com._4point.aem.fluentforms.api.Xci;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.PDFFormRenderOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationOptions;
 import com._4point.aem.fluentforms.api.forms.ValidationResult;
 import com._4point.aem.fluentforms.impl.TemplateValues;
 import com._4point.aem.fluentforms.impl.UsageContext;
+import com._4point.aem.fluentforms.impl.XciImpl;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.DataFormat;
@@ -238,6 +240,27 @@ public class FormsServiceImpl implements FormsService {
 		@Override
 		public Document executeOn(Document template, Document data) throws FormsServiceException {
 			return renderPDFForm(template, data, options);
+		}
+
+		@Override
+		public XciArgumentBuilder xci() {
+			return new XciArgumentBuilderImpl();
+		}
+		
+		private class XciArgumentBuilderImpl implements XciArgumentBuilder {
+			private final Xci.XciBuilder xciBuilder = new XciImpl.XciBuilderImpl();
+
+			@Override
+			public XciArgumentBuilder embedFonts(boolean embedFonts) {
+				xciBuilder.pdf().embedFonts(embedFonts);
+				return this;
+			}
+
+			@Override
+			public RenderPDFFormArgumentBuilder done() {
+				RenderPDFFormArgumentBuilderImpl.this.setXci(xciBuilder.build());
+				return RenderPDFFormArgumentBuilderImpl.this;
+			}
 		}
 	}
 

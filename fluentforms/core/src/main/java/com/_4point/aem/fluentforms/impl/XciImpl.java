@@ -73,7 +73,7 @@ public class XciImpl implements Xci {
 		return factory.create(result.getBytes());
 	}
 
-	public static class JavaxXciBuilder implements Xci.XciBuilder {
+	public static class XciBuilderImpl implements Xci.XciBuilder {
 		private DestinationBuilderImpl pdfBuilder = null;
 		private DestinationBuilderImpl pclBuilder = null;
 		private DestinationBuilderImpl psBuilder = null;
@@ -120,7 +120,7 @@ public class XciImpl implements Xci {
 
 			@Override
 			public XciBuilder buildDestination() {
-				return JavaxXciBuilder.this;
+				return XciBuilderImpl.this;
 			}
 		}		
 	}

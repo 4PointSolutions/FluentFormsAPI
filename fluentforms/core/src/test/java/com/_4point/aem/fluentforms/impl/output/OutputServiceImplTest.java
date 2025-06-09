@@ -371,8 +371,9 @@ class OutputServiceImplTest {
 									.setRetainPDFFormState(true)
 									.setRetainUnsignedSignatureFields(true)
 									.setTaggedPDF(true)
-									// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
-//									underTest.setXci(new MockDocumentFactory().create(new byte[0]));
+									.xci()
+										.embedFonts(false)
+										.done()
 									.executeOn(template, data);
 		
 		// Verify that all the results are correct.
@@ -400,8 +401,9 @@ class OutputServiceImplTest {
 									.setRetainPDFFormState(true)
 									.setRetainUnsignedSignatureFields(true)
 									.setTaggedPDF(true)
-									// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
-//									underTest.setXci(new MockDocumentFactory().create(new byte[0]));
+									.xci()
+										.embedFonts(true)
+										.done()
 									.executeOn(filename, data);
 		
 		// Verify that all the results are correct.
@@ -427,8 +429,9 @@ class OutputServiceImplTest {
 									.setRetainPDFFormState(true)
 									.setRetainUnsignedSignatureFields(true)
 									.setTaggedPDF(true)
-									// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
-					//				underTest.setXci(new MockDocumentFactory().create(new byte[0]));
+									.xci()
+										.embedFonts(true)
+										.done()
 									.executeOn(filename, data);
 		
 		// Verify that all the results are correct.
@@ -454,8 +457,9 @@ class OutputServiceImplTest {
 									.setRetainPDFFormState(true)
 									.setRetainUnsignedSignatureFields(true)
 									.setTaggedPDF(true)
-									// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
-					//				underTest.setXci(new MockDocumentFactory().create(new byte[0]));
+									.xci()
+										.embedFonts(true)
+										.done()
 									.executeOn(filename, data);
 		
 		// Verify that all the results are correct.
@@ -481,8 +485,9 @@ class OutputServiceImplTest {
 									.setRetainPDFFormState(true)
 									.setRetainUnsignedSignatureFields(true)
 									.setTaggedPDF(true)
-									// Omit the creation of XCI document because that would require a real Adobe implementation to be available.
-					//				underTest.setXci(new MockDocumentFactory().create(new byte[0]));
+									.xci()
+										.embedFonts(true)
+										.done()
 									.executeOn(filename, data);
 		
 		// Verify that all the results are correct.

@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
+import com._4point.aem.fluentforms.api.Xci;
 import com._4point.aem.fluentforms.api.output.BatchOptions;
 import com._4point.aem.fluentforms.api.output.BatchResult;
 import com._4point.aem.fluentforms.api.output.OutputService;
@@ -21,6 +22,7 @@ import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.TemplateValues;
 import com._4point.aem.fluentforms.impl.UsageContext;
+import com._4point.aem.fluentforms.impl.XciImpl;
 import com.adobe.fd.output.api.AcrobatVersion;
 import com.adobe.fd.output.api.PaginationOverride;
 
@@ -232,6 +234,27 @@ public class OutputServiceImpl implements OutputService {
 		public Document executeOn(Document template, Document data) throws OutputServiceException {
 			return generatePDFOutput(template, data, this.pdfOutputOptions);
 		}
+
+		@Override
+		public XciArgumentBuilder xci() {
+			return new XciArgumentBuilderImpl();
+		}
+		
+		private class XciArgumentBuilderImpl implements XciArgumentBuilder {
+			private final Xci.XciBuilder xciBuilder = new XciImpl.XciBuilderImpl();
+
+			@Override
+			public XciArgumentBuilder embedFonts(boolean embedFonts) {
+				xciBuilder.pdf().embedFonts(embedFonts);
+				return this;
+			}
+
+			@Override
+			public GeneratePdfOutputArgumentBuilder done() {
+				GeneratePdfOutputArgumentBuilderImpl.this.setXci(xciBuilder.build());
+				return GeneratePdfOutputArgumentBuilderImpl.this;
+			}
+		}
 	}
 	
 	private class GeneratePrintedOutputArgumentBuilderImpl implements GeneratePrintedOutputArgumentBuilder {
@@ -299,6 +322,34 @@ public class OutputServiceImpl implements OutputService {
 		@Override
 		public Document executeOn(Document template, Document data) throws OutputServiceException {
 			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+		@Override
+		public XciArgumentBuilder xci() {
+			return new XciArgumentBuilderImpl();
+		}
+		
+		private class XciArgumentBuilderImpl implements XciArgumentBuilder {
+			private final Xci.XciBuilder xciBuilder = new XciImpl.XciBuilderImpl();
+
+			@Override
+			public XciArgumentBuilder embedPclFonts(boolean embedFonts) {
+				xciBuilder.pcl().embedFonts(embedFonts);
+				return this;
+			}
+
+			@Override
+			public XciArgumentBuilder embedPsFonts(boolean embedFonts) {
+				xciBuilder.ps().embedFonts(embedFonts);
+				return this;
+			}
+
+			@Override
+			public GeneratePrintedOutputArgumentBuilder done() {
+				GeneratePrintedOutputArgumentBuilderImpl.this.setXci(xciBuilder.build());
+				return GeneratePrintedOutputArgumentBuilderImpl.this;
+			}
+
 		}
 
 	}

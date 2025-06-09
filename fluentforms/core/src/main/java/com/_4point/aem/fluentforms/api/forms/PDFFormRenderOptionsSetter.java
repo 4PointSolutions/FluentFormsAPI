@@ -12,6 +12,7 @@ import java.util.Objects;
 import com._4point.aem.fluentforms.api.AbsoluteOrRelativeUrl;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.PathOrUrl;
+import com._4point.aem.fluentforms.api.Xci;
 import com.adobe.fd.forms.api.AcrobatVersion;
 import com.adobe.fd.forms.api.CacheStrategy;
 import com.adobe.fd.forms.api.RenderAtClient;
@@ -80,5 +81,9 @@ public interface PDFFormRenderOptionsSetter {
 	PDFFormRenderOptionsSetter setTaggedPDF(boolean isTagged);
 
 	PDFFormRenderOptionsSetter setXci(Document xci);
+	
+	default PDFFormRenderOptionsSetter setXci(Xci xci) {
+		return setXci(xci.toDocument());
+	}
 
 }

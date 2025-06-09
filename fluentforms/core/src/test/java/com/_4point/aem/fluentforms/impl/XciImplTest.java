@@ -12,7 +12,7 @@ import com._4point.aem.fluentforms.api.Xci;
 
 class XciImplTest {
 	
-	private XciImpl.JavaxXciBuilder builder = new XciImpl.JavaxXciBuilder();
+	private XciImpl.XciBuilderImpl builder = new XciImpl.XciBuilderImpl();
 
 	private static final String XCI_FORMAT_STR = """
 			<?xml version="1.0" encoding="UTF-8"?>

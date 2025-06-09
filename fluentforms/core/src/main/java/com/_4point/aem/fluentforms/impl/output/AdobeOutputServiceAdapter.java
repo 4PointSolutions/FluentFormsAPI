@@ -2,7 +2,6 @@ package com._4point.aem.fluentforms.impl.output;
 
 import static com._4point.aem.fluentforms.impl.BuilderUtils.setIfNotNull;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
