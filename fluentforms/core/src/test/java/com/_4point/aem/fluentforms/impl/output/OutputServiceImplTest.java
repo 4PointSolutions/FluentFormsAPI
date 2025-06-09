@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,9 +23,11 @@ import com._4point.aem.fluentforms.api.TestUtils;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
 import com._4point.aem.fluentforms.api.output.PDFOutputOptions;
+import com._4point.aem.fluentforms.api.output.PrintConfig;
 import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com.adobe.fd.output.api.AcrobatVersion;
+import com.adobe.fd.output.api.PaginationOverride;
 
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 
@@ -47,7 +48,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePDFOutput(Document,...) Happy Path.")
 	void testGeneratePDFOutputDocumentDocumentPDFOutputOptions() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		Document template = Mockito.mock(Document.class);
 		Document data = Mockito.mock(Document.class);
@@ -95,7 +96,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePDFOutput(Path,...) Happy Path, No Context Root.")
 	void testGeneratePDFOutputPathDocumentDefaultPDFOutputOptions() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		Path filename = TestUtils.SAMPLE_FORM;
 		Document data = Mockito.mock(Document.class);
@@ -113,7 +114,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePDFOutput(Path,...) Happy Path, with Context Root.")
 	void testGeneratePDFOutputPathDocumentNonDefaultPDFOutputOptions() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		Path filename = TestUtils.SAMPLE_FORM.getFileName();
 		Document data = Mockito.mock(Document.class);
@@ -180,7 +181,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePDFOutput(URL,...) Happy Path, no contentRoot.")
 	void testGeneratePDFOutputUrlDocumentDefaultPDFOutputOptions() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		String expectedTemplateFilename = "bar.xdp";
 		String expectedContextRoot = "http://www.example.com/foo/";
@@ -200,7 +201,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePDFOutput(URL,...) Happy Path, with contentRoot.")
 	void testGeneratePDFOutputUrlDocumentWithPDFOutputOptions() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		String expectedTemplateFilename = "http://www.example.com/foo/bar.xdp";
 		String expectedContextRoot = "http://www.otherexample.com/foo/";
@@ -254,7 +255,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePDFOutput(PathOrUrl,...) Happy Path with no contentRoot.")
 	void testGeneratePDFOutputPathOrUrlDocumentDefaultPDFOutputOptions() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		String expectedTemplateFilename = "bar.xdp";
 		String expectedContextRoot = "file:foo/";
@@ -274,7 +275,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePDFOutput(PathOrUrl,...) Happy Path with contentRoot.")
 	void testGeneratePDFOutputPathOrUrlDocumentWithPDFOutputOptions() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		String expectedTemplateFilename = "file:foo/bar.xdp";
 		String expectedContextRoot = "file:notfoo/";
@@ -295,7 +296,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePDFOutput(Crx PathOrUrl,...) Happy Path with no contextRoot.")
 	void testGeneratePDFOutputCrxUrlDocumentDefaultPDFOutputOptions() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		String expectedTemplateFilename = "bar.xdp";
 		String expectedContextRoot = "crx:/content/dam/formsanddocuments/foo/";
@@ -315,7 +316,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePDFOutput(Crx PathOrUrl,...) Happy Path with contextRoot.")
 	void testGeneratePDFOutputCrxUrlDocumentWithPDFOutputOptions() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		String expectedTemplateFilename = "crx:/content/dam/formsanddocuments/foo/bar.xdp";
 		String expectedContextRoot = "crx:/othercontent/dam/foo/bar/";
@@ -357,7 +358,7 @@ class OutputServiceImplTest {
 
 	@Test
 	void testGeneratePDFOutputDocument() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		Document template = Mockito.mock(Document.class);
 		Document data = Mockito.mock(Document.class);
@@ -385,7 +386,7 @@ class OutputServiceImplTest {
 
 	@Test
 	void testGeneratePDFOutputPath() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		Path contentRoot = TestUtils.SAMPLE_FORM.getParent().getParent();
 		Path filename = contentRoot.relativize(TestUtils.SAMPLE_FORM);
@@ -415,7 +416,7 @@ class OutputServiceImplTest {
 
 	@Test
 	void testGeneratePDFOutputUrl() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		PathOrUrl filename = PathOrUrl.from("file:foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
@@ -443,7 +444,7 @@ class OutputServiceImplTest {
 
 	@Test
 	void testGeneratePDFOutputPathOrUrl() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		PathOrUrl filename = PathOrUrl.from("file:foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
@@ -471,7 +472,7 @@ class OutputServiceImplTest {
 
 	@Test
 	void testGeneratePDFOutputCrxUrl() throws Exception {
-		MockPdfOutputService svc = new MockPdfOutputService();
+		MockPdfOutputService svc = new MockPdfOutputService(adobeOutputService);
 		
 		PathOrUrl filename = PathOrUrl.from("crx:/content/dam/formsanddocuments/foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
@@ -497,14 +498,15 @@ class OutputServiceImplTest {
 		PDFOutputOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 
-	@Disabled
+	@Test
+	@DisplayName("Test GeneratePrintedOutputBatch() throws UnsupportedOperationException.")
 	void testGeneratePDFOutputBatch() {
-		fail("Not yet implemented");
+		assertThrows(UnsupportedOperationException.class, ()->underTest.generatePDFOutputBatch(null, null, null, null));
 	}
 
 	@Test
 	void testGeneratePrintedOutputDocumentDocumentPrintedOutputOptions() throws Exception {
-		MockPrintedOutputService svc = new MockPrintedOutputService();
+		MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
 		
 		Document template = Mockito.mock(Document.class);
 		Document data = Mockito.mock(Document.class);
@@ -553,7 +555,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePrintedOutput(Path,...) Happy Path, No Context Root.")
 	void testGeneratePrintedOutputPathDocumentDefaultPrintedOutputOptions() throws Exception {
-		MockPrintedOutputService svc = new MockPrintedOutputService();
+		MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
 		
 		Path filename = TestUtils.SAMPLE_FORM;
 		Document data = Mockito.mock(Document.class);
@@ -571,7 +573,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePrintedOutput(Path,...) Happy Path, with Context Root.")
 	void testGeneratePrintedOutputPathDocumentNonDefaultPrintedOutputOptions() throws Exception {
-		MockPrintedOutputService svc = new MockPrintedOutputService();
+		MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
 		
 		Path filename = TestUtils.SAMPLE_FORM.getFileName();
 		Document data = Mockito.mock(Document.class);
@@ -608,7 +610,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePrintedOutput(Document,...) null arguments.")
 	void testRenderPrintedOutputDocument_nullArguments() throws Exception {
-		//MockPrintedOutputService svc = new MockPrintedOutputService();
+		//MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
 		
 		Document template = Mockito.mock(Document.class);
 		Document data = Mockito.mock(Document.class);
@@ -626,7 +628,7 @@ class OutputServiceImplTest {
 	@Test
 	@DisplayName("Test GeneratePrintedOutput(Path,...) path argument.")
 	void testRenderPrintedOutputDocumentPathOrUrl_PathInput() throws Exception {
-		MockPrintedOutputService svc = new MockPrintedOutputService();
+		MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
 		
 		Path filename = TestUtils.SAMPLE_FORM;
 		
@@ -639,21 +641,11 @@ class OutputServiceImplTest {
 
 	}
 	
-	@Disabled("Not currently working, needs investigation.  Not a big issue, since generatePrintedOutput is not implemented elsewhere yet.")
-	@Test
-	@DisplayName("Test GeneratePrintedOutput(Path,...) path argument.")
-	void testRenderPrintedOutputDocumentPathOrUrl_MockPathInput() throws Exception {
-		PathOrUrl pathOrUrl = Mockito.mock(PathOrUrl.class);
-		Document data = Mockito.mock(Document.class);
-		PrintedOutputOptions printedOutputOptions = Mockito.mock(PrintedOutputOptions.class);
-		IllegalArgumentException ex1 = assertThrows
-				(IllegalArgumentException.class, ()->underTest.generatePrintedOutput(pathOrUrl, data, printedOutputOptions));
-		
-	}
+	
 	@Test
 	@DisplayName("Test GeneratePrintedOutput(Url,...) path argument.")
 	void testRenderPrintedOutputDocumentPathOrUrl_URLInput() throws Exception {
-		MockPrintedOutputService svc = new MockPrintedOutputService();
+		MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
 		String expectedTemplateFilename = "bar.xdp";
 		String expectedContextRoot = "http://www.example.com/foo/";
 		URL url = new URL(expectedContextRoot + expectedTemplateFilename);
@@ -666,22 +658,48 @@ class OutputServiceImplTest {
 		assertSame(resultURL, svc.getResult(), "Expected the document to be the same - Url input.");
 	}
 	
-	@Disabled("Not currently working, needs investigation.  Not a big issue, since generatePrintedOutput is not implemented elsewhere yet.")
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Document,...) with non-default options.")
+	void testGeneratePrintedOutputDocument() throws Exception {
+		MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
+		
+		Document template = Mockito.mock(Document.class);
+		Document data = Mockito.mock(Document.class);
+		Document result = underTest.generatePrintedOutput()
+								   		.setContentRoot(Paths.get("foo", "bar"))
+										.setCopies(2)
+										.setDebugDir(Paths.get("bar", "foo"))
+										.setLocale(Locale.CANADA_FRENCH)
+										.setPaginationOverride(PaginationOverride.duplexLongEdge)
+										.setPrintConfig(PrintConfig.HP_PCL_5e)
+										.xci()
+											.embedPclFonts(false)
+											.done()
+										.executeOn(template, data);
+		
+		// Verify that all the results are correct.
+		assertEquals(template, svc.getTemplateDocArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		PrintedOutputOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
+	}
+
+	
+	@DisplayName("Test GeneratePrintedOutput(CrxUrl,...) throws FileNotFoundException.")
 	@Test
 	void testGeneratePrintedOutputCrxUrl() throws Exception {
-		MockPrintedOutputService svc = new MockPrintedOutputService();
+		MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
 		
 		PathOrUrl filename = PathOrUrl.from("crx:/content/dam/formsanddocuments/foo/bar.xdp");
 		Document data = Mockito.mock(Document.class);
 		
-		PrintedOutputOptions printedOutputOptions = Mockito.mock(PrintedOutputOptions.class);
-		
-		Document resultCrx = underTest.generatePrintedOutput(filename, data, printedOutputOptions);
+		Document resultCrx = underTest.generatePrintedOutput().executeOn(filename, data);
 		
 		// Verify that all the results are correct.
-		assertEquals(filename.toString(), svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertEquals(filename.getFilename().orElseThrow().toString(), svc.getTemplateStringArg(), "Expected the template filename passed to AEM would match the filename used.");
 		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
 		assertSame(resultCrx, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		PrintedOutputOptionsImplTest.assertEmpty(svc.getOptionsArg(), filename.getParent().orElseThrow().getCrxUrl());
 	}
 	
 	@Test
@@ -710,9 +728,10 @@ class OutputServiceImplTest {
 		assertThrows(OutputServiceException.class, ()->underTest.generatePrintedOutput(filename, data, printedFormRenderOptions));
 	}
 	
-	@Disabled
+	@Test
+	@DisplayName("Test GeneratePrintedOutputBatch() throws UnsupportedOperationException.")
 	void testGeneratePrintedOutputBatch() {
-		fail("Not yet implemented");
+		assertThrows(UnsupportedOperationException.class, ()->underTest.generatePrintedOutputBatch(null, null, null, null));
 	}
 
 	private class MockPdfOutputService {
@@ -722,8 +741,7 @@ class OutputServiceImplTest {
 		private final ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
 		private final ArgumentCaptor<PDFOutputOptions> optionsArg = ArgumentCaptor.forClass(PDFOutputOptions.class);
 		
-		protected MockPdfOutputService() throws OutputServiceException {
-			super();
+		protected MockPdfOutputService(TraditionalOutputService adobeOutputService) throws OutputServiceException {
 			// These are "lenient" because we only expect one or the other to be called.  Also, in some of the exceptional cases,
 			// neither are called.
 			Mockito.lenient().when(adobeOutputService.generatePDFOutput(templateStringArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);
@@ -751,15 +769,14 @@ class OutputServiceImplTest {
 		}
 	}
 
-	private class MockPrintedOutputService {
+	private static class MockPrintedOutputService {
 		private final Document result = Mockito.mock(Document.class);
 		private final ArgumentCaptor<String> templateStringArg = ArgumentCaptor.forClass(String.class);
 		private final ArgumentCaptor<Document> templateDocArg = ArgumentCaptor.forClass(Document.class);
 		private final ArgumentCaptor<Document> dataArg = ArgumentCaptor.forClass(Document.class);
 		private final ArgumentCaptor<PrintedOutputOptions> optionsArg = ArgumentCaptor.forClass(PrintedOutputOptions.class);
 		
-		protected MockPrintedOutputService() throws OutputServiceException {
-			super();
+		protected MockPrintedOutputService(TraditionalOutputService adobeOutputService) throws OutputServiceException {
 			// These are "lenient" because we only expect one or the other to be called.  Also, in some of the exceptional cases,
 			// neither are called.
 			Mockito.lenient().when(adobeOutputService.generatePrintedOutput(templateStringArg.capture(), dataArg.capture(), optionsArg.capture())).thenReturn(result);

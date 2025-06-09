@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.fluentforms.api.output.PrintConfig;
+import com._4point.aem.fluentforms.api.output.PrintedOutputOptions;
 import com._4point.aem.fluentforms.impl.XciImpl;
 import com.adobe.fd.output.api.PaginationOverride;
 
@@ -24,7 +25,7 @@ class PrintedOutputOptionsImplTest {
 		assertEmpty(underTest, null);
 	}
 
-	private static void assertEmpty(PrintedOutputOptionsImpl printedOutputOptions, String contentRoot) {
+	/* package */ static void assertEmpty(PrintedOutputOptions printedOutputOptions, String contentRoot) {
 		com.adobe.fd.output.api.PrintedOutputOptions adobePrintedOutputOptions = AdobeOutputServiceAdapter.toAdobePrintedOutputOptions(printedOutputOptions);
 		assertEquals(contentRoot, adobePrintedOutputOptions.getContentRoot());	// We modify the content root, so we expect it to be different than the empty version (which would be null).
 		assertEquals(emptyPrintedOutputOptions.getCopies(), adobePrintedOutputOptions.getCopies());
@@ -54,7 +55,7 @@ class PrintedOutputOptionsImplTest {
 		assertNotEmpty(underTest);
 	}
 
-	/* package */ static void assertNotEmpty(PrintedOutputOptionsImpl printedOutputOptions) {
+	/* package */ static void assertNotEmpty(PrintedOutputOptions printedOutputOptions) {
 		com.adobe.fd.output.api.PrintedOutputOptions adobePrintedOutputOptions = AdobeOutputServiceAdapter.toAdobePrintedOutputOptions(printedOutputOptions);
 		assertNotEquals(emptyPrintedOutputOptions.getContentRoot(), adobePrintedOutputOptions.getContentRoot());
 		assertNotEquals(emptyPrintedOutputOptions.getCopies(), adobePrintedOutputOptions.getCopies());
