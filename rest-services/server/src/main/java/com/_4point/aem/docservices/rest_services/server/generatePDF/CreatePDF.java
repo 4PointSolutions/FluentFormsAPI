@@ -47,6 +47,7 @@ import com._4point.aem.fluentforms.api.generatePDF.CreatePDFResult;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService.CreatePDFResultArgumentBuilder;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService.GeneratePDFServiceException;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.generatePDF.AdobeGeneratePDFServiceAdapter;
 import com._4point.aem.fluentforms.impl.generatePDF.GeneratePDFServiceImpl;
 import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
@@ -59,7 +60,7 @@ import com._4point.aem.fluentforms.impl.generatePDF.TraditionalGeneratePDFServic
 @SlingServletPaths(ServletUtils.SERVICES_PREFIX + "/GeneratePDFService/CreatePDF")
 public class CreatePDF extends SlingAllMethodsServlet {
 	private static final Logger log = LoggerFactory.getLogger(CreatePDF.class);
-	private final DocumentFactory docFactory = DocumentFactory.getDefault();
+	private final DocumentFactory docFactory = AdobeDocumentFactoryImpl.getFactory();	// We know we're running on AEM, so we'll use the AdobeDocumentFactoryImpl.
 	private final Supplier<TraditionalGeneratePDFService> generatePDFServiceFactory = this::getAdobeGeneratePDFService;
 	private static final String DATA_PARAM_NAME = "data";
 	private static final String FILE_EXTENSION = "fileExtension";

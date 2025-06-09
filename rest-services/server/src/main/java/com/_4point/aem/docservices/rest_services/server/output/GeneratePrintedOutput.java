@@ -39,6 +39,7 @@ import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.OutputService.GeneratePrintedOutputArgumentBuilder;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
 import com._4point.aem.fluentforms.api.output.PrintConfig;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.output.AdobeOutputServiceAdapter;
 import com._4point.aem.fluentforms.impl.output.OutputServiceImpl;
@@ -52,7 +53,7 @@ import com.adobe.fd.output.api.PaginationOverride;
 public class GeneratePrintedOutput extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(GeneratePrintedOutput.class);
-	private final DocumentFactory docFactory = DocumentFactory.getDefault();
+	private final DocumentFactory docFactory = AdobeDocumentFactoryImpl.getFactory();	// We know we're running on AEM, so we'll use the AdobeDocumentFactoryImpl.
 	private final Supplier<TraditionalOutputService> outputServiceFactory = this::getAdobeOutputService;
 
 	@Reference

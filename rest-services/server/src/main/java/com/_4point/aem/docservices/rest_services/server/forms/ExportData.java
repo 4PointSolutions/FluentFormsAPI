@@ -30,6 +30,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.forms.FormsService.FormsServiceException;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.forms.AdobeFormsServiceAdapter;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
@@ -51,7 +52,7 @@ public class ExportData extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(ExportData.class);
 	
-	private final DocumentFactory docFactory = DocumentFactory.getDefault();
+	private final DocumentFactory docFactory = AdobeDocumentFactoryImpl.getFactory();	// We know we're running on AEM, so we'll use the AdobeDocumentFactoryImpl.
 	private final Supplier<TraditionalFormsService> formServiceFactory = this::getAdobeFormsService;
 
 	@Reference

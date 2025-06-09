@@ -39,6 +39,7 @@ import com._4point.aem.fluentforms.api.assembler.AssemblerService;
 import com._4point.aem.fluentforms.api.assembler.AssemblerService.AssemblerServiceException;
 import com._4point.aem.fluentforms.api.assembler.LogLevel;
 import com._4point.aem.fluentforms.api.assembler.PDFAConversionResult;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.assembler.AdobeAssemblerServiceAdapter;
 import com._4point.aem.fluentforms.impl.assembler.AssemblerServiceImpl;
@@ -75,7 +76,7 @@ public class ToPdfA  extends SlingAllMethodsServlet {
 
 	private final Supplier<TraditionalDocAssemblerService> assemblerServiceFactory = this::getAdobeAssemblerService;
 
-	private final DocumentFactory docFactory = DocumentFactory.getDefault();
+	private final DocumentFactory docFactory = AdobeDocumentFactoryImpl.getFactory();	// We know we're running on AEM, so we'll use the AdobeDocumentFactoryImpl.
 
 	private TraditionalDocAssemblerService getAdobeAssemblerService() {
 		return new AdobeAssemblerServiceAdapter(adobeAssembleService, docFactory);

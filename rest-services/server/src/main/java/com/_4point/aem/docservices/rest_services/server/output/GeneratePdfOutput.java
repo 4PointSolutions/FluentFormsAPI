@@ -38,6 +38,7 @@ import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.output.OutputService.GeneratePdfOutputArgumentBuilder;
 import com._4point.aem.fluentforms.api.output.OutputService.OutputServiceException;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.output.AdobeOutputServiceAdapter;
 import com._4point.aem.fluentforms.impl.output.OutputServiceImpl;
@@ -51,7 +52,7 @@ import com.adobe.fd.output.api.AcrobatVersion;
 public class GeneratePdfOutput extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(GeneratePdfOutput.class);
-	private final DocumentFactory docFactory = DocumentFactory.getDefault();
+	private final DocumentFactory docFactory = AdobeDocumentFactoryImpl.getFactory();	// We know we're running on AEM, so we'll use the AdobeDocumentFactoryImpl.
 	private final Supplier<TraditionalOutputService> outputServiceFactory = this::getAdobeOutputService;
 
 	@Reference

@@ -29,6 +29,7 @@ import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService.ConvertPdfServiceException;
 import com._4point.aem.fluentforms.api.convertPdf.ConvertPdfService.ToPSArgumentBuilder;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.convertPdf.AdobeConvertPdfServiceAdapter;
 import com._4point.aem.fluentforms.impl.convertPdf.ConvertPdfServiceImpl;
 import com._4point.aem.fluentforms.impl.convertPdf.TraditionalConvertPdfService;
@@ -46,7 +47,7 @@ import com.adobe.fd.cpdf.api.enumeration.Style;
 public class ToPS extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(ToPS.class);
-	private final DocumentFactory docFactory = DocumentFactory.getDefault();
+	private final DocumentFactory docFactory = AdobeDocumentFactoryImpl.getFactory();	// We know we're running on AEM, so we'll use the AdobeDocumentFactoryImpl.
 	private final Supplier<TraditionalConvertPdfService> convertPdfServiceFactory = this::getAdobeConvertPdfService;
 
 	@Reference

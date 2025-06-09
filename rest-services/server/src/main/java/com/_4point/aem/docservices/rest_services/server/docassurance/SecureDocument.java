@@ -30,6 +30,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService;
 import com._4point.aem.fluentforms.api.docassurance.DocAssuranceService.DocAssuranceServiceException;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.docassurance.AdobeDocAssuranceServiceAdapter;
 import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl;
 import com._4point.aem.fluentforms.impl.docassurance.TraditionalDocAssuranceService;
@@ -42,7 +43,7 @@ public class SecureDocument extends SlingAllMethodsServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(SecureDocument.class);
 
-	private final DocumentFactory docFactory = DocumentFactory.getDefault();
+	private final DocumentFactory docFactory = AdobeDocumentFactoryImpl.getFactory();	// We know we're running on AEM, so we'll use the AdobeDocumentFactoryImpl.
 	private Supplier<TraditionalDocAssuranceService> docAssuranceServiceFactory = this::getAdobeDocAssuranceService;
 	private ResourceResolver resourceResolver;
 

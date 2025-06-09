@@ -28,6 +28,7 @@ import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.api.DocumentFactory;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService.PdfUtilityException;
+import com._4point.aem.fluentforms.impl.AdobeDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.pdfUtility.AdobePdfUtilityServiceAdapter;
 import com._4point.aem.fluentforms.impl.pdfUtility.PdfUtilityServiceImpl;
 import com._4point.aem.fluentforms.impl.pdfUtility.TraditionalPdfUtilityService;
@@ -42,7 +43,7 @@ public class ConvertPdfToXdp extends SlingAllMethodsServlet {
 	private static final String APPLICATION_XDP = "application/vnd.adobe.xdp+xml";
 	private static final String DOCUMENT_PARAM_NAME = "document";
 	
-	private final DocumentFactory docFactory = DocumentFactory.getDefault();
+	private final DocumentFactory docFactory = AdobeDocumentFactoryImpl.getFactory();	// We know we're running on AEM, so we'll use the AdobeDocumentFactoryImpl.
 	private final Supplier<TraditionalPdfUtilityService> pdfUtilityServiceFactory = this::getAdobePdfUtilityService;
 
 	@Reference

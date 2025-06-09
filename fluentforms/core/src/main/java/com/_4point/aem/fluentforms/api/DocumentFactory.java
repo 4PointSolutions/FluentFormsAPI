@@ -104,6 +104,7 @@ public interface DocumentFactory {
 	 * 
 	 * @return
 	 */
+	@Deprecated
 	public static DocumentFactory getDefault() {
 		return AdobeDocumentFactoryImpl.getFactory();
 	}
