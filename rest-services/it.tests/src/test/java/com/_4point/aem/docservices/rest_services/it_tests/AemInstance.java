@@ -25,12 +25,6 @@ public enum AemInstance {
 	
 	private static final String LOCALHOST = "localhost";
 	
-	// These tests require an AEM container image with AEM forms installed.  Since AEM is proprietary, it is not possible to obtain this
-	// through public images.  By default, this uses a private image hosted in the 4PointSolutions-PS GitHub organization.  If you are not
-	// part of that prg, you will have to supply your own image.
-//	private static final String AEM_IMAGE_NAME = "ghcr.io/4pointsolutions-ps/aem:aem65sp21";
-//	private static final String AEM_IMAGE_NAME = "aem_lts:aem65lts";
-	private static final String AEM_IMAGE_NAME = "aem_lts_it_tests:aem65lts_it_tests";
 
 	private final AemTargetType targetType;
 	private final GenericContainer<?> aemContainer;
@@ -38,7 +32,7 @@ public enum AemInstance {
 
 	@SuppressWarnings("resource")
 	private AemInstance(AemTargetType targetType) {
-		this(targetType, targetType == AemTargetType.TESTCONTAINERS ? new GenericContainer<>(DockerImageName.parse(AEM_IMAGE_NAME))
+		this(targetType, targetType == AemTargetType.TESTCONTAINERS ? new GenericContainer<>(DockerImageName.parse(TestUtils.AEM_IMAGE_NAME))
 																	   .withReuse(true)
 																	   .withExposedPorts(4502)
 							   : null);

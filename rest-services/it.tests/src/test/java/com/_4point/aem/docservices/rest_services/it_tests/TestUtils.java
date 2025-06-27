@@ -46,6 +46,13 @@ public class TestUtils {
 	//		* GeneratePrintedOutput test AllArgs seems to want D:\FluentForms\Forms - Need to fix tests
 	//		* Generate HTLML5 test fails because protected mode is on - Need to fix AEM image creation code to set this.
 	
+	// The TESTCONTAINERS configuration requires an AEM container image with AEM forms installed.  Since AEM is proprietary, it is not possible to obtain this
+	// through public images.  By default, this uses a private image hosted in the 4PointSolutions-PS GitHub organization.  If you are not
+	// part of that prg, you will have to supply your own image.
+//	public static final String AEM_IMAGE_NAME = "ghcr.io/4pointsolutions-ps/aem:aem65sp21";
+	public static final String AEM_IMAGE_NAME = "aem_lts_it_tests:aem65lts_it_tests";
+
+	
 	private static final String SAMPLE_FORM_PDF_NAME = "SampleForm.pdf";
 	private static final String SAMPLE_FORM_XDP_NAME = "SampleForm.xdp";
 	private static final String SAMPLE_FORM_WITH_DATA_PDF_NAME = "SampleFormWithData.pdf";
