@@ -29,6 +29,7 @@ import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
 import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 
 @Tag("server-tests")
+@Tag("requiresPdfG")
 public class GeneratePDFTest {
 	private static final String GENERATE_PDF_URL = "http://" + AemInstance.AEM_1.aemHost() + ":" + AemInstance.AEM_1.aemPort() + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/GeneratePDFService/CreatePDF";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
@@ -58,7 +59,7 @@ public class GeneratePDFTest {
 	@Test
 	void testGeneratePdf_AllArgs() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM_NAME, SAMPLE_FORM_DOCX.toFile(), MediaType.MULTIPART_FORM_DATA_TYPE).
+			multipart.field(DATA_PARAM_NAME, LOCAL_SAMPLE_FORM_DOCX.toFile(), MediaType.MULTIPART_FORM_DATA_TYPE).
 			field(FILE_EXTENSION, "docx")
 			.field(FILE_TYPE_SETTINGS, "")
 			.field(PDF_SETTINGS, PDFSettings.High_Quality_Print.toString())
@@ -83,7 +84,7 @@ public class GeneratePDFTest {
 	@Test
 	void testGeneratePdf_JustDataAndFileExtension() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM_NAME, SAMPLE_FORM_DOCX.toFile(), MediaType.MULTIPART_FORM_DATA_TYPE).
+			multipart.field(DATA_PARAM_NAME, LOCAL_SAMPLE_FORM_DOCX.toFile(), MediaType.MULTIPART_FORM_DATA_TYPE).
 			field(FILE_EXTENSION, "docx");
 			Response result = target.request()
 					.accept(APPLICATION_XML)

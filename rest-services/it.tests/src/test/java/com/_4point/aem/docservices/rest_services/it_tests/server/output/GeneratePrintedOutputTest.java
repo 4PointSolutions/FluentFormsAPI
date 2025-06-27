@@ -110,14 +110,14 @@ public class GeneratePrintedOutputTest {
 	void testGeneratePrintedOutput_AllArgs(Printer printer) throws Exception {
 		String printConfig = printer.getPrintConfig();
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString())
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, REMOTE_SAMPLE_FORM_XDP.getFileName().toString())
 					 .field(COPIES_PARAM, "1")
 //					 .field(DEBUG_DIR_PARAM, "")	We don't want to generate debug outputs.
 					 .field(LOCALE_PARAM, "en-CA")
 					 .field(PAGINATION_OVERRIDE_PARAM, "simplex")
 					 .field(PRINT_CONFIG_PARAM, printConfig)
-					 .field(CONTENT_ROOT_PARAM, SERVER_FORMS_DIR.toString())
+					 .field(CONTENT_ROOT_PARAM, REMOTE_SAMPLE_FORM_XDP.getParent().toString())
 					 .field(XCI_PARAM, RESOURCES_DIR.resolve("pa.xci").toFile(), MediaType.APPLICATION_XML_TYPE)
 					 ;
 
@@ -175,8 +175,8 @@ public class GeneratePrintedOutputTest {
 	void testGeneratePrintedOutput_JustFormAndData_MinArgs(Printer printer) throws Exception {
 		String printConfig = printer.getPrintConfig();
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString())
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, REMOTE_SAMPLE_FORM_XDP.toString())
 					 .field(PRINT_CONFIG_PARAM, printConfig);
 
 			Response result = target.request()
@@ -195,8 +195,8 @@ public class GeneratePrintedOutputTest {
 	@Test
 	void testGeneratePrintedOutput_JustFormDocAndData() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SAMPLE_FORM_XDP.toFile(), APPLICATION_XDP)
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, LOCAL_SAMPLE_FORM_XDP.toFile(), APPLICATION_XDP)
 					 .field(PRINT_CONFIG_PARAM, "Generic_PS_L3");
 	
 			Response result = target.request()
@@ -215,8 +215,8 @@ public class GeneratePrintedOutputTest {
 	@Test
 	void testGeneratePrintedOutput_CRXFormAndData() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SAMPLE_FORM_XDP.getFileName().toString())
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, REMOTE_SAMPLE_FORM_XDP.getFileName().toString())
 					 .field(CONTENT_ROOT_PARAM, CRX_CONTENT_ROOT)
 					 .field(PRINT_CONFIG_PARAM, "HP_PCL_5e");
 
@@ -238,8 +238,8 @@ public class GeneratePrintedOutputTest {
 	void testGeneratePdfOutput_BadXDP() throws Exception {
 		String badFormName = "BadForm.xdp";
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, TestUtils.SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, TestUtils.SERVER_FORMS_DIR.resolve(badFormName).toString())
+			multipart.field(DATA_PARAM, TestUtils.LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, TestUtils.REMOTE_SAMPLE_FORM_XDP.getParent().resolve(badFormName).toString())
 					 .field(PRINT_CONFIG_PARAM, "HP_PCL_5e");
 
 			Response result = target.request()

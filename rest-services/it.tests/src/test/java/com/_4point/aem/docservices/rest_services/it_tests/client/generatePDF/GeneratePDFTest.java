@@ -24,6 +24,7 @@ import com._4point.aem.fluentforms.impl.generatePDF.PDFSettings;
 import com._4point.aem.fluentforms.impl.generatePDF.SecuritySettings;
 
 @Tag("client-tests")
+@Tag("requiresPdfG")
 public class GeneratePDFTest {
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
 	private GeneratePDFService underTest;
@@ -50,7 +51,7 @@ public class GeneratePDFTest {
 	@DisplayName("Test testGeneratePdf() Happy Path.")
 	void testGeneratePdf() throws Exception {
 		CreatePDFResult createPDFResult = underTest.createPDF()
-				.executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DOCX), "docx");
+				.executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DOCX), "docx");
 	    assertNotNull(createPDFResult.getCreatedDocument().getInlineData());
 	    assertEquals(APPLICATION_PDF.toString(), createPDFResult.getCreatedDocument().getContentType());
 	}
@@ -61,7 +62,7 @@ public class GeneratePDFTest {
 		CreatePDFResult createPDFResult = underTest.createPDF().setPdfSetting(PDFSettings.High_Quality_Print)
 				.setSecuritySetting(SecuritySettings.No_Security).setFileTypeSettings("").setSettingDoc(null)
 				.setxmpDoc(null)
-				.executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DOCX), "docx");
+				.executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DOCX), "docx");
 		   assertNotNull(createPDFResult.getCreatedDocument().getInlineData());
 		   assertEquals(APPLICATION_PDF.toString(), createPDFResult.getCreatedDocument().getContentType());
 	}
@@ -70,7 +71,7 @@ public class GeneratePDFTest {
 	@DisplayName("Test testGeneratePdf with bad data.")
 	void testGeneratePdf_BadData() throws Exception {
 		GeneratePDFServiceException ex = assertThrows(GeneratePDFServiceException.class,
-				() -> underTest.createPDF2(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DOCX),
+				() -> underTest.createPDF2(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DOCX),
 						" ", null, null, null, null, null));
 		String msg = ex.getMessage();
 		assertNotNull(msg);

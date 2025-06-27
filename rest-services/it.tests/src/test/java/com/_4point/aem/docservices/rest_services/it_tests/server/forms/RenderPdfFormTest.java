@@ -77,14 +77,14 @@ class RenderPdfFormTest {
 	@Test
 	void testRenderFormsPDF_AllArgs() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString())
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, REMOTE_SAMPLE_FORM_XDP.toString())
 					 .field(ACROBAT_VERSION_PARAM, "Acrobat_10")
 //					 .field(CACHE_STRATEGY_PARAM, "CONSERVATIVE")
 					 .field(EMBED_FONTS_PARAM, "true")
 					 .field(LOCALE_PARAM, "en-CA")
 					 .field(TAGGED_PDF_PARAM, "true")
-					 .field(CONTENT_ROOT_PARAM, SERVER_FORMS_DIR.toString())
+					 .field(CONTENT_ROOT_PARAM, REMOTE_SAMPLE_FORM_XDP.getParent().toString())
 //					 .field(SUBMIT_URL_PARAM, "/submit/url")
 					 .field(XCI_PARAM, RESOURCES_DIR.resolve("pa.xci").toFile(), MediaType.APPLICATION_XML_TYPE)
 					 ;
@@ -117,8 +117,8 @@ class RenderPdfFormTest {
 	@Test
 	void testRenderFormsPDF_JustFormAndData() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString());
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, REMOTE_SAMPLE_FORM_XDP.toString());
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)
@@ -146,8 +146,8 @@ class RenderPdfFormTest {
 	@Test
 	void testRenderFormsPDF_JustFormDocAndData() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SAMPLE_FORM_XDP.toFile(), APPLICATION_XDP);
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, LOCAL_SAMPLE_FORM_XDP.toFile(), APPLICATION_XDP);
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)
@@ -174,8 +174,8 @@ class RenderPdfFormTest {
 	@Test
 	void testRenderFormsPDF_CRXFormAndData() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SAMPLE_FORM_XDP.getFileName().toString())
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, LOCAL_SAMPLE_FORM_XDP.getFileName().toString())
 					 .field(CONTENT_ROOT_PARAM, CRX_CONTENT_ROOT);
 
 			Response result = target.request()
@@ -201,9 +201,9 @@ class RenderPdfFormTest {
 	@Test
 	void testRenderFormsPDF_BadXDP() throws IOException {
 		String badFormName = "BadForm.xdp";
-		try (final FormDataMultiPart multipart = new FormDataMultiPart()
-				.field(DATA_PARAM, TestUtils.SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-				.field(TEMPLATE_PARAM, TestUtils.SERVER_FORMS_DIR.resolve(badFormName).toString())) {
+		try (final FormDataMultiPart fdmp = new FormDataMultiPart(); final FormDataMultiPart multipart = fdmp
+				.field(DATA_PARAM, TestUtils.LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+				.field(TEMPLATE_PARAM, TestUtils.REMOTE_SAMPLE_FORM_XDP.getParent().resolve(badFormName).toString())) {
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)

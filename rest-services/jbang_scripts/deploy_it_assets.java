@@ -24,7 +24,7 @@ class deploy_it_assets implements Callable<Integer> {
 	private static final String AEM_SERVER_USER = "admin";
 	private static final String AEM_SERVER_PASSWORD = "admin";
 	private static final Path REST_SERVICES_PROJECT_DIR = Path.of("..");
-	private static final Path SAMPLES_DIR = REST_SERVICES_PROJECT_DIR.resolve(Path.of("it.tests", "src", "test", "resources"));
+	private static final Path SAMPLES_DIR = REST_SERVICES_PROJECT_DIR.resolve(Path.of("test_containers", "ff_it_files"));
 	private static final Path AF_TEST_FORMS_PATH = SAMPLES_DIR.resolve("sample00002test.zip");
 	private static final Path OF_TEST_FORMS_PATH = SAMPLES_DIR.resolve("SampleForm.xdp");
 

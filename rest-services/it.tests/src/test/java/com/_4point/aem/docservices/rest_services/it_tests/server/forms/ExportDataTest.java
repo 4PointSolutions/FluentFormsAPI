@@ -64,7 +64,7 @@ public class ExportDataTest {
 	
 		try (@SuppressWarnings("resource")
 		final FormDataMultiPart multipart = new FormDataMultiPart()
-												.field("pdforxdp", TestUtils.SAMPLE_FORM_WITH_DATA_PDF.toFile() ,APPLICATION_PDF)
+												.field("pdforxdp", TestUtils.LOCAL_SAMPLE_FORM_WITH_DATA_PDF.toFile() ,APPLICATION_PDF)
 												.field("dataformat", DataFormat.XmlData.name())) {
 			
 			Response result = target.request()
@@ -98,7 +98,7 @@ public class ExportDataTest {
 	void testExportDataXdp_Bytes() throws Exception {
 		try (@SuppressWarnings("resource")
 			final FormDataMultiPart multipart = new FormDataMultiPart()
-														.field("pdforxdp", TestUtils.SAMPLE_FORM_WITH_DATA_PDF.toFile() ,APPLICATION_PDF)
+														.field("pdforxdp", TestUtils.LOCAL_SAMPLE_FORM_WITH_DATA_PDF.toFile() ,APPLICATION_PDF)
 														.field("dataformat", DataFormat.XDP.name())) {
 			
 			Response result = target.request()
@@ -134,7 +134,7 @@ public class ExportDataTest {
 		
 		try (@SuppressWarnings("resource")
 		final FormDataMultiPart multipart = new FormDataMultiPart()
-												.field("pdforxdp", TestUtils.SAMPLE_FORM_WITH_DATA_PDF.toFile() ,APPLICATION_PDF)
+												.field("pdforxdp", TestUtils.LOCAL_SAMPLE_FORM_WITH_DATA_PDF.toFile() ,APPLICATION_PDF)
 												.field("dataformat", DataFormat.Auto.name())) {
 			
 			Response result = target.request()
@@ -169,7 +169,7 @@ public class ExportDataTest {
 		
 		try (@SuppressWarnings("resource")
 		final FormDataMultiPart multipart = new FormDataMultiPart()
-												.field("pdforxdp", TestUtils.SAMPLE_FORM_PDF.toFile() ,APPLICATION_PDF)
+												.field("pdforxdp", TestUtils.LOCAL_SAMPLE_FORM_PDF.toFile() ,APPLICATION_PDF)
 												.field("dataformat", DataFormat.XmlData.name())) {
 			
 			Response result = target.request()

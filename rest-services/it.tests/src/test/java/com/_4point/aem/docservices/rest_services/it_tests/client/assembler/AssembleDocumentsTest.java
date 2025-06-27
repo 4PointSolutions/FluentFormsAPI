@@ -70,9 +70,9 @@ public class AssembleDocumentsTest {
 	@DisplayName("Test AssembleDocuments() Happy Path.")
 	void testAssembleDocuments() throws Exception {
 		AssemblerResult assemblerResult	= underTest.invoke()
-												   .add("File0.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF))
-												   .add("File1.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF).setContentType("application/pdf"))
-												   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_DDX));
+												   .add("File0.pdf", DOC_FACTORY.create(LOCAL_SAMPLE_FORM_WITHOUT_DATA_PDF))
+												   .add("File1.pdf", DOC_FACTORY.create(LOCAL_SAMPLE_FORM_WITHOUT_DATA_PDF).setContentType("application/pdf"))
+												   .executeOn(DOC_FACTORY.create(LOCAL_SAMPLE_FORM_DDX));
 
 		Map<String, Document> resultDocuments = assemblerResult.getDocuments();
 		validateResultMap(resultDocuments);
@@ -106,9 +106,9 @@ public class AssembleDocumentsTest {
 				.setLogLevel(LogLevel.ALL)
 				.setTakeOwnership(Boolean.FALSE)
 				.setValidateOnly(Boolean.FALSE)
-				.add("File0.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF).setContentType("application/pdf"))
-				.add("File1.pdf", DOC_FACTORY.create(SAMPLE_FORM_WITHOUT_DATA_PDF))
-				.executeOn(DOC_FACTORY.create(SAMPLE_FORM_DDX));
+				.add("File0.pdf", DOC_FACTORY.create(LOCAL_SAMPLE_FORM_WITHOUT_DATA_PDF).setContentType("application/pdf"))
+				.add("File1.pdf", DOC_FACTORY.create(LOCAL_SAMPLE_FORM_WITHOUT_DATA_PDF))
+				.executeOn(DOC_FACTORY.create(LOCAL_SAMPLE_FORM_DDX));
 
 		Map<String, Document> resultDocuments = assemblerResult.getDocuments();
 		validateResultMap(resultDocuments);
@@ -117,12 +117,12 @@ public class AssembleDocumentsTest {
 	@Test
 	@DisplayName("Test testAssembleDocuments with bad data.")
 	void testAssembleDocuments_BadData() throws Exception {
-		Map<String, Object> sourceDocuments = Map.of("File0.pdf", DOC_FACTORY.create(SAMPLE_FORM_PDF),
-													 "File1.pdf", DOC_FACTORY.create(SAMPLE_FORM_PDF)
+		Map<String, Object> sourceDocuments = Map.of("File0.pdf", DOC_FACTORY.create(LOCAL_SAMPLE_FORM_PDF),
+													 "File1.pdf", DOC_FACTORY.create(LOCAL_SAMPLE_FORM_PDF)
 													);
 		AssemblerOptionsSpecImpl assemblerOptionsSpecImpl = new AssemblerOptionsSpecImpl();
 		assemblerOptionsSpecImpl.setLogLevel(LogLevel.ALL);
-		AssemblerServiceException ex = assertThrows(AssemblerServiceException.class, ()->underTest.invoke(DOC_FACTORY.create(SAMPLE_FORM_DOCX), sourceDocuments, assemblerOptionsSpecImpl));
+		AssemblerServiceException ex = assertThrows(AssemblerServiceException.class, ()->underTest.invoke(DOC_FACTORY.create(LOCAL_SAMPLE_FORM_DOCX), sourceDocuments, assemblerOptionsSpecImpl));
 
 		assertThat(ex, exceptionMsgContainsAll("Error while POSTing to server"));
 	}
@@ -131,7 +131,7 @@ public class AssembleDocumentsTest {
 	@DisplayName("Test ToPdfA() Happy Path.")
 	void testToPdfA() throws Exception {
 		PDFAConversionResult result = underTest.toPDFA()
-											   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_PDF));
+											   .executeOn(DOC_FACTORY.create(LOCAL_SAMPLE_FORM_PDF));
 		Document pdfaDocument = result.getPDFADocument();
 		Document conversionLog = result.getConversionLog();
 		Document jobLog = result.getJobLog();
@@ -158,7 +158,7 @@ public class AssembleDocumentsTest {
 											   .setRetainPDFFormState(true)
 											   .setSignatures(Signatures.ARCHIVE_ALWAYS)
 											   .setVerify(true)
-											   .executeOn(DOC_FACTORY.create(SAMPLE_FORM_PDF));
+											   .executeOn(DOC_FACTORY.create(LOCAL_SAMPLE_FORM_PDF));
 		Document pdfaDocument = result.getPDFADocument();
 		Document conversionLog = result.getConversionLog();
 		Document jobLog = result.getJobLog();
@@ -177,7 +177,7 @@ public class AssembleDocumentsTest {
 					+ "    <DocumentInformation result=\"info\" source=\"doc1\"/>\n"
 					+ "</DDX>\n";
  
-		Map<String, EitherDocumentOrDocumentList> inputDocs = Collections.singletonMap("doc1", EitherDocumentOrDocumentList.from(DOC_FACTORY.create(SAMPLE_FORM_PDF)));
+		Map<String, EitherDocumentOrDocumentList> inputDocs = Collections.singletonMap("doc1", EitherDocumentOrDocumentList.from(DOC_FACTORY.create(LOCAL_SAMPLE_FORM_PDF)));
 		
 		AssemblerResult result = underTest.invoke()
 										  .executeOn2(DOC_FACTORY.create(ddx.getBytes()), inputDocs);

@@ -51,7 +51,7 @@ class ConvertPdfToXdpTest {
 	@Test
 	void testConvertPdfToXdp() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DOCUMENT_PARAM, SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF);
+			multipart.field(DOCUMENT_PARAM, LOCAL_SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF);
 			
 			Response result = target.request()
 					.accept(APPLICATION_XDP)

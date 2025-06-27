@@ -63,7 +63,7 @@ public class RenderHtml5FormTest {
 	void testRenderHtml5Form_FormRef() throws IOException {
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(TEMPLATE_PARAM_NAME, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString());
+			multipart.field(TEMPLATE_PARAM_NAME, REMOTE_SAMPLE_FORM_XDP.toString());
 
 			Response result = target
 					.request()
@@ -111,14 +111,14 @@ public class RenderHtml5FormTest {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			switch (scenario.formType) {
 			case BY_REFERENCE:
-				multipart.field(TEMPLATE_PARAM_NAME, SAMPLE_FORM_XDP.toAbsolutePath().toString());
+				multipart.field(TEMPLATE_PARAM_NAME, REMOTE_SAMPLE_FORM_XDP.toAbsolutePath().toString());
 				break;
 			case BY_CRX_REFERENCE:
-				multipart.field(TEMPLATE_PARAM_NAME, "sample-forms/ " + SAMPLE_FORM_XDP.getFileName().toString());
+				multipart.field(TEMPLATE_PARAM_NAME, "sample-forms/ " + REMOTE_SAMPLE_FORM_XDP.getFileName().toString());
 				multipart.field(CONTEXT_ROOT_PARAM_NAME, "crx:/content/dam/formsanddocuments");
 				break;
 			case BY_VALUE:
-				multipart.field(TEMPLATE_PARAM_NAME, SAMPLE_FORM_XDP.toFile(), MediaType.valueOf(APPLICATION_XDP));
+				multipart.field(TEMPLATE_PARAM_NAME, LOCAL_SAMPLE_FORM_XDP.toFile(), MediaType.valueOf(APPLICATION_XDP));
 				break;
 			default:
 				throw new IllegalStateException("Unknown FormType (" + scenario.formType.toString() + ").");
@@ -127,10 +127,10 @@ public class RenderHtml5FormTest {
 			case NO_DATA:
 				break;	// Don't do anything w.r.t. data if NO_DATA is specified.
 			case BY_REFERENCE:
-				multipart.field(DATA_PARAM_NAME, SAMPLE_FORM_DATA_XML.toString());
+				multipart.field(DATA_PARAM_NAME, REMOTE_SAMPLE_FORM_DATA_XML.toString());
 				break;
 			case BY_VALUE:
-				multipart.field(DATA_PARAM_NAME, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE);
+				multipart.field(DATA_PARAM_NAME, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE);
 				break;
 			default:
 				throw new IllegalStateException("Unknown DataType (" + scenario.dataType.toString() + ").");

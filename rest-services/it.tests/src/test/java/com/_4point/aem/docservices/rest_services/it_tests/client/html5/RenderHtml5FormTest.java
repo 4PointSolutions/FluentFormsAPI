@@ -49,7 +49,7 @@ class RenderHtml5FormTest {
 
 	@Test
 	void testRenderHtml5FormPathOrUrl() throws Exception {
-		PathOrUrl template = PathOrUrl.from(CRX_CONTENT_ROOT + TestUtils.SAMPLE_FORM_XDP.getFileName().toString());
+		PathOrUrl template = PathOrUrl.from(CRX_CONTENT_ROOT + TestUtils.REMOTE_SAMPLE_FORM_XDP.getFileName().toString());
 		
 		Document result = underTest.renderHtml5Form(template);
 		
@@ -67,8 +67,8 @@ class RenderHtml5FormTest {
 
 	@Test
 	void testRenderHtml5FormPathOrUrlDocument() throws Exception {
-		PathOrUrl template = PathOrUrl.from(CRX_CONTENT_ROOT + TestUtils.SAMPLE_FORM_XDP.getFileName().toString());
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML);
+		PathOrUrl template = PathOrUrl.from(CRX_CONTENT_ROOT + TestUtils.REMOTE_SAMPLE_FORM_XDP.getFileName().toString());
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.LOCAL_SAMPLE_FORM_DATA_XML);
 		data.setContentTypeIfEmpty("application/xml");
 		
 		Document result = underTest.renderHtml5Form(template, data);

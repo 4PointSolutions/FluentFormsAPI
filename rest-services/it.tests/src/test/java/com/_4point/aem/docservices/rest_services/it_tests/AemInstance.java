@@ -15,8 +15,6 @@ import org.awaitility.Awaitility;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import com._4point.aem.docservices.rest_services.it_tests.TestUtils.AemTargetType;
-
 /**
  * This singleton defines the AEM instance that is being used for the integration tests.
  * 
@@ -30,20 +28,23 @@ public enum AemInstance {
 	// These tests require an AEM container image with AEM forms installed.  Since AEM is proprietary, it is not possible to obtain this
 	// through public images.  By default, this uses a private image hosted in the 4PointSolutions-PS GitHub organization.  If you are not
 	// part of that prg, you will have to supply your own image.
-	private static final String AEM_IMAGE_NAME = "ghcr.io/4pointsolutions-ps/aem:aem65sp21";
-	private final TestUtils.AemTargetType targetType;
+//	private static final String AEM_IMAGE_NAME = "ghcr.io/4pointsolutions-ps/aem:aem65sp21";
+//	private static final String AEM_IMAGE_NAME = "aem_lts:aem65lts";
+	private static final String AEM_IMAGE_NAME = "aem_lts_it_tests:aem65lts_it_tests";
+
+	private final AemTargetType targetType;
 	private final GenericContainer<?> aemContainer;
 	private final AtomicBoolean preparedForTests = new AtomicBoolean(false);
 
 	@SuppressWarnings("resource")
-	private AemInstance(TestUtils.AemTargetType targetType) {
+	private AemInstance(AemTargetType targetType) {
 		this(targetType, targetType == AemTargetType.TESTCONTAINERS ? new GenericContainer<>(DockerImageName.parse(AEM_IMAGE_NAME))
 																	   .withReuse(true)
 																	   .withExposedPorts(4502)
 							   : null);
 	}
 
-	private AemInstance(TestUtils.AemTargetType targetType, GenericContainer<?> aemContainer) {
+	private AemInstance(AemTargetType targetType, GenericContainer<?> aemContainer) {
 		this.targetType = targetType;
 		this.aemContainer = aemContainer;
 		if (aemContainer != null) {

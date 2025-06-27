@@ -21,6 +21,7 @@ import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.docassurance.DocAssuranceServiceImpl;
 
 @Tag("client-tests")
+@Tag("requiresRe")
 public class SecureDocumentTest {
 
 	private DocAssuranceService underTest; 
@@ -65,7 +66,7 @@ public class SecureDocumentTest {
 		                                  .done()
 		                              .done()
 		                          .done()
-		                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
+		                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_PDF));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "testReaderExtendPDF_AllArgs_Client.pdf", true, true, true);
 	}
@@ -77,7 +78,7 @@ public class SecureDocumentTest {
 			Document pdfResult =  underTest.secureDocument()
 			                          .readerExtensionsOptions("recred")
 			                          .done()
-			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
+			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_PDF));
 			assertThat("Expected an error to be thrown.", pdfResult.getInlineData().length > 0);
 		} catch (DocAssuranceServiceException e) {
 			assertThat(e.getMessage(), containsStringIgnoringCase("Internal Error while reader extending a PDF."));
@@ -93,7 +94,7 @@ public class SecureDocumentTest {
 			Document pdfResult =  underTest.secureDocument()
 			                          .readerExtensionsOptions("bad")
 			                          .done()
-			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
+			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_PDF));
 			assertThat("Expected an error to be thrown.", pdfResult.getInlineData().length > 0);
 		} catch (DocAssuranceServiceException e) {
 			assertThat(e.getMessage(), containsStringIgnoringCase("Internal Error while reader extending a PDF."));
@@ -108,7 +109,7 @@ public class SecureDocumentTest {
 			Document pdfResult =  underTest.secureDocument()
 			                          .readerExtensionsOptions(null)
 			                          .done()
-			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
+			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_PDF));
 			assertThat("Expected an error to be thrown.", pdfResult.getInlineData().length > 0);
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage(), containsStringIgnoringCase("Credential Alias provided in Reader Extension options cannot be null."));
@@ -122,7 +123,7 @@ public class SecureDocumentTest {
 			Document pdfResult =  underTest.secureDocument()
 			                          .readerExtensionsOptions("")
 			                          .done()
-			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
+			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_PDF));
 			assertThat("Expected an error to be thrown.", pdfResult.getInlineData().length > 0);
 		} catch (DocAssuranceServiceException e) {
 			assertThat(e.getMessage(), containsStringIgnoringCase("Internal Error while reader extending a PDF."));
@@ -137,7 +138,7 @@ public class SecureDocumentTest {
 			Document pdfResult =  underTest.secureDocument()
 			                          .readerExtensionsOptions("recred")
 			                          .done()
-			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML));
+			                          .executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 			assertThat("Expected an error to be thrown.", pdfResult.getInlineData().length > 0);
 		} catch (DocAssuranceServiceException e) {
 			assertThat(e.getMessage(), containsStringIgnoringCase("Internal Error while reader extending a PDF."));

@@ -98,7 +98,7 @@ class RenderAdaptiveFormTest {
 	@Test
 	void testRenderAdaptiveFormPathOrUrlDocument() throws Exception {
 		PathOrUrl template = PathOrUrl.from(SAMPLE_AF_NAME);
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML);
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.LOCAL_SAMPLE_FORM_DATA_XML);
 		data.setContentTypeIfEmpty("application/xml");
 		
 		Document result = underTest.renderAdaptiveForm(template, data);
@@ -115,7 +115,7 @@ class RenderAdaptiveFormTest {
 	@Test
 	void testRenderAdaptiveFormStringDocument() throws Exception {
 		String template = SAMPLE_AF_NAME;
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML);
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.LOCAL_SAMPLE_FORM_DATA_XML);
 		data.setContentTypeIfEmpty("application/xml");
 		
 		Document result = underTest.renderAdaptiveForm(template, data);
@@ -132,7 +132,7 @@ class RenderAdaptiveFormTest {
 	@Test
 	void testRenderAdaptiveFormPathDocument() throws Exception {
 		Path template = Paths.get(SAMPLE_AF_NAME);
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_XML);
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.LOCAL_SAMPLE_FORM_DATA_XML);
 		data.setContentTypeIfEmpty("application/xml");
 		
 		Document result = underTest.renderAdaptiveForm(template, data);
@@ -149,7 +149,7 @@ class RenderAdaptiveFormTest {
 	@Test
 	void testRenderAdaptiveFormStringJsonDocument() throws Exception {
 		String template = SAMPLE_JSON_AF_NAME;
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.SAMPLE_FORM_DATA_JSON);
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(TestUtils.LOCAL_SAMPLE_FORM_DATA_JSON);
 		data.setContentTypeIfEmpty("application/json");
 		
 		Document result = underTest.renderAdaptiveForm(template, data);

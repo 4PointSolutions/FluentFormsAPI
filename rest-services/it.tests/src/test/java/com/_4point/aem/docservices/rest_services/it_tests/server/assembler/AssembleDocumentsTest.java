@@ -70,10 +70,10 @@ public class AssembleDocumentsTest {
 
 	@Test
 	void testAssembleDocuments_AllArgs() throws Exception {
-		byte[] samplePdf1 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
-		byte[] samplePdf2 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
+		byte[] samplePdf1 = Files.readAllBytes(LOCAL_SAMPLE_FORM_WITHOUT_DATA_PDF);
+		byte[] samplePdf2 = Files.readAllBytes(LOCAL_SAMPLE_FORM_WITHOUT_DATA_PDF);
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM_NAME, SAMPLE_FORM_DDX.toFile(), MediaType.APPLICATION_XML_TYPE)
+			multipart.field(DATA_PARAM_NAME, LOCAL_SAMPLE_FORM_DDX.toFile(), MediaType.APPLICATION_XML_TYPE)
 			.field(IS_FAIL_ON_ERROR, String.valueOf(Boolean.FALSE))
 			.field(IS_TAKE_OWNER_SHIP, String.valueOf(Boolean.FALSE))
 			.field(IS_VALIDATE_ONLY, String.valueOf(Boolean.FALSE))
@@ -104,10 +104,10 @@ public class AssembleDocumentsTest {
 	
 	@Test
 	void testAssembleDocuments_JustWithDDXandInputDocuments() throws Exception {
-		byte[] samplePdf1 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
-		byte[] samplePdf2 = Files.readAllBytes(SAMPLE_FORM_WITHOUT_DATA_PDF);
+		byte[] samplePdf1 = Files.readAllBytes(LOCAL_SAMPLE_FORM_WITHOUT_DATA_PDF);
+		byte[] samplePdf2 = Files.readAllBytes(LOCAL_SAMPLE_FORM_WITHOUT_DATA_PDF);
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM_NAME, SAMPLE_FORM_DDX.toFile(), MediaType.APPLICATION_XML_TYPE);
+			multipart.field(DATA_PARAM_NAME, LOCAL_SAMPLE_FORM_DDX.toFile(), MediaType.APPLICATION_XML_TYPE);
 			Map.of("File0.pdf", samplePdf1, "File1.pdf", samplePdf2)
 			   .forEach((docName, doc) -> {
 				   multipart.field(SOURCE_DOCUMENT_KEY, docName);

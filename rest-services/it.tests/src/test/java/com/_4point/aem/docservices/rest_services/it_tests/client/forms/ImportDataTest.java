@@ -53,8 +53,8 @@ class ImportDataTest {
 	@DisplayName("Test importData() Happy Path.")
 	void testImportData() throws Exception {
 
-		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_DATA_XML);
-		Document pdf = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_PDF);;
+		Document data = SimpleDocumentFactoryImpl.INSTANCE.create(LOCAL_SAMPLE_FORM_DATA_XML);
+		Document pdf = SimpleDocumentFactoryImpl.INSTANCE.create(LOCAL_SAMPLE_FORM_PDF);;
 		Document pdfResult = underTest.importData(pdf, data);
 
 		// Verify that all the results are correct.

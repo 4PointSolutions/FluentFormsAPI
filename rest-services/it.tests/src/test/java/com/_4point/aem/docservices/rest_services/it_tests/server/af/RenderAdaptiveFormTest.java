@@ -84,7 +84,7 @@ public class RenderAdaptiveFormTest {
 	// because the code isn't working (I can't get a manual test using the browser and the dataRef attribute to work either).
 	@Test
 	void testRenderAdaptiveForm_FormRefAndData() throws IOException {
-		Path sampleFormDataPath = TestUtils.SAMPLE_FORM_DATA_XML;
+		Path sampleFormDataPath = TestUtils.LOCAL_SAMPLE_FORM_DATA_XML;
 		String dataKey = postDataToDataCacheService(sampleFormDataPath);
 
 		Response result = client.target(constructAfUrl(SAMPLE_AF_NAME))
@@ -107,8 +107,9 @@ public class RenderAdaptiveFormTest {
 	// This is just used to load in some data into the DataCache service for manual testing.
 	// It should not be executed as part of an automated test suite.
 	@Disabled
+	@Test
 	void postData() throws Exception {
-		Path sampleFormDataPath = TestUtils.SAMPLE_FORM_DATA_XML;
+		Path sampleFormDataPath = TestUtils.LOCAL_SAMPLE_FORM_DATA_XML;
 		String dataKey = postDataToDataCacheService(sampleFormDataPath);
 		System.out.println("Data stored.  DataKey='" + dataKey + "'.");
 	}
@@ -133,7 +134,8 @@ public class RenderAdaptiveFormTest {
 			if (SAVE_RESULTS) {
 				IOUtils.write(resultBytes, Files.newOutputStream(TestUtils.ACTUAL_RESULTS_DIR.resolve("testRenderAdaptiveForm_FormRefAndData_DataKey_result.txt")));
 			}
-			assertTrue(MediaType.TEXT_PLAIN_TYPE.isCompatible(MediaType.valueOf(result.getHeaderString(HttpHeaders.CONTENT_TYPE))));
+			String contentType = result.getHeaderString(HttpHeaders.CONTENT_TYPE);
+			assertTrue(MediaType.TEXT_PLAIN_TYPE.isCompatible(MediaType.valueOf(contentType)), "Unexpected content type returned from DataCache service.  Expected 'text/plain' but was '" + contentType + "'.");
 			dataKey = new String(resultBytes, StandardCharsets.UTF_8);
 		}
 		

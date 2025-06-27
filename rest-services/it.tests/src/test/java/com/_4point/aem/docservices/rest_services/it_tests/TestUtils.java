@@ -1,14 +1,11 @@
 package com._4point.aem.docservices.rest_services.it_tests;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,13 +28,6 @@ public class TestUtils {
 	public static final String TEST_USER = "admin";
 	public static final String TEST_USER_PASSWORD = "admin";
 	
-	public enum AemTargetType {
-		LOCAL,			// Running on local machine (assumes that the port is TEST_MACHINE_PORT)	
-		REMOTE_WINDOWS, // Running on remote Windows machine (assumes that machine name is TEST_MACHINE_NAME and port is TEST_MACHINE_PORT) 
-		REMOTE_LINUX, 	// Running on remote Linux machine (assumes that machine name is TEST_MACHINE_NAME and port is TEST_MACHINE_PORT)
-		TESTCONTAINERS; // Running on local testcontainers image (gets port from TestContainers)
-	}
-	
 	// Set this to indicate the type of machine that AEM is running on:
 	//  The integration tests will run against an AEM instance running in a Docker container otherwise they will run against a local AEM instance.
 	public static final AemTargetType AEM_TARGET_TYPE = AemTargetType.LOCAL; 
@@ -54,7 +44,7 @@ public class TestUtils {
 	//		* JSAFE not configured - Causes Assembler test to fail (should be fixed in latest AEM image)
 	//		* Sample XDP not deployed - Causes HTML5, PDF and Print rendering tests to fail (should be fixed in latest AEM image)
 	//		* GeneratePrintedOutput test AllArgs seems to want D:\FluentForms\Forms - Need to fix tests
-	//		* Generate HTLML5 test fails because proteted mode is on - Need to fix AEM image creation code to set this.
+	//		* Generate HTLML5 test fails because protected mode is on - Need to fix AEM image creation code to set this.
 	
 	private static final String SAMPLE_FORM_PDF_NAME = "SampleForm.pdf";
 	private static final String SAMPLE_FORM_XDP_NAME = "SampleForm.xdp";
@@ -64,31 +54,38 @@ public class TestUtils {
 	private static final String SAMPLE_FORM_DATA_JSON_NAME = "SampleForm_data.json";
 	private static final String SAMPLE_FORM_DATA_DOCX_NAME = "SampleForm.docx";
 	private static final String SAMPLE_FORM_DDX_NAME = "SampleForm_DDX.xml";
-	private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 	
-	public static final Path SAMPLE_FORM_PDF = getPath(SAMPLE_FORM_PDF_NAME);
-	public static final Path SAMPLE_FORM_WITH_DATA_PDF = getPath(SAMPLE_FORM_WITH_DATA_PDF_NAME);
-	public static final Path SAMPLE_FORM_WITHOUT_DATA_PDF = getPath(SAMPLE_FORM_WITHOUT_DATA_PDF_NAME);
-	public static final Path SAMPLE_FORM_XDP = getPath(SAMPLE_FORM_XDP_NAME);
-	public static final Path SAMPLE_FORM_DATA_XML = getPath(SAMPLE_FORM_DATA_XML_NAME);
-	public static final Path SAMPLE_FORM_DATA_JSON = getPath(SAMPLE_FORM_DATA_JSON_NAME);
-	public final static Path SAMPLE_FORM_DOCX =  getPath(SAMPLE_FORM_DATA_DOCX_NAME);
-	public static final Path SAMPLE_FORM_DDX = getPath(SAMPLE_FORM_DDX_NAME);
+	public static final Path REMOTE_SAMPLE_FORM_PDF = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_PDF_NAME);
+	public static final Path REMOTE_SAMPLE_FORM_WITH_DATA_PDF = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_WITH_DATA_PDF_NAME);
+	public static final Path REMOTE_SAMPLE_FORM_WITHOUT_DATA_PDF = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_WITHOUT_DATA_PDF_NAME);
+	public static final Path REMOTE_SAMPLE_FORM_XDP = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_XDP_NAME);
+	public static final Path REMOTE_SAMPLE_FORM_DATA_XML = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_DATA_XML_NAME);
+	public static final Path REMOTE_SAMPLE_FORM_DATA_JSON = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_DATA_JSON_NAME);
+	public final static Path REMOTE_SAMPLE_FORM_DOCX =  AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_DATA_DOCX_NAME);
+	public static final Path REMOTE_SAMPLE_FORM_DDX = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_DDX_NAME);
+	
+	public static final Path LOCAL_SAMPLE_FORM_PDF = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_PDF_NAME);
+	public static final Path LOCAL_SAMPLE_FORM_WITH_DATA_PDF = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_WITH_DATA_PDF_NAME);
+	public static final Path LOCAL_SAMPLE_FORM_WITHOUT_DATA_PDF = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_WITHOUT_DATA_PDF_NAME);
+	public static final Path LOCAL_SAMPLE_FORM_XDP = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_XDP_NAME);
+	public static final Path LOCAL_SAMPLE_FORM_DATA_XML = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_DATA_XML_NAME);
+	public static final Path LOCAL_SAMPLE_FORM_DATA_JSON = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_DATA_JSON_NAME);
+	public final static Path LOCAL_SAMPLE_FORM_DOCX =  AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_DATA_DOCX_NAME);
+	public static final Path LOCAL_SAMPLE_FORM_DDX = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_DDX_NAME);
 	
 	public static final Path RESOURCES_DIR = Paths.get("src", "test", "resources");
 	public static final Path ACTUAL_RESULTS_DIR = RESOURCES_DIR.resolve("actualResults");
-	public static final Path SERVER_FORMS_DIR = Paths.get("D:", "FluentForms", "Forms");
 
 	private static final boolean SAVE_RESULTS = false;
 
-	private static Path getPath(String name) {
-		try {
-			return Paths.get(classLoader.getResource(name).toURI());
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException("getResource returned invalid URI. (This should never happen!)", e);
-		}
-	}
-	
+//	private static Path getPath(String name) {
+//		try {
+//			return Paths.get(classLoader.getResource(name).toURI());
+//		} catch (URISyntaxException e) {
+//			throw new IllegalStateException("getResource returned invalid URI. (This should never happen!)", e);
+//		}
+//	}
+//	
 	public static String readEntityToString(Response result) {
 		try {
 			return IOUtils.toString((InputStream)result.getEntity(), StandardCharsets.UTF_8);

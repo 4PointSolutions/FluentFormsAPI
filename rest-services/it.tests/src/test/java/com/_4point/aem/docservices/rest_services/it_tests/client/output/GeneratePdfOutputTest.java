@@ -19,6 +19,7 @@ import org.junit.jupiter.api.condition.OS;
 import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
 import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
+import com._4point.aem.docservices.rest_services.it_tests.AemTargetType;
 import com._4point.aem.docservices.rest_services.it_tests.Pdf;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
@@ -58,7 +59,7 @@ class GeneratePdfOutputTest {
 	@DisplayName("Test generatePdfOutput() Just Form and Data.")
 	void testGeneratePdfOutput_JustFormAndData() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()
-									.executeOn(SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML));
+									.executeOn(REMOTE_SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormAndData.pdf", false, false, false);
 	}
@@ -67,7 +68,7 @@ class GeneratePdfOutputTest {
 	@DisplayName("Test generatePdfOutput() Just Form Document and Data.")
 	void testGeneratePdfOutput_JustFormDocAndData() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()
-									.executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_XDP), SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML));
+									.executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_XDP), SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormAndData.pdf", false, false, false);
 	}
@@ -77,7 +78,7 @@ class GeneratePdfOutputTest {
 	void testGeneratePdfOutput_CRXFormAndData() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()
 									.setContentRoot(PathOrUrl.from(CRX_CONTENT_ROOT))
-									.executeOn(SAMPLE_FORM_XDP.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML));
+									.executeOn(REMOTE_SAMPLE_FORM_XDP.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_CRXFormAndData.pdf", false, false, false);		
 	}
@@ -86,7 +87,7 @@ class GeneratePdfOutputTest {
 	@DisplayName("Test generatePdfOutput() All Arguments.")
 	void testGeneratePdfOutput_AllArgs() throws Exception {
 		AcrobatVersion acrobatVersion = AcrobatVersion.Acrobat_10_1;
-		Path contentRoot = SAMPLE_FORM_XDP.getParent();
+		Path contentRoot = REMOTE_SAMPLE_FORM_XDP.getParent();
 //		Path debugDir = null;
 		
 		Document pdfResult =  underTest.generatePDFOutput()
@@ -99,7 +100,8 @@ class GeneratePdfOutputTest {
 									.setRetainPDFFormState(true)
 									.setRetainUnsignedSignatureFields(true)
 									.setTaggedPDF(true)
-									.executeOn(SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML));
+									// TODO: Since contentRoot is set, the full path should not be necessary. Try changing to just the filename.
+									.executeOn(REMOTE_SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_AllArgs.pdf", false, false, false);		
 	}
@@ -108,7 +110,7 @@ class GeneratePdfOutputTest {
 	@DisplayName("Test generatePdfOutput() Just Form Doc.  FluentFormsAPI Issue #15")
 	void testGeneratePdfOutput_JustFormDocIssue15() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()
-									   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf")));
+									   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(AemTargetType.LOCAL.samplesPath("SampleArtworkPdf.pdf")));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
 	}
@@ -117,7 +119,7 @@ class GeneratePdfOutputTest {
 	@DisplayName("Test generatePdfOutput() Just Form.  FluentFormsAPI Issue #15")
 	void testGeneratePdfOutput_JustFormIssue15() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()
-									   .executeOn(TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf").toAbsolutePath());
+									   .executeOn(AEM_TARGET_TYPE.samplesPath("SampleArtworkPdf.pdf"));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
 	}

@@ -57,7 +57,7 @@ public class DataCacheServiceTest {
 	void testDataService_WriteRead() throws IOException {
 		String dataKey = null;
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, TestUtils.SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE);
+			multipart.field(DATA_PARAM, TestUtils.LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE);
 
 			Response result = target
 					.request()

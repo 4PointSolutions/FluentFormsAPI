@@ -27,7 +27,7 @@ import static com._4point.aem.docservices.rest_services.it_tests.TestUtils.*;
 @Tag("client-tests")
 class ConvertPdfToXdpTest {
 
-	private final Document DUMMY_DOC = SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF);
+	private final Document DUMMY_DOC = SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_PDF);
 	private PdfUtilityService underTest;
 	
 	@BeforeAll
@@ -50,7 +50,7 @@ class ConvertPdfToXdpTest {
 	
 	@Test
 	void testConvertPdfToXdp() throws Exception {
-		Document result = underTest.convertPDFtoXDP(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_PDF));
+		Document result = underTest.convertPDFtoXDP(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_PDF));
 		
 		assertNotNull(result);
 		assertEquals("application/vnd.adobe.xdp+xml", result.getContentType());

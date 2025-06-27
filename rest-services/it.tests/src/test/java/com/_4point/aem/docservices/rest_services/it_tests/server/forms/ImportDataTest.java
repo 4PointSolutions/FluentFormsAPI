@@ -59,8 +59,8 @@ class ImportDataTest {
 	void testImportData_Bytes() throws IOException {
 
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()
-													.field(DATA_PARAM_NAME, TestUtils.SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-													.field(PDF_PARAM_NAME, TestUtils.SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)) {
+													.field(DATA_PARAM_NAME, TestUtils.LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+													.field(PDF_PARAM_NAME, TestUtils.LOCAL_SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)) {
 			
 			Response result = target.request()
 									  .accept(APPLICATION_PDF)

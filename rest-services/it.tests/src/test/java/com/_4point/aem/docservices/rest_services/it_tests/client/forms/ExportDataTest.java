@@ -68,7 +68,7 @@ class ExportDataTest {
 	@DisplayName("Test exportData() Happy Path.")
 	void testExportData() throws Exception {
 
-		Document pdforxdp = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_WITH_DATA_PDF.toFile());
+		Document pdforxdp = SimpleDocumentFactoryImpl.INSTANCE.create(LOCAL_SAMPLE_FORM_WITH_DATA_PDF);
 		DataFormat dataformat = com.adobe.fd.forms.api.DataFormat.XmlData;
 		Optional<Document> pdfResult = underTest.exportData(pdforxdp, dataformat);
 
@@ -97,7 +97,7 @@ class ExportDataTest {
 	@DisplayName("Test exportData() Non-interactive PDF.")
 	void testExportDataNonInteractive() throws Exception {
 
-		Document pdforxdp = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_WITHOUT_DATA_PDF);
+		Document pdforxdp = SimpleDocumentFactoryImpl.INSTANCE.create(LOCAL_SAMPLE_FORM_WITHOUT_DATA_PDF);
 		DataFormat dataformat = com.adobe.fd.forms.api.DataFormat.XmlData;
 		FormsServiceException ex = assertThrows(FormsServiceException.class, ()->underTest.exportData(pdforxdp, dataformat));
 		
@@ -109,7 +109,7 @@ class ExportDataTest {
 	@DisplayName("Test exportData() NoData PDF.")
 	void testExportDataNoData() throws Exception {
 
-		Document pdforxdp = SimpleDocumentFactoryImpl.INSTANCE.create(SAMPLE_FORM_PDF);
+		Document pdforxdp = SimpleDocumentFactoryImpl.INSTANCE.create(LOCAL_SAMPLE_FORM_PDF);
 		DataFormat dataformat = com.adobe.fd.forms.api.DataFormat.XmlData;
 		Optional<Document> pdfResult = underTest.exportData(pdforxdp, dataformat);
 

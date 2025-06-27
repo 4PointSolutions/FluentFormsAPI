@@ -53,7 +53,7 @@ class RenderPdfFormTest {
 	@DisplayName("Test renderPdfForm() Just Form and Data.")
 	void testRenderPdfForm_JustFormAndData() throws Exception {
 		Document pdfResult =  underTest.renderPDFForm()
-									.executeOn(SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML));
+									.executeOn(REMOTE_SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "RenderPdfFormClient_JustFormAndData.pdf", true, true, false);
 	}
@@ -62,7 +62,7 @@ class RenderPdfFormTest {
 	@DisplayName("Test renderPdfForm() Just Form Document and Data.")
 	void testRenderPdfForm_JustFormDocAndData() throws Exception {
 		Document pdfResult =  underTest.renderPDFForm()
-									.executeOn(SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_XDP), SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML));
+									.executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_XDP), SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "RenderPdfFormClient_JustFormAndData.pdf", true, true, false);
 	}
@@ -72,7 +72,7 @@ class RenderPdfFormTest {
 	void testRenderPdfForm_CRXFormAndData() throws Exception {
 		Document pdfResult =  underTest.renderPDFForm()
 									.setContentRoot(PathOrUrl.from(CRX_CONTENT_ROOT))
-									.executeOn(SAMPLE_FORM_XDP.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML));
+									.executeOn(REMOTE_SAMPLE_FORM_XDP.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "RenderPdfFormClient_CRXFormAndData.pdf", true, true, false);
 	}
@@ -82,7 +82,7 @@ class RenderPdfFormTest {
 	void testRenderPdfForm_AllArgs() throws Exception {
 		AcrobatVersion acrobatVersion = AcrobatVersion.Acrobat_10_1;
 		CacheStrategy strategy = CacheStrategy.NONE;
-		Path contentRoot = SAMPLE_FORM_XDP.getParent();
+		Path contentRoot = REMOTE_SAMPLE_FORM_XDP.getParent();
 //		Path debugDir = null;
 		Locale locale = Locale.CANADA_FRENCH;
 		String submitUrl = "http://example.com/";
@@ -98,7 +98,7 @@ class RenderPdfFormTest {
 									.setSubmitUrlString(submitUrl)
 									.setTaggedPDF(true)
 									.setXci(xci)
-									.executeOn(SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(SAMPLE_FORM_DATA_XML));
+									.executeOn(REMOTE_SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "RenderPdfFormClient_AllArgs.pdf", false, true, false);
 	}

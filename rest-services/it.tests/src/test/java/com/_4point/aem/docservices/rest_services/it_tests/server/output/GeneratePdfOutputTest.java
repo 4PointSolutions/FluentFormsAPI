@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
+import com._4point.aem.docservices.rest_services.it_tests.AemTargetType;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
 @Tag("server-tests")
@@ -68,8 +69,8 @@ class GeneratePdfOutputTest {
 	@Test
 	void testGeneratePdfOutput_AllArgs() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString())
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, REMOTE_SAMPLE_FORM_XDP.toString())
 					 .field(ACROBAT_VERSION_PARAM, "Acrobat_10")
 //					 .field(DEBUG_DIR_PARAM, "")	We don't want to generate debug outputs.
 					 .field(EMBED_FONTS_PARAM, Boolean.toString(false))
@@ -78,7 +79,7 @@ class GeneratePdfOutputTest {
 					 .field(RETAIN_PDF_FORM_STATE_PARAM, Boolean.toString(false))
 					 .field(RETAIN_UNSIGNED_SIGNATURE_FIELDS_PARAM, Boolean.toString(false))
 					 .field(TAGGED_PDF_PARAM, "true")
-					 .field(CONTENT_ROOT_PARAM, SERVER_FORMS_DIR.toString())
+					 .field(CONTENT_ROOT_PARAM, REMOTE_SAMPLE_FORM_XDP.getParent().toString())
 					 .field(XCI_PARAM, RESOURCES_DIR.resolve("pa.xci").toFile(), MediaType.APPLICATION_XML_TYPE)
 					 ;
 
@@ -100,8 +101,8 @@ class GeneratePdfOutputTest {
 	@Test
 	void testGeneratePdfOutput_JustFormAndData() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SERVER_FORMS_DIR.resolve(SAMPLE_FORM_XDP).toString());
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, REMOTE_SAMPLE_FORM_XDP.toString());
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)
@@ -119,8 +120,8 @@ class GeneratePdfOutputTest {
 	@Test
 	void testGeneratePdfOutput_JustFormDocAndData() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SAMPLE_FORM_XDP.toFile(), APPLICATION_XDP);
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, LOCAL_SAMPLE_FORM_XDP.toFile(), APPLICATION_XDP);
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)
@@ -138,8 +139,8 @@ class GeneratePdfOutputTest {
 	@Test
 	void testGeneratePdfOutput_CRXFormAndData() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DATA_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, SAMPLE_FORM_XDP.getFileName().toString())
+			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+					 .field(TEMPLATE_PARAM, REMOTE_SAMPLE_FORM_XDP.getFileName().toString())
 					 .field(CONTENT_ROOT_PARAM, CRX_CONTENT_ROOT);
 
 			Response result = target.request()
@@ -160,8 +161,8 @@ class GeneratePdfOutputTest {
 	void testGeneratePdfOutput_CRXBadXDP() throws Exception {
 		String badFormName = "BadForm.xdp";
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()
-				.field(DATA_PARAM, TestUtils.SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-				.field(TEMPLATE_PARAM, TestUtils.SERVER_FORMS_DIR.resolve(badFormName).toString())) {
+				.field(DATA_PARAM, TestUtils.LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+				.field(TEMPLATE_PARAM, TestUtils.REMOTE_SAMPLE_FORM_XDP.getParent().resolve(badFormName).toString())) {
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)
@@ -180,7 +181,7 @@ class GeneratePdfOutputTest {
 	@Test
 	void testGeneratePdfOutput_JustFormDoc_Issue15() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(TEMPLATE_PARAM, TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf").toFile(), APPLICATION_PDF);
+			multipart.field(TEMPLATE_PARAM, AemTargetType.LOCAL.samplesPath("SampleArtworkPdf.pdf").toFile(), APPLICATION_PDF);
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)
@@ -198,7 +199,7 @@ class GeneratePdfOutputTest {
 	@Test
 	void testGeneratePdfOutput_JustForm_Issue15() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(TEMPLATE_PARAM, TestUtils.RESOURCES_DIR.resolve("SampleArtworkPdf.pdf").toAbsolutePath().toString());
+			multipart.field(TEMPLATE_PARAM, AemTargetType.LOCAL.samplesPath("SampleArtworkPdf.pdf").toAbsolutePath().toString());
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)

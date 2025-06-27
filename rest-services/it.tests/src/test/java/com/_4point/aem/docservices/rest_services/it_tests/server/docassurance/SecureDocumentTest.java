@@ -27,6 +27,7 @@ import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 
 @Tag("server-tests")
+@Tag("requiresRe")
 public class SecureDocumentTest {
 	private static final String SECURE_DOCUMENT_URL = "http://" + AemInstance.AEM_1.aemHost() + ":" + AemInstance.AEM_1.aemPort() + TEST_MACHINE_AEM_TYPE.pathPrefix() + "/services/DocAssuranceService/SecureDocument";
 	private static final MediaType APPLICATION_PDF = new MediaType("application", "pdf");
@@ -66,7 +67,7 @@ public class SecureDocumentTest {
 	@Test
 	void testReaderExtendPDF_AllArgs() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DOCUMENT_PARAM, SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)
+			multipart.field(DOCUMENT_PARAM, LOCAL_SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)
 					 .field(CREDENTIAL_ALIAS_PARAM, "recred")
 					 .field(MESSAGE_PARAM, "ReaderExtendPDF Test")
 					 .field(IS_MODE_FINAL_PARAM, "true")
@@ -98,7 +99,7 @@ public class SecureDocumentTest {
 	@Test
 	void testReaderExtendPDF_AllArgsTrue() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DOCUMENT_PARAM, SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)
+			multipart.field(DOCUMENT_PARAM, LOCAL_SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)
 					 .field(CREDENTIAL_ALIAS_PARAM, "recred")
 					 .field(MESSAGE_PARAM, "ReaderExtendPDF Test")
 					 .field(IS_MODE_FINAL_PARAM, "true")
@@ -130,7 +131,7 @@ public class SecureDocumentTest {
 	@Test
 	void testReaderExtendPDF_JustInDocAndCred() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DOCUMENT_PARAM, SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)
+			multipart.field(DOCUMENT_PARAM, LOCAL_SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)
 					 .field(CREDENTIAL_ALIAS_PARAM, "recred");
 
 			Response result = target.request()
@@ -153,7 +154,7 @@ public class SecureDocumentTest {
 	@Test
 	void testReaderExtendPDF_BadCredentialAlias() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DOCUMENT_PARAM, SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)
+			multipart.field(DOCUMENT_PARAM, LOCAL_SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF)
 					 .field(CREDENTIAL_ALIAS_PARAM, "bad");
 
 			Response result = target.request()
@@ -171,7 +172,7 @@ public class SecureDocumentTest {
 	@Test
 	void testReaderExtendPDF_NoCredentialAlias() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DOCUMENT_PARAM, SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF);
+			multipart.field(DOCUMENT_PARAM, LOCAL_SAMPLE_FORM_PDF.toFile(), APPLICATION_PDF);
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)
@@ -187,7 +188,7 @@ public class SecureDocumentTest {
 	@Test
 	void testReaderExtendPDF_InDocNotPdf() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
-			multipart.field(DOCUMENT_PARAM, SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
+			multipart.field(DOCUMENT_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
 					 .field(CREDENTIAL_ALIAS_PARAM, "recred");
 
 			Response result = target.request()
