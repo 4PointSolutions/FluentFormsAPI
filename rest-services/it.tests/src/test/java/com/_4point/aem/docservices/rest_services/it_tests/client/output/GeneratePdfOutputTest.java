@@ -19,7 +19,6 @@ import org.junit.jupiter.api.condition.OS;
 import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
 import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
-import com._4point.aem.docservices.rest_services.it_tests.AemTargetType;
 import com._4point.aem.docservices.rest_services.it_tests.Pdf;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
 import com._4point.aem.fluentforms.api.Document;
@@ -110,7 +109,7 @@ class GeneratePdfOutputTest {
 	@DisplayName("Test generatePdfOutput() Just Form Doc.  FluentFormsAPI Issue #15")
 	void testGeneratePdfOutput_JustFormDocIssue15() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()
-									   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(AemTargetType.LOCAL.samplesPath("SampleArtworkPdf.pdf")));
+									   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_ARTWORK_PDF));
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
 	}
@@ -119,7 +118,7 @@ class GeneratePdfOutputTest {
 	@DisplayName("Test generatePdfOutput() Just Form.  FluentFormsAPI Issue #15")
 	void testGeneratePdfOutput_JustFormIssue15() throws Exception {
 		Document pdfResult =  underTest.generatePDFOutput()
-									   .executeOn(AEM_TARGET_TYPE.samplesPath("SampleArtworkPdf.pdf"));
+									   .executeOn(REMOTE_SAMPLE_ARTWORK_PDF);
 		
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
 	}

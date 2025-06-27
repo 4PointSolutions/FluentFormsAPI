@@ -54,6 +54,7 @@ public class TestUtils {
 	private static final String SAMPLE_FORM_DATA_JSON_NAME = "SampleForm_data.json";
 	private static final String SAMPLE_FORM_DATA_DOCX_NAME = "SampleForm.docx";
 	private static final String SAMPLE_FORM_DDX_NAME = "SampleForm_DDX.xml";
+	private static final String SAMPLE_ARTWORK_PDF = "SampleArtworkPdf.pdf";
 	
 	public static final Path REMOTE_SAMPLE_FORM_PDF = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_PDF_NAME);
 	public static final Path REMOTE_SAMPLE_FORM_WITH_DATA_PDF = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_WITH_DATA_PDF_NAME);
@@ -63,6 +64,7 @@ public class TestUtils {
 	public static final Path REMOTE_SAMPLE_FORM_DATA_JSON = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_DATA_JSON_NAME);
 	public final static Path REMOTE_SAMPLE_FORM_DOCX =  AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_DATA_DOCX_NAME);
 	public static final Path REMOTE_SAMPLE_FORM_DDX = AEM_TARGET_TYPE.samplesPath(SAMPLE_FORM_DDX_NAME);
+	public static final Path REMOTE_SAMPLE_ARTWORK_PDF = AEM_TARGET_TYPE.samplesPath(SAMPLE_ARTWORK_PDF);
 	
 	public static final Path LOCAL_SAMPLE_FORM_PDF = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_PDF_NAME);
 	public static final Path LOCAL_SAMPLE_FORM_WITH_DATA_PDF = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_WITH_DATA_PDF_NAME);
@@ -72,6 +74,8 @@ public class TestUtils {
 	public static final Path LOCAL_SAMPLE_FORM_DATA_JSON = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_DATA_JSON_NAME);
 	public final static Path LOCAL_SAMPLE_FORM_DOCX =  AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_DATA_DOCX_NAME);
 	public static final Path LOCAL_SAMPLE_FORM_DDX = AemTargetType.LOCAL.samplesPath(SAMPLE_FORM_DDX_NAME);
+	public static final Path LOCAL_SAMPLE_ARTWORK_PDF = AemTargetType.LOCAL.samplesPath(SAMPLE_ARTWORK_PDF);
+
 	
 	public static final Path RESOURCES_DIR = Paths.get("src", "test", "resources");
 	public static final Path ACTUAL_RESULTS_DIR = RESOURCES_DIR.resolve("actualResults");

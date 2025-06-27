@@ -14,7 +14,8 @@ public enum AemTargetType {
 	REMOTE_LINUX(Path.of("/opt", "adobe", "ff_it_files")), 	// Running on remote Linux machine (assumes that machine name is TEST_MACHINE_NAME and port is TEST_MACHINE_PORT)
 	TESTCONTAINERS(Path.of("/opt", "adobe", "ff_it_files")); // Running on local testcontainers image (gets port from TestContainers)
 	
-	private final Path samplesPath;		// Location where sample files are stored for this AEM target type.
+	private final Path samplesPath;		// Location where sample files are stored for this AEM target type.  
+										// Needs to be absolute path since (in some cases) it will be passed to AEM.
 
 	private AemTargetType(Path samplesPath) {
 		this.samplesPath = samplesPath;

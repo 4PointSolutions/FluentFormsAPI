@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,7 @@ import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 class RenderAdaptiveFormTest {
 
 	private static final String SAMPLE_AF_NAME = "sample00002test";
-	private static final String SAMPLE_JSON_AF_NAME = "sample-json-adaptive-form--1";
+	private static final String SAMPLE_JSON_AF_NAME = "sample-json-adaptive-form--1";	// TODO: Locate this adaptive form (or generate one) and then enable testRenderAdaptiveFormStringJsonDocument().
 
 	private AdaptiveFormsService underTest;
 	
@@ -146,6 +147,7 @@ class RenderAdaptiveFormTest {
 		assertThat(new String(resultBytes, StandardCharsets.UTF_8), allOf(containsString("Text Field1 Data"), containsString("Text Field2 Data")));
 	}
 	
+	@Disabled("This test is disabled because the sample JSON Adaptive Form is not available in the test environment.  It can be enabled when the sample JSON Adaptive Form is available.")
 	@Test
 	void testRenderAdaptiveFormStringJsonDocument() throws Exception {
 		String template = SAMPLE_JSON_AF_NAME;
