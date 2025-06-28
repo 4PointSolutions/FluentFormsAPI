@@ -129,8 +129,7 @@ class GeneratePdfOutputTest {
 	@EnabledIf("targetIsLinux")
 	@DisplayName("Test generatePdfOutput() Just Form with Linux Path.  From Windows Machine")
 	void testGeneratePdfOutput_JustForm() throws Exception {
-//		Path formPath = Paths.get("/home/aem_user/u000/AEM/Forms/RUNTIME/Invoices/EN/Invoice_GB_PD.xdp");
-		URL formPath = new URL("file:/home/aem_user/u000/AEM/Forms/RUNTIME/Invoices/EN/Invoice_GB_PD.xdp");
+		URL formPath = new URL("file:/opt/adobe/ff_it_files/SampleForm.xdp");
 		Document pdfResult =  underTest.generatePDFOutput()
 									   .executeOn(formPath);
 		
@@ -144,8 +143,8 @@ class GeneratePdfOutputTest {
 	@EnabledIf("targetIsLinux")
 	@DisplayName("Test generatePdfOutput() Just Form with Linux ContentRoot.  From Windows Machine")
 	void testGeneratePdfOutput_JustFormContentRoot() throws Exception {
-		Path contentPath = Paths.get("\\","home", "aem_user", "u000","AEM","Forms","RUNTIME","Invoices","EN");
-		Path formPath = Paths.get("Invoice_GB_PD.xdp");
+		Path contentPath = Paths.get("\\","opt", "adobe", "ff_it_files");
+		Path formPath = Paths.get("SampleForm.xdp");
 		Document pdfResult =  underTest.generatePDFOutput()
 									   .setContentRoot(contentPath)
 									   .executeOn(formPath);
