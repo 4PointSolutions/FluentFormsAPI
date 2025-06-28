@@ -321,7 +321,7 @@ class PathOrUrlTest {
 		assertTrue(result.isPath(), "Expected that isPath() would be true");
 		assertFalse(result.isUrl(), "Expected that isUrl() would be false");
 		assertFalse(result.isCrxUrl(), "Expected that isCrxUrl() would be false");
-		String expected = pathPath.toString().replace('\\', '/');
+		String expected = pathPath.getFileSystem().getSeparator().equals("\\") ? pathPath.toString().replace('\\', '/') : pathPath.toString();
 		assertEquals(expected, result.toUnixString());
 	}
 
