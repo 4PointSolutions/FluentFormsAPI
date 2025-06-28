@@ -314,13 +314,14 @@ class PathOrUrlTest {
 	}
 
 	@ParameterizedTest
-	@CsvSource( { "C:/foo/bar,C:/foo/bar", "foo,foo", "foo/bar,foo/bar", "C:\\foo\\bar,C:/foo/bar", "\\\\foo\\bar,//foo/bar/", "C:/foo/bar/,C:/foo/bar", "\\\\foo\\bar\\,//foo/bar/" })
-	void testToUnixString(String path, String expected) {
-		PathOrUrl result = PathOrUrl.from(Path.of(path));
+	@ValueSource(strings = { "C:/foo/bar", "foo", "foo/bar", "C:\\foo\\bar", "\\\\foo\\bar", "C:/foo/bar/", "\\\\foo\\bar\\" })
+	void testToUnixString(String path) {
+		Path pathPath = Path.of(path);
+		PathOrUrl result = PathOrUrl.from(pathPath);
 		assertTrue(result.isPath(), "Expected that isPath() would be true");
 		assertFalse(result.isUrl(), "Expected that isUrl() would be false");
 		assertFalse(result.isCrxUrl(), "Expected that isCrxUrl() would be false");
-//		Path expected = Paths.get(path);
+		String expected = pathPath.toString().replace('\\', '/');
 		assertEquals(expected, result.toUnixString());
 	}
 
