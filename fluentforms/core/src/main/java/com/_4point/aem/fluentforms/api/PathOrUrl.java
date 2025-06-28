@@ -293,6 +293,20 @@ public final class PathOrUrl {
 		}
 	}
 	
+	public String toUnixString() {
+		if (this.isPath()) {
+			String stringVersion = this.path.toString();
+			return this.path.getFileSystem().getSeparator().equals("\\") ? stringVersion.replace('\\', '/') 
+																		 : stringVersion;
+		} else if (this.isUrl()) {
+			return this.url.toString();
+		} else if (this.isCrxUrl()) {
+			return urlToCrx(this.url);
+		} else {
+			throw new IllegalStateException("PathOrUrl object is neither Path nor URL!");	// Should never happen.
+		}
+	}
+
 	/**
 	 * Convert a crx Url into a file: URL for storage. 
 	 * 

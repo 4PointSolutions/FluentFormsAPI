@@ -16,8 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.*;
 
 import com._4point.aem.fluentforms.impl.CrxUrlHandler;
 
@@ -313,5 +312,17 @@ class PathOrUrlTest {
 		assertNotNull(msg);
 		assertThat(msg, containsStringIgnoringCase("Path must be relative"));
 	}
+
+	@ParameterizedTest
+	@CsvSource( { "C:/foo/bar,C:/foo/bar", "foo,foo", "foo/bar,foo/bar", "C:\\foo\\bar,C:/foo/bar", "\\\\foo\\bar,//foo/bar/", "C:/foo/bar/,C:/foo/bar", "\\\\foo\\bar\\,//foo/bar/" })
+	void testToUnixString(String path, String expected) {
+		PathOrUrl result = PathOrUrl.from(Path.of(path));
+		assertTrue(result.isPath(), "Expected that isPath() would be true");
+		assertFalse(result.isUrl(), "Expected that isUrl() would be false");
+		assertFalse(result.isCrxUrl(), "Expected that isCrxUrl() would be false");
+//		Path expected = Paths.get(path);
+		assertEquals(expected, result.toUnixString());
+	}
+
 
 }
