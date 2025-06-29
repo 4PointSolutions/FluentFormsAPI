@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 
 public interface RestClient {
 	public static final String CORRELATION_ID_HTTP_HDR = "X-Correlation-ID";
@@ -138,6 +139,9 @@ public interface RestClient {
 			}
 			default <T> Builder addStringVersion(String fieldName, T fieldData) {
 				return fieldData != null ? addIfNotNull(fieldName, fieldData.toString()) : this;
+			}
+			default <T> Builder addStringVersionOfPath(String fieldName, PathOrUrl fieldData) {
+				return fieldData != null ? addIfNotNull(fieldName, fieldData.toUnixString()) : this;
 			}
 			default <T, O> Builder transformAndAddStringVersion(String fieldName, T fieldData, Function<T, O> fn) {
 				return fieldData != null ? addStringVersion(fieldName, fn.apply(fieldData)) : this;

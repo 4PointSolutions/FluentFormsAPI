@@ -123,6 +123,19 @@ class GeneratePdfOutputTest {
 		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
 	}
 
+	@Test
+	@DisplayName("Test generatePdfOutput() for issue #32.")
+	void testGeneratePdfOutput_MixedContentRoot_Issue32() throws Exception {
+		Path contentRoot = REMOTE_SAMPLE_FORM_XDP.getParent().getParent(); // Get a content root two directories up
+		Path template = REMOTE_SAMPLE_FORM_XDP.getParent().resolve(REMOTE_SAMPLE_FORM_XDP.getFileName()); // Get a template that contains a parent directory
+
+		Document pdfResult =  underTest.generatePDFOutput()
+				                       .setContentRoot(contentRoot)
+                                       .executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
+		
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormAndData.pdf", false, false, false);
+	}
+
 
 	@Test
 	@EnabledOnOs(OS.WINDOWS)

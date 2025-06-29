@@ -106,7 +106,7 @@ public class RestServicesFormsServiceAdapter extends RestServicesServiceAdapter 
                 .addIfNotNull(DATA_PARAM, data, ContentType.APPLICATION_XML)
                 .addStringVersion(ACROBAT_VERSION_PARAM, pdfFormRenderOptions.getAcrobatVersion())
                 .addStringVersion(CACHE_STRATEGY_PARAM, pdfFormRenderOptions.getCacheStrategy())
-                .addStringVersion(CONTENT_ROOT_PARAM, pdfFormRenderOptions.getContentRoot())
+                .addStringVersionOfPath(CONTENT_ROOT_PARAM, pdfFormRenderOptions.getContentRoot())
                 .addStringVersion(DEBUG_DIR_PARAM, pdfFormRenderOptions.getDebugDir())
                 .addStringVersion(EMBED_FONTS_PARAM, pdfFormRenderOptions.getEmbedFonts())
                 .addStringVersion(LOCALE_PARAM, pdfFormRenderOptions.getLocale())

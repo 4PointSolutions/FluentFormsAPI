@@ -79,7 +79,7 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 				 								 .addIfNotNull(TEMPLATE_PARAM, template, ContentType.APPLICATION_XDP)	// We're currently labeling everything as an XDP but we accept PDFs too.
 				 								 .addIfNotNull(TEMPLATE_PARAM, templateStr)
 				 								 .addStringVersion(ACROBAT_VERSION_PARAM, pdfOutputOptions.getAcrobatVersion())
-				 								 .addStringVersion(CONTENT_ROOT_PARAM, pdfOutputOptions.getContentRoot())
+				 								 .addStringVersionOfPath(CONTENT_ROOT_PARAM, pdfOutputOptions.getContentRoot())
 				 								 .addStringVersion(DEBUG_DIR_PARAM, pdfOutputOptions.getDebugDir())
 				 								 .addStringVersion(EMBED_FONTS_PARAM, pdfOutputOptions.getEmbedFonts())
 				 								 .addStringVersion(LINEARIZED_PDF_PARAM, pdfOutputOptions.getLinearizedPDF())
@@ -135,7 +135,7 @@ public class RestServicesOutputServiceAdapter extends RestServicesServiceAdapter
 												 .addIfNotNull(DATA_PARAM, data, ContentType.APPLICATION_XML)
 												 .addIfNotNull(TEMPLATE_PARAM, template, ContentType.APPLICATION_XDP)	// We're currently labeling everything as an XDP but we accept PDFs too.
 												 .addIfNotNull(TEMPLATE_PARAM, templateStr)
-				 								 .addStringVersion(CONTENT_ROOT_PARAM, printedOutputOptions.getContentRoot())
+				 								 .addStringVersionOfPath(CONTENT_ROOT_PARAM, printedOutputOptions.getContentRoot())
 				 								 .addStringVersion(COPIES_PARAM, printedOutputOptions.getCopies())
 				 								 .addStringVersion(DEBUG_DIR_PARAM, printedOutputOptions.getDebugDir())
 				 								 .addStringVersion(LOCALE_PARAM, printedOutputOptions.getLocale())
