@@ -185,7 +185,7 @@ class RestServicesOutputServiceAdapterTest {
 			
 			// Setup the expected calls to mockPayloadBuilder
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.acrobatVersion"), eq(AcrobatVersion.Acrobat_10_1))).thenReturn(mockPayloadBuilder);
-			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.contentRoot"), Mockito.any(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersionOfPath(eq("outputOptions.contentRoot"), Mockito.any(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.debugDir"), Mockito.any(Path.class))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.embedFonts"), eq(Boolean.TRUE))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.linearizedPdf"), eq(Boolean.TRUE))).thenReturn(mockPayloadBuilder);
@@ -196,7 +196,7 @@ class RestServicesOutputServiceAdapterTest {
 			when(mockPayloadBuilder.addIfNotNull(eq("outputOptions.xci"), Mockito.any(Document.class), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
 		} else {
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.acrobatVersion"), isNull(AcrobatVersion.class))).thenReturn(mockPayloadBuilder);
-			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.contentRoot"), isNull(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersionOfPath(eq("outputOptions.contentRoot"), isNull(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.debugDir"), isNull(Path.class))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.embedFonts"), eq(Boolean.FALSE))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.linearizedPdf"), eq(Boolean.FALSE))).thenReturn(mockPayloadBuilder);
@@ -226,7 +226,7 @@ class RestServicesOutputServiceAdapterTest {
 			when(printedOutputOptions.getXci()).thenReturn(Mockito.mock(Document.class));
 			
 			// Setup the expected calls to mockPayloadBuilder
-			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.contentRoot"), Mockito.any(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersionOfPath(eq("outputOptions.contentRoot"), Mockito.any(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.copies"), eq(Integer.valueOf(1)))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.debugDir"), Mockito.any(Path.class))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.locale"), eq(Locale.CANADA_FRENCH))).thenReturn(mockPayloadBuilder);
@@ -237,7 +237,7 @@ class RestServicesOutputServiceAdapterTest {
 			// Mandatory entry in PrintedOutputOptions.
 			when(printedOutputOptions.getPrintConfig()).thenReturn(PrintConfig.HP_PCL_5e);
 			
-			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.contentRoot"), isNull(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
+			when(mockPayloadBuilder.addStringVersionOfPath(eq("outputOptions.contentRoot"), isNull(PathOrUrl.class))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.copies"), eq(Integer.valueOf(0)))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.debugDir"), isNull(Path.class))).thenReturn(mockPayloadBuilder);
 			when(mockPayloadBuilder.addStringVersion(eq("outputOptions.locale"), isNull(Locale.class))).thenReturn(mockPayloadBuilder);

@@ -180,7 +180,7 @@ class RestServicesFormsServiceAdapterTest {
 		when(mockPayloadBuilder.addIfNotNull(eq("data"), codePath.hasData ? same(data) : isNull(), eq(ContentType.APPLICATION_XML))).thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.addStringVersion(eq("renderOptions.acrobatVersion"), eq(pdfFormRenderOptions.getAcrobatVersion()))).thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.addStringVersion(eq("renderOptions.cacheStrategy"), eq(pdfFormRenderOptions.getCacheStrategy()))).thenReturn(mockPayloadBuilder);
-		when(mockPayloadBuilder.addStringVersion(eq("renderOptions.contentRoot"), eq(pdfFormRenderOptions.getContentRoot()))).thenReturn(mockPayloadBuilder);
+		when(mockPayloadBuilder.addStringVersionOfPath(eq("renderOptions.contentRoot"), eq(pdfFormRenderOptions.getContentRoot()))).thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.addStringVersion(eq("renderOptions.debugDir"), eq(pdfFormRenderOptions.getDebugDir()))).thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.addStringVersion(eq("renderOptions.embedFonts"), eq(pdfFormRenderOptions.getEmbedFonts()))).thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.addStringVersion(eq("renderOptions.locale"), eq(pdfFormRenderOptions.getLocale()))).thenReturn(mockPayloadBuilder);
