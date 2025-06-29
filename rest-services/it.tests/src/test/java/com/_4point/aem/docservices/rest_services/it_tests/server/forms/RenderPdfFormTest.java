@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 
 @Tag("server-tests")
 class RenderPdfFormTest {
@@ -78,13 +79,13 @@ class RenderPdfFormTest {
 	void testRenderFormsPDF_AllArgs() throws Exception {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM, LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, REMOTE_SAMPLE_FORM_XDP.toString())
+					 .field(TEMPLATE_PARAM, REMOTE_SAMPLE_FORM_XDP.getFileName().toString())
 					 .field(ACROBAT_VERSION_PARAM, "Acrobat_10")
 //					 .field(CACHE_STRATEGY_PARAM, "CONSERVATIVE")
 					 .field(EMBED_FONTS_PARAM, "true")
 					 .field(LOCALE_PARAM, "en-CA")
 					 .field(TAGGED_PDF_PARAM, "true")
-					 .field(CONTENT_ROOT_PARAM, REMOTE_SAMPLE_FORM_XDP.getParent().toString())
+					 .field(CONTENT_ROOT_PARAM, PathOrUrl.from(REMOTE_SAMPLE_FORM_XDP.getParent()).toUnixString())
 //					 .field(SUBMIT_URL_PARAM, "/submit/url")
 					 .field(XCI_PARAM, RESOURCES_DIR.resolve("pa.xci").toFile(), MediaType.APPLICATION_XML_TYPE)
 					 ;
@@ -203,7 +204,7 @@ class RenderPdfFormTest {
 		String badFormName = "BadForm.xdp";
 		try (final FormDataMultiPart fdmp = new FormDataMultiPart(); final FormDataMultiPart multipart = fdmp
 				.field(DATA_PARAM, TestUtils.LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-				.field(TEMPLATE_PARAM, TestUtils.REMOTE_SAMPLE_FORM_XDP.getParent().resolve(badFormName).toString())) {
+				.field(TEMPLATE_PARAM, PathOrUrl.from(TestUtils.REMOTE_SAMPLE_FORM_XDP.getParent().resolve(badFormName)).toUnixString())) {
 
 			Response result = target.request()
 									.accept(APPLICATION_PDF)

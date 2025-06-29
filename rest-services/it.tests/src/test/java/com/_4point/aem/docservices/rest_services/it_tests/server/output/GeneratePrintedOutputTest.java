@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.docservices.rest_services.it_tests.ByteArrayString;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 
 @Tag("server-tests")
 public class GeneratePrintedOutputTest {
@@ -117,7 +118,7 @@ public class GeneratePrintedOutputTest {
 					 .field(LOCALE_PARAM, "en-CA")
 					 .field(PAGINATION_OVERRIDE_PARAM, "simplex")
 					 .field(PRINT_CONFIG_PARAM, printConfig)
-					 .field(CONTENT_ROOT_PARAM, REMOTE_SAMPLE_FORM_XDP.getParent().toString())
+					 .field(CONTENT_ROOT_PARAM, PathOrUrl.from(REMOTE_SAMPLE_FORM_XDP.getParent()).toUnixString())
 					 .field(XCI_PARAM, RESOURCES_DIR.resolve("pa.xci").toFile(), MediaType.APPLICATION_XML_TYPE)
 					 ;
 
@@ -239,7 +240,7 @@ public class GeneratePrintedOutputTest {
 		String badFormName = "BadForm.xdp";
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			multipart.field(DATA_PARAM, TestUtils.LOCAL_SAMPLE_FORM_DATA_XML.toFile(), MediaType.APPLICATION_XML_TYPE)
-					 .field(TEMPLATE_PARAM, TestUtils.REMOTE_SAMPLE_FORM_XDP.getParent().resolve(badFormName).toString())
+					 .field(TEMPLATE_PARAM, PathOrUrl.from(TestUtils.REMOTE_SAMPLE_FORM_XDP.getParent().resolve(badFormName)).toUnixString())
 					 .field(PRINT_CONFIG_PARAM, "HP_PCL_5e");
 
 			Response result = target.request()

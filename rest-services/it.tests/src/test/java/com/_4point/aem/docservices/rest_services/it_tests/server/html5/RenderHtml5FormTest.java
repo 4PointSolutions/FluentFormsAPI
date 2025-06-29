@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import com._4point.aem.docservices.rest_services.it_tests.AemInstance;
 import com._4point.aem.docservices.rest_services.it_tests.TestUtils;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 
 @Tag("server-tests")
 public class RenderHtml5FormTest {
@@ -111,7 +112,7 @@ public class RenderHtml5FormTest {
 		try (final FormDataMultiPart multipart = new FormDataMultiPart()) {
 			switch (scenario.formType) {
 			case BY_REFERENCE:
-				multipart.field(TEMPLATE_PARAM_NAME, REMOTE_SAMPLE_FORM_XDP.toAbsolutePath().toString());
+				multipart.field(TEMPLATE_PARAM_NAME, PathOrUrl.from(REMOTE_SAMPLE_FORM_XDP).toUnixString());
 				break;
 			case BY_CRX_REFERENCE:
 				multipart.field(TEMPLATE_PARAM_NAME, "sample-forms/ " + REMOTE_SAMPLE_FORM_XDP.getFileName().toString());
