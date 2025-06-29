@@ -86,6 +86,7 @@ public enum AemInstance {
 		
 		deployer.deployXdp(Paths.get("src", "test", "resources", "SampleForm.xdp"), "sample-forms");
 		deployer.deployAf(Paths.get("src", "test", "resources", "sample00002test.zip"));
+		// TODO: Create a deploy a sample AF that uses a JSON schema
 //		deployer.deployAf(Paths.get("src", "test", "resources", "SampleForm.xdp"), "sample-forms");
 		System.out.println("Sample files deployed.");
 	}
