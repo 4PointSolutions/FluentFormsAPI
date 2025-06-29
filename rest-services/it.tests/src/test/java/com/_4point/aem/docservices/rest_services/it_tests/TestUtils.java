@@ -33,18 +33,12 @@ public class TestUtils {
 	public static final AemTargetType AEM_TARGET_TYPE = AemTargetType.LOCAL; 
 	// Status of LOCAL AEM Target support.
 	//		AEM Integration test issues:
-	//		* Sample JSON Adaptive Form not deployed - Causes JSON AF Rendering test to fail
-	//		* Sample XDP not copied to target file system - Causes GeneratePdfOututTest "For mWindows Machine" rendering test failures
-	//		* Reader Extensions not configured - Causes Reader Extensions (Secure Document) tests to fail
-	//		* OpenOffice not installed - causes GeneratePdf tests to fail
+	//		* Sample JSON Adaptive Form not deployed - Causes JSON AF Rendering test to fail - This test is currently disabled.
+	//		* Reader Extensions not configured - Causes Reader Extensions (Secure Document) tests to fail - These tests can be excluded by excluding the "requiresRe" tag.
+	//		* OpenOffice not installed - causes GeneratePdf tests to fail - These tests can be excluded by excluding the "requiresPdfG" tag.
 	//
 	// Status of TestContainers support.
-	//		AEM Integration test issues (in addition to those above)::
-	//		* Sample Adaptive Form not deployed - Causes AF Rendering test to fail (should be fixed in latest AEM image)
-	//		* JSAFE not configured - Causes Assembler test to fail (should be fixed in latest AEM image)
-	//		* Sample XDP not deployed - Causes HTML5, PDF and Print rendering tests to fail (should be fixed in latest AEM image)
-	//		* GeneratePrintedOutput test AllArgs seems to want D:\FluentForms\Forms - Need to fix tests
-	//		* Generate HTLML5 test fails because protected mode is on - Need to fix AEM image creation code to set this.
+	//		Same as above.
 	
 	// The TESTCONTAINERS configuration requires an AEM container image with AEM forms installed.  Since AEM is proprietary, it is not possible to obtain this
 	// through public images.  By default, this uses a private image hosted in the 4PointSolutions-PS GitHub organization.  If you are not
