@@ -69,7 +69,7 @@ class GeneratePdfOutputTest {
 		Document pdfResult =  underTest.generatePDFOutput()
 									.executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_XDP), SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
-		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormAndData.pdf", false, false, false);
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "testGeneratePdfOutput_JustFormDocAndData.pdf", false, false, false);
 	}
 
 	@Test
@@ -120,7 +120,7 @@ class GeneratePdfOutputTest {
 		Document pdfResult =  underTest.generatePDFOutput()
 									   .executeOn(REMOTE_SAMPLE_ARTWORK_PDF);
 		
-		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "testGeneratePdfOutput_JustFormIssue15.pdf", false, false, false);
 	}
 
 	@Test
@@ -133,7 +133,7 @@ class GeneratePdfOutputTest {
 				                       .setContentRoot(contentRoot)
                                        .executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
-		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormAndData.pdf", false, false, false);
+		TestUtils.validatePdfResult(pdfResult.getInlineData(), "testGeneratePdfOutput_MixedContentRoot_Issue32.pdf", false, false, false);
 	}
 
 
@@ -148,7 +148,7 @@ class GeneratePdfOutputTest {
 		
 		Pdf resultPdf = Pdf.from(pdfResult.getInputStream());
 		
-//		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
+//		TestUtils.validatePdfResult(pdfResult.getInlineData(), "testGeneratePdfOutput_JustForm.pdf", false, false, false);
 	}
 
 	@Test
@@ -164,7 +164,7 @@ class GeneratePdfOutputTest {
 		
 		Pdf resultPdf = Pdf.from(pdfResult.getInputStream());
 		
-//		TestUtils.validatePdfResult(pdfResult.getInlineData(), "GeneratePdfOutput_JustFormDocIssue15.pdf", false, false, false);
+//		TestUtils.validatePdfResult(pdfResult.getInlineData(), "testGeneratePdfOutput_JustFormContentRoot.pdf", false, false, false);
 	}
 	
 	boolean targetIsLinux() {
