@@ -42,7 +42,15 @@ public interface OutputService {
 
 	Document generatePrintedOutput(PathOrUrl urlOrFileName, Document data, PrintedOutputOptions printedOutputOptions) throws OutputServiceException, FileNotFoundException;
 
+	/**
+	 * @deprecated Use {@link #generatePrintedOutput(PrintConfig)} instead.
+	 * 
+	 * @return
+	 */
+	@Deprecated
 	GeneratePrintedOutputArgumentBuilder generatePrintedOutput();
+	
+	GeneratePrintedOutputArgumentBuilder2 generatePrintedOutput(PrintConfig printConfig);
 	
 	// TODO:  Generate overloaded methods
 	BatchResult generatePrintedOutputBatch(Map<String, PathOrUrl> templates, Map<String, Document> data, PrintedOutputOptions printedOutputOptions, BatchOptions batchOptions) throws OutputServiceException;
@@ -362,6 +370,167 @@ public interface OutputService {
 			XciArgumentBuilder embedPclFonts(boolean embedFonts);
 			XciArgumentBuilder embedPsFonts(boolean embedFonts);
 			GeneratePrintedOutputArgumentBuilder done();
+		}
+	}
+
+	public static interface GeneratePrintedOutputArgumentBuilder2 extends PrintedOutputOptionsSetter2, Transformable<GeneratePrintedOutputArgumentBuilder> {
+
+		@Override
+		GeneratePrintedOutputArgumentBuilder2 setContentRoot(PathOrUrl pathOrUrl);
+
+		@Override
+		default GeneratePrintedOutputArgumentBuilder2 setContentRoot(Path path) {
+			PrintedOutputOptionsSetter2.super.setContentRoot(path);
+			return this;
+		}
+
+		@Override
+		default GeneratePrintedOutputArgumentBuilder2 setContentRoot(URL url) {
+			PrintedOutputOptionsSetter2.super.setContentRoot(url);
+			return this;
+		}
+
+		@Override
+		GeneratePrintedOutputArgumentBuilder2 setCopies(int copies);
+
+		@Override
+		GeneratePrintedOutputArgumentBuilder2 setDebugDir(Path debugDir);
+
+		@Override
+		GeneratePrintedOutputArgumentBuilder2 setLocale(Locale locale);
+
+		@Override
+		GeneratePrintedOutputArgumentBuilder2 setPaginationOverride(PaginationOverride paginationOverride);
+
+		@Override
+		GeneratePrintedOutputArgumentBuilder2 setXci(Document xci);
+
+		@Override
+		default GeneratePrintedOutputArgumentBuilder2 setXci(Xci xci) {
+			PrintedOutputOptionsSetter2.super.setXci(xci);
+            return this;
+        }
+		
+		public XciArgumentBuilder xci();
+
+		/**
+		 * Merges the provided template with the provided data and returns the generated
+		 * output.
+		 * 
+		 * @param template The template to merge data into.
+		 * @param data     The data to merge with the template.
+		 * @return The generated output document.
+		 * @throws OutputServiceException If an error occurs during processing.
+		 * @throws FileNotFoundException  If the template file is not found.
+		 */
+		public Document executeOn(PathOrUrl template, Document data) throws OutputServiceException, FileNotFoundException;
+
+		/**
+		 * Merges the provided template with the provided data and returns the generated
+		 * output.
+		 * 
+		 * @param template The template to merge data into.
+		 * @param data     The data to merge with the template.
+		 * @return The generated output document.
+		 * @throws OutputServiceException If an error occurs during processing.
+		 * @throws FileNotFoundException  If the template file is not found.
+		 */
+		public Document executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException;
+		
+		/**
+		 * Merges the provided template with the provided data and returns the generated
+		 * output.
+		 * 
+		 * @param template The template to merge data into.
+		 * @param data     The data to merge with the template.
+		 * @return The generated output document.
+		 * @throws OutputServiceException If an error occurs during processing.
+		 */
+		public Document executeOn(URL template, Document data) throws OutputServiceException;
+
+		/**
+		 * Merges the provided template with the provided data and returns the generated
+		 * output.
+		 * 
+		 * @param template The template to merge data into.
+		 * @param data     The data to merge with the template.
+		 * @return The generated output document.
+		 * @throws FileNotFoundException  If the template file is not found.
+		 */
+		public Document executeOn(Document template, Document data) throws OutputServiceException;
+		
+		default public Document executeOn(PathOrUrl template, byte[] data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Path template, byte[] data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public Document executeOn(URL template, byte[] data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Document template, byte[] data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(byte[] template, byte[] data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(InputStream template, byte[] data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(PathOrUrl template, InputStream data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Path template, InputStream data) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+		
+		default public Document executeOn(URL template, InputStream data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(Document template, InputStream data) throws OutputServiceException {
+			return executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(data));
+		};
+
+		default public Document executeOn(byte[] template, InputStream data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(InputStream template, InputStream data) throws OutputServiceException {
+			DocumentFactory factory = SimpleDocumentFactoryImpl.getFactory();
+			return executeOn(factory.create(template), factory.create(data));
+		};
+
+		default public Document executeOn(PathOrUrl template) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, (Document)null);
+		};
+
+		default public Document executeOn(Path template) throws OutputServiceException, FileNotFoundException {
+			return executeOn(template, (Document)null);
+		};
+		
+		default public Document executeOn(URL template) throws OutputServiceException {
+			return executeOn(template, (Document)null);
+		};
+
+		default public Document executeOn(Document template) throws OutputServiceException {
+			return executeOn(template, (Document)null);
+		};
+
+		public interface XciArgumentBuilder {
+			XciArgumentBuilder embedPclFonts(boolean embedFonts);
+			XciArgumentBuilder embedPsFonts(boolean embedFonts);
+			GeneratePrintedOutputArgumentBuilder2 done();
 		}
 	}
 

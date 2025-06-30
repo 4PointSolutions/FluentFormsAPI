@@ -659,7 +659,7 @@ class OutputServiceImplTest {
 	}
 	
 	@Test
-	@DisplayName("Test GeneratePrintedOutput(Document,...) with non-default options.")
+	@DisplayName("Test deprecated GeneratePrintedOutput(Document,...) with non-default options.")
 	void testGeneratePrintedOutputDocument() throws Exception {
 		MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
 		
@@ -685,7 +685,7 @@ class OutputServiceImplTest {
 	}
 
 	
-	@DisplayName("Test GeneratePrintedOutput(CrxUrl,...) throws FileNotFoundException.")
+	@DisplayName("Test deprecated GeneratePrintedOutput(CrxUrl,...) throws FileNotFoundException.")
 	@Test
 	void testGeneratePrintedOutputCrxUrl() throws Exception {
 		MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
@@ -700,6 +700,31 @@ class OutputServiceImplTest {
 		assertSame(data, svc.getDataArg(), "Expected the data Document passed to AEM would match the data Document used.");
 		assertSame(resultCrx, svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
 		PrintedOutputOptionsImplTest.assertEmpty(svc.getOptionsArg(), filename.getParent().orElseThrow().getCrxUrl());
+	}
+	
+	@Test
+	@DisplayName("Test GeneratePrintedOutput(Document,...) with non-default options.")
+	void testGeneratePrintedOutputDocument2() throws Exception {
+		MockPrintedOutputService svc = new MockPrintedOutputService(adobeOutputService);
+		
+		Document template = Mockito.mock(Document.class);
+		Document data = Mockito.mock(Document.class);
+		Document result = underTest.generatePrintedOutput(PrintConfig.HP_PCL_5e)
+								   		.setContentRoot(Paths.get("foo", "bar"))
+										.setCopies(2)
+										.setDebugDir(Paths.get("bar", "foo"))
+										.setLocale(Locale.CANADA_FRENCH)
+										.setPaginationOverride(PaginationOverride.duplexLongEdge)
+										.xci()
+											.embedPclFonts(false)
+											.done()
+										.executeOn(template, data);
+		
+		// Verify that all the results are correct.
+		assertEquals(template, svc.getTemplateDocArg(), "Expected the template filename passed to AEM would match the filename used.");
+		assertTrue(svc.getDataArg() == data, "Expected the data Document passed to AEM would match the data Document used.");
+		assertTrue(result == svc.getResult(), "Expected the Document returned by AEM would match the Document result.");
+		PrintedOutputOptionsImplTest.assertNotEmpty(svc.getOptionsArg());
 	}
 	
 	@Test

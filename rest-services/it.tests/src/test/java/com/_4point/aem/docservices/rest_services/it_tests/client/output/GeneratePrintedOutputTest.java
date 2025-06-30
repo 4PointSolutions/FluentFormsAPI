@@ -58,8 +58,7 @@ class GeneratePrintedOutputTest {
 	@Test
 	@DisplayName("Test generatePrintedOutput() Just Form and Data.")
 	void testgeneratePrintedOutput_JustFormAndData() throws Exception {
-		Document pdfResult =  underTest.generatePrintedOutput()
-				                    .setPrintConfig(PrintConfig.HP_PCL_5e)
+		Document pdfResult =  underTest.generatePrintedOutput(PrintConfig.HP_PCL_5e)
 									.executeOn(REMOTE_SAMPLE_FORM_XDP, SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
 		TestUtils.validatePrintedResult(pdfResult.getInlineData(), "generatePrintedOutput_JustFormAndData.pcl");
@@ -68,8 +67,7 @@ class GeneratePrintedOutputTest {
 	@Test
 	@DisplayName("Test generatePrintedOutput() Just Form Document and Data.")
 	void testgeneratePrintedOutput_JustFormDocAndData() throws Exception {
-		Document pdfResult =  underTest.generatePrintedOutput()
-									   .setPrintConfig(PrintConfig.Generic_PS_L3)
+		Document pdfResult =  underTest.generatePrintedOutput(PrintConfig.Generic_PS_L3)
 									   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_XDP), SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
 		TestUtils.validatePrintedResult(pdfResult.getInlineData(), "testgeneratePrintedOutput_JustFormDocAndData.ps");
@@ -78,8 +76,7 @@ class GeneratePrintedOutputTest {
 	@Test
 	@DisplayName("Test generatePrintedOutput() CRX Form and Data.")
 	void testgeneratePrintedOutput_CRXFormAndData() throws Exception {
-		Document pdfResult =  underTest.generatePrintedOutput()
-									.setPrintConfig(PrintConfig.ZPL600)
+		Document pdfResult =  underTest.generatePrintedOutput(PrintConfig.ZPL600)
 									.setContentRoot(PathOrUrl.from(CRX_CONTENT_ROOT))
 									.executeOn(REMOTE_SAMPLE_FORM_XDP.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
@@ -92,13 +89,12 @@ class GeneratePrintedOutputTest {
 		Path contentRoot = REMOTE_SAMPLE_FORM_XDP.getParent();
 //		Path debugDir = null;
 		
-		Document pdfResult =  underTest.generatePrintedOutput()
+		Document pdfResult =  underTest.generatePrintedOutput(PrintConfig.HP_PCL_5e)
 									.setContentRoot(contentRoot)
 									.setCopies(2)
 //									.setDebugDir(debugDir)
 									.setLocale(Locale.CANADA_FRENCH)
 									.setPaginationOverride(PaginationOverride.duplexShortEdge)
-									.setPrintConfig(PrintConfig.HP_PCL_5e)
 									.xci()
 									   .embedPclFonts(true)
 									   .done()
@@ -112,8 +108,7 @@ class GeneratePrintedOutputTest {
 	@Test
 	@DisplayName("Test generatePrintedOutput() Just Form Doc.  FluentFormsAPI Issue #15")
 	void testgeneratePrintedOutput_JustFormDocIssue15() throws Exception {
-		Document pdfResult =  underTest.generatePrintedOutput()
-									   .setPrintConfig(PrintConfig.HP_PCL_5e)
+		Document pdfResult =  underTest.generatePrintedOutput(PrintConfig.HP_PCL_5e)
 									   .executeOn(SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_ARTWORK_PDF));
 		
 		TestUtils.validatePrintedResult(pdfResult.getInlineData(), "generatePrintedOutput_JustFormDocIssue15.pcl");
@@ -122,8 +117,7 @@ class GeneratePrintedOutputTest {
 	@Test
 	@DisplayName("Test generatePrintedOutput() Just Form.  FluentFormsAPI Issue #15")
 	void testgeneratePrintedOutput_JustFormIssue15() throws Exception {
-		Document pdfResult =  underTest.generatePrintedOutput()
-				   					   .setPrintConfig(PrintConfig.Generic_PS_L3)
+		Document pdfResult =  underTest.generatePrintedOutput(PrintConfig.Generic_PS_L3)
 									   .executeOn(REMOTE_SAMPLE_ARTWORK_PDF);
 		
 		TestUtils.validatePrintedResult(pdfResult.getInlineData(), "testgeneratePrintedOutput_JustFormIssue15.ps");
@@ -135,8 +129,7 @@ class GeneratePrintedOutputTest {
 		Path contentRoot = REMOTE_SAMPLE_FORM_XDP.getParent().getParent(); // Get a content root two directories up
 		Path template = REMOTE_SAMPLE_FORM_XDP.getParent().resolve(REMOTE_SAMPLE_FORM_XDP.getFileName()); // Get a template that contains a parent directory
 
-		Document pdfResult =  underTest.generatePrintedOutput()
-									   .setPrintConfig(PrintConfig.HP_PCL_5e)
+		Document pdfResult =  underTest.generatePrintedOutput(PrintConfig.HP_PCL_5e)
 				                       .setContentRoot(contentRoot)
                                        .executeOn(template, SimpleDocumentFactoryImpl.getFactory().create(LOCAL_SAMPLE_FORM_DATA_XML));
 		
@@ -150,8 +143,7 @@ class GeneratePrintedOutputTest {
 	@DisplayName("Test generatePrintedOutput() Just Form with Linux Path.  From Windows Machine")
 	void testgeneratePrintedOutput_JustForm() throws Exception {
 		URL formPath = new URL("file:/opt/adobe/ff_it_files/SampleForm.xdp");
-		Document pdfResult =  underTest.generatePrintedOutput()
-				   					   .setPrintConfig(PrintConfig.HP_PCL_5e)
+		Document pdfResult =  underTest.generatePrintedOutput(PrintConfig.HP_PCL_5e)
 									   .executeOn(formPath);
 		
 		TestUtils.validatePrintedResult(pdfResult.getInlineData(), "testgeneratePrintedOutput_JustForm.pcl");
@@ -164,8 +156,7 @@ class GeneratePrintedOutputTest {
 	void testgeneratePrintedOutput_JustFormContentRoot() throws Exception {
 		Path contentPath = Paths.get("\\","opt", "adobe", "ff_it_files");
 		Path formPath = Paths.get("SampleForm.xdp");
-		Document pdfResult =  underTest.generatePrintedOutput()
-				   					   .setPrintConfig(PrintConfig.Generic_PS_L3)
+		Document pdfResult =  underTest.generatePrintedOutput(PrintConfig.Generic_PS_L3)
 									   .setContentRoot(contentPath)
 									   .executeOn(formPath);
 		

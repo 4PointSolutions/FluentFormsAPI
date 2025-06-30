@@ -141,6 +141,11 @@ public class OutputServiceImpl implements OutputService {
 	}
 
 	@Override
+	public GeneratePrintedOutputArgumentBuilder2 generatePrintedOutput(PrintConfig printConfig) {
+		return new GeneratePrintedOutputArgumentBuilderImpl2(printConfig);
+	}
+
+	@Override
 	public BatchResult generatePrintedOutputBatch(Map<String, PathOrUrl> templates, Map<String, Document> data, PrintedOutputOptions printedOutputOptions,
 			BatchOptions batchOptions) throws OutputServiceException {
 		// TODO Auto-generated method stub
@@ -348,6 +353,101 @@ public class OutputServiceImpl implements OutputService {
 			public GeneratePrintedOutputArgumentBuilder done() {
 				GeneratePrintedOutputArgumentBuilderImpl.this.setXci(xciBuilder.build());
 				return GeneratePrintedOutputArgumentBuilderImpl.this;
+			}
+
+		}
+
+	}
+
+	private class GeneratePrintedOutputArgumentBuilderImpl2 implements GeneratePrintedOutputArgumentBuilder2 {
+
+		PrintedOutputOptions printedOutputOptions = new PrintedOutputOptionsImpl();
+
+		private GeneratePrintedOutputArgumentBuilderImpl2(PrintConfig printConfig) {
+			this.printedOutputOptions.setPrintConfig(Objects.requireNonNull(printConfig, "printConfig cannot be null."));
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder2 setContentRoot(PathOrUrl pathOrUrl) {
+			this.printedOutputOptions.setContentRoot(pathOrUrl);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder2 setCopies(int copies) {
+			this.printedOutputOptions.setCopies(copies);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder2 setDebugDir(Path debugDir) {
+			this.printedOutputOptions.setDebugDir(debugDir);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder2 setLocale(Locale locale) {
+			this.printedOutputOptions.setLocale(locale);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder2 setPaginationOverride(PaginationOverride paginationOverride) {
+			this.printedOutputOptions.setPaginationOverride(paginationOverride);
+			return this;
+		}
+
+		@Override
+		public GeneratePrintedOutputArgumentBuilder2 setXci(Document xci) {
+			this.printedOutputOptions.setXci(xci);
+			return this;
+		}
+
+		@Override
+		public Document executeOn(PathOrUrl template, Document data)
+				throws OutputServiceException, FileNotFoundException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+		@Override
+		public Document executeOn(Path template, Document data) throws OutputServiceException, FileNotFoundException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+		@Override
+		public Document executeOn(URL template, Document data) throws OutputServiceException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+		@Override
+		public Document executeOn(Document template, Document data) throws OutputServiceException {
+			return generatePrintedOutput(template, data, this.printedOutputOptions);
+		}
+
+		@Override
+		public XciArgumentBuilder xci() {
+			return new XciArgumentBuilderImpl();
+		}
+		
+		private class XciArgumentBuilderImpl implements XciArgumentBuilder {
+			private final Xci.XciBuilder xciBuilder = new XciImpl.XciBuilderImpl();
+
+			@Override
+			public XciArgumentBuilder embedPclFonts(boolean embedFonts) {
+				xciBuilder.pcl().embedFonts(embedFonts);
+				return this;
+			}
+
+			@Override
+			public XciArgumentBuilder embedPsFonts(boolean embedFonts) {
+				xciBuilder.ps().embedFonts(embedFonts);
+				return this;
+			}
+
+			@Override
+			public GeneratePrintedOutputArgumentBuilder2 done() {
+				GeneratePrintedOutputArgumentBuilderImpl2.this.setXci(xciBuilder.build());
+				return GeneratePrintedOutputArgumentBuilderImpl2.this;
 			}
 
 		}
