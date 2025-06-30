@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,11 +14,9 @@ import java.nio.file.Paths;
 
 import jakarta.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.function.Executable;
 
 import com._4point.aem.docservices.rest_services.client.helpers.AemServerType;
-import com._4point.aem.docservices.rest_services.it_tests.Pdf.PdfException;
 
 public class TestUtils {
 	
@@ -83,17 +82,9 @@ public class TestUtils {
 
 	private static final boolean SAVE_RESULTS = false;
 
-//	private static Path getPath(String name) {
-//		try {
-//			return Paths.get(classLoader.getResource(name).toURI());
-//		} catch (URISyntaxException e) {
-//			throw new IllegalStateException("getResource returned invalid URI. (This should never happen!)", e);
-//		}
-//	}
-//	
 	public static String readEntityToString(Response result) {
 		try {
-			return IOUtils.toString((InputStream)result.getEntity(), StandardCharsets.UTF_8);
+			return new String(((InputStream) result.getEntity()).readAllBytes(), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new IllegalStateException("Exception while reading response stream.", e);
 		}
@@ -101,16 +92,38 @@ public class TestUtils {
 	
 	@SuppressWarnings("unused")
 	public static void validatePdfResult(byte[] pdfBytes, String testResultFilename, boolean dynamic, boolean interactive, boolean hasRights)
-			throws IOException, Exception, PdfException {
+			throws Exception {
 		if (SAVE_RESULTS == true) {
-			IOUtils.write(pdfBytes, Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve(testResultFilename)));
+			try (OutputStream saveStream = Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve(testResultFilename))) {
+				saveStream.write(pdfBytes);
+			}
 		}
+
 		assertThat("Expected a PDF to be returned.", ByteArrayString.toString(pdfBytes, 8), containsString("%, P, D, F, -, 1, ., 7"));
 		try (Pdf pdf = Pdf.from(pdfBytes)) {
 			Executable dynamicTest = dynamic ? ()->assertTrue(pdf.isDynamic(), "Expected Pdf to be dynamic.") : ()->assertFalse(pdf.isDynamic(), "Expected Pdf to be static.");
 			Executable interactiveTest = interactive ? ()->assertTrue(pdf.isInteractive(), "Expected Pdf to be interactive.") : ()->assertFalse(pdf.isInteractive(), "Expected Pdf to be non-interactive.");
 			Executable rightsTest = hasRights ? ()->assertTrue(pdf.hasRights(), "Expected Pdf to have Usage Rights.") : ()->assertFalse(pdf.hasRights(), "Expected Pdf to have no Usage Rights.");
 			assertAll(dynamicTest, interactiveTest, rightsTest);
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	public static void validatePrintedResult(byte[] pdfBytes, String testResultFilename) throws IOException {
+		if (SAVE_RESULTS == true) {
+			try (OutputStream saveStream = Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve(testResultFilename))) {
+				saveStream.write(pdfBytes);
+			}
+		}
+		
+		if (testResultFilename.endsWith(".pcl")) {
+			assertThat("Expected PCL to be returned.", ByteArrayString.toString(pdfBytes, 60 ), containsString("@, P, J, L,  , E, N, T, E, R,  , L, A, N, G, U, A, G, E,  , =,  , P, C, L"));
+		} else if (testResultFilename.endsWith(".ps")) {
+			assertThat("Expected Postscript to be returned.", ByteArrayString.toString(pdfBytes, 62 ), containsString("%, !, P, S, -, A, d, o, b, e"));
+		} else if (testResultFilename.endsWith(".zpl")) {
+			assertThat("Expected ZPL to be returned.", ByteArrayString.toString(pdfBytes, 10 ), containsString("^, X, A"));
+		} else {
+			throw new IllegalArgumentException("Unknown file type for testResultFilename: " + testResultFilename);
 		}
 	}
 	
