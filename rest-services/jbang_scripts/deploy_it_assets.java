@@ -5,11 +5,15 @@
 //DEPS org.slf4j:slf4j-simple:2.0.17
 //JAVA 21+
 
+package com._4point.aem.fluentforms.deploy_it_assets;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import com._4point.aem.package_manager.FormsAndDocumentsClient;
@@ -24,7 +28,8 @@ class deploy_it_assets implements Callable<Integer> {
 	private static final String AEM_SERVER_USER = "admin";
 	private static final String AEM_SERVER_PASSWORD = "admin";
 	private static final Path REST_SERVICES_PROJECT_DIR = Path.of("..");
-	private static final Path SAMPLES_DIR = REST_SERVICES_PROJECT_DIR.resolve(Path.of("test_containers", "ff_it_files"));
+	private static final List<Path> SAMPLES_DIRS_LIST = List.of(Path.of("/opt", "adobe", "ff_it_files"), REST_SERVICES_PROJECT_DIR.resolve(Path.of("test_containers", "ff_it_files")));
+	private static final Path SAMPLES_DIR = findSamplesDir(SAMPLES_DIRS_LIST);
 	private static final Path AF_TEST_FORMS_PATH = SAMPLES_DIR.resolve("sample00002test.zip");
 	private static final Path OF_TEST_FORMS_PATH = SAMPLES_DIR.resolve("SampleForm.xdp");
 
@@ -95,5 +100,16 @@ class deploy_it_assets implements Callable<Integer> {
     	System.out.println("Sample forms deployed!");
 		
         return 0;
+    }
+    
+	private static Path findSamplesDir(List<Path> samplesDirsList) {
+		 return samplesDirsList.stream()
+				 			   .filter(dir -> dir.toFile().isDirectory() && isSamplesDir(dir))
+				 			   .findFirst()
+				 			   .orElseThrow(() -> new IllegalStateException("Could not find a valid samples directory in: " + samplesDirsList));
+	}
+
+	private static boolean isSamplesDir(Path dir) {
+		return Files.exists(dir.resolve("sample00002test.zip")) && Files.exists(dir.resolve("SampleForm.xdp"));
     }
 }
