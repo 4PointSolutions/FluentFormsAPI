@@ -12,6 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.FieldSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -40,6 +42,8 @@ properties = {
 "logging.level.com._4point.aem.fluentforms.spring.AemProxyEndpoint=DEBUG"
 })
 class AemProxyEndpointTest {
+	private final static Logger logger = LoggerFactory.getLogger(AemProxyEndpointTest.class);
+
 	static final int WIREMOCK_PORT = 5504;
 	static final String AF_BASE_LOCATION = "/aem";
 
@@ -102,6 +106,12 @@ class AemProxyEndpointTest {
 
 	private void runTest(String endpoint, String inputText, String expectedResponseText) {
 		stubFor(get(urlPathEqualTo(endpoint)).willReturn(okForContentType("text/plain", inputText)));
+		
+		logger.atInfo()
+			  .addArgument(endpoint)
+			  .addArgument(inputText)
+			  .addArgument(expectedResponseText)
+			  .log("Testing proxy endpoint '{}' with input '{}', expecting response '{}'.");
 		
 		// When
 		// Make rest call to the proxy endpoint
