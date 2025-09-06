@@ -5,9 +5,11 @@ import static java.util.Objects.requireNonNullElse;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.FieldSource;
@@ -41,6 +43,7 @@ properties = {
 "jasypt.encryptor.salt-generator-classname=org.jasypt.salt.RandomSaltGenerator",
 "logging.level.com._4point.aem.fluentforms.spring.AemProxyEndpoint=DEBUG"
 })
+@Timeout(value = 1, unit = TimeUnit.MINUTES)	// Fail tests that take longer than this to prevent hanging.
 class AemProxyEndpointTest {
 	private final static Logger logger = LoggerFactory.getLogger(AemProxyEndpointTest.class);
 
