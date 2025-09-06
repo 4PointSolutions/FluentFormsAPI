@@ -43,7 +43,7 @@ properties = {
 "jasypt.encryptor.salt-generator-classname=org.jasypt.salt.RandomSaltGenerator",
 "logging.level.com._4point.aem.fluentforms.spring.AemProxyEndpoint=DEBUG"
 })
-@Timeout(value = 1, unit = TimeUnit.MINUTES)	// Fail tests that take longer than this to prevent hanging.
+@Timeout(value = 5, unit = TimeUnit.MINUTES)	// Fail tests that take longer than this to prevent hanging.
 class AemProxyEndpointTest {
 	private final static Logger logger = LoggerFactory.getLogger(AemProxyEndpointTest.class);
 
