@@ -118,10 +118,20 @@ class AemProxyEndpointTest {
 		
 		// When
 		// Make rest call to the proxy endpoint
-		String result = restClient.get()
-								  .uri(endpoint)
-								  .retrieve()
-								  .body(String.class);
+		String result;
+		try {
+			result = restClient.get()
+									  .uri(endpoint)
+									  .retrieve()
+									  .body(String.class);
+		} catch (Exception e) {
+			logger.atError()
+				  .addArgument(endpoint)
+				  .addArgument(inputText)
+				  .addArgument(expectedResponseText)
+				  .log("Caught exception while testing proxy endpoint '{}' with input '{}', expecting response '{}'.");
+			throw e;
+		}
 		
 		assertNotNull(result);
 		assertEquals(expectedResponseText, result);
