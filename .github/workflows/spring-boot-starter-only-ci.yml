@@ -10,10 +10,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
-    - name: Set up JDK 21 for Shared Runner
+    - name: Set up JDK 21
       uses: actions/setup-java@v5
       with:
-        distribution: 'zulu'
+        distribution: 'oracle'
         java-version: '21'
         cache: 'maven'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
