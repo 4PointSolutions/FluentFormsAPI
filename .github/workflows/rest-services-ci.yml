@@ -9,15 +9,25 @@ on:
 
 jobs:
   build:
+    name: Java ${{ matrix.java }} build
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: true
+      matrix:
+        java: [ 21 ]
+        experimental: [false]
+        include:
+          - java: 24
+            experimental: true
 
     steps:
     - uses: actions/checkout@v5
-    - name: Set up JDK 21 for Shared Runner
+    - name: Set up JDK ${{ matrix.java }}
       uses: actions/setup-java@v5
       with:
         distribution: 'oracle'
-        java-version: '21'
+        java-version: ${{ matrix.java }}
         cache: 'maven'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
@@ -28,7 +38,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
 
     - name: Publish to GitHub Packages Apache Maven
-      if: github.ref == 'refs/heads/master' || github.ref == 'refs/tags/*' # Only run on main branch or tags
+      if: (github.ref == 'refs/heads/master' || github.ref == 'refs/tags/*') &&  !matrix.experimental # Only run on main branch or tags and non-experimental
       run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml --file rest-services
       env:
         GITHUB_TOKEN: ${{ github.token }}
