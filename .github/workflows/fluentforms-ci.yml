@@ -37,7 +37,7 @@ jobs:
       run: mvn -B package --file fluentforms
 
     - name: Publish to GitHub Packages Apache Maven
-      if: (github.ref == 'refs/heads/master' || github.ref == 'refs/tags/*') &&  matrix.experimental == 'false' # Only run on main branch or tags and non-experimental
+      if: (github.ref == 'refs/heads/master' || github.ref == 'refs/tags/*') &&  !matrix.experimental # Only run on main branch or tags and non-experimental
       run: mvn -B deploy -s $GITHUB_WORKSPACE/settings.xml --file fluentforms
       env:
         GITHUB_TOKEN: ${{ github.token }}
