@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
@@ -84,6 +85,10 @@ class AemProxyEndpointTest {
 				 .request()
 				 .get();
 		
+		if (MediaType.APPLICATION_JSON_TYPE.isCompatible(response.getMediaType())) {
+			byte[] resultBytes = ((InputStream)response.getEntity()).readAllBytes();
+			System.out.println("'" + new String(resultBytes) + "'");
+		}
 		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE), hasEntity()));
 
 //		if (USE_WIREMOCK) {	// For some reason that I can't determine, wiremock returns text/html.  I would like to fix this, but for now, I work around it.
