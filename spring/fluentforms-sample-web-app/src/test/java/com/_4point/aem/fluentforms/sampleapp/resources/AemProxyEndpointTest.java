@@ -1,14 +1,11 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
-import static com._4point.testing.matchers.jaxrs.ResponseMatchers.hasMediaType;
-import static com._4point.testing.matchers.jaxrs.ResponseMatchers.isStatus;
+import static com._4point.testing.matchers.jaxrs.ResponseMatchers.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com._4point.testing.matchers.jaxrs.ResponseMatchers.hasEntity;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
@@ -85,11 +82,11 @@ class AemProxyEndpointTest {
 				 .request()
 				 .get();
 		
-		if (MediaType.APPLICATION_JSON_TYPE.isCompatible(response.getMediaType())) {
-			byte[] resultBytes = ((InputStream)response.getEntity()).readAllBytes();
-			System.out.println("'" + new String(resultBytes) + "'");
-		}
-		assertThat(response, allOf(isStatus(Status.OK), hasMediaType(MediaType.TEXT_HTML_TYPE), hasEntity()));
+		assertThat(response, allOf(isStatus(Status.OK), 
+								   // For some reason that I can't determine, wiremock returns text/html.  I would like to fix this, but for now, I accept both.
+								   anyOf(hasMediaType(MediaType.APPLICATION_JSON_TYPE), hasMediaType(MediaType.TEXT_HTML_TYPE)), 
+								   hasStringEntityMatching(containsString("{\"token\":\"eyJleHAiOjE3NDY5NjMyMjgsImlhdCI6MTc0Njk2MjYyOH0.LCykkZEZpvibCViWTKfXMVDFJ3V5aUoXVrn53xwpZWY\"}"))
+								   ));
 
 //		if (USE_WIREMOCK) {	// For some reason that I can't determine, wiremock returns text/html.  I would like to fix this, but for now, I work around it.
 //			assertTrue(MediaType.TEXT_HTML_TYPE.isCompatible(mediaType), "Expected response media type (" + response.getMediaType().toString() + ") to be compatible with 'text/html'.");
