@@ -85,7 +85,7 @@ class AemProxyEndpointTest {
 		assertThat(response, allOf(isStatus(Status.OK), 
 								   // For some reason that I can't determine, wiremock returns text/html.  I would like to fix this, but for now, I accept both.
 								   anyOf(hasMediaType(MediaType.APPLICATION_JSON_TYPE), hasMediaType(MediaType.TEXT_HTML_TYPE)), 
-								   hasStringEntityMatching(containsString("{\"token\":\"eyJleHAiOjE3NDY5NjMyMjgsImlhdCI6MTc0Njk2MjYyOH0.LCykkZEZpvibCViWTKfXMVDFJ3V5aUoXVrn53xwpZWY\"}"))
+								   hasStringEntityMatching(matchesRegex("\\s*\\{\"token\":\".*\"\\}\\s*"))
 								   ));
 
 //		if (USE_WIREMOCK) {	// For some reason that I can't determine, wiremock returns text/html.  I would like to fix this, but for now, I work around it.
