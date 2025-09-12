@@ -1,6 +1,10 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # FluentForms API
+[![Fluent Forms CI](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/fluentforms-ci.yml/badge.svg)](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/fluentforms-ci.yml)
+[![REST Services CI](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/rest-services-ci.yml/badge.svg)](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/rest-services-ci.yml)
+[![Spring Boot Starter CI](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-boot-starter-ci.yml/badge.svg)](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-boot-starter-ci.yml)
+[![Spring Sample Web App CI](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-sample-web-app-ci.yml/badge.svg)](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-sample-web-app-ci.yml)
 
 The FluentForms API project is a set of Java libraries that allow remote access to 
 [Adobe Experience Manager Forms](https://experienceleague.adobe.com/docs/experience-manager-65/content/forms/getting-started/introduction-aem-forms.html?lang=en) (a.k.a. AEM Forms) 
