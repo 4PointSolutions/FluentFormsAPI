@@ -37,3 +37,21 @@ You can configure the tests to run against AEM running in a local container imag
  See the README in that directory for more details. 
     
 The TestContainers code assumes that the image contains an AEM instance running on port 4502.  The TestContainers code is located in the `AemInstance.java` source file. 
+
+#### Creating a Containerized Image using `aem_cntrl`
+
+In order to create a containerized image...
+* Create the FluentForms jar files (`fluentforms.core-0.0.x-SNAPSHOT.jar`, and `rest-services.server-0.0.x-SNAPSHOT.jar`) from their projects within this GitHub repo.
+* Download the latest AEM installation files (quickstart jar plus any service pack zips).
+* Obtain a copy of your `licence.properties` file from you current AEM installation.
+* Create an `aem_cntrl-0.0.x-SNAPSHOT.jar` file from the [`aem_cntrl` project](https://github.com/4PointSolutions/aem-utils/tree/main/aem_cntrl).
+* Follow the instructions in the [`aem_container` project](https://github.com/4PointSolutions/aem-utils/blob/main/aem_container/README.md) to create a container image.
+
+Once the container is built, configure the project as [outlined above](#containerized-aem-image-via-testcontainers) and run the tests.
+
+### Testing New Releases of AEM
+
+Each time a new version of AEM is released, the integration tests in this project should be run against it.
+
+To do this, follow the instructions under [Creating a Containerized Image using `aem_cntrl`](#creating-a-containerized-image-using-aem_cntrl) and then
+running the tests as outlined under [Containerized AEM Image \(via TestContainers\)](#containerized-aem-image-via-testcontainers)
