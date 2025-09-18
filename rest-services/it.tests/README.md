@@ -49,7 +49,7 @@ In order to create a containerized image...
 
 Once the container is built, configure the project as [outlined above](#containerized-aem-image-via-testcontainers) and run the tests.
 
-### Testing New Releases of AEM
+## Testing New Releases of AEM
 
 Each time a new version of AEM is released, the integration tests in this project should be run against it.
 
