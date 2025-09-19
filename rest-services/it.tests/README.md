@@ -40,12 +40,13 @@ The TestContainers code assumes that the image contains an AEM instance running 
 
 #### Creating a Containerized Image using `aem_cntrl`
 
-In order to create a containerized image...
+In order to create a containerized AEM integration test image...
 * Create the FluentForms jar files (`fluentforms.core-0.0.x-SNAPSHOT.jar`, and `rest-services.server-0.0.x-SNAPSHOT.jar`) from their projects within this GitHub repo.
 * Download the latest AEM installation files (quickstart jar plus any service pack zips).
 * Obtain a copy of your `licence.properties` file from you current AEM installation.
 * Create an `aem_cntrl-0.0.x-SNAPSHOT.jar` file from the [`aem_cntrl` project](https://github.com/4PointSolutions/aem-utils/tree/main/aem_cntrl).
-* Follow the instructions in the [`aem_container` project](https://github.com/4PointSolutions/aem-utils/blob/main/aem_container/README.md) to create a container image.
+* Follow the instructions in the [`aem_container` project](https://github.com/4PointSolutions/aem-utils/blob/main/aem_container/README.md) to create a base AEM container image.
+* Follow the instructions in the [test_containers ReadMe](https://github.com/4PointSolutions/FluentFormsAPI/blob/master/rest-services/test_containers/ReadMe.md) to create an integration test container image from the base AEM container image.
 
 Once the container is built, configure the project as [outlined above](#containerized-aem-image-via-testcontainers) and run the tests.
 

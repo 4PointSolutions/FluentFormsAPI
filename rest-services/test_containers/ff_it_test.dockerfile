@@ -1,4 +1,4 @@
-FROM aem:aem65lts AS ff_it_test
+FROM aem:aem65ltssp1 AS ff_it_test
 
 ENV container="aem-lts-quickstart,aem-author,ubuntu,java21"
 
@@ -39,7 +39,7 @@ java -Xms1024m -Xmx2048m \
 -Djava.awt.headless=true \
 -Dsling.run.modes=author,crx3,crx3tar \
 -Djava.locale.providers=CLDR,JRE,SPI \
--jar crx-quickstart/app/cq-quickstart-6.6.0-standalone-quickstart.jar \
+-jar crx-quickstart/app/cq-quickstart-6.6.1-standalone-quickstart.jar \
 start \
 -c crx-quickstart \
 -i launchpad \
