@@ -17,7 +17,7 @@
 		<java.version>17</java.version>
 		<jasypt.spring.boot.version>3.0.5</jasypt.spring.boot.version>
 		<jasypt.maven.plugin.version>3.0.5</jasypt.maven.plugin.version>
-		<fluentforms.version>0.0.4-SNAPSHOT</fluentforms.version>
+		<fluentforms.version>0.0.5-SNAPSHOT</fluentforms.version>
 		<fluentforms-autoconfigure.version>0.0.4-SNAPSHOT</fluentforms-autoconfigure.version>
 	</properties>
 
