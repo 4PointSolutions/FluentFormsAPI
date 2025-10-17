@@ -10,7 +10,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>fluentforms-spring-boot-starter</artifactId>
-	<version>0.0.4-SNAPSHOT</version>
+	<version>0.0.5-SNAPSHOT</version>
 	<name>FluentForms Spring Boot Starter</name>
 	<description>Spring Boot starter for FluentForms library</description>
 	<properties>
