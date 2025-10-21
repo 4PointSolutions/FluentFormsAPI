@@ -4,6 +4,7 @@ on:
   push:
     paths:
     - 'spring/fluentforms-sample-web-app/**'
+    - 'spring/fluentforms-sample-webmvc-app/**'
     - '.github/workflows/spring-sample-web-app-ci.yml'
   workflow_dispatch:
     
@@ -34,6 +35,11 @@ jobs:
 
     - name: Build Sample Web App with Maven
       run: mvn -B install -s $GITHUB_WORKSPACE/settings.xml --file spring/fluentforms-sample-web-app
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Build Sample Web App with Maven
+      run: mvn -B install -s $GITHUB_WORKSPACE/settings.xml --file spring/fluentforms-sample-webmvc-app
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
