@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com._4point.aem.fluentforms</groupId>
 	<artifactId>fluentforms-sample-webmvc-app</artifactId>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<name>Fluent Forms Spring Boot Sample Web MVC Application</name>
 	<description>Sample Spring Boot Web MVC Application that utilizes the Fluent Forms Spring Boot Starters</description>
 
