@@ -1,0 +1,25 @@
+{
+  "id" : "0ec41fac-6a98-42c5-a287-9d9027b891f5",
+  "name" : "services_dataservices_datacache",
+  "request" : {
+    "url" : "/services/DataServices/DataCache",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "anything" : "anything"
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "5af0580b-5977-4b18-b400-abf439c7c216",
+    "headers" : {
+      "Date" : "Fri, 04 Sep 2020 19:25:05 GMT",
+      "X-Content-Type-Options" : "nosniff",
+      "Set-Cookie" : "cq-authoring-mode=TOUCH; Path=/; Expires=Fri, 11-Sep-2020 19:25:05 GMT; Max-Age=604800",
+      "Expires" : "Thu, 01 Jan 1970 00:00:00 GMT",
+      "Content-Type" : "text/plain;charset=iso-8859-1"
+    }
+  },
+  "uuid" : "0ec41fac-6a98-42c5-a287-9d9027b891f5",
+  "persistent" : true,
+  "insertionIndex" : 4
+}

@@ -1,0 +1,22 @@
+{
+  "id" : "34969b80-157b-4075-8fdf-adc52fd6ce11",
+  "name" : "libs_granite_csrf_token.json",
+  "request" : {
+    "url" : "/libs/granite/csrf/token.json",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"token\":\"eyJleHAiOjE3NDY5NjMyMjgsImlhdCI6MTc0Njk2MjYyOH0.LCykkZEZpvibCViWTKfXMVDFJ3V5aUoXVrn53xwpZWY\"}",
+    "headers" : {
+      "Cache-Control" : "no-cache",
+      "X-Content-Type-Options" : "nosniff",
+      "Expires" : "-1",
+      "Date" : "Sun, 11 May 2025 11:23:48 GMT",
+      "Content-Type" : "application/json"
+    }
+  },
+  "uuid" : "34969b80-157b-4075-8fdf-adc52fd6ce11",
+  "persistent" : true,
+  "insertionIndex" : 17
+}

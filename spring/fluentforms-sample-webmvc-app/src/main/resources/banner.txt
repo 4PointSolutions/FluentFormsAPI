@@ -1,0 +1,8 @@
+    ____________   _____                       __        ___              
+   / ____/ ____/  / ___/____ _____ ___  ____  / /__     /   |  ____  ____ 
+  / /_  / /_      \__ \/ __ `/ __ `__ \/ __ \/ / _ \   / /| | / __ \/ __ \
+ / __/ / __/     ___/ / /_/ / / / / / / /_/ / /  __/  / ___ |/ /_/ / /_/ /
+/_/   /_/       /____/\__,_/_/ /_/ /_/ .___/_/\___/  /_/  |_/ .___/ .___/ 
+                                    /_/                    /_/   /_/      
+                                                                                                                     
+${application.title}${application.formatted-version}:@git.commit.id.abbrev@ (Build Time: @git.build.time@) :: Spring Boot ::${spring-boot.formatted-version}

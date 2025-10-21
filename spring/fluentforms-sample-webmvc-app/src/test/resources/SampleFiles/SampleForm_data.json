@@ -1,0 +1,24 @@
+{
+	"afData": {
+		"afUnboundData": {
+			"data": {}
+		},
+		"afBoundData": {
+			"data": {
+				"spouse": {
+					"name": {
+						"title": "null"
+					},
+					"relation": "SPOUSE",
+					"lang": "EN",
+					"trustName": "foo"
+				}
+			}
+		},
+		"afSubmissionInfo": {
+			"lastFocusItem": "guide[0].guide1[0].guideRootPanel[0]",
+			"stateOverrides": {},
+			"signers": {}
+		}
+	}
+}
