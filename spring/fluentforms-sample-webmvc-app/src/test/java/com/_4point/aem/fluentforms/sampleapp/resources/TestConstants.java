@@ -23,12 +23,12 @@ public class TestConstants {
 	// The following Set controls whether the integration tests are run with WireMock, TestContainers or both.
 	// This is normally set to just WIREMOCK since that is what is required for the GitHub actions CI pipeline,
 	// but it may be set to other values when testing locally. 
-//	private static Set<IntegrationTestType> TESTS_TO_RUN = EnumSet.of(IntegrationTestType.WIREMOCK);
+	private static Set<IntegrationTestType> TESTS_TO_RUN = EnumSet.of(IntegrationTestType.WIREMOCK);
 
 	// If the local environment has docker installed and has a local AEM container image available, then the
 	// AEM_IMAGE_NAME can be modified, and the following line uncommented to run both WireMock and an AEM instance
 	// tests.
-	 private static Set<IntegrationTestType> TESTS_TO_RUN = EnumSet.of(IntegrationTestType.WIREMOCK, IntegrationTestType.AEM_INSTANCE);
+//	 private static Set<IntegrationTestType> TESTS_TO_RUN = EnumSet.of(IntegrationTestType.WIREMOCK, IntegrationTestType.AEM_INSTANCE);
 	
 	
 	private enum IntegrationTestType { WIREMOCK, AEM_INSTANCE };
