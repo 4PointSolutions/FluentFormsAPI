@@ -35,7 +35,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 					portProperties = "fluentforms.aem.port"
         			)
 				)
-class AemProxyEndpointTest extends AbstractAemProxyEndpointTest {
+class WireMockAemProxyEndpointTest extends AbstractAemProxyEndpointTest {
 	private static final boolean WIREMOCK_RECORDING = false;
 
 	@BeforeEach

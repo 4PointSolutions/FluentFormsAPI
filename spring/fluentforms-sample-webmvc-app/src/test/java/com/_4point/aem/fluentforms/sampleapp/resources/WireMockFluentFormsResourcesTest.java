@@ -27,7 +27,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 					portProperties = "fluentforms.aem.port"
         			)
 				)
-class FluentFormsResourcesTest extends AbstractFluentFormsResourcesTest {
+class WireMockFluentFormsResourcesTest extends AbstractFluentFormsResourcesTest {
 	private static final boolean WIREMOCK_RECORDING = false;
 
 
