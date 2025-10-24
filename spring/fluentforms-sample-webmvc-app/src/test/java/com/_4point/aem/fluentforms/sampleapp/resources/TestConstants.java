@@ -34,7 +34,7 @@ public class TestConstants {
 	private enum IntegrationTestType { WIREMOCK, AEM_INSTANCE };
 	
 	public static boolean runWiremockTests() { return TESTS_TO_RUN.contains(IntegrationTestType.WIREMOCK); }
-	public static boolean runTestContainerTests() { return TESTS_TO_RUN.contains(IntegrationTestType.AEM_INSTANCE); }
+	public static boolean runAemInstanceTests() { return TESTS_TO_RUN.contains(IntegrationTestType.AEM_INSTANCE); }
 	
 	// Set this to indicate the type of machine that AEM is running on:
 	//  The integration tests will run against an AEM instance running in a Docker container otherwise they will run against a local AEM instance.

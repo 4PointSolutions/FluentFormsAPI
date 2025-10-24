@@ -1,13 +1,8 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseEntityMatchers.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.net.URI;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.htmlunit.DefaultCredentialsProvider;
@@ -17,15 +12,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClient;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 import com._4point.aem.fluentforms.sampleapp.FluentFormsSpringApplication;
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -35,21 +26,17 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.recording.SnapshotRecordResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 
-@WireMockTest(httpPort = AemProxyEndpointTest.WIREMOCK_PORT)
+@EnabledIf("com._4point.aem.fluentforms.sampleapp.resources.TestConstants#runWiremockTests")
+@WireMockTest()
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
-				classes = FluentFormsSpringApplication.class,
-				properties = {"fluentforms.aem.port=" + AemProxyEndpointTest.WIREMOCK_PORT }
+				classes = FluentFormsSpringApplication.class
 				)
-class AemProxyEndpointTest {
-	private static final boolean SAVE_RESULTS = false;
+@EnableWireMock(@ConfigureWireMock(
+					portProperties = "fluentforms.aem.port"
+        			)
+				)
+class AemProxyEndpointTest extends AbstractAemProxyEndpointTest {
 	private static final boolean WIREMOCK_RECORDING = false;
-	static final int WIREMOCK_PORT = 5502;
-
-	private static final Path RESOURCES_DIR = Path.of("src", "test", "resources");
-	private static final Path SAMPLE_FILES_DIR = RESOURCES_DIR.resolve("SampleFiles");
-
-	@LocalServerPort
-	private int port;
 
 	@BeforeEach
 	void setUp(WireMockRuntimeInfo wmRuntimeInfo) throws Exception {
@@ -73,80 +60,6 @@ class AemProxyEndpointTest {
 		}
 	}
 	
-
-	@Test
-	void testProxyCsrfToken() throws Exception {
-		String csrf_token_path =  "/aem/libs/granite/csrf/token.json";
-		
-		// RestTestClient requires Spring Boot 4.x, which we can't use yet because Fluent Forms requires Spring Boot 3.x.
-//		RestTestClient restTestClient = RestTestClient.bindToServer()
-//													  .baseUrl(getBaseUri(port).toASCIIString())
-//													  .build();
-//		restTestClient.get().uri(csrf_token_path).exchange()
-//					  .expectStatus().isOk()
-//					  .expectHeader().value(HttpHeaders.CONTENT_TYPE, 
-//							  org.hamcrest.Matchers.anyOf(org.hamcrest.Matchers.equalTo(MediaType.APPLICATION_JSON_VALUE), org.hamcrest.Matchers.equalTo(MediaType.TEXT_HTML_VALUE)))
-//					  .expectBody(String.class)
-//					  .value(body -> assertThat(body, matchesRegex("\\s*\\{\"token\":\".*\"\\}\\s*")));
-
-		RestClient restClient = RestClient.create();
-		ResponseEntity<String> response = restClient.get()
-				.uri(getBaseUri(port) + csrf_token_path)
-				.retrieve()
-				.toEntity(String.class);
-		
-		assertThat(response, allOf(isStatus(HttpStatus.OK), 
-		   // For some reason that I can't determine, wiremock returns text/html.  I would like to fix this, but for now, I accept both.
-		   anyOf(isMediaType(MediaType.APPLICATION_JSON), isMediaType(MediaType.TEXT_HTML)), 
-		   hasStringEntityMatching(matchesRegex("\\s*\\{\"token\":\".*\"\\}\\s*"))
-		   ));
-
-		
-//		Response response = ClientBuilder.newClient()
-//				 .target(getBaseUri(port))
-//				 .path(csrf_token_path)
-//				 .request()
-//				 .get();
-//		
-//		assertThat(response, allOf(isStatus(Status.OK), 
-//								   // For some reason that I can't determine, wiremock returns text/html.  I would like to fix this, but for now, I accept both.
-//								   anyOf(hasMediaType(MediaType.APPLICATION_JSON_TYPE), hasMediaType(MediaType.TEXT_HTML_TYPE)), 
-//								   hasStringEntityMatching(matchesRegex("\\s*\\{\"token\":\".*\"\\}\\s*"))
-//								   ));
-
-//		if (USE_WIREMOCK) {	// For some reason that I can't determine, wiremock returns text/html.  I would like to fix this, but for now, I work around it.
-//			assertTrue(MediaType.TEXT_HTML_TYPE.isCompatible(mediaType), "Expected response media type (" + response.getMediaType().toString() + ") to be compatible with 'text/html'.");
-//		} else {
-//			assertTrue(MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType), "Expected response media type (" + response.getMediaType().toString() + ") to be compatible with 'application/json'.");
-//		}
-//		assertTrue(response.hasEntity(), "Expected response to have entity");
-//		byte[] resultBytes = ((InputStream)response.getEntity()).readAllBytes();
-//		if (SAVE_RESULTS /* && USE_AEM */) {
-//			try (var os = Files.newOutputStream(ACTUAL_RESULTS_DIR.resolve("testProxyCsrfToken_" + (urlPrefix.isBlank() ? "osgi" : "jee") + "_result.json"))) {
-//				os.write(resultBytes);;
-//			}
-//		}
-	}
-
-	@Test
-	void proxyTest() throws Exception {
-	    try (final WebClient webClient = new WebClient()) {
-	        String baseUri = getBaseUriString(port) + "/FluentForms/Html5FormsServiceRenderHtml5Form" + "?form=" + SAMPLE_FILES_DIR.resolve("SampleForm.xdp").toAbsolutePath();
-			final HtmlPage page = webClient.getPage(baseUri);
-	        assertEquals("LC Forms", page.getTitleText());
-	    }
-	    List.of(
-	    		/* "/content/xfaforms/profiles/default.html", */ // This fails for some reason however it's not essential to the test because if this were truly not working, none of the other calls would be made.
-	    		/* "/libs/granite/csrf/token.json", */ // This is not tested because it doesn't always happen (depending on the timings).
-	    		"/etc.clientlibs/fd/xfaforms/clientlibs/I18N/en.js",
-	    		"/etc.clientlibs/fd/xfaforms/clientlibs/profile.css",
-	    		"/etc.clientlibs/fd/xfaforms/clientlibs/profile.js",
-	    		"/etc.clientlibs/clientlibs/granite/jquery/granite/csrf.js",
-	    		"/etc.clientlibs/toggles.json"
-	    		)
-	    	.forEach(url->verify(getRequestedFor(urlPathEqualTo(url))));
-	}
-	
 	// In order to re-record the AEM interactions for Wiremock emulation, you need to:
 	//  1) run a local AEM server
 	//  2) set the WIREMOCK_RECORDING variable to true
@@ -163,12 +76,12 @@ class AemProxyEndpointTest {
 	//    It appears that the FluentForms call does not include the _US suffix.
 	@Disabled("This test is not really a test but it is used to record interactions with the AEM server.")
 	@Test
-	void aemTest() throws Exception {
+	void aemTest(WireMockRuntimeInfo wmRuntimeInfo) throws Exception {
 	    DefaultCredentialsProvider userCredentials = new DefaultCredentialsProvider();
 	    userCredentials.addCredentials("admin", "admin".toCharArray());
 	    try (final WebClient webClient = new WebClient()) {
 	    	webClient.setCredentialsProvider(userCredentials);
-	        String baseUri = "http://localhost:" + WIREMOCK_PORT + "/content/xfaforms/profiles/default.html?contentRoot=crx:///content/dam/formsanddocuments/sample-forms&template=SampleForm.xdp";
+	        String baseUri = "http://localhost:" + wmRuntimeInfo.getHttpPort() + "/content/xfaforms/profiles/default.html?contentRoot=crx:///content/dam/formsanddocuments/sample-forms&template=SampleForm.xdp";
 			final HtmlPage page = webClient.getPage(baseUri);
 	        assertEquals("LC Forms", page.getTitleText());
 
@@ -186,14 +99,5 @@ class AemProxyEndpointTest {
 	    		"/etc.clientlibs/fd/xfaforms/clientlibs/profile.js"
 	    		)
 	    	.forEach(url->verify(getRequestedFor(urlPathEqualTo(url))));
-
-	}
-		
-	private static String getBaseUriString(int port) {
-		return getBaseUri(port).toString();
-	}
-
-	private static URI getBaseUri(int port) {
-		return URI.create("http://localhost:" + port);
 	}
 }

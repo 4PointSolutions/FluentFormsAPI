@@ -8,10 +8,14 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.awaitility.Awaitility;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -21,7 +25,7 @@ import org.testcontainers.utility.DockerImageName;
  * Change the value of TestConstants.AEM_TARGET_TYPE in the TestConstants class to tell the tests what type of AEM instance we're testing against.
  */
 public enum AemInstance {
-	AEM_1(TestConstants.AEM_TARGET_TYPE); // Change parameter to false to disable TestContainers and use local AEM instance..,
+	AEM_1(TestConstants.AEM_TARGET_TYPE); // Change parameter in TestContants to choose between TestContainers, local AEM instance, and remote AEM instance.
 	
 	private static final String LOCALHOST = "localhost";
 	
@@ -180,6 +184,23 @@ public enum AemInstance {
 		 */
 		public Path samplesPath(String filename) {
 			return this.samplesPath.resolve(filename);
+		}
+	}
+	
+	/**
+	 * Class used to initialize the Spring Boot context with all the parameters required to use an AEM instance.
+	 */
+	static class AemInstanceContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+		@Override
+		public void initialize(ConfigurableApplicationContext applicationContext) {
+			System.out.println("Setting context: %s:%d".formatted(AEM_1.aemHost(),AEM_1.aemPort()));
+			TestPropertyValues
+					.of(Map.of(
+							"fluentforms.aem.host", AEM_1.aemHost(),
+							"fluentforms.aem.port", AEM_1.aemPort().toString()
+							))
+					.applyTo(applicationContext);
 		}
 	}
 }
