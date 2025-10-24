@@ -1,20 +1,12 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseEntityMatchers.hasStringEntityMatching;
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseEntityMatchers.isMediaType;
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseEntityMatchers.isStatus;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com._4point.aem.fluentforms.sampleapp.resources.ResponseEntityMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.matchesRegex;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.htmlunit.WebClient;
@@ -28,11 +20,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
 abstract class AbstractAemProxyEndpointTest {
-	private static final Path RESOURCES_DIR = Path.of("src", "test", "resources");
-	private static final Path SAMPLE_FILES_DIR = RESOURCES_DIR.resolve("SampleFiles");
+	protected static final Path SAMPLE_XDP_FILENAME_PATH = Path.of("SampleForm.xdp");
 
 	@LocalServerPort
 	private int port;
+	private final String sampleFileLocation;
+
+	protected AbstractAemProxyEndpointTest(String sampleFileLocation) {
+		this.sampleFileLocation = sampleFileLocation;
+	}
 
 	@Timeout(value = 30, unit = TimeUnit.SECONDS)
 	@Test
@@ -66,21 +62,14 @@ abstract class AbstractAemProxyEndpointTest {
 	@Test
 	void proxyTest() throws Exception {
 	    try (final WebClient webClient = new WebClient()) {
-	        String baseUri = getBaseUriString(port) + "/FluentForms/Html5FormsServiceRenderHtml5Form" + "?form=" + SAMPLE_FILES_DIR.resolve("SampleForm.xdp").toAbsolutePath();
+	        String baseUri = getBaseUriString(port) + "/FluentForms/Html5FormsServiceRenderHtml5Form" + "?form=" + sampleFileLocation;
 			final HtmlPage page = webClient.getPage(baseUri);
 	        assertEquals("LC Forms", page.getTitleText());
 	    }
-	    List.of(
-	    		/* "/content/xfaforms/profiles/default.html", */ // This fails for some reason however it's not essential to the test because if this were truly not working, none of the other calls would be made.
-	    		/* "/libs/granite/csrf/token.json", */ // This is not tested because it doesn't always happen (depending on the timings).
-	    		"/etc.clientlibs/fd/xfaforms/clientlibs/I18N/en.js",
-	    		"/etc.clientlibs/fd/xfaforms/clientlibs/profile.css",
-	    		"/etc.clientlibs/fd/xfaforms/clientlibs/profile.js",
-	    		"/etc.clientlibs/clientlibs/granite/jquery/granite/csrf.js",
-	    		"/etc.clientlibs/toggles.json"
-	    		)
-	    	.forEach(url->verify(getRequestedFor(urlPathEqualTo(url))));
+	    verifyProxyTest();
 	}
+
+	protected abstract void verifyProxyTest();
 
 	protected static String getBaseUriString(int port) {
 		return getBaseUri(port).toString();
@@ -89,4 +78,5 @@ abstract class AbstractAemProxyEndpointTest {
 	private static URI getBaseUri(int port) {
 		return URI.create("http://localhost:" + port);
 	}
+	
 }

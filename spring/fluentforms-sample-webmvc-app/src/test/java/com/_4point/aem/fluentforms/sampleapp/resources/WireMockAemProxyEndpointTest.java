@@ -3,6 +3,7 @@ package com._4point.aem.fluentforms.sampleapp.resources;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import org.htmlunit.DefaultCredentialsProvider;
@@ -38,6 +39,13 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 class WireMockAemProxyEndpointTest extends AbstractAemProxyEndpointTest {
 	private static final boolean WIREMOCK_RECORDING = false;
 
+	private static final Path RESOURCES_DIR = Path.of("src", "test", "resources");
+	private static final Path SAMPLE_FILES_DIR = RESOURCES_DIR.resolve("SampleFiles");
+
+	public WireMockAemProxyEndpointTest() {
+		super(SAMPLE_FILES_DIR.resolve(SAMPLE_XDP_FILENAME_PATH).toAbsolutePath().toString());
+	}
+
 	@BeforeEach
 	void setUp(WireMockRuntimeInfo wmRuntimeInfo) throws Exception {
 		if (WIREMOCK_RECORDING) {
@@ -59,6 +67,21 @@ class WireMockAemProxyEndpointTest extends AbstractAemProxyEndpointTest {
 			}
 		}
 	}
+
+	@Override
+	protected void verifyProxyTest() {
+		List.of(
+	    		/* "/content/xfaforms/profiles/default.html", */ // This fails for some reason however it's not essential to the test because if this were truly not working, none of the other calls would be made.
+	    		/* "/libs/granite/csrf/token.json", */ // This is not tested because it doesn't always happen (depending on the timings).
+	    		"/etc.clientlibs/fd/xfaforms/clientlibs/I18N/en.js",
+	    		"/etc.clientlibs/fd/xfaforms/clientlibs/profile.css",
+	    		"/etc.clientlibs/fd/xfaforms/clientlibs/profile.js",
+	    		"/etc.clientlibs/clientlibs/granite/jquery/granite/csrf.js",
+	    		"/etc.clientlibs/toggles.json"
+	    		)
+	    	.forEach(url->verify(getRequestedFor(urlPathEqualTo(url))));
+	}
+
 	
 	// In order to re-record the AEM interactions for Wiremock emulation, you need to:
 	//  1) run a local AEM server
