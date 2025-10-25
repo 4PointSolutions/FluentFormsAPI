@@ -1,18 +1,10 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseEntityMatchers.hasStringEntityMatching;
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseEntityMatchers.isMediaType;
-import static com._4point.aem.fluentforms.sampleapp.resources.ResponseEntityMatchers.isStatus;
-import static com._4point.testing.matchers.jaxrs.ResponseMatchers.*;
+import static com._4point.aem.fluentforms.sampleapp.resources.ResponseEntityMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URI;
-import java.util.List;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -23,56 +15,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import com.github.tomakehurst.wiremock.recording.SnapshotRecordResult;
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
-
-@WireMockTest(httpPort = FluentFormsResourcesTest.WIREMOCK_HTTP_PORT)
+// This test does not call AEM, so does not require WireMock
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class AfSubmissionHandlerTest {
+
 	public static final String AF_TEMPLATE_NAME = "sample00002test";
 	private static final String SUBMIT_ADAPTIVE_FORM_SERVICE_PATH = "/aem/content/forms/af/" + AF_TEMPLATE_NAME + "/jcr:content/guideContainer.af.submit.jsp";
-
-	private static final boolean WIREMOCK_RECORDING = false;
-	static final int WIREMOCK_PORT = 5502;
-	
-	private static final String APPLICATION_PDF = "application/pdf";
-	private static final MediaType APPLICATION_PDF_TYPE = MediaType.valueOf(APPLICATION_PDF);
 
 	@LocalServerPort
 	private int port;
 
 	private static final RestClient REST_CLIENT = RestClient.create();
 
-	@BeforeEach
-	void setUp(WireMockRuntimeInfo wmRuntimeInfo) throws Exception {
-		if (WIREMOCK_RECORDING) {
-			WireMock.startRecording(getBaseUriString(4502));
-		}
-	}
-
-	@AfterEach
-	void tearDown() throws Exception {
-		if (WIREMOCK_RECORDING) {
-			SnapshotRecordResult recordings = WireMock.stopRecording();
-			List<StubMapping> mappings = recordings.getStubMappings();
-			System.out.println("Found " + mappings.size() + " recordings.");
-			for (StubMapping mapping : mappings) {
-				ResponseDefinition response = mapping.getResponse();
-				var jsonBody = response.getJsonBody();
-				System.out.println(jsonBody == null ? "JsonBody is null" : jsonBody.toPrettyString());
-			}
-		}
-	}
-	
 	@Test
-	void test() {
+	void testAdaptiveFormSubmitHandler() {
 		var mockData = mockFormData("http://localhost:8080/redirect", "{ \"foo\" : \"bar\"}");
 
 		URI uri = UriComponentsBuilder.fromUri(getBaseUri(port))
@@ -111,7 +69,7 @@ class AfSubmissionHandlerTest {
 		return parts;
 	}
 
-	private static String getBaseUriString(int port) {
+	protected static String getBaseUriString(int port) {
 		return getBaseUri(port).toString();
 	}
 

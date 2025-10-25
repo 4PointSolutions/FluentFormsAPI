@@ -3,7 +3,6 @@ package com._4point.aem.fluentforms.sampleapp.resources;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -15,13 +14,6 @@ import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService;
 import com._4point.aem.docservices.rest_services.client.af.AdaptiveFormsService.AdaptiveFormsServiceException;
@@ -44,8 +36,16 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 
-@CrossOrigin
-@RestController
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+
+@Path(FluentFormsResources.RESOURCE_PATH)
 public class FluentFormsResources {
 	private final static Logger log = LoggerFactory.getLogger(FluentFormsResources.class);
 
@@ -64,20 +64,22 @@ public class FluentFormsResources {
 	@Autowired
 	OutputService outputService;
 	
-	@GetMapping(value = FluentFormsResources.RESOURCE_PATH + "/OutputServiceGeneratePdf", produces = {APPLICATION_PDF, "*/*"}) 
-	public ResponseEntity<byte[]> outputServiceGeneratePdf(@RequestParam("form") String templateName, @RequestParam(value =  "dataKey", required = false) String key) throws OutputServiceException, IOException {
+	@Path("/OutputServiceGeneratePdf")
+	@GET
+	@Produces({APPLICATION_PDF, "*/*;qs=0.8"})	// Will be selected if user requests PDF or nothing at all.
+	public Response outputServiceGeneratePdf(@QueryParam("form") String templateName, @QueryParam("dataKey") String key) throws OutputServiceException, IOException {
 		log.atInfo().addArgument(templateName).addArgument(key).log("Entered outputServiceGeneratePdf with template='{}', dataKey='{}'");
 		if (templateName == null) {
 			log.atError().log("'form' parameter not found in incoming request.");
-			return ResponseEntity.badRequest().build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		if (outputService == null) {
 			log.atError().log("OutputService was not available.");
-			return ResponseEntity.internalServerError().build();
+			return Response.serverError().build();
 		}
 		if (key != null && !dataService.exists(key)) {
 			log.atError().addArgument(key).log("Bad dataKey ({}).  Data was not available.");
-			return ResponseEntity.badRequest().build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		Optional<Document> data = retreiveData(key);
@@ -88,27 +90,26 @@ public class FluentFormsResources {
 				 						   : generatePDFOutput.executeOn(template);
 
 		log.atInfo().log("Exiting outputServiceGeneratePdf");
-		return ResponseEntity.ok()
-							 .contentType(MediaType.valueOf(result.getContentType()))
-							 .body(result.getInputStream().readAllBytes());
+		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
 	}
-	
 	private GeneratePdfOutputArgumentBuilder applyContentRoot(GeneratePdfOutputArgumentBuilder in) {
 		log.atDebug().addArgument(contentRoot).log("Content Root='{}'.");
 		return contentRoot != null && !contentRoot.isBlank() ? in.setContentRoot(PathOrUrl.from(contentRoot))
 															 : in;
 	}
 	
-	@PostMapping(value = FluentFormsResources.RESOURCE_PATH + "/OutputServiceGeneratePdf", produces = {APPLICATION_PDF, "*/*"})
-	public ResponseEntity<byte[]> outputServiceGeneratePdf_Post(@RequestParam("form") String templateName, InputStream dataInputStream) throws OutputServiceException, IOException {
+	@Path("/OutputServiceGeneratePdf")
+	@POST
+	@Produces({APPLICATION_PDF, "*/*;qs=0.8"})	// Will be selected if user requests PDF or nothing at all.
+	public Response outputServiceGeneratePdf_Post(@QueryParam("form") String templateName, InputStream dataInputStream) throws OutputServiceException, IOException {
 		log.atInfo().addArgument(templateName).log("Entered outputServiceGeneratePdf_Post with template='{}' amd POSTed data");
 		if (templateName == null) {
 			log.atError().log("'form' parameter not found in incoming request.");
-			return ResponseEntity.badRequest().build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		if (outputService == null) {
 			log.atError().log("OutputService was not available.");
-			return ResponseEntity.internalServerError().build();
+			return Response.serverError().build();
 		}
 
 		//  Read in data from data InputStream
@@ -116,7 +117,7 @@ public class FluentFormsResources {
 		Optional<AemDataFormat> format = AemDataFormat.sniff(dataBytes);
 		if (format.isEmpty()) { 
 			log.atError().log("Unrecognized data format.");
-			return ResponseEntity.badRequest().build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		//  Sniff it and convert it to XML if it is JSON
 		byte[] data = switch(format.orElseThrow()) {
@@ -127,15 +128,13 @@ public class FluentFormsResources {
 		log.atTrace().addArgument(()->new String(data, StandardCharsets.UTF_8)).log("XML data is '{}'.");
 		
 		//  Carry on as before
-		var template = Path.of(templateName);
+		var template = java.nio.file.Path.of(templateName);
 		var generatePDFOutput = applyContentRoot(outputService.generatePDFOutput());
 
 		Document result = generatePDFOutput.executeOn(template, data);
 
 		log.atInfo().log("Exiting outputServiceGeneratePdf_Post");
-		return ResponseEntity.ok()
-							 .contentType(MediaType.valueOf(result.getContentType()))
-							 .body(result.getInputStream().readAllBytes());
+		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
 	}
 
 	private byte[] convertJsonToXml(byte[] jsonBytes) {
@@ -184,12 +183,14 @@ public class FluentFormsResources {
 	@Autowired
 	AdaptiveFormsService adaptiveFormsService;
 	
-	@GetMapping(value = FluentFormsResources.RESOURCE_PATH + "/AdaptiveFormsServiceRenderAdaptiveForm", produces = {MediaType.TEXT_HTML_VALUE, "*/*"})
-	public ResponseEntity<byte[]> adaptiveFormsServiceRenderAdaptiveForm(@RequestParam("form") String templateName, @RequestParam(value = "dataKey", required = false) String key) throws AdaptiveFormsServiceException, IOException {
+	@Path("/AdaptiveFormsServiceRenderAdaptiveForm")
+	@GET
+	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
+	public Response adaptiveFormsServiceRenderAdaptiveForm(@QueryParam("form") String templateName, @QueryParam("dataKey") String key) throws AdaptiveFormsServiceException, IOException {
 		log.atInfo().addArgument(templateName).addArgument(key).log("Entered adaptiveFormsServiceRenderAdaptiveForm with template='{}', dataKey='{}'");
-		if (templateName == null) return ResponseEntity.badRequest().build();
-		if (adaptiveFormsService == null) return ResponseEntity.internalServerError().build();
-		if (key != null && !dataService.exists(key)) ResponseEntity.badRequest().build();
+		if (templateName == null) return Response.status(Status.BAD_REQUEST).build();
+		if (adaptiveFormsService == null) return Response.serverError().build();
+		if (key != null && !dataService.exists(key)) Response.status(Status.BAD_REQUEST).build();
 		
 		Optional<Document> data = retreiveData(key);
 		
@@ -197,9 +198,7 @@ public class FluentFormsResources {
 										   : adaptiveFormsService.renderAdaptiveForm(templateName);
 		
 		log.atInfo().log("Exiting adaptiveFormsServiceRenderAdaptiveForm");
-		return ResponseEntity.ok()
-							 .contentType(MediaType.valueOf(result.getContentType()))
-							 .body(result.getInputStream().readAllBytes());
+		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
 	}
 
 	private Optional<Document> retreiveData(String key) {
@@ -220,33 +219,37 @@ public class FluentFormsResources {
 	@Autowired
 	DataService dataService;
 	
-	@PostMapping(value = FluentFormsResources.RESOURCE_PATH + "/SaveData", produces = {MediaType.TEXT_HTML_VALUE, "*/*"})
-	public ResponseEntity<Void> saveData(@RequestParam("dataKey") String key, InputStream body) {
+	@Path("/SaveData")
+	@POST
+	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
+	public Response saveData(@QueryParam("dataKey") String key, InputStream body) {
 		log.atInfo().addArgument(key).log("Entered saveData with dataKey='{}'");
 		try {
 			byte[] jsonBytes = Objects.requireNonNull(body).readAllBytes();
 			log.atTrace().addArgument(()->new String(jsonBytes, StandardCharsets.UTF_8)).log("Incoming Json is '{}'.");
 			dataService.save(Objects.requireNonNull(key), jsonBytes);
 			log.atInfo().log("Exiting saveData");
-			return ResponseEntity.noContent().build();
+			return Response.noContent().build();
 		} catch (DataServiceException e) {
 			log.atError().setCause(e).log("Error saving data, returning Bad Request.");
-			return ResponseEntity.badRequest().build();
+			return Response.status(Status.BAD_REQUEST).build();
 		} catch (IOException e) {
 			log.atError().setCause(e).log("Error saving data, returning Internal Server Error.");
-			return ResponseEntity.internalServerError().build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
 	@Autowired
 	Html5FormsService html5FormService;
 	
-	@GetMapping(value = FluentFormsResources.RESOURCE_PATH + "/Html5FormsServiceRenderHtml5Form", produces = {MediaType.TEXT_HTML_VALUE, "*/*"})
-	public ResponseEntity<byte[]> htmlFormsServiceRenderHtml5Form(@RequestParam("form") String templateName, @RequestParam(value = "dataKey", required = false) String key) throws Html5FormsServiceException, IOException {
+	@Path("/Html5FormsServiceRenderHtml5Form")
+	@GET
+	@Produces({MediaType.TEXT_HTML, "*/*;qs=0.8"})	// Will be selected if user requests HTML or nothing at all.
+	public Response htmlFormsServiceRenderHtml5Form(@QueryParam("form") String templateName, @QueryParam("dataKey") String key) throws Html5FormsServiceException, IOException {
 		log.atInfo().addArgument(templateName).addArgument(key).log("Entered html5FormsServiceRenderHtml5Form with template='{}', dataKey='{}'");
-		if (templateName == null) return ResponseEntity.badRequest().build();
-		if (adaptiveFormsService == null) return ResponseEntity.internalServerError().build();
-		if (key != null && !dataService.exists(key)) ResponseEntity.badRequest().build();
+		if (templateName == null) return Response.status(Status.BAD_REQUEST).build();
+		if (adaptiveFormsService == null) return Response.serverError().build();
+		if (key != null && !dataService.exists(key)) Response.status(Status.BAD_REQUEST).build();
 		
 		Optional<Document> data = retreiveData(key);
 		
@@ -254,8 +257,7 @@ public class FluentFormsResources {
 										   : html5FormService.renderHtml5Form(templateName);
 		
 		log.atInfo().log("Exiting html5FormsServiceRenderHtml5Form");
-		return ResponseEntity.ok()
-							 .contentType(MediaType.valueOf(result.getContentType()))
-							 .body(result.getInputStream().readAllBytes());
+		return Response.ok().entity(result.getInputStream()).type(result.getContentType()).build();
 	}
+
 }
