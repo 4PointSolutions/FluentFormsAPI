@@ -20,19 +20,26 @@ import org.springframework.web.util.UriComponentsBuilder;
 public abstract class AbstractFluentFormsResourcesTest {
 	private static final String APPLICATION_PDF = "application/pdf";
 	private static final MediaType APPLICATION_PDF_TYPE = MediaType.valueOf(APPLICATION_PDF);
-	
+
 	private static final Path RESOURCES_DIR = Path.of("src", "test", "resources");
 	private static final Path SAMPLE_FILES_DIR = RESOURCES_DIR.resolve("SampleFiles");
+	protected static final Path SAMPLE_XDP_FILENAME_PATH = Path.of("SampleForm.xdp");
 
 	private static final RestClient REST_CLIENT = RestClient.create();
 
 	@LocalServerPort
 	private int port;
+	private final String sampleFormLocation;
+	
+	protected AbstractFluentFormsResourcesTest(String sampleFormLocation) {
+		this.sampleFormLocation = sampleFormLocation;
+	}
+
 	@Test
 	void testOutputServiceGeneratePdf_NoData() {
 		URI uri = UriComponentsBuilder.fromUri(getBaseUri(port))
 									  .path("/FluentForms/OutputServiceGeneratePdf")
-									  .queryParam("form", "sample_template.xdp")
+									  .queryParam("form", sampleFormLocation)
 									  .build()
 									  .toUri(); 
 
@@ -63,7 +70,7 @@ public abstract class AbstractFluentFormsResourcesTest {
 
 		URI uri = UriComponentsBuilder.fromUri(getBaseUri(port))
 				  .path("/FluentForms/OutputServiceGeneratePdf")
-				  .queryParam("form", "sample_template.xdp")
+				  .queryParam("form", sampleFormLocation)
 				  .queryParam("dataKey", dataKeyValue)
 				  .build()
 				  .toUri(); 
@@ -80,7 +87,7 @@ public abstract class AbstractFluentFormsResourcesTest {
 	void testOutputServiceGeneratePdf_WithPostedXmlData() {
 		URI uri = UriComponentsBuilder.fromUri(getBaseUri(port))
 				  .path("/FluentForms/OutputServiceGeneratePdf")
-				  .queryParam("form", "sample_template.xdp")
+				  .queryParam("form", sampleFormLocation)
 				  .build()
 				  .toUri(); 
 		
@@ -97,7 +104,7 @@ public abstract class AbstractFluentFormsResourcesTest {
 	void testOutputServiceGeneratePdf_WithPostedJsonData() {
 		URI uri = UriComponentsBuilder.fromUri(getBaseUri(port))
 				  .path("/FluentForms/OutputServiceGeneratePdf")
-				  .queryParam("form", "sample_template.xdp")
+				  .queryParam("form", sampleFormLocation)
 				  .build()
 				  .toUri(); 
 		
@@ -162,7 +169,7 @@ public abstract class AbstractFluentFormsResourcesTest {
 	void testHtml5FormsServiceRenderHtml5Form_NoData() {
 		URI uri = UriComponentsBuilder.fromUri(getBaseUri(port))
 				.path("/FluentForms/Html5FormsServiceRenderHtml5Form")
-				.queryParam("form", SAMPLE_FILES_DIR.resolve("SampleForm.xdp").toAbsolutePath())
+				.queryParam("form", sampleFormLocation)
 				.build()
 				.toUri(); 
 
@@ -193,7 +200,7 @@ public abstract class AbstractFluentFormsResourcesTest {
 
 		URI uri = UriComponentsBuilder.fromUri(getBaseUri(port))
 				.path("/FluentForms/Html5FormsServiceRenderHtml5Form")
-				.queryParam("form", SAMPLE_FILES_DIR.resolve("SampleForm.xdp").toAbsolutePath())
+				.queryParam("form", sampleFormLocation)
 				.queryParam("dataKey", dataKeyValue)
 				.build()
 				.toUri(); 

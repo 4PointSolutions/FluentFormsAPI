@@ -55,7 +55,8 @@ public class FluentFormsResources {
 	protected static final String RESOURCE_PATH = "/FluentForms";
 
 	// TODO:  Move this to configuration value
-	String contentRoot = "crx:/content/dam/formsanddocuments";
+//	String contentRoot = "crx:/content/dam/formsanddocuments";
+	String contentRoot = "";
 	
 	@Autowired
 	DocumentFactory documentFactory;

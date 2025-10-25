@@ -1,5 +1,6 @@
 package com._4point.aem.fluentforms.sampleapp.resources;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -30,7 +31,12 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 class WireMockFluentFormsResourcesTest extends AbstractFluentFormsResourcesTest {
 	private static final boolean WIREMOCK_RECORDING = false;
 
+	private static final Path RESOURCES_DIR = Path.of("src", "test", "resources");
+	private static final Path SAMPLE_FILES_DIR = RESOURCES_DIR.resolve("SampleFiles");
 
+	private WireMockFluentFormsResourcesTest() {
+		super(SAMPLE_FILES_DIR.resolve(SAMPLE_XDP_FILENAME_PATH).toAbsolutePath().toString());
+	}
 
 	@BeforeEach
 	void setUp(WireMockRuntimeInfo wmRuntimeInfo) throws Exception {

@@ -5,7 +5,7 @@
     "url" : "/services/OutputService/GeneratePdfOutput",
     "method" : "POST",
     "bodyPatterns" : [ {
-      "contains" : "sample_template"
+      "contains" : "SampleForm.xdp"
     } ]
   },
   "response" : {

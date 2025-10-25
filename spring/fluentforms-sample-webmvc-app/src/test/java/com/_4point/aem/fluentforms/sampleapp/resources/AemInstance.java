@@ -138,6 +138,14 @@ public enum AemInstance {
 		return aemContainer == null && aemHost().equalsIgnoreCase(LOCALHOST);
 	}
 
+	public Path samplesPath(String filename) {
+		return targetType.samplesPath(filename);
+	}
+
+	public Path samplesPath(Path filename) {
+		return samplesPath(filename.toString());
+	}
+
 	private static boolean aemIsUp(HttpClient restClient, HttpRequest request) {
 		try {
 			HttpResponse<Void> result = restClient.send(request, BodyHandlers.discarding());
@@ -165,7 +173,7 @@ public enum AemInstance {
 	 * the tests.
 	 */
 	public enum AemTargetType {
-		LOCAL(Path.of("..", "test_containers", "ff_it_files").toAbsolutePath()),			// Running on local machine (assumes that the port is TEST_MACHINE_PORT)	
+		LOCAL(Path.of("src", "test", "resources", "SampleFiles").toAbsolutePath()),			// Running on local machine (assumes that the port is TEST_MACHINE_PORT)	
 		REMOTE_WINDOWS(Path.of("/Adobe", "ff_it_files")), // Running on remote Windows machine (assumes that machine name is TEST_MACHINE_NAME and port is TEST_MACHINE_PORT) 
 		REMOTE_LINUX(Path.of("/opt", "adobe", "ff_it_files")), 	// Running on remote Linux machine (assumes that machine name is TEST_MACHINE_NAME and port is TEST_MACHINE_PORT)
 		TESTCONTAINERS(Path.of("/opt", "adobe", "ff_it_files")); // Running on local testcontainers image (gets port from TestContainers)
