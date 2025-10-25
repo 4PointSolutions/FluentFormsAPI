@@ -33,12 +33,12 @@ jobs:
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
-    - name: Build Sample Web App with Maven
-      run: mvn -B install -s $GITHUB_WORKSPACE/settings.xml --file spring/fluentforms-sample-web-app
+    - name: Build Sample Jersey Web App with Maven
+      run: mvn -B install -s $GITHUB_WORKSPACE/settings.xml --file spring/fluentforms-sample-web-jersey-app
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
-    - name: Build Sample Web App with Maven
+    - name: Build Sample Web MVC App with Maven
       run: mvn -B install -s $GITHUB_WORKSPACE/settings.xml --file spring/fluentforms-sample-webmvc-app
       env:
         GITHUB_TOKEN: ${{ github.token }}
