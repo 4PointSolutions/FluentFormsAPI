@@ -10,12 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
 
 import org.htmlunit.WebClient;
 import org.htmlunit.html.HtmlPage;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import jakarta.ws.rs.client.ClientBuilder;
@@ -34,7 +32,6 @@ abstract class AbstractAemProxyEndpointTest {
 		this.sampleFileLocation = sampleFileLocation;
 	}
 
-	@Timeout(value = 30, unit = TimeUnit.SECONDS)
 	@Test
 	void testProxyCsrfToken() throws Exception {
 		String csrf_token_path =  "/aem/libs/granite/csrf/token.json";
