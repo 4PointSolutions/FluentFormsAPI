@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.htmlunit.DefaultCredentialsProvider;
 import org.htmlunit.WebClient;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -36,6 +38,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 					portProperties = "fluentforms.aem.port"
         			)
 				)
+@Timeout(value = 30, unit = TimeUnit.SECONDS)
 class WireMockAemProxyEndpointTest extends AbstractAemProxyEndpointTest {
 	private static final boolean WIREMOCK_RECORDING = false;
 
