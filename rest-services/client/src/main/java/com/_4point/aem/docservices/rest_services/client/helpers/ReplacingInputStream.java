@@ -110,7 +110,7 @@ public class ReplacingInputStream extends FilterInputStream {
 	public int read(byte[] ba, int off, int len) throws IOException {
 		for (int i = off; i < len; i++) {
 			int b = read();
-			if (b == -1) return i == 0 ? -1 : i;	// If we haven't read anything, return -1 otherwise, return the number of bytes we have read.
+			if (b == -1) return (i - off) == 0 ? -1 : i - off;	// If we haven't read anything, return -1 otherwise, return the number of bytes we have read.
 			ba[i] = (byte)b;
 		}
 		return len;
