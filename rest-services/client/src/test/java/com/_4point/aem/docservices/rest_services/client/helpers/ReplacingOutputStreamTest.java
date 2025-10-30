@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -73,4 +74,29 @@ class ReplacingOutputStreamTest {
 			assertEquals(expected, bos.toString());
 		}
 	}
+	
+	
+	private static final String MODIFICATION_TARGETS_FORMAT_STR = """
+			'contextPath = %sresult[1];'
+			'"%s/etc.clientlibs/toggles.json"'
+			""";
+
+	@Test
+	void shouldWorkWithByteArrayOutputStream() throws IOException {
+		String aemResponseText = "Value should be modified. " + MODIFICATION_TARGETS_FORMAT_STR.formatted("", "");
+		String expectedResult = "Value should be modified. " + MODIFICATION_TARGETS_FORMAT_STR.formatted("\" + /aem\" + ", "");
+		
+		byte[] aemResponseBytes = aemResponseText.getBytes();
+		byte[] expectedResultBytes = expectedResult.getBytes();
+   		String target = "contextPath = result[1];";
+
+   		String replacement = "contextPath = \" + /aem\" + result[1];";
+   		var os = new ByteArrayOutputStream();
+   		try (os; ReplacingOutputStream replacingOutputStream = new ReplacingOutputStream(os , target, replacement)) {
+   			replacingOutputStream.write(aemResponseBytes);
+   			
+   		}
+   		assertArrayEquals(expectedResultBytes, os.toByteArray());
+	}
+
 }

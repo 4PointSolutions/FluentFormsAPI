@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -74,4 +75,28 @@ class ReplacingInputStreamTest {
 	        }
 		}
 	}
+	
+	private static final String MODIFICATION_TARGETS_FORMAT_STR = """
+			'contextPath = %sresult[1];'
+			'"%s/etc.clientlibs/toggles.json"'
+			""";
+
+	@Test
+	void shouldWorkWithByteArrayInputStream() throws IOException {
+		String aemResponseText = "Value should be modified. " + MODIFICATION_TARGETS_FORMAT_STR.formatted("", "");
+		String expectedResult = "Value should be modified. " + MODIFICATION_TARGETS_FORMAT_STR.formatted("\" + /aem\" + ", "");
+		
+		byte[] aemResponseBytes = aemResponseText.getBytes();
+		byte[] expectedResultBytes = expectedResult.getBytes();
+   		String target = "contextPath = result[1];";
+
+   		String replacement = "contextPath = \" + /aem\" + result[1];";
+   		try (ReplacingInputStream replacingInputStream = new ReplacingInputStream(new ByteArrayInputStream(aemResponseBytes), target, replacement)) {
+   			byte[] result = replacingInputStream.readAllBytes();
+   			
+   			assertArrayEquals(aemResponseBytes, new ByteArrayInputStream(aemResponseBytes).readAllBytes());
+   			assertArrayEquals(expectedResultBytes, result);
+   		}
+	}
+
 }
