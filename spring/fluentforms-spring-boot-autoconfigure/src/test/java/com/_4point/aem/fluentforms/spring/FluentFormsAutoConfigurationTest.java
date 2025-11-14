@@ -97,7 +97,7 @@ class FluentFormsAutoConfigurationTest {
 	@Test
 	void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
 		RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
-		assertTrue(client instanceof JerseyRestClient, "RestClientFactory should return a JerseyRestClient by default");
+		assertTrue(client instanceof SpringRestClientRestClient, "RestClientFactory should return a SpringRestClientRestClient by default");
 	}
 
 	@Test
@@ -193,23 +193,24 @@ class FluentFormsAutoConfigurationTest {
 		}
 	}
 
-	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
-			properties = {
-					"fluentforms.aem.servername=localhost", 
-					"fluentforms.aem.port=4502", 
-					"fluentforms.aem.user=admin",		 
-					"fluentforms.aem.password=admin",
-					"fluentforms.aem.usessl=true",
-					"fluentforms.restclient=jersey"	// Configure for Jersey RestClient
-					})
-	public static class JserseyRestClient_SslNoBundleNameTest {
-		
-		@Test
-		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
-			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
-			assertTrue(client instanceof JerseyRestClient, "RestClientFactory should return a JerseyRestClient when configured to do so");
-		}
-	}
+//	@Disabled("Needs to be moved to the Jersey Rest Client module")
+//	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+//			properties = {
+//					"fluentforms.aem.servername=localhost", 
+//					"fluentforms.aem.port=4502", 
+//					"fluentforms.aem.user=admin",		 
+//					"fluentforms.aem.password=admin",
+//					"fluentforms.aem.usessl=true",
+//					"fluentforms.restclient=jersey"	// Configure for Jersey RestClient
+//					})
+//	public static class JserseyRestClient_SslNoBundleNameTest {
+//		
+//		@Test
+//		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
+//			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
+//			assertTrue(client instanceof JerseyRestClient, "RestClientFactory should return a JerseyRestClient when configured to do so");
+//		}
+//	}
 
 	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
 			properties = {
@@ -232,26 +233,28 @@ class FluentFormsAutoConfigurationTest {
 		}
 	}
 
-	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
-			properties = {
-					"fluentforms.aem.servername=localhost", 
-					"fluentforms.aem.port=4502", 
-					"fluentforms.aem.user=admin",		 
-					"fluentforms.aem.password=admin",
-					"fluentforms.aem.usessl=true",
-					"spring.ssl.bundle.jks.aem.truststore.location=file:src/test/resources/aemforms.p12",
-					"spring.ssl.bundle.jks.aem.truststore.password=Pa$$123",
-					"spring.ssl.bundle.jks.aem.truststore.type=PKCS12",
-					"fluentforms.restclient=jersey"	// Configure for Jersey RestClient
-					})
-	public static class JserseyRestClient_SslBundleTest {
-		
-		@Test
-		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
-			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
-			assertTrue(client instanceof JerseyRestClient, "RestClientFactory should return a JerseyRestClient when configured to do so");
-		}
-	}
+//	@Disabled("This test needs to be moved to the Jersey autoconfiguration project when it is created.")
+//	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+//			properties = {
+//					"fluentforms.aem.servername=localhost", 
+//					"fluentforms.aem.port=4502", 
+//					"fluentforms.aem.user=admin",		 
+//					"fluentforms.aem.password=admin",
+//					"fluentforms.aem.usessl=true",
+//					"spring.ssl.bundle.jks.aem.truststore.location=file:src/test/resources/aemforms.p12",
+//					"spring.ssl.bundle.jks.aem.truststore.password=Pa$$123",
+//					"spring.ssl.bundle.jks.aem.truststore.type=PKCS12",
+//					"fluentforms.restclient=jersey"	// Configure for Jersey RestClient
+//					})
+//	public static class JserseyRestClient_SslBundleTest {
+//		
+//		@Test
+//		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
+//			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
+//			assertTrue(client instanceof JerseyRestClient, "RestClientFactory should return a JerseyRestClient when configured to do so");
+//		}
+//	}
+
 	private static AemConfig toAemConfig(AemConfiguration config) {
 		return new AemConfig() {
 

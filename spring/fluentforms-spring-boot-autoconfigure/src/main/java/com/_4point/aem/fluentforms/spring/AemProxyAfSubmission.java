@@ -1,46 +1,41 @@
 package com._4point.aem.fluentforms.spring;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import org.glassfish.jersey.client.ChunkedInput;
-import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.media.multipart.BodyPartEntity;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ssl.SslBundles;
+import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
+import org.springframework.boot.ssl.NoSuchSslBundleException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
-
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.GenericType;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.util.UriBuilder;
 
 /**
  * Class that handles Adaptive Form Submissions.
@@ -60,27 +55,26 @@ import jakarta.ws.rs.core.Response;
  * 
  * 
  */
-@Path("/aem")
+@CrossOrigin
+@RestController
+@RequestMapping("/aem")
 public class AemProxyAfSubmission {
 	private final static Logger logger = LoggerFactory.getLogger(AemProxyAfSubmission.class);
 	private static final String CONTENT_FORMS_AF = "content/forms/af/";
 	
 	@Autowired
-	AfSubmitProcessor submitProcessor;
+	SpringAfSubmitProcessor submitProcessor;
 
-	@Path(CONTENT_FORMS_AF + "{remainder : .+}")
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Produces(MediaType.WILDCARD)
-    public Response proxySubmitPost(@PathParam("remainder") String remainder, /* @HeaderParam(CorrelationId.CORRELATION_ID_HDR) final String correlationIdHdr,*/ @Context HttpHeaders headers, final FormDataMultiPart inFormData)  {
+	@PostMapping(path = CONTENT_FORMS_AF + "{remainder}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.ALL_VALUE)
+    public ResponseEntity<byte[]> proxySubmitPost(@PathVariable("remainder") String remainder, /* @HeaderParam(CorrelationId.CORRELATION_ID_HDR) final String correlationIdHdr,*/ @RequestHeader HttpHeaders headers, final MultipartHttpServletRequest inFormData)  {
 		logger.atInfo().addArgument(()->submitProcessor != null ?  submitProcessor.getClass().getName() : "null" ).log("Submit proxy called. SubmitProcessor={}");
 //		final String correlationId = CorrelationId.generate(correlationIdHdr);
 //		ProcessingMetadataBuilder pmBuilder = ProcessingMetadata.start(correlationId);
-		return submitProcessor.processRequest(inFormData, headers, remainder);
+		return submitProcessor.processRequest(inFormData, remainder);
 	}
 	
 	/**
-	 * Transforms a FormDataMultiPart object using a set of provided functions.
+	 * Transforms a incoming  object using a set of provided functions.
 	 * 
 	 * Accepts incoming form data, in the form of a FormDataMultiPart object and a Map collection of functions.  It walks through the
 	 * parts and if it finds a function in the Map with the same name it executes that function on the the data from the corresponding part.
@@ -92,28 +86,24 @@ public class AemProxyAfSubmission {
 	 * @return
 	 * @throws IOException
 	 */
-	private static FormDataMultiPart transformFormData(final FormDataMultiPart inFormData, final Map<String, Function<byte[], byte[]>> fieldFunctions, Logger logger) {
+	private static MultipartHttpServletRequest transformFormData(final MultipartHttpServletRequest inFormData, final Map<String, Function<byte[], byte[]>> fieldFunctions, Logger logger) {
 		try {
-			FormDataMultiPart outFormData = new FormDataMultiPart();
-			var fields = inFormData.getFields();
+			var fields = inFormData.getMultiFileMap();
 			logger.atDebug().log(()->"Found " + fields.size()  + " fields");
 			
 			for (var fieldEntry : fields.entrySet()) {
 				String fieldName = fieldEntry.getKey();
-				for (FormDataBodyPart fieldData : fieldEntry.getValue()) {
+				for (var fieldData : fieldEntry.getValue()) {
 					logger.atDebug().log(()->"Copying '" + fieldName  + "' field");
-					byte[] fieldBytes = ((BodyPartEntity)fieldData.getEntity()).getInputStream().readAllBytes();
+					byte[] fieldBytes = fieldData.getBytes();
 					logger.atTrace().log(()->"Fieldname '" + fieldName + "' is '" + new String(fieldBytes) + "'.");
 					var fieldFn = fieldFunctions.getOrDefault(fieldName, Function.identity());	// Look for an entry in fieldFunctions table for this field.  Return the Identity function if we don't find one.
-					byte[] modifiedFieldBytes = fieldFn.apply(fieldBytes);
-					if (modifiedFieldBytes != null) {	// If the function returned bytes (if not, then remove that part)
-						outFormData.field(fieldName, new String(modifiedFieldBytes, StandardCharsets.UTF_8));	// Apply the field function to bytes.
-					}
+					fieldFn.apply(fieldBytes);	// throw away the result.
 				}
 			}
-			return outFormData;
+			return inFormData;
 		} catch (IOException e) {
-			throw new InternalServerErrorException("Error while transforming submission data.", e);
+			throw new IllegalStateException("Error while transforming submission data.", e);
 		}
 	}
 
@@ -126,7 +116,7 @@ public class AemProxyAfSubmission {
 	 * 
 	 */
 	@FunctionalInterface
-	public interface AfSubmitProcessor {
+	public interface SpringAfSubmitProcessor {
 		/**
 		 * Processor to process incoming Adaptive Forms submit.
 		 * 
@@ -138,11 +128,11 @@ public class AemProxyAfSubmission {
 		 * 		Adaptive Forms location path (relative to /content/forms/af/)
 		 * @return
 		 */
-		Response processRequest(final FormDataMultiPart inFormData, HttpHeaders headers, String remainder);
+		ResponseEntity<byte[]> processRequest(final MultipartHttpServletRequest inFormData, String remainder);
 	}
 	
 	@FunctionalInterface
-	public interface AfFormDataTransformer {
+	public interface SpringAfFormDataTransformer {
 		/**
 		 * If one or more of these are available in the Spring context, they will be run against the incoming
 		 * data before it is processed.
@@ -158,7 +148,7 @@ public class AemProxyAfSubmission {
 		 * @return
 		 * 		outgoing form data object
 		 */
-		FormDataMultiPart transformFormData(final FormDataMultiPart inFormData);
+		MultipartHttpServletRequest transformFormData(final MultipartHttpServletRequest inFormData);
 	}
 	/**
 	 * This processor forwards the Adaptive Form submissions on to AEM for processing by the AEM instance.
@@ -169,50 +159,109 @@ public class AemProxyAfSubmission {
 	 * Spring context.  
 	 * 
 	 */
-	static class AfSubmitAemProxyProcessor implements AfSubmitProcessor {
+	static class AfSubmitAemProxyProcessor implements SpringAfSubmitProcessor {
 
-		private final AemConfiguration aemConfig;
-		private final Client httpClient;
+		private final RestClient httpClient;
 		
-		public AfSubmitAemProxyProcessor(AemConfiguration aemConfig, SslBundles sslBundles) {
-			this.aemConfig = aemConfig;
-	    	this.httpClient = JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle(), aemConfig.user(), aemConfig.password());
+		public AfSubmitAemProxyProcessor(AemConfiguration aemConfig, RestClientSsl restClientSsl) {
+			this.httpClient = Optional.of(RestClient.builder())
+									.map(b->b.baseUrl(aemConfig.url()))
+									.map(b->configureBasicAuthentication(b, aemConfig))
+									.map(b->configureSsl(b, aemConfig, restClientSsl))
+									.get().build();	
+//	    	this.httpClient = configureBasicAuthentication(RestClient.builder().baseUrl(aemConfig.url()), aemConfig).build();
+//	    			JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle(), aemConfig.user(), aemConfig.password());
+		}
+
+		private static RestClient.Builder configureBasicAuthentication(
+				RestClient.Builder builder,
+				AemConfiguration aemConfig 
+				) {
+			ClientHttpRequestInterceptor basicAuth = new BasicAuthenticationInterceptor(aemConfig.user(), aemConfig.password());
+
+			return builder.requestInterceptor(basicAuth);
+		}
+		
+		private static RestClient.Builder configureSsl(RestClient.Builder builder, AemConfiguration aemConfig, RestClientSsl restClientSsl) {
+			return aemConfig.useSsl() ? builder.apply(getSslBundle(aemConfig.sslBundle(), restClientSsl))
+						 			  : builder;			
+		}
+
+		private static Consumer<RestClient.Builder> getSslBundle(String sslBundleName, RestClientSsl restClientSsl) {
+			try {
+				return restClientSsl.fromBundle(sslBundleName);
+			} catch (NoSuchSslBundleException e) {
+				// Default to normal SSL context (which includes the default trust store)
+				// This is not ideal since misspelling the bundle name silently fails, but is required to avoid breaking existing code.  
+				// At dome point it should probably be changed to let the exception pass and only use the default SSL context 
+				// if the SSL bundle name is empty.
+				return b->{}; // No-op;
+			}
 		}
 
 		@Override
-		public Response processRequest(FormDataMultiPart formSubmission, HttpHeaders headers, String remainder) {
-	    	logger.atTrace().addArgument(()->{	String formData = formSubmission.getField("jcr:data").getEntityAs(String.class); 
-	    										return formData != null ? formData : "null"; 
-	    									  })
+		public ResponseEntity<byte[]> processRequest(MultipartHttpServletRequest formSubmission, String remainder) {
+	    	logger.atTrace().addArgument(()->getFormData(formSubmission))
 	    					.log("AF Submit Proxy: Data = '{}'");
 			
 	    	// Transfer to AEM
-	    	String contentType = headers.getMediaType().toString();
-	    	String cookie = headers.getHeaderString("cookie");
-			WebTarget webTarget = httpClient.target(aemConfig.url())
-									.property(ClientProperties.FOLLOW_REDIRECTS, Boolean.FALSE)
-									.path("/" + CONTENT_FORMS_AF + remainder);
+	    	var headers = formSubmission.getRequestHeaders();
+//	    	String contentType = headers.getContentType().toString();
+//	    	String cookie = headers.getFirst("cookie");
+	    	ResponseEntity<byte[]> result = httpClient.post()
+	    											  .uri(ub->appendPath(ub, remainder))	
+											    	  .body(new HttpEntity<>(formSubmission.getMultiFileMap(), headers))
+//											    	  .headers(h->{
+//											    		  h.set("cookie", cookie);
+//											    	  	  })
+											    	  .retrieve()
+											    	  .toEntity(byte[].class)
+			    	  ;
+			    		
+//			WebTarget webTarget = httpClient.target(aemConfig.url())
+//									.property(ClientProperties.FOLLOW_REDIRECTS, Boolean.FALSE)
+//									.path("/" + CONTENT_FORMS_AF + remainder);
+//
+//			logger.atDebug().log(()->"Proxying Submit POST request for target '" + webTarget.getUri().toString() + "'.");
+//			Response result = webTarget.request()
+//									   .header("cookie", cookie)
+//									   .post(Entity.entity(formSubmission , contentType));
 
-			logger.atDebug().log(()->"Proxying Submit POST request for target '" + webTarget.getUri().toString() + "'.");
-			Response result = webTarget.request()
-									   .header("cookie", cookie)
-									   .post(Entity.entity(formSubmission , contentType));
+			logger.atDebug().log(()->"AEM Response = " + result.getStatusCode().value());
+			logger.atDebug().log(()->"AEM Response Location = " + result.getHeaders().getLocation());
 
-			logger.atDebug().log(()->"AEM Response = " + result.getStatus());
-			logger.atDebug().log(()->"AEM Response Location = " + result.getLocation());
-
-			String aemResponseEncoding = result.getHeaderString("Transfer-Encoding");
-			if (aemResponseEncoding != null && aemResponseEncoding.equalsIgnoreCase("chunked")) {
-				logger.atDebug().log("Returning chunked response from AEM.");
-				return Response.status(result.getStatus()).entity(new ByteArrayInputStream(transferFromAem(result, logger)))
-							   .type(result.getMediaType())
-//							   .header(CorrelationId.CORRELATION_ID_HDR, correlationId)
-							   .build();
-			} else  {
-				logger.atDebug().log("Returning response from AEM.");
-				return Response.fromResponse(result)
-//							   .header(CorrelationId.CORRELATION_ID_HDR, correlationId)
-							   .build();
+			// TODO: Remove transfer-encoding header if chunked
+			// TODO: Add correlation ID header
+			return ResponseEntity.status(result.getStatusCode())
+								 .headers(result.getHeaders())
+								 .body(result.getBody());
+//			String aemResponseEncoding = result.getHeaderString("Transfer-Encoding");
+//			if (aemResponseEncoding != null && aemResponseEncoding.equalsIgnoreCase("chunked")) {
+//				logger.atDebug().log("Returning chunked response from AEM.");
+//				return Response.status(result.getStatus()).entity(new ByteArrayInputStream(transferFromAem(result, logger)))
+//							   .type(result.getMediaType())
+////							   .header(CorrelationId.CORRELATION_ID_HDR, correlationId)
+//							   .build();
+//			} else  {
+//				logger.atDebug().log("Returning response from AEM.");
+//				return Response.fromResponse(result)
+////							   .header(CorrelationId.CORRELATION_ID_HDR, correlationId)
+//							   .build();
+//			}
+		}
+		
+		private static URI appendPath(UriBuilder builder, String remainder) {
+			var uri = builder.path("/" + CONTENT_FORMS_AF + remainder).build();
+			logger.atDebug().log(()->"Proxying Submit POST request for target '" + uri.toString() + "'.");
+			return uri;
+		}
+		
+		private static String getFormData(MultipartHttpServletRequest formSubmission) {	
+			try {
+				var formData = formSubmission.getFile("jcr:data");
+				return formData != null ? formData.getResource().getContentAsString(StandardCharsets.UTF_8) : "null";
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
 			}
 		}
 		
@@ -224,43 +273,43 @@ public class AemProxyAfSubmission {
 		 * @return
 		 * @throws IOException
 		 */
-		private static byte[] transferFromAem(Response result, Logger logger) {
-			try {
-				if (logger.isDebugEnabled()) {
-					logger.debug("AEM Response Mediatype=" + (result.getMediaType() != null ? result.getMediaType().toString(): "null"));
-					MultivaluedMap<String, Object> headers = result.getHeaders();
-					for(Entry<String, List<Object>> entry : headers.entrySet()) {
-						String msgLine = "For header '" + entry.getKey() + "', ";
-						for (Object value : entry.getValue()) { 
-							msgLine += "'" + value.toString() + "' ";
-						}
-						logger.debug(msgLine);
-					}
-				}
-				
-				String aemResponseEncoding = result.getHeaderString("Transfer-Encoding");
-				if (aemResponseEncoding != null && aemResponseEncoding.equalsIgnoreCase("chunked")) {
-					// They've sent back chunked response.
-					logger.debug("Found a chunked encoding.");
-					final ChunkedInput<byte[]> chunkedInput = result.readEntity(new GenericType<ChunkedInput<byte[]>>() {});
-					byte[] chunk;
-					ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-					try (buffer) {
-						while ((chunk = chunkedInput.read()) != null) {
-							buffer.writeBytes(chunk);
-							logger.debug("Read chunk from AEM response.");
-						}
-					}
-					
-					return buffer.toByteArray();
-				} else {
-					return ((InputStream)result.getEntity()).readAllBytes();
-				}
-			} catch (IllegalStateException | IOException e) {
-				throw new InternalServerErrorException("Error while processing transferring result from AEM.", e);
-			}
-		}
-
+//		private static byte[] transferFromAem(Response result, Logger logger) {
+//			try {
+//				if (logger.isDebugEnabled()) {
+//					logger.debug("AEM Response Mediatype=" + (result.getMediaType() != null ? result.getMediaType().toString(): "null"));
+//					MultivaluedMap<String, Object> headers = result.getHeaders();
+//					for(Entry<String, List<Object>> entry : headers.entrySet()) {
+//						String msgLine = "For header '" + entry.getKey() + "', ";
+//						for (Object value : entry.getValue()) { 
+//							msgLine += "'" + value.toString() + "' ";
+//						}
+//						logger.debug(msgLine);
+//					}
+//				}
+//				
+//				String aemResponseEncoding = result.getHeaderString("Transfer-Encoding");
+//				if (aemResponseEncoding != null && aemResponseEncoding.equalsIgnoreCase("chunked")) {
+//					// They've sent back chunked response.
+//					logger.debug("Found a chunked encoding.");
+//					final ChunkedInput<byte[]> chunkedInput = result.readEntity(new GenericType<ChunkedInput<byte[]>>() {});
+//					byte[] chunk;
+//					ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+//					try (buffer) {
+//						while ((chunk = chunkedInput.read()) != null) {
+//							buffer.writeBytes(chunk);
+//							logger.debug("Read chunk from AEM response.");
+//						}
+//					}
+//					
+//					return buffer.toByteArray();
+//				} else {
+//					return ((InputStream)result.getEntity()).readAllBytes();
+//				}
+//			} catch (IllegalStateException | IOException e) {
+//				throw new InternalServerErrorException("Error while processing transferring result from AEM.", e);
+//			}
+//		}
+//
 	}
 
 	/**
@@ -289,7 +338,7 @@ public class AemProxyAfSubmission {
 				 * @return
 				 * 		Response object with a media type of "text/plain"
 				 */
-				public static Response text(String text) { return new Response(text.getBytes(StandardCharsets.UTF_8), MediaType.TEXT_PLAIN); }
+				public static Response text(String text) { return new Response(text.getBytes(StandardCharsets.UTF_8), MediaType.TEXT_PLAIN_VALUE); }
 				/**
 				 * Creates an HTML response from a String
 				 * 
@@ -298,7 +347,7 @@ public class AemProxyAfSubmission {
 				 * @return
 				 * 		Response object with a media type of "text/html"
 				 */
-				public static Response html(String html) { return new Response(html.getBytes(StandardCharsets.UTF_8), MediaType.TEXT_HTML); }
+				public static Response html(String html) { return new Response(html.getBytes(StandardCharsets.UTF_8), MediaType.TEXT_HTML_VALUE); }
 				/**
 				 * Creates an JSON response from a String
 				 * 
@@ -307,7 +356,7 @@ public class AemProxyAfSubmission {
 				 * @return
 				 * 		Response object with a media type of "application/html"
 				 */
-				public static Response json(String json) { return new Response(json.getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_JSON); }
+				public static Response json(String json) { return new Response(json.getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_JSON_VALUE); }
 				/**
 				 * Creates an XML response from a String
 				 * 
@@ -316,7 +365,7 @@ public class AemProxyAfSubmission {
 				 * @return
 				 * 		Response object with a media type of "application/xml"
 				 */
-				public static Response xml(String xml) { return new Response(xml.getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_XML); }
+				public static Response xml(String xml) { return new Response(xml.getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_XML_VALUE); }
 			};
 			/**
 			 * A Temporary Redirect (302 HTTP status code) response
@@ -481,7 +530,7 @@ public class AemProxyAfSubmission {
 	 *        ALL - process all handlers that canHandle a request.
 	 * 
 	 */
-	static class AfSubmitLocalProcessor implements AfSubmitProcessor {
+	static class AfSubmitLocalProcessor implements SpringAfSubmitProcessor {
 		private final static Logger logger = LoggerFactory.getLogger(AfSubmitLocalProcessor.class);
 		private static final String REMAINDER_PATH_SUFFIX = "/jcr:content/guideContainer.af.submit.jsp";
 		
@@ -492,10 +541,10 @@ public class AemProxyAfSubmission {
 		public interface InternalAfSubmitAemProxyProcessor {
 			AfSubmitAemProxyProcessor get();
 		}
-
+	
 		private final List<AfSubmissionHandler> submissionHandlers;
 		private final AfSubmitAemProxyProcessor aemProxyProcessor;
-
+	
 		AfSubmitLocalProcessor(List<AfSubmissionHandler> submissionHandlers, InternalAfSubmitAemProxyProcessor aemProxyProcessor) {
 			this.submissionHandlers = submissionHandlers;
 			this.aemProxyProcessor = aemProxyProcessor.get();
@@ -504,25 +553,25 @@ public class AemProxyAfSubmission {
 				submissionHandlers.forEach(sh->logger.atDebug().addArgument(sh.getClass().getName()).log("  Found AfSubmissionHandler named '{}'."));
 			}
 		}
-
+	
 		@Override
-		public Response processRequest(FormDataMultiPart inFormData, HttpHeaders headers, String remainder) {
+		public ResponseEntity<byte[]> processRequest(MultipartHttpServletRequest inFormData, String remainder) {
 			if (!remainder.endsWith(REMAINDER_PATH_SUFFIX)) {
 				// If the submission does not end with the expected submission suffix, then just proxy it AEM.
-				return aemProxyProcessor.processRequest(inFormData, headers, remainder);
+				return aemProxyProcessor.processRequest(inFormData, remainder);
 			}
 			String formName = determineFormName(remainder);
 			Optional<AfSubmissionHandler> firstHandler = submissionHandlers.stream()
 																		   .filter(sh->canHandle(sh, formName))
 																		   .findFirst();
 			
-			return firstHandler.map(h->processSubmission(h, inFormData, headers, formName))
+			return firstHandler.map(h->processSubmission(h, inFormData, formName))
 							   .orElseGet(()->errorResponse());
 		}
-
-		private Response processSubmission(AfSubmissionHandler handler, FormDataMultiPart inFormData, HttpHeaders headers, String formName) {
+	
+		private ResponseEntity<byte[]> processSubmission(AfSubmissionHandler handler, MultipartHttpServletRequest inFormData, String formName) {
 			logger.atInfo().addArgument(handler.getClass().getName()).log("Calling AfSubmissionHandler={}");
-			return formulateResponse(handler.processSubmission(formulateSubmission(inFormData, headers, formName)));
+			return formulateResponse(handler.processSubmission(formulateSubmission(inFormData, formName)));
 		}
 		
 		private String determineFormName(String guideContainerPath) {
@@ -536,7 +585,7 @@ public class AemProxyAfSubmission {
 		}
 		
 		// Create a AfSubmissionHandler.Submission object from the JAX-RS Request classes.
-		private AfSubmissionHandler.Submission formulateSubmission(FormDataMultiPart inFormData, HttpHeaders headers, String formName) {
+		private AfSubmissionHandler.Submission formulateSubmission(MultipartHttpServletRequest inFormData, String formName) {
 			class ExtractedData {
 				String formData;
 				String redirectUrl;
@@ -552,39 +601,52 @@ public class AemProxyAfSubmission {
 			return new AfSubmissionHandler.Submission(extractedData.formData, 
 													  formName, 
 													  extractedData.redirectUrl, 
-													  transferHeaders(headers)
+													  transferHeaders(inFormData.getRequestHeaders())
 													  );
 		}
 		
 		// Transfer headers from JAX-RS construct to Spring construct (in order to keep JAX-RS encapsulated in this class)
 		private MultiValueMapAdapter<String, String> transferHeaders(HttpHeaders headers) {
 			if (logger.isDebugEnabled()) {
-				headers.getRequestHeaders().forEach((k,v)->logger.atDebug().addArgument(k).addArgument(v.size()).log("Found Http header {} with {} values."));
+				headers.forEach((k,v)->logger.atDebug().addArgument(k).addArgument(v.size()).log("Found Http header {} with {} values."));
 			}
-			return new MultiValueMapAdapter<String, String>(headers.getRequestHeaders());
+			return new MultiValueMapAdapter<String, String>(headers);
 		}
 		
 		// Convert the SubmitResponse object into a JAX-RS Response object.  
-		private Response formulateResponse(AfSubmissionHandler.SubmitResponse submitResponse) {
+		private ResponseEntity<byte[]> formulateResponse(AfSubmissionHandler.SubmitResponse submitResponse) {
 			if (submitResponse instanceof AfSubmissionHandler.SubmitResponse.Response response) {
-				var builder = response.responseBytes().length > 0 ? Response.ok().entity(response.responseBytes()).type(response.mediaType()) 
-																  :	Response.noContent();
-				return builder.build();
+				return response.responseBytes().length > 0 
+						? ResponseEntity.ok().contentType(MediaType.valueOf(response.mediaType())).body(response.responseBytes())
+						:	ResponseEntity.noContent().build();
 			} else if (submitResponse instanceof AfSubmissionHandler.SubmitResponse.SeeOther redirectFound) {
-				return Response.seeOther(redirectFound.redirectUrl()).build();
+				return seeOther(redirectFound.redirectUrl());
 			} else if (submitResponse instanceof AfSubmissionHandler.SubmitResponse.Redirect redirect) {
-				return Response.temporaryRedirect(redirect.redirectUrl()).build();
+				return temporaryRedirect(redirect.redirectUrl());
 			} else {
 				// This cannot happen, but we need to supply an else until we can turn this code into a switch
 				// expression in JDK 21.
 				throw new IllegalStateException("Unexpected SubmitResponse class type '%s', this should never happen!".formatted(submitResponse.getClass().getName()));
 			}
 		}
-		
+	
+		private static ResponseEntity<byte[]> seeOther(URI url) {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setLocation(url);
+			return ResponseEntity.status(HttpStatusCode.valueOf(HttpStatus.SEE_OTHER.value())).headers(headers).build();
+		}
+	
+		private static ResponseEntity<byte[]> temporaryRedirect(URI url) {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setLocation(url);
+			return ResponseEntity.status(HttpStatusCode.valueOf(HttpStatus.TEMPORARY_REDIRECT.value())).headers(headers).build();
+		}
+	
 		// Generate an JAX-RS Error response if not AfSubmissionHandler was found.
-		private Response errorResponse() {
+		private static ResponseEntity<byte[]> errorResponse() {
 			logger.atWarn().log("No applicable AfSubmissionHandler found.");
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return ResponseEntity.notFound().build();
 		}
 	}
+
 }

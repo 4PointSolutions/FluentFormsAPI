@@ -4,31 +4,44 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
 import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.boot.test.context.assertj.AssertableWebApplicationContext;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.test.context.runner.ContextConsumer;
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
-import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestClient;
 
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
-import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
-import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitProcessor;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.SpringAfSubmitProcessor;
 
 /**
- * Test that AutoCOnfiguration happens.  The code in this test class is based on the following docs:
+ * Test that AutoConfiguration happens.  The code in this test class is based on the following docs:
  * 
  * https://spring.io/blog/2018/03/07/testing-auto-configurations-with-spring-boot-2-0
  * 
  */
 class AutoConfigurationTest {
 	
-	private static final AutoConfigurations AUTO_CONFIG = AutoConfigurations.of(FluentFormsAutoConfiguration.class, AemProxyAutoConfiguration.class);
+	/**
+	 * This class provides mock versions of beans that would normally be provided by Spring Boot in a real application.  We
+	 * only need to mock out the RestClient.Builder and RestClientSsl beans because those are the only Spring Boot provided
+	 * beans that our AutoConfigurations depend on.
+	 */
+	private static class SpringBootMocks {
+		@Bean RestClient.Builder mockRestClientBuilder() { return Mockito.mock(RestClient.Builder.class, Mockito.RETURNS_DEEP_STUBS); }
+		@Bean private RestClientSsl mockRestClientSsl() { return Mockito.mock(RestClientSsl.class); }
+	}
 	
-	private static final AutoConfigurations LOCAL_SUBMIT_CONFIG = AutoConfigurations.of(FluentFormsAutoConfiguration.class, AemProxyAutoConfiguration.class, DummyLocalSubmitHandler.class);
+	private static final AutoConfigurations AUTO_CONFIG = AutoConfigurations.of(FluentFormsAutoConfiguration.class, AemProxyAutoConfiguration.class, SpringBootMocks.class);
+	
+	private static final AutoConfigurations LOCAL_SUBMIT_CONFIG = AutoConfigurations.of(FluentFormsAutoConfiguration.class, AemProxyAutoConfiguration.class, DummyLocalSubmitHandler.class, SpringBootMocks.class);
 	
 	// Tests to make sure that only the FluentFormsLibraries are loaded in a non-web application.
 	private static final ContextConsumer<? super AssertableApplicationContext> FF_LIBRARIES_ONLY = (context) -> {
@@ -38,8 +51,7 @@ class AutoConfigurationTest {
 				()->assertThat(context).hasSingleBean(OutputService.class),
 				()->assertThat(context).getBean("outputService").isNotNull(),
 				()->assertThat(context).doesNotHaveBean(AemProxyAutoConfiguration.class),
-				()->assertThat(context).doesNotHaveBean(ResourceConfigCustomizer.class),
-				()->assertThat(context).doesNotHaveBean(AfSubmitProcessor.class),
+				()->assertThat(context).doesNotHaveBean(SpringAfSubmitProcessor.class),
 				()->assertThat(context).doesNotHaveBean(AfSubmissionHandler.class)
 				);
 		};
@@ -52,8 +64,7 @@ class AutoConfigurationTest {
 				()->assertThat(context).hasSingleBean(OutputService.class),
 				()->assertThat(context).getBean("outputService").isNotNull(),
 				()->assertThat(context).doesNotHaveBean(AemProxyAutoConfiguration.class),
-				()->assertThat(context).doesNotHaveBean(ResourceConfigCustomizer.class),
-				()->assertThat(context).doesNotHaveBean(AfSubmitProcessor.class),
+				()->assertThat(context).doesNotHaveBean(SpringAfSubmitProcessor.class),
 				()->assertThat(context).doesNotHaveBean(AfSubmissionHandler.class)
 				);
 	};
@@ -67,10 +78,8 @@ class AutoConfigurationTest {
 				()->assertThat(context).getBean("outputService").isNotNull(),
 				()->assertThat(context).hasSingleBean(AemProxyAutoConfiguration.class),
 				()->assertThat(context).getBean(AemProxyAutoConfiguration.class.getName()).isSameAs(context.getBean(AemProxyAutoConfiguration.class)),
-				()->assertThat(context).hasSingleBean(ResourceConfigCustomizer.class),
-				()->assertThat(context).getBean("afProxyConfigurer").isNotNull(),
-				()->assertThat(context).hasSingleBean(AfSubmitProcessor.class),
-				()->assertThat(context).getBean(AfSubmitProcessor.class).isSameAs(context.getBean(AfSubmitAemProxyProcessor.class)),
+				()->assertThat(context).hasSingleBean(SpringAfSubmitProcessor.class),
+				()->assertThat(context).getBean(SpringAfSubmitProcessor.class).isSameAs(context.getBean(AfSubmitAemProxyProcessor.class)),
 				()->assertThat(context).doesNotHaveBean(AfSubmissionHandler.class)
 				);
 	};
@@ -84,10 +93,8 @@ class AutoConfigurationTest {
 				()->assertThat(context).getBean("outputService").isNotNull(),
 				()->assertThat(context).hasSingleBean(AemProxyAutoConfiguration.class),
 				()->assertThat(context).getBean(AemProxyAutoConfiguration.class.getName()).isSameAs(context.getBean(AemProxyAutoConfiguration.class)),
-				()->assertThat(context).hasSingleBean(ResourceConfigCustomizer.class),
-				()->assertThat(context).getBean("afProxyConfigurer").isNotNull(),
-				()->assertThat(context).hasSingleBean(AfSubmitProcessor.class),
-				()->assertThat(context).getBean(AfSubmitProcessor.class).isSameAs(context.getBean(AfSubmitLocalProcessor.class)),
+				()->assertThat(context).hasSingleBean(SpringAfSubmitProcessor.class),
+				()->assertThat(context).getBean(SpringAfSubmitProcessor.class).isSameAs(context.getBean(AfSubmitLocalProcessor.class)),
 				()->assertThat(context).hasSingleBean(AfSubmissionHandler.class)
 				);
 	};

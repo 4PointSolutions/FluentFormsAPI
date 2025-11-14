@@ -27,6 +27,6 @@ public record AemConfiguration(
 	) {
 
 	public String url() {
-		return "http" + (useSsl ? "s" : "") + "://" + servername + (port != 80 ? ":" + port : "") + "/";
+		return "http" + (useSsl ? "s" : "") + "://" + servername + (port != null && port != 80 ? ":" + port : "") + "/";
 	}
 }
