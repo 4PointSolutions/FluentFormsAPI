@@ -60,12 +60,12 @@ import org.springframework.web.util.UriBuilder;
 @RequestMapping("/aem")
 public class AemProxyAfSubmission {
 	private final static Logger logger = LoggerFactory.getLogger(AemProxyAfSubmission.class);
-	private static final String CONTENT_FORMS_AF = "content/forms/af/";
+	private static final String CONTENT_FORMS_AF = "/content/forms/af/";
 	
 	@Autowired
 	SpringAfSubmitProcessor submitProcessor;
 
-	@PostMapping(path = CONTENT_FORMS_AF + "{remainder}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.ALL_VALUE)
+	@PostMapping(path = CONTENT_FORMS_AF + "{*remainder}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.ALL_VALUE)
     public ResponseEntity<byte[]> proxySubmitPost(@PathVariable("remainder") String remainder, /* @HeaderParam(CorrelationId.CORRELATION_ID_HDR) final String correlationIdHdr,*/ @RequestHeader HttpHeaders headers, final MultipartHttpServletRequest inFormData)  {
 		logger.atInfo().addArgument(()->submitProcessor != null ?  submitProcessor.getClass().getName() : "null" ).log("Submit proxy called. SubmitProcessor={}");
 //		final String correlationId = CorrelationId.generate(correlationIdHdr);
@@ -87,24 +87,20 @@ public class AemProxyAfSubmission {
 	 * @throws IOException
 	 */
 	private static MultipartHttpServletRequest transformFormData(final MultipartHttpServletRequest inFormData, final Map<String, Function<byte[], byte[]>> fieldFunctions, Logger logger) {
-		try {
-			var fields = inFormData.getMultiFileMap();
-			logger.atDebug().log(()->"Found " + fields.size()  + " fields");
-			
-			for (var fieldEntry : fields.entrySet()) {
-				String fieldName = fieldEntry.getKey();
-				for (var fieldData : fieldEntry.getValue()) {
-					logger.atDebug().log(()->"Copying '" + fieldName  + "' field");
-					byte[] fieldBytes = fieldData.getBytes();
-					logger.atTrace().log(()->"Fieldname '" + fieldName + "' is '" + new String(fieldBytes) + "'.");
-					var fieldFn = fieldFunctions.getOrDefault(fieldName, Function.identity());	// Look for an entry in fieldFunctions table for this field.  Return the Identity function if we don't find one.
-					fieldFn.apply(fieldBytes);	// throw away the result.
-				}
+		var fields = inFormData.getParameterMap();
+		logger.atDebug().log(()->"Found " + fields.size()  + " fields");
+		
+		for (var fieldEntry : fields.entrySet()) {
+			String fieldName = fieldEntry.getKey();
+			for (var fieldData : fieldEntry.getValue()) {
+				logger.atDebug().log(()->"Copying '" + fieldName  + "' field");
+				byte[] fieldBytes = fieldData.getBytes();
+				logger.atTrace().log(()->"Fieldname '" + fieldName + "' is '" + new String(fieldBytes) + "'.");
+				var fieldFn = fieldFunctions.getOrDefault(fieldName, Function.identity());	// Look for an entry in fieldFunctions table for this field.  Return the Identity function if we don't find one.
+				fieldFn.apply(fieldBytes);	// throw away the result.
 			}
-			return inFormData;
-		} catch (IOException e) {
-			throw new IllegalStateException("Error while transforming submission data.", e);
 		}
+		return inFormData;
 	}
 
 	/**
@@ -251,7 +247,7 @@ public class AemProxyAfSubmission {
 		}
 		
 		private static URI appendPath(UriBuilder builder, String remainder) {
-			var uri = builder.path("/" + CONTENT_FORMS_AF + remainder).build();
+			var uri = builder.path(CONTENT_FORMS_AF + remainder).build();
 			logger.atDebug().log(()->"Proxying Submit POST request for target '" + uri.toString() + "'.");
 			return uri;
 		}
@@ -575,7 +571,15 @@ public class AemProxyAfSubmission {
 		}
 		
 		private String determineFormName(String guideContainerPath) {
-			return guideContainerPath.substring(0, guideContainerPath.length() - REMAINDER_PATH_SUFFIX.length());
+			return extractFormName(removeLeadingSlash(guideContainerPath));
+		}
+
+		private static String extractFormName(String relativePath) {
+			return relativePath.substring(0, relativePath.length() - REMAINDER_PATH_SUFFIX.length());
+		}
+
+		private static String removeLeadingSlash(String path) {
+			return path.startsWith("/") ? path.substring(1) : path;
 		}
 		
 		private boolean canHandle(AfSubmissionHandler sh, String formName) {

@@ -289,13 +289,13 @@ class AemProxyAfSubmissionTest {
 		void testRedirect() {
 			final FormDataMultiPart getPdfForm = mockFormData("foo2", "bar");
 
-			ResponseEntity<byte[]> response = restClient.post()
+			ResponseEntity<Void> response = restClient.post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
 					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.body(getPdfForm.parts())
 					.accept(MediaType.TEXT_PLAIN)
 					.retrieve()
-					.toEntity(byte[].class)
+					.toBodilessEntity()
 					;
 //			Response response = jrc.target
 //								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
@@ -310,13 +310,13 @@ class AemProxyAfSubmissionTest {
 		void testSeeOther() {
 			final FormDataMultiPart getPdfForm = mockFormData("foo3", "bar");
 
-			ResponseEntity<byte[]> response = restClient.post()
+			ResponseEntity<Void> response = restClient.post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
-					.contentType(MediaType.MULTIPART_FORM_DATA)
+//					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.body(getPdfForm.parts())
 					.accept(MediaType.TEXT_PLAIN)
 					.retrieve()
-					.toEntity(byte[].class)
+					.toBodilessEntity()
 					;
 //			Response response = jrc.target
 //								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
@@ -331,13 +331,13 @@ class AemProxyAfSubmissionTest {
 		void testProxy() {
 			final FormDataMultiPart getPdfForm = mockFormData("foo2", "bar");
 
-			ResponseEntity<byte[]> response = restClient.post()
+			ResponseEntity<Void> response = restClient.post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH+"anythingElse")
 					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.body(getPdfForm.parts())
 					.accept(MediaType.TEXT_PLAIN)
 					.retrieve()
-					.toEntity(byte[].class)
+					.toBodilessEntity()
 					;
 
 //			Response response = jrc.target
@@ -368,7 +368,7 @@ class AemProxyAfSubmissionTest {
 						()->assertEquals(AF_TEMPLATE_NAME, submission.formName()),
 						()->assertEquals("bar", submission.formData()),
 						()->assertThat(submission.redirectUrl(), anyOf(equalTo("foo1"), equalTo("foo2"), equalTo("foo3"))),
-						()->assertEquals(MediaType.TEXT_PLAIN, submission.headers().getFirst("accept")),
+						()->assertEquals(MediaType.TEXT_PLAIN_VALUE, submission.headers().getFirst("accept")),
 						()->assertTrue(MediaType.MULTIPART_FORM_DATA.isCompatibleWith(MediaType.valueOf(submission.headers().getFirst("content-type"))))
 						);
 				try {
@@ -418,7 +418,11 @@ class AemProxyAfSubmissionTest {
 	 */
 	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
 					classes = {TestApplication.class, AemProxyAfSubmissionTestWithCustomAfSubmitProcessorTest.MockSubmitProcessor.class}
-//					,properties="debug"
+//					,properties= { 
+//									"debug"
+//									,"logging.level.com._4point.aem.fluentforms.spring=DEBUG"
+//									,"logging.level.org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping=TRACE"
+//								 }
 					)
 	public static class AemProxyAfSubmissionTestWithCustomAfSubmitProcessorTest {
 		
@@ -441,7 +445,7 @@ class AemProxyAfSubmissionTest {
 			MultiValueMap<String, HttpEntity<?>> parts = getPdfForm.parts();
 			ResponseEntity<byte[]> response = restClient.post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
-					.contentType(MediaType.MULTIPART_FORM_DATA)
+//					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.body(parts)
 					.accept(MediaType.APPLICATION_PDF)
 					.retrieve()
@@ -604,7 +608,7 @@ class AemProxyAfSubmissionTest {
 
 			@Override
 			protected boolean matchesSafely(ResponseEntity<?> item, Description mismatchDescription) {
-				if (item.hasBody() == true) {
+				if (item.hasBody() == false) {
 					return true;
 				} else {
 					mismatchDescription.appendText("was ResponseEntity with body of size " + ((byte[])item.getBody()).length);
