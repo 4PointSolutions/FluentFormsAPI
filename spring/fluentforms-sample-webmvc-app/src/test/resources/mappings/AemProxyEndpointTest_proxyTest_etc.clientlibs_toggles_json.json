@@ -1,5 +1,5 @@
 {
-  "id" : "12f8a3d2-2fed-45c3-a025-7f8668b43320",
+  "id" : "df2fc952-74e3-4262-8fad-6ed36fd6a6ad",
   "name" : "etc.clientlibs_toggles.json",
   "request" : {
     "url" : "/etc.clientlibs/toggles.json",
@@ -10,11 +10,11 @@
     "body" : "{\"enabled\":[\"ENABLED\"]}",
     "headers" : {
       "Cache-Control" : "max-age=30",
-      "Date" : "Sun, 11 May 2025 11:23:47 GMT",
+      "Date" : "Sun, 16 Nov 2025 14:26:33 GMT",
       "Content-Type" : "application/json;charset=utf-8"
     }
   },
-  "uuid" : "12f8a3d2-2fed-45c3-a025-7f8668b43320",
+  "uuid" : "df2fc952-74e3-4262-8fad-6ed36fd6a6ad",
   "persistent" : true,
-  "insertionIndex" : 18
+  "insertionIndex" : 32
 }
