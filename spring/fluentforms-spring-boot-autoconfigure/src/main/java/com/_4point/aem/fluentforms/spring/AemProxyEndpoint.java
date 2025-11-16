@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
 import org.springframework.boot.ssl.NoSuchSslBundleException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
@@ -95,7 +96,9 @@ public class AemProxyEndpoint {
 			  .log(()->"CSRF token GET response status = {}");
 		
         logger.atDebug().log("Returning GET response for CSRF token.");
-		return response;
+		return ResponseEntity.status(response.getStatusCode())
+				.headers(removeChunkedTransferEncoding(response.getHeaders()))
+				.body(response.getBody());
 	}
 
 	/**
@@ -130,10 +133,20 @@ public class AemProxyEndpoint {
 			default -> is -> is; // No filtering needed
 		};
 		return ResponseEntity.status(response.getStatusCode())
-				.headers(response.getHeaders())
-				.header("Transfer-Encoding", new String[0])
+				.headers(removeChunkedTransferEncoding(response.getHeaders()))
 				.body(filterByteArray(response.getBody(), filter));
     }
+
+    // Remove transfer-encoding header to prevent chunked encoding issues.
+	private static HttpHeaders removeChunkedTransferEncoding(HttpHeaders headers) {
+		var transferEncoding = headers.getFirst(HttpHeaders.TRANSFER_ENCODING);
+		if (transferEncoding != null && transferEncoding.equalsIgnoreCase("chunked")) {
+			var newHeaders = new HttpHeaders(headers);
+			newHeaders.remove(HttpHeaders.TRANSFER_ENCODING);
+			return newHeaders;
+		}
+		return headers;
+	}
 
     // passes a byte array through an InputStream filter and returns the result as a byte array.
     private static byte[] filterByteArray(byte[] input, Function<InputStream, InputStream> isFilter) {

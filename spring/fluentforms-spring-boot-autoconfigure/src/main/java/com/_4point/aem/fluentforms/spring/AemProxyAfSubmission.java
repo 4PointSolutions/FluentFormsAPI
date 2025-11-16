@@ -226,10 +226,9 @@ public class AemProxyAfSubmission {
 			logger.atDebug().log(()->"AEM Response = " + result.getStatusCode().value());
 			logger.atDebug().log(()->"AEM Response Location = " + result.getHeaders().getLocation());
 
-			// TODO: Remove transfer-encoding header if chunked
 			// TODO: Add correlation ID header
 			return ResponseEntity.status(result.getStatusCode())
-								 .headers(result.getHeaders())
+								 .headers(removeChunkedTransferEncoding(result.getHeaders()))
 								 .body(result.getBody());
 //			String aemResponseEncoding = result.getHeaderString("Transfer-Encoding");
 //			if (aemResponseEncoding != null && aemResponseEncoding.equalsIgnoreCase("chunked")) {
@@ -246,6 +245,16 @@ public class AemProxyAfSubmission {
 //			}
 		}
 		
+		private HttpHeaders removeChunkedTransferEncoding(HttpHeaders headers) {
+			var transferEncoding = headers.getFirst(HttpHeaders.TRANSFER_ENCODING);
+			if (transferEncoding != null && transferEncoding.equalsIgnoreCase("chunked")) {
+				var newHeaders = new HttpHeaders(headers);
+				newHeaders.remove(HttpHeaders.TRANSFER_ENCODING);
+				return newHeaders;
+			}
+			return headers;
+		}
+
 		private static URI appendPath(UriBuilder builder, String remainder) {
 			var uri = builder.path(CONTENT_FORMS_AF + remainder).build();
 			logger.atDebug().log(()->"Proxying Submit POST request for target '" + uri.toString() + "'.");
