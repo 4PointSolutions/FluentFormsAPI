@@ -1,7 +1,9 @@
 package com._4point.aem.fluentforms.spring;
 
 import java.util.List;
+import java.util.Map;
 
+import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -52,6 +54,14 @@ public class AemProxyJerseyAutoConfiguration {
 	public ResourceConfigCustomizer afProxyConfigurer(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, @Autowired(required = false) SslBundles sslBundles, TaskExecutor aemProxyTaskExecutor) {
 		return config->config.register(new AemProxyJerseyEndpoint(aemConfig, aemProxyConfig, sslBundles, aemProxyTaskExecutor))
 					  		 .register(new AemProxyJerseyAfSubmission())
+					  		 .addProperties(Map.of(
+								    			// Turn off Wadl generation (this was interfering with some CORS functionality
+					    						 "jersey.config.server.wadl.disableWadl", true, 
+					    						 // Set properties to allow Jersey to coexist with Spring MVC
+					    						 "jersey.config.server.response.setStatusOverSendError", true,
+					    						 // See https://docs.spring.io/spring-boot/how-to/jersey.html#howto .jersey.alongside-another-web-framework
+					    						 ServletProperties.FILTER_FORWARD_ON_404, true
+					  				 			))
 					  		 ;
 	}
 	
