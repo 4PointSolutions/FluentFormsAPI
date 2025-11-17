@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.ssl.NoSuchSslBundleException;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Fallback;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.client.RestClient;
 
@@ -58,8 +59,6 @@ import com._4point.aem.fluentforms.spring.rest_services.client.SpringRestClientR
 @AutoConfiguration
 @EnableConfigurationProperties(AemConfiguration.class)
 public class FluentFormsAutoConfiguration {
-	//  // TODO: Either call JerseuRestClient.factory(JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle())) or create SpringRestClient
-//	private static final BiFunction<SslBundles, String, RestClientFactory> restClientFactory = (b, s)->JerseyRestClient.factory(JerseyClientFactory.createClient(b, s)); 
 	                        
 	@SuppressWarnings("unchecked")
 	private <T extends Builder> T setAemFields(T builder, AemConfiguration aemConfig) {
@@ -74,6 +73,7 @@ public class FluentFormsAutoConfiguration {
 	// matchIfMissing is set to true so that, by default (if nothing is specified in the properties file), then the SpringRestClient is used.
 	@ConditionalOnProperty(prefix="fluentforms", name="restclient", havingValue="springrestclient", matchIfMissing=true )
 	@ConditionalOnMissingBean
+	@Fallback
 	@Bean
 	public RestClientFactory springRestClientFactory(AemConfiguration aemConfig, RestClient.Builder restClientBuilder, RestClientSsl restClientSsl) {
 		return SpringRestClientRestClient.factory(aemConfig.useSsl() ? restClientBuilder.apply(getSslBundle(aemConfig.sslBundle(), restClientSsl))
@@ -92,22 +92,7 @@ public class FluentFormsAutoConfiguration {
 			return b->{}; // No-op;
 		}
 	}
-	
-//	@Configuration(proxyBeanMethods = false)
-//	@ConditionalOnClass(org.glassfish.jersey.client.JerseyClient.class)
-//	public static class JerseyRestClientConfiguration {
-//
-//		@ConditionalOnProperty(prefix="fluentforms", name="restclient", havingValue="jersey", matchIfMissing=true )
-//		@ConditionalOnMissingBean
-//		@Bean
-//		public RestClientFactory jerseyRestClientFactory(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
-//			Client jerseyClient = JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle());	// Create custom Jersey Client with SSL bundle
-//			return JerseyRestClient.factory(jerseyClient); // Create a RestClientFactory using JerseyClient implementation
-//		}
-//		
-//	}
-
-	
+		
 	@ConditionalOnMissingBean
 	@Bean
 	public AdaptiveFormsService adaptiveFormsService(AemConfiguration aemConfig, Function<InputStream, InputStream> afInputStreamFilter, RestClientFactory restClientFactory) {
