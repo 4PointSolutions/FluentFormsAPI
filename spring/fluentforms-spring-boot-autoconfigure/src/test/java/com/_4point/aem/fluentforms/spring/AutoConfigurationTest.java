@@ -43,6 +43,8 @@ class AutoConfigurationTest {
 	
 	private static final AutoConfigurations LOCAL_SUBMIT_CONFIG = AutoConfigurations.of(FluentFormsAutoConfiguration.class, AemProxyAutoConfiguration.class, DummyLocalSubmitHandler.class, SpringBootMocks.class);
 	
+	private static final AutoConfigurations ALTERNATE_PROXY_CONFIG = AutoConfigurations.of(DummyProxyImplementation.class, FluentFormsAutoConfiguration.class, AemProxyAutoConfiguration.class, SpringBootMocks.class);
+
 	// Tests to make sure that only the FluentFormsLibraries are loaded in a non-web application.
 	private static final ContextConsumer<? super AssertableApplicationContext> FF_LIBRARIES_ONLY = (context) -> {
 		assertAll(
@@ -108,6 +110,9 @@ class AutoConfigurationTest {
 	private final WebApplicationContextRunner webLocalSubmitContextRunner = new WebApplicationContextRunner()
 		    .withConfiguration(LOCAL_SUBMIT_CONFIG);
 
+	private final WebApplicationContextRunner webAlternateProxyContextRunner = new WebApplicationContextRunner()
+		    .withConfiguration(ALTERNATE_PROXY_CONFIG);
+	
 	// Only the services that do not require a web server should be started.
 	@Test
 	void nonWebContext_StartNonWebServices() {
@@ -165,6 +170,35 @@ class AutoConfigurationTest {
 	    		.run(WEB_LOCAL_SUBMIT_SERVICES);
 	}
 
+	// Only the FluentForms libraries are instantiated by this autoconfiguration when an alternate proxy implementation is supplied.
+	@Test
+	void webContext_StartAllServices_AlternateProxySupplied() {
+	    this.webAlternateProxyContextRunner
+	    		.withPropertyValues("fluentforms.aem.servername=localhost", "fluentforms.aem.port=4502",
+	    							"fluentforms.aem.user=user", "fluentforms.aem.password=password")
+	    		.run(WEB_FF_LIBRARIES_ONLY);
+	}
+
+	// Only the FluentForms libraries are instantiated when an alternate proxy tyoe is configured.
+	@Test
+	void webContext_ProxyDisabled_AlternateProxyConfigured() {
+	    this.webContextRunner
+	    		.withPropertyValues("fluentforms.aem.servername=localhost", "fluentforms.aem.port=4502",
+	    							"fluentforms.aem.user=user", "fluentforms.aem.password=password",
+	    							"fluentforms.rproxy.type=someothertype")
+	    		.run(WEB_FF_LIBRARIES_ONLY);
+	}
+
+	// All services should start when the default proxy type is configured.
+	@Test
+	void webContext_ProxyEnabled_DefaultProxyConfigured() {
+	    this.webContextRunner
+	    		.withPropertyValues("fluentforms.aem.servername=localhost", "fluentforms.aem.port=4502",
+	    							"fluentforms.aem.user=user", "fluentforms.aem.password=password",
+	    							"fluentforms.rproxy.type=springmvc")
+	    		.run(WEB_ALL_DEFAULT_SERVICES);
+	}
+	
 
 	public static class DummyLocalSubmitHandler implements AfSubmissionHandler {
 
@@ -177,5 +211,9 @@ class AutoConfigurationTest {
 		public SubmitResponse processSubmission(Submission submission) {
 			return null;
 		}
+	}
+	
+	public static class DummyProxyImplementation implements AemProxyImplemention {
+		
 	}
 }

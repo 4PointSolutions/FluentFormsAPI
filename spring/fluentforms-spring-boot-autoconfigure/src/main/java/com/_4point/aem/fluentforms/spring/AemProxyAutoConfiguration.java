@@ -26,43 +26,22 @@ import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.SpringAfSubmitPro
 @AutoConfiguration
 @ConditionalOnWebApplication(type=Type.SERVLET)
 @ConditionalOnProperty(prefix="fluentforms.rproxy", name="enabled", havingValue="true", matchIfMissing=true )
+@ConditionalOnProperty(prefix="fluentforms.rproxy", name="type", havingValue="springmvc", matchIfMissing=true )
 @EnableConfigurationProperties({AemConfiguration.class, AemProxyConfiguration.class})
+@ConditionalOnMissingBean(AemProxyImplemention.class)
 public class AemProxyAutoConfiguration {
-
-//	/**
-//	 * Configures the JAX-RS resources associated with reverse proxying resources and submissions from
-//	 * Adaptive Forms. 
-//	 * 
-//	 * @param aemConfig
-//	 * 		AEM configuration typically configured using application.properties files.  This is
-//	 * 		typically injected by the Spring Framework.
-//	 * @param aemProxyConfig
-//	 * 		AEM proxy-specific configuration typically configured using application.properties files.
-//	 * 		This is typically injected by the Spring Framework.
-//	 * @param aemProxyTaskExecutor 
-//	 * @return
-//	 * 		JAX-RS Resource configuration customizer that is used by the spring-jersey starter to configure
-//	 * 		JAX-RS Resources (i.e. endpoints)
-//	 */
-//	@Bean
-//	public ResourceConfigCustomizer afProxyConfigurer(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, @Autowired(required = false) SslBundles sslBundles, TaskExecutor aemProxyTaskExecutor) {
-//		return config->config.register(new AemProxyEndpoint(aemConfig, aemProxyConfig, sslBundles, aemProxyTaskExecutor))
-//					  		 .register(new AemProxyAfSubmission())
-//					  		 ;
-//	}
-//	
-//	/**
-//	 * Supply a TaskExecutor for use by the AemProxyEndpoint.  This is used to process csrf token requests because they are Chunked.
-//	 * 
-//	 * @return the taskeExecutor that will be used to process csrf token requests.
-//	 */
-//	@Bean
-//	public TaskExecutor aemProxyTaskExecutor() {
-//		var executor = new SimpleAsyncTaskExecutor("AemProxy-");
-//		// Use virtual threads if available.  This will be the default for Java 21 and later.
-//		executor.setVirtualThreads(JavaVersion.getJavaVersion().isEqualOrNewerThan(JavaVersion.TWENTY_ONE));
-//		return executor;
-//	}
+	
+	/**
+	 * Marker bean to indicate that the Spring MVC-based AEM Proxy implementation is being used.
+	 * 
+	 * @return
+	 */
+	@Bean
+	AemProxyImplemention aemProxyImplemention() {
+		return new AemProxyImplemention() {
+			// This is just a marker bean.
+		};
+	}
 	
 	@Bean
 	AemProxyEndpoint aemProxyEndpoint(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, @Autowired(required = false) RestClientSsl restClientSsl) {
