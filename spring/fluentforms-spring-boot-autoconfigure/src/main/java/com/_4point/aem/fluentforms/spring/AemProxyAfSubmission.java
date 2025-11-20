@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
 import org.springframework.boot.ssl.NoSuchSslBundleException;
 import org.springframework.http.HttpEntity;
@@ -62,8 +61,11 @@ public class AemProxyAfSubmission {
 	private final static Logger logger = LoggerFactory.getLogger(AemProxyAfSubmission.class);
 	private static final String CONTENT_FORMS_AF = "/content/forms/af/";
 	
-	@Autowired
-	SpringAfSubmitProcessor submitProcessor;
+	private final SpringAfSubmitProcessor submitProcessor;
+	
+	AemProxyAfSubmission(SpringAfSubmitProcessor submitProcessor) {
+		this.submitProcessor = submitProcessor;
+	}
 
 	@PostMapping(path = CONTENT_FORMS_AF + "{*remainder}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.ALL_VALUE)
     public ResponseEntity<byte[]> proxySubmitPost(@PathVariable("remainder") String remainder, /* @HeaderParam(CorrelationId.CORRELATION_ID_HDR) final String correlationIdHdr,*/ @RequestHeader HttpHeaders headers, final MultipartHttpServletRequest inFormData)  {

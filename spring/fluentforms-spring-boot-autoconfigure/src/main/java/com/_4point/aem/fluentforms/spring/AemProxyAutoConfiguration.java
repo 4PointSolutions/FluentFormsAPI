@@ -49,8 +49,8 @@ public class AemProxyAutoConfiguration {
 	}
 
 	@Bean
-	AemProxyAfSubmission aemProxyAfSubmission() {
-		return new AemProxyAfSubmission();
+	AemProxyAfSubmission aemProxyAfSubmission(SpringAfSubmitProcessor submitProcessor) {
+		return new AemProxyAfSubmission(submitProcessor);
 	}
 	
 	/**
