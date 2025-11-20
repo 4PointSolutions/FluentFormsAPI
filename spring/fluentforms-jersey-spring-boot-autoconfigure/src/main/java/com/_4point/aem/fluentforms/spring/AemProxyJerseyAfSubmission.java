@@ -4,15 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 import org.glassfish.jersey.client.ChunkedInput;
 import org.glassfish.jersey.client.ClientProperties;
@@ -23,8 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ssl.SslBundles;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
+
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -66,7 +64,7 @@ public class AemProxyJerseyAfSubmission {
 	private static final String CONTENT_FORMS_AF = "content/forms/af/";
 	
 	@Autowired
-	AfSubmitProcessor submitProcessor;
+	JerseyAfSubmitProcessor submitProcessor;
 
 	@Path(CONTENT_FORMS_AF + "{remainder : .+}")
     @POST
@@ -126,7 +124,7 @@ public class AemProxyJerseyAfSubmission {
 	 * 
 	 */
 	@FunctionalInterface
-	public interface AfSubmitProcessor {
+	public interface JerseyAfSubmitProcessor {
 		/**
 		 * Processor to process incoming Adaptive Forms submit.
 		 * 
@@ -169,7 +167,7 @@ public class AemProxyJerseyAfSubmission {
 	 * Spring context.  
 	 * 
 	 */
-	static class AfSubmitAemProxyProcessor implements AfSubmitProcessor {
+	static class AfSubmitAemProxyProcessor implements JerseyAfSubmitProcessor {
 
 		private final AemConfiguration aemConfig;
 		private final Client httpClient;
@@ -264,215 +262,6 @@ public class AemProxyJerseyAfSubmission {
 	}
 
 	/**
-	 * Implement this interface in order to provide code that will handle an Adaptive Form submission
-	 * 
-	 */
-	public interface AfSubmissionHandler {
-		/**
-		 * Object that contains the data submitted by the Adaptive Form
-		 */
-		public record Submission(String formData, String formName, String redirectUrl, MultiValueMap<String, String> headers) {};
-		
-		/**
-		 * Interface that is a tagging interface for the different types of response.
-		 */
-		public sealed interface SubmitResponse permits SubmitResponse.Response, SubmitResponse.SeeOther, SubmitResponse.Redirect {
-			/**
-			 * A Normal response with a 200 HTTP status code (204 if the responseBytes variable is empty)
-			 */
-			public record Response(byte[] responseBytes, String mediaType) implements SubmitResponse {
-				/**
-				 * Creates a text response from a String
-				 * 
-				 * @param text
-				 * 		Text to go into the response.
-				 * @return
-				 * 		Response object with a media type of "text/plain"
-				 */
-				public static Response text(String text) { return new Response(text.getBytes(StandardCharsets.UTF_8), MediaType.TEXT_PLAIN); }
-				/**
-				 * Creates an HTML response from a String
-				 * 
-				 * @param html
-				 * 		String containing HTML.  No checking is done to ensure that this is valid HTML.
-				 * @return
-				 * 		Response object with a media type of "text/html"
-				 */
-				public static Response html(String html) { return new Response(html.getBytes(StandardCharsets.UTF_8), MediaType.TEXT_HTML); }
-				/**
-				 * Creates an JSON response from a String
-				 * 
-				 * @param json
-				 * 		String containing JSON.  No checking is done to ensure that this is valid JSON.
-				 * @return
-				 * 		Response object with a media type of "application/html"
-				 */
-				public static Response json(String json) { return new Response(json.getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_JSON); }
-				/**
-				 * Creates an XML response from a String
-				 * 
-				 * @param xml
-				 * 		String containing XML.  No checking is done to ensure that this is valid XML.
-				 * @return
-				 * 		Response object with a media type of "application/xml"
-				 */
-				public static Response xml(String xml) { return new Response(xml.getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_XML); }
-			};
-			/**
-			 * A Temporary Redirect (302 HTTP status code) response
-			 */
-			public record SeeOther(URI redirectUrl) implements SubmitResponse {};
-			/**
-			 * A Temporary Redirect (307 HTTP status code) response
-			 */
-			public record Redirect(URI redirectUrl) implements SubmitResponse {};
-		}
-		/**
-		 * Called to determine if this handler can handle a submission from this form.
-		 * 
-		 * The first handler that can handle a form submission (i.e. for which canHandle() returns true) will be selected.
-		 * 
-		 * @param formName
-		 * 		Adaptive Form name (full path under formsanddocuments)
-		 * @return
-		 * 		true indicates the this handler can handle the submission, false indicates that it cannot
-		 */
-		boolean canHandle(String formName);
-		
-		/**
-		 * Called to process the submission
-		 * 
-		 * The incoming submission is parsed into a Submission object and then the first handler that indicates
-		 * that is can handle the submission will have its processSubmission method called.
-		 * 
-		 * @param submission
-		 * 		Submission object containing the form submission data
-		 * @return
-		 * 		a SubmitResponse object that will be turned into an HTTP response to the submission.
-		 */
-		SubmitResponse processSubmission(Submission submission);
-		
-		/**
-		 * Creates an AfSubmissionHandler that handles form submissions from a specific form
-		 * 
-		 * @param formName
-		 * 		name of the form (so the form name under FormsAndDocuments)
-		 * @param handlerLogic
-		 * 		function that will be called when a form submission for occurs from that form
-		 * @return
-		 * 		an AfSubmissionHandler object
-		 */
-		public static AfSubmissionHandler canHandleFormNameEquals(String formName, Function<Submission, SubmitResponse> handlerLogic) {
-			Objects.requireNonNull(formName, "Form Name for submission handler cannot be null.");
-			return new AfSubmissionHandler() {
-
-				@Override
-				public boolean canHandle(String formNameIn) {
-					return formName.equals(formNameIn);
-				}
-
-				@Override
-				public SubmitResponse processSubmission(Submission submission) {
-					return handlerLogic.apply(submission);
-				}
-			};
-		}
-		
-		/**
-		 * Creates an AfSubmissionHandler that handles form submissions from one or more specific forms
-		 * 
-		 * @param handlerLogic
-		 * 		function that will be called when a form submission for occurs from that form
-		 * @param formNames
-		 * 		one or more form names (can be zero, but then this handler will never be called)
-		 * @return
-		 * 		an AfSubmissionHandler object
-		 */
-		public static AfSubmissionHandler canHandleFormNameAnyOf(Function<Submission, SubmitResponse> handlerLogic, String... formNames) {
-			if (formNames.length < 1) {
-				logger.atWarn().log("No form names were supplied, so this handler will never be called.");
-			}
-			return new AfSubmissionHandler() {
-
-				@Override
-				public boolean canHandle(String formNameIn) {
-					for (String formName : formNames) {
-						if (Objects.equals(formName, formNameIn)) {
-							return true;
-						}
-					}
-					return false;
-				}
-
-				@Override
-				public SubmitResponse processSubmission(Submission submission) {
-					return handlerLogic.apply(submission);
-				}
-			};
-		}
-		
-		/**
-		 * Creates an AfSubmissionHandler that handles form submissions from one or more specific forms
-		 * 
-		 * @param formNames
-		 * 		list of one or more form names (can be empty, but then this handler will never be called)
-		 * @param handlerLogic
-		 * 		function that will be called when a form submission for occurs from that form
-		 * @return
-		 * 		an AfSubmissionHandler object
-		 */
-		public static AfSubmissionHandler canHandleFormNameAnyOf(List<String> formNames, Function<Submission, SubmitResponse> handlerLogic) {
-			if (formNames.size() < 1) {
-				logger.atWarn().log("No form names were supplied, so this handler will never be called.");
-			}
-			return new AfSubmissionHandler() {
-
-				@Override
-				public boolean canHandle(String formNameIn) {
-					for (String formName : formNames) {
-						if (Objects.equals(formName, formNameIn)) {
-							return true;
-						}
-					}
-					return false;
-				}
-
-				@Override
-				public SubmitResponse processSubmission(Submission submission) {
-					return handlerLogic.apply(submission);
-				}
-			};
-		}
-		
- 		/**
-		 * Creates an AfSubmissionHandler that handles form submissions from one or more specific forms
-		 * 
- 		 * @param formNameRegEx
-		 * 		a regex that will be applied to the name of the form, if it matches, then the handler will apply
- 		 * @param handlerLogic
-		 * 		function that will be called when a form submission for occurs from that form
- 		 * @return
-		 * 		an AfSubmissionHandler object
- 		 */
- 		public static AfSubmissionHandler canHandleFormNameMatchesRegex(String formNameRegEx, Function<Submission, SubmitResponse> handlerLogic) {
-			final var pattern = Pattern.compile(Objects.requireNonNull(formNameRegEx, "Form Name RegEx for submission handler cannot be null."));
-
-			return new AfSubmissionHandler() {
-
-				@Override
-				public boolean canHandle(String formNameIn) {
-					return pattern.matcher(formNameIn).matches();
-				}
-
-				@Override
-				public SubmitResponse processSubmission(Submission submission) {
-					return handlerLogic.apply(submission);
-				}
-			};
-		}
-	}
-	
-	/**
 	 * This processor will process Adaptive Forms submissions locally without sending anything to AEM.
 	 * 
 	 * It will invoke one or more AfSubmitHandlers that have been configured in the Spring context.
@@ -481,7 +270,7 @@ public class AemProxyJerseyAfSubmission {
 	 *        ALL - process all handlers that canHandle a request.
 	 * 
 	 */
-	static class AfSubmitLocalProcessor implements AfSubmitProcessor {
+	static class AfSubmitLocalProcessor implements JerseyAfSubmitProcessor {
 		private final static Logger logger = LoggerFactory.getLogger(AfSubmitLocalProcessor.class);
 		private static final String REMAINDER_PATH_SUFFIX = "/jcr:content/guideContainer.af.submit.jsp";
 		

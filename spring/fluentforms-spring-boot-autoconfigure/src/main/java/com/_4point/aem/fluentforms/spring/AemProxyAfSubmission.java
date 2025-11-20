@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
 import org.springframework.boot.ssl.NoSuchSslBundleException;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,7 @@ import org.springframework.web.util.UriBuilder;
  * 
  * 
  */
+@Lazy // Not sure why this is required, but without it the Jersey auto-configuration tests fail.  Leaving it in for now.
 @CrossOrigin
 @RestController
 @RequestMapping("/aem")

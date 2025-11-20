@@ -3,6 +3,7 @@ package com._4point.aem.fluentforms.spring;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.ssl.SslBundles;
@@ -12,7 +13,6 @@ import org.springframework.context.annotation.Lazy;
 
 import com._4point.aem.docservices.rest_services.client.helpers.Builder.RestClientFactory;
 import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
-import com.ulisesbocchio.jasyptspringboot.annotation.ConditionalOnMissingBean;
 
 import jakarta.ws.rs.client.Client;
 

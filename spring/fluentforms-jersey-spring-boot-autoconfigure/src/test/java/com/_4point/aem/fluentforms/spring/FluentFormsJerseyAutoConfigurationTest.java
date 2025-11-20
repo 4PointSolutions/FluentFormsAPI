@@ -34,7 +34,7 @@ import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
 import com._4point.aem.fluentforms.spring.rest_services.client.SpringRestClientRestClient;
 
-@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class}, 
 				properties = {
 						"fluentforms.aem.servername=localhost", 
 						"fluentforms.aem.port=4502", 
@@ -117,7 +117,7 @@ class FluentFormsJerseyAutoConfigurationTest {
 		}
 	}	
 	
-	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class}, 
 			properties = {
 					"fluentforms.aem.servername=localhost", 
 					"fluentforms.aem.port=4502", 
@@ -158,7 +158,7 @@ class FluentFormsJerseyAutoConfigurationTest {
 		return result;
 	}
 
-	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
 			properties = {
 					"fluentforms.aem.servername=localhost", 
 					"fluentforms.aem.port=4502", 
@@ -175,7 +175,7 @@ class FluentFormsJerseyAutoConfigurationTest {
 		}
 	}
 
-	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
 			properties = {
 					"fluentforms.aem.servername=localhost", 
 					"fluentforms.aem.port=4502", 
@@ -193,13 +193,14 @@ class FluentFormsJerseyAutoConfigurationTest {
 		}
 	}
 
-	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class}, 
 			properties = {
 					"fluentforms.aem.servername=localhost", 
 					"fluentforms.aem.port=4502", 
 					"fluentforms.aem.user=admin",		 
 					"fluentforms.aem.password=admin",
 					"fluentforms.aem.usessl=true",
+					"fluentforms.rproxy.enabled=false",
 					"fluentforms.restclient=jersey"	// Configure for Jersey RestClient
 					})
 	public static class JserseyRestClient_SslNoBundleNameTest {
@@ -211,7 +212,7 @@ class FluentFormsJerseyAutoConfigurationTest {
 		}
 	}
 
-	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
 			properties = {
 					"fluentforms.aem.servername=localhost", 
 					"fluentforms.aem.port=4502", 
@@ -232,7 +233,7 @@ class FluentFormsJerseyAutoConfigurationTest {
 		}
 	}
 
-	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
 			properties = {
 					"fluentforms.aem.servername=localhost", 
 					"fluentforms.aem.port=4502", 

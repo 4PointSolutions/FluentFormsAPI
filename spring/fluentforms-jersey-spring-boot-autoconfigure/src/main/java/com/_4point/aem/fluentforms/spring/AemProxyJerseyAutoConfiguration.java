@@ -6,6 +6,7 @@ import java.util.Map;
 import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,11 +20,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 
-import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmissionHandler;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
 import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmitAemProxyProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmitLocalProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmitLocalProcessor.InternalAfSubmitAemProxyProcessor;
-import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmitProcessor;
+import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.JerseyAfSubmitProcessor;
 
 /**
  * AutoConfiguration for the Reverse Proxy Library which reverse proxies secondary
@@ -32,9 +33,24 @@ import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmitPro
 @AutoConfiguration
 @ConditionalOnWebApplication(type=Type.SERVLET)
 @ConditionalOnProperty(prefix="fluentforms.rproxy", name="enabled", havingValue="true", matchIfMissing=true )
+@ConditionalOnProperty(prefix="fluentforms.rproxy", name="type", havingValue="jersey", matchIfMissing=true )
 @EnableConfigurationProperties({AemConfiguration.class, AemProxyConfiguration.class})
+@ConditionalOnMissingBean(AemProxyImplemention.class)
+@AutoConfigureBefore(AemProxyAutoConfiguration.class)
 public class AemProxyJerseyAutoConfiguration {
 
+	/**
+	 * Marker bean to indicate that the Jersey-based AEM Proxy implementation is being used.
+	 * 
+	 * @return
+	 */
+	@Bean
+	AemProxyImplemention aemProxyImplemention() {
+		return new AemProxyImplemention() {
+			// This is just a marker bean.
+		};
+	}
+	
 	/**
 	 * Configures the JAX-RS resources associated with reverse proxying resources and submissions from
 	 * Adaptive Forms. 
@@ -93,10 +109,10 @@ public class AemProxyJerseyAutoConfiguration {
 	 * 		Processor that will call the first submission handler that says that it can
 	 * 		process this request.
 	 */
-	@ConditionalOnMissingBean(AfSubmitProcessor.class)
+	@ConditionalOnMissingBean(JerseyAfSubmitProcessor.class)
 	@ConditionalOnBean(AfSubmissionHandler.class)
 	@Bean
-	public AfSubmitProcessor localSubmitProcessor(List<AfSubmissionHandler> submissionHandlers, InternalAfSubmitAemProxyProcessor aemProxyProcessor) {
+	public JerseyAfSubmitProcessor localSubmitProcessor(List<AfSubmissionHandler> submissionHandlers, InternalAfSubmitAemProxyProcessor aemProxyProcessor) {
 		return new AfSubmitLocalProcessor(submissionHandlers, aemProxyProcessor);
 	}
 	
@@ -112,9 +128,9 @@ public class AemProxyJerseyAutoConfiguration {
 	 * @return
 	 * 		Processor that forwards all submissions on to AEM.
 	 */
-	@ConditionalOnMissingBean({AfSubmitProcessor.class, AfSubmissionHandler.class})
+	@ConditionalOnMissingBean({JerseyAfSubmitProcessor.class, AfSubmissionHandler.class})
 	@Bean()
-	public AfSubmitProcessor aemSubmitProcessor(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
+	public JerseyAfSubmitProcessor aemSubmitProcessor(AemConfiguration aemConfig, @Autowired(required = false) SslBundles sslBundles) {
 		return new AfSubmitAemProxyProcessor(aemConfig, sslBundles);
 	}
 	

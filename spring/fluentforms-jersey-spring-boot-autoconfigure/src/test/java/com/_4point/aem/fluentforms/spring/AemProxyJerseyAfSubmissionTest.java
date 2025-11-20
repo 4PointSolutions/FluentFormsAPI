@@ -1,11 +1,19 @@
 package com._4point.aem.fluentforms.spring;
 
-import static com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmissionTest.TestApplication.JerseyConfig;
-import static com._4point.testing.matchers.jaxrs.ResponseMatchers.*;
-import static com._4point.testing.matchers.javalang.ExceptionMatchers.*;
+import static com._4point.testing.matchers.javalang.ExceptionMatchers.exceptionMsgContainsAll;
+import static com._4point.testing.matchers.jaxrs.ResponseMatchers.doesNotHaveEntity;
+import static com._4point.testing.matchers.jaxrs.ResponseMatchers.hasEntityMatching;
+import static com._4point.testing.matchers.jaxrs.ResponseMatchers.isStatus;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,13 +45,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmitAemProxyProcessor;
-import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
-import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmitProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler.SubmitResponse;
+import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmitAemProxyProcessor;
+import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmitLocalProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.AfSubmitLocalProcessor.InternalAfSubmitAemProxyProcessor;
+import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.JerseyAfSubmitProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmissionTest.AemProxyAfSubmissionTestWithLocalAfSubmitProcessorTest.MockAemProxy;
+import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmissionTest.TestApplication.JerseyConfig;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
@@ -361,7 +370,7 @@ class AemProxyJerseyAfSubmissionTest {
 		}
 
 		@Component
-		public static class MockSubmitProcessor implements AfSubmitProcessor {
+		public static class MockSubmitProcessor implements JerseyAfSubmitProcessor {
 
 			@Override
 			public Response processRequest(FormDataMultiPart inFormData, HttpHeaders headers, String remainder) {
