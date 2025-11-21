@@ -18,7 +18,7 @@
 		<wiremock.version>3.13.1</wiremock.version>
 		<wiremock-spring-boot.version>3.10.6</wiremock-spring-boot.version>
 		<htmlunit.version>4.16.0</htmlunit.version>
-		<fluentforms.spring.boot.starter.version>0.0.4-SNAPSHOT</fluentforms.spring.boot.starter.version>
+		<fluentforms.jersey.spring.boot.starter.version>0.0.4-SNAPSHOT</fluentforms.jersey.spring.boot.starter.version>
 		<fp.hamcrest.matchers.version>0.0.4-SNAPSHOT</fp.hamcrest.matchers.version>
 	</properties>
 
@@ -67,8 +67,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com._4point.aem.fluentforms</groupId>
-			<artifactId>fluentforms-spring-boot-starter</artifactId>
-			<version>${fluentforms.spring.boot.starter.version}</version>
+			<artifactId>fluentforms-jersey-spring-boot-starter</artifactId>
+			<version>${fluentforms.jersey.spring.boot.starter.version}</version>
 		</dependency>
 
 		<!-- Testing Dependencies -->
