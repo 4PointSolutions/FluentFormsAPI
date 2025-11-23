@@ -21,7 +21,7 @@
     <groupId>com._4point.aem</groupId>
     <artifactId>fluentforms</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>0.0.4</version>
     <description>fluent-forms-api</description>
 
 	<!--
