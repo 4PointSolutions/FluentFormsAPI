@@ -123,6 +123,20 @@
 				<groupId>io.github.git-commit-id</groupId>
 				<artifactId>git-commit-id-maven-plugin</artifactId>
 			</plugin>
+			<!-- This project is an example project, so we don't need to install or deploy it. -->
+	        <plugin>
+	            <artifactId>maven-install-plugin</artifactId>
+	            <configuration>
+	                <skip>true</skip>
+	            </configuration>
+	        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>

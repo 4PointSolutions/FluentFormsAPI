@@ -9,9 +9,28 @@
 	<description>Fluent Forms Spring Boot Starter Projects</description>
 	
 	<modules>
-		<!-- Top Leve projects -->
+		<!-- Top Level projects -->
 		<module>fluentforms</module>
         <module>rest-services</module>
         <module>spring</module>
  	</modules>
+
+	<build>
+		<!-- This project is a compositing project, so we don't need to install or deploy it. -->
+		<plugins>
+	        <plugin>
+	            <artifactId>maven-install-plugin</artifactId>
+	            <configuration>
+	                <skip>true</skip>
+	            </configuration>
+	        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

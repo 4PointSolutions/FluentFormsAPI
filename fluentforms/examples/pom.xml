@@ -11,6 +11,25 @@
 	<name>FluentForms Examples</name>
 	<description>Various examples of using the Fluent Forms APIs.</description>
 
+	<build>
+		<!-- This project is an example project, so we don't need to install or deploy it. -->
+		<plugins>
+	        <plugin>
+	            <artifactId>maven-install-plugin</artifactId>
+	            <configuration>
+	                <skip>true</skip>
+	            </configuration>
+	        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
