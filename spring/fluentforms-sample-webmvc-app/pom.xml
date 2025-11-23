@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com._4point.aem.fluentforms</groupId>
 	<artifactId>fluentforms-sample-webmvc-app</artifactId>
-	<version>0.0.4</version>
+	<version>0.0.5-SNAPSHOT</version>
 	<name>Fluent Forms Spring Boot Sample Web MVC Application</name>
 	<description>Sample Spring Boot Web MVC Application that utilizes the Fluent Forms Spring Boot Starters</description>
 
@@ -18,7 +18,7 @@
 		<wiremock.version>3.13.1</wiremock.version>
 		<wiremock-spring-boot.version>3.10.6</wiremock-spring-boot.version>
 		<htmlunit.version>4.16.0</htmlunit.version>
-		<fluentforms.spring.boot.starter.version>0.0.4</fluentforms.spring.boot.starter.version>
+		<fluentforms.spring.boot.starter.version>0.0.5-SNAPSHOT</fluentforms.spring.boot.starter.version>
 		<fp.hamcrest.matchers.version>0.0.4-SNAPSHOT</fp.hamcrest.matchers.version>
 	</properties>
 
