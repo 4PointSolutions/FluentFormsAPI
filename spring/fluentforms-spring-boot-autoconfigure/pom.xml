@@ -10,14 +10,14 @@
 	</parent>
 	<groupId>com._4point.aem.fluentforms</groupId>
 	<artifactId>fluentforms-spring-boot-autoconfigure</artifactId>
-	<version>0.0.4</version>
+	<version>0.0.5-SNAPSHOT</version>
 	<name>AutoConfigure Project</name>
 
 	<properties>
 		<java.version>17</java.version>
 		<jasypt.spring.boot.version>3.0.5</jasypt.spring.boot.version>
 		<jasypt.maven.plugin.version>3.0.5</jasypt.maven.plugin.version>
-		<fluentforms.version>0.0.4</fluentforms.version>
+		<fluentforms.version>0.0.5-SNAPSHOT</fluentforms.version>
 		<fp.hamcrest.matchers.version>0.0.4-SNAPSHOT</fp.hamcrest.matchers.version>
 		<wiremock.version>4.0.0-beta.15</wiremock.version>
 		<pitest.maven.plugin.version>1.20.2</pitest.maven.plugin.version>
