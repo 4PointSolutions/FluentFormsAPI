@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com._4point.aem.fluentforms</groupId>
 	<artifactId>fluentforms-sample-web-app</artifactId>
-	<version>0.0.4-SNAPSHOT</version>
+	<version>0.0.5-SNAPSHOT</version>
 	<name>Fluent Forms Spring Boot Sample Web Application</name>
 	<description>Sample Spring Boot Web Application (using Jersey JAX-RS) that utilizes the Fluent Forms Spring Boot Starters</description>
 
