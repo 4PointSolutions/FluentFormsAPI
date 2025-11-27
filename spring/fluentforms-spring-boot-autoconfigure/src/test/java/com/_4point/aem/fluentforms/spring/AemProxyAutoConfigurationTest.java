@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -19,10 +18,11 @@ properties = {
 		})
 class AemProxyAutoConfigurationTest {
 
-	@Test
-	void testDocumentFactory(@Autowired ResourceConfigCustomizer afProxyConfigurer) {
-		assertNotNull(afProxyConfigurer);
-	}
+	// TODO:  Maybe add more tests here later.
+//	@Test
+//	void testDocumentFactory(@Autowired ResourceConfigCustomizer afProxyConfigurer) {
+//		assertNotNull(afProxyConfigurer);
+//	}
 
 	@SpringBootApplication
 	@EnableConfigurationProperties({AemConfiguration.class,AemProxyConfiguration.class})

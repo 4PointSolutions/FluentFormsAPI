@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.5</version>
+		<version>3.5.7</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com._4point.aem.fluentforms</groupId>
 	<artifactId>fluentforms-spring-boot-autoconfigure</artifactId>
 	<version>0.0.5-SNAPSHOT</version>
-	<name>AutoConfigure Project</name>
+	<name>FluentForms AutoConfigure Project</name>
 
 	<properties>
 		<java.version>17</java.version>
@@ -19,7 +19,7 @@
 		<jasypt.maven.plugin.version>3.0.5</jasypt.maven.plugin.version>
 		<fluentforms.version>0.0.5-SNAPSHOT</fluentforms.version>
 		<fp.hamcrest.matchers.version>0.0.4-SNAPSHOT</fp.hamcrest.matchers.version>
-		<wiremock.version>4.0.0-beta.15</wiremock.version>
+		<wiremock.version>4.0.0-beta.16</wiremock.version>
 		<pitest.maven.plugin.version>1.20.2</pitest.maven.plugin.version>
 		<pitest.junit5.maven.plugin.version>1.2.3</pitest.junit5.maven.plugin.version>
 	</properties>
@@ -66,7 +66,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jersey</artifactId>
+			<artifactId>spring-boot-starter-web</artifactId>
 			<optional>true</optional>
 			<scope>provided</scope>
 		</dependency>
@@ -78,11 +78,6 @@
 		<dependency>
 			<groupId>com._4point.aem.docservices</groupId>
 			<artifactId>rest-services.client</artifactId>
-			<version>${fluentforms.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com._4point.aem.docservices.rest-services</groupId>
-			<artifactId>rest-services.jersey-client</artifactId>
 			<version>${fluentforms.version}</version>
 		</dependency>
 		<!-- Testing Dependencies -->

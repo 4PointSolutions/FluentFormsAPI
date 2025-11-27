@@ -1,0 +1,41 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com._4point.aem.fluentforms</groupId>
+	<artifactId>spring-starters</artifactId>
+	<packaging>pom</packaging>
+	<version>0.0.4-SNAPSHOT</version>
+	<description>Fluent Forms Spring Boot Starter Projects</description>
+	
+	<modules>
+		<!-- Spring MVC Starters -->
+		<module>fluentforms-spring-boot-autoconfigure</module>
+        <module>fluentforms-spring-boot-starter</module>
+        <module>fluentforms-sample-webmvc-app</module>
+        <module>fluentforms-sample-cli-app</module>
+        <!-- Spring Jersey JAX-RS Starters -->
+        <module>fluentforms-jersey-spring-boot-autoconfigure</module>
+        <module>fluentforms-jersey-spring-boot-starter</module>
+        <module>fluentforms-sample-web-jersey-app</module>
+ 	</modules>
+
+	<build>
+		<!-- This project is a compositing project, so we don't need to install or deploy it. -->
+		<plugins>
+	        <plugin>
+	            <artifactId>maven-install-plugin</artifactId>
+	            <configuration>
+	                <skip>true</skip>
+	            </configuration>
+	        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

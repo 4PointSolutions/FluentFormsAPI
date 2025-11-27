@@ -1,0 +1,164 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.7</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com._4point.aem.fluentforms</groupId>
+	<artifactId>fluentforms-jersey-spring-boot-autoconfigure</artifactId>
+	<version>0.0.4-SNAPSHOT</version>
+	<name>FluentForms Jersey AutoConfigure Project</name>
+
+	<properties>
+		<java.version>17</java.version>
+		<jasypt.spring.boot.version>3.0.5</jasypt.spring.boot.version>
+		<jasypt.maven.plugin.version>3.0.5</jasypt.maven.plugin.version>
+		<fluentforms.version>0.0.4-SNAPSHOT</fluentforms.version>
+		<fluentforms-autoconfigure.version>0.0.4-SNAPSHOT</fluentforms-autoconfigure.version>
+		
+		<!-- Testing Dependencies -->
+		<fp.hamcrest.matchers.version>0.0.4-SNAPSHOT</fp.hamcrest.matchers.version>
+		<wiremock.version>4.0.0-beta.16</wiremock.version>
+		<pitest.maven.plugin.version>1.20.2</pitest.maven.plugin.version>
+		<pitest.junit5.maven.plugin.version>1.2.3</pitest.junit5.maven.plugin.version>
+	</properties>
+
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>4Point Solutions FluentFormsAPI Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/4PointSolutions/FluentFormsAPI</url>
+		</repository>
+	</distributionManagement>
+
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/4PointSolutions/*</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	
+	<dependencies>
+		<!-- Project Dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ulisesbocchio</groupId>
+			<artifactId>jasypt-spring-boot-starter</artifactId>
+			<version>${jasypt.spring.boot.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-autoconfigure</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-autoconfigure-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jersey</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com._4point.aem.fluentforms</groupId>
+			<artifactId>fluentforms-spring-boot-autoconfigure</artifactId>
+			<version>${fluentforms-autoconfigure.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com._4point.aem</groupId>
+			<artifactId>fluentforms.core</artifactId>
+			<version>${fluentforms.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com._4point.aem.docservices</groupId>
+			<artifactId>rest-services.client</artifactId>
+			<version>${fluentforms.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com._4point.aem.docservices.rest-services</groupId>
+			<artifactId>rest-services.jersey-client</artifactId>
+			<version>${fluentforms.version}</version>
+		</dependency>
+		<!-- Testing Dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.4point.testing</groupId>
+			<artifactId>4point-hamcrest-matchers</artifactId>
+			<version>${fp.hamcrest.matchers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock-standalone</artifactId>
+			<version>${wiremock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.pitest</groupId>
+			<artifactId>pitest-junit5-plugin</artifactId>
+			<version>${pitest.junit5.maven.plugin.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<!-- Useful in case you want to change the password or secret key
+			for the jasypt data -->
+			<!-- To change password or key 
+				- Navigate to directory where
+			this pom resides
+				- In command line execute:  
+						mvn
+			jasypt:encrypt-value -Djasypt.encryptor.password=SECRET_KEY
+			-Djasypt.plugin.value=VALUE_TO_BE_ENCRYPTED
+				- SECRET_KEY is the
+			value that is used to encrypt/decrypt 
+				- Alternatively you can
+			download the plugin jar an execute the command from the location
+			where the plugin jar reside
+			-->
+			<plugin>
+				<groupId>com.github.ulisesbocchio</groupId>
+				<artifactId>jasypt-maven-plugin</artifactId>
+				<version>${jasypt.maven.plugin.version}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+			</plugin>
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+    			<artifactId>maven-surefire-plugin</artifactId>
+    			<configuration>
+        			<excludes>
+		            	<exclude/>
+        			</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- PiTest Mutation Testing plugin -->
+				<!-- Run with goals 'test-compile' and 'org.pitest:pitest-maven:mutationCoverage' --> 
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>${pitest.maven.plugin.version}</version>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

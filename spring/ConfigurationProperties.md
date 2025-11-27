@@ -43,6 +43,9 @@ be set to `/clientApp` (as in `fluentforms.rproxy.clientPrefix=/clientApp`).
 
 `fluentforms.rproxy.afBaseLocation` - TBD - This needs to be documented.
 
+`fluentforms.rproxy.type` - This is used to set the mechanism used to reverse-proxy secondary resources to AEM.  If the value is `springmvc`, then Spring MVC is used to implement the reverse proxy.  If it is `jersey`, then JAX-RS Jersey is used.  This property is optional and, if omitted, then the autoconfiguration will choose `springmvc` if no other type is available.  It will typically use a different implementation if it is available (e.g. if `fluentforms-jersey-spring-starter` is on the class path).  This means that under normal circumstances, this setting should not have to be set and is only intended to be used to override the autoconfiguration mechanisms.
+
+
 ### Rest Client Properties
 
 Fluent Forms can be configured to use one of two different REST client libraries.  It can use either the Jersey client libraries or the Spring RestClient libraries.  it was originally developed to use the Jersey client libraries however this some drawbacks - firstly, the Spring requires special configuration when you combine it with libraries that use  the built in Spring Web Mechanisms (e.g. Spring MVC, Spring Boot Activator, etc. - see [https://docs.spring.io/spring-boot/how-to/jersey.html](https://docs.spring.io/spring-boot/how-to/jersey.html)). Secondly, Spring Jersey is an extra dependency that duplicates functionality that is already available in the Spring Framework, so it causes some jar bloat.

@@ -3,32 +3,33 @@ package com._4point.aem.fluentforms.spring;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.naming.ConfigurationException;
 
-import org.glassfish.jersey.client.ChunkedInput;
-import org.glassfish.jersey.server.ChunkedOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ssl.SslBundles;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
+import org.springframework.boot.ssl.NoSuchSslBundleException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputStream;
-
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.GenericType;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 /**
  * Reverse Proxy Code which reverse proxies secondary resources (.css, .js, etc.) that the browser will request.
@@ -42,73 +43,63 @@ import jakarta.ws.rs.core.Response;
  * get the AdaptiveForm or HTML5 Form using the FLuentForms libraries.
  *
  */
-@Path("/aem")
+@CrossOrigin
+@RestController
+@RequestMapping("/aem")
 public class AemProxyEndpoint {
 
 	private final static Logger logger = LoggerFactory.getLogger(AemProxyEndpoint.class);
 
 	private static final String AEM_APP_PREFIX = "/";
-	private Client httpClient;
+	private final RestClient httpClient;
 
 	private final AemProxyConfiguration aemProxyConfig;
 	private final AemConfiguration aemConfig;
-	private final TaskExecutor taskExecutor;
 
     /**
      * 
      */
-    public AemProxyEndpoint(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, SslBundles sslBundles, TaskExecutor taskExecutor) {
+    public AemProxyEndpoint(AemConfiguration aemConfig, AemProxyConfiguration aemProxyConfig, RestClientSsl restClientSsl) {
     	this.aemProxyConfig = aemProxyConfig;
     	this.aemConfig = aemConfig;
-    	this.httpClient = JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle(), aemConfig.user(), aemConfig.password());
-		this.taskExecutor = taskExecutor;
+    	this.httpClient = createClient(aemConfig, RestClient.builder(), restClientSsl);
 	}
 
-    @Path("libs/granite/csrf/token.json")
-    @GET
-    public ChunkedOutput<byte[]> proxyOsgiCsrfToken() throws IOException {
+    @GetMapping("/libs/granite/csrf/token.json")
+    public ResponseEntity<byte[]> proxyOsgiCsrfToken() throws IOException {
     	final String path = AEM_APP_PREFIX + "libs/granite/csrf/token.json";
     	return getCsrfToken(path);
     }
 
-    @Path("lc/libs/granite/csrf/token.json")
-	@GET
-	public ChunkedOutput<byte[]> proxyJeeCsrfToken() throws IOException {
+    @GetMapping("/lc/libs/granite/csrf/token.json")
+	public ResponseEntity<byte[]> proxyJeeCsrfToken() throws IOException {
 		final String path = "/lc/libs/granite/csrf/token.json";
 	  	return getCsrfToken(path);
 	}
 
-	private ChunkedOutput<byte[]> getCsrfToken(final String path) {
+	private ResponseEntity<byte[]> getCsrfToken(final String path) {
 		logger.atDebug().log("Proxying GET request. CSRF token");
-		WebTarget webTarget = httpClient.target(aemConfig.url())
-								.path(path);
-		logger.atDebug().log(()->"Proxying GET request for CSRF token '" + webTarget.getUri().toString() + "'.");
-		Response result = webTarget.request()
-		   .get();
-
-		logger.atDebug().log(()->"CSRF token GET response status = " + result.getStatus());
-		final ChunkedInput<byte[]> chunkedInput = result.readEntity(new GenericType<ChunkedInput<byte[]>>() {});
-		final ChunkedOutput<byte[]> output = new ChunkedOutput<byte[]>(byte[].class);
 		
-		taskExecutor.execute(() -> {
-			try (result; chunkedInput; output) {
-				byte[] chunk;
-				while ((chunk = chunkedInput.read()) != null) {
-					output.write(chunk);
-					logger.debug("Returning GET chunk for CSRF token.");
-				}
-				logger.debug("Finished GETting chunks for CSRF token.");
-			} catch (IllegalStateException | IOException e) {
-				e.printStackTrace();
-			}
-			logger.debug("Exiting Thread.");
-		});
+		URI uri = UriComponentsBuilder.fromUriString(aemConfig.url())
+									  .path(path)
+									  .build()
+									  .toUri();
+
+		logger.atDebug().log(()->"Proxying GET request for CSRF token '" + uri.toString() + "'.");
+		ResponseEntity<byte[]> response = httpClient.get()
+													.uri(uri)
+													.retrieve()
+													.toEntity(byte[].class);
+
+		logger.atDebug()
+			  .addArgument(()->response.getStatusCode().toString())
+			  .log(()->"CSRF token GET response status = {}");
 		
         logger.atDebug().log("Returning GET response for CSRF token.");
-		return output;
+		return ResponseEntity.status(response.getStatusCode())
+				.headers(removeChunkedTransferEncoding(response.getHeaders()))
+				.body(response.getBody());
 	}
-
-
 
 	/**
      * This function acts as a reverse proxy for anything under clientlibs.  It just forwards
@@ -118,31 +109,54 @@ public class AemProxyEndpoint {
      * @return
      * @throws ConfigurationException
      */
-    @Path("{remainder : .+}")
-    @GET
-    public Response proxyGet(@PathParam("remainder") String remainder) {
+    @GetMapping("/{*remainder}")
+    public ResponseEntity<byte[]> proxyGet(@PathVariable("remainder") String remainder) {
     	logger.atDebug().log(()->"Proxying GET request. remainder=" + remainder);
-		WebTarget webTarget = httpClient.target(aemConfig.url())
-								.path(AEM_APP_PREFIX + remainder);
-		logger.atDebug().log(()->"Proxying GET request for target '" + webTarget.getUri().toString() + "'.");
-		Response result = webTarget.request()
-								    .get();
+		URI uri = UriComponentsBuilder.fromUriString(aemConfig.url())
+				  					  .path(AEM_APP_PREFIX + remainder)
+				  					  .build()
+				  					  .toUri();
+		logger.atDebug().log(()->"Proxying GET request for target '" + uri.toString() + "'.");
+		ResponseEntity<byte[]> response = httpClient.get()
+													.uri(uri)
+													.retrieve()
+													.toEntity(byte[].class);
+
 		if (logger.isDebugEnabled()) {
-			result.getHeaders().forEach((h, l)->logger.atDebug().log("For " + webTarget.getUri().toString() + ", Header:" + h + "=" + l.stream().map(o->(String)o).collect(Collectors.joining("','", "'", "'"))));
+			response.getHeaders().forEach((h, l)->logger.atDebug().log("For " + uri + ", Header:" + h + "=" + l.stream().map(o->(String)o).collect(Collectors.joining("','", "'", "'"))));
 		}
 
-		logger.atDebug().log(()->"Returning GET response from target '" + webTarget.getUri().toString() + "' status code=" + result.getStatus() + ".");
+		logger.atDebug().log(()->"Returning GET response from target '" + uri + "' status code=" + response.getStatusCode().value() + ".");
 		Function<InputStream, InputStream> filter = switch (remainder) {
-		 	case "etc.clientlibs/clientlibs/granite/utils.js" -> this::substituteAfBaseLocation;
-			case "etc.clientlibs/fd/xfaforms/clientlibs/profile.js" -> this::fixTogglesDotJsonLocation;
+		 	case "/etc.clientlibs/clientlibs/granite/utils.js" -> this::substituteAfBaseLocation;
+			case "/etc.clientlibs/fd/xfaforms/clientlibs/profile.js" -> AemProxyEndpoint::fixTogglesDotJsonLocation;
 			default -> is -> is; // No filtering needed
 		};
-		return Response.fromResponse(result)
-					   .header("Transfer-Encoding", null)			// Remove the Transfer-Encoding header
-					   .entity(filter.apply(result.readEntity(InputStream.class)))
-					   .build();
+		return ResponseEntity.status(response.getStatusCode())
+				.headers(removeChunkedTransferEncoding(response.getHeaders()))
+				.body(filterByteArray(response.getBody(), filter));
     }
 
+    // Remove transfer-encoding header to prevent chunked encoding issues.
+	private static HttpHeaders removeChunkedTransferEncoding(HttpHeaders headers) {
+		var transferEncoding = headers.getFirst(HttpHeaders.TRANSFER_ENCODING);
+		if (transferEncoding != null && transferEncoding.equalsIgnoreCase("chunked")) {
+			var newHeaders = new HttpHeaders(headers);
+			newHeaders.remove(HttpHeaders.TRANSFER_ENCODING);
+			return newHeaders;
+		}
+		return headers;
+	}
+
+    // passes a byte array through an InputStream filter and returns the result as a byte array.
+    private static byte[] filterByteArray(byte[] input, Function<InputStream, InputStream> isFilter) {
+    	try (var bais = new ByteArrayInputStream(input)) {
+    		return isFilter.apply(bais).readAllBytes();
+    	} catch (IOException e) {
+			throw new IllegalStateException("This should never happen - ", e);
+		}
+    }
+    
     /**
      * Wraps an InputStream with a wrapper that replaces some code in the Adobe utils.js code.
      * 
@@ -167,61 +181,97 @@ public class AemProxyEndpoint {
     	}
     }
     
-	private InputStream fixTogglesDotJsonLocation(InputStream is) {
+	private static InputStream fixTogglesDotJsonLocation(InputStream is) {
 		String target = "\"/etc.clientlibs/toggles.json\"";
 		String replacement = "\"/aem/etc.clientlibs/toggles.json\"";
 		logger.atDebug().log("Altering profile.js to replace '{}' with '{}'", target, replacement);
 		return new ReplacingInputStream(is, target, replacement);
 	}
     
-    @Path("{remainder : .+}")
-    @POST
-    public Response proxyPost(@PathParam("remainder") String remainder, @HeaderParam("Content-Type") String contentType, InputStream in) {
+    @PostMapping("/{*remainder}")
+    public ResponseEntity<byte[]> proxyPost(@PathVariable("remainder") String remainder, @RequestHeader(value = "Content-Type", required = false) String contentType, byte[] in) {
     	logger.atDebug().log("Proxying POST request. remainder={}", remainder);
-		WebTarget webTarget = httpClient.target(aemConfig.url())
-								.path(AEM_APP_PREFIX + remainder);
-		logger.atDebug().addArgument(()->webTarget.getUri().toString())
-						.addArgument(contentType)
-						.log(()->"Proxying POST request for target '{}'.  ContentType='{}'.");
-		Response result = webTarget.request()
-				.post(Entity.entity(
-						logger.isDebugEnabled() ? debugInput(in, webTarget.getUri().toString()) : in,	// if Debug is on, write out information about input stream 
-						contentType != null ? contentType : "application/octet-stream"					// supply default content type if it was omitted.
-						));
+		URI uri = UriComponentsBuilder.fromUriString(aemConfig.url())
+				  .path(AEM_APP_PREFIX + remainder)
+				  .build()
+				  .toUri();
+		logger.atDebug().addArgument(()->uri.toString())
+			  			.addArgument(contentType)
+			  			.log(()->"Proxying POST request for target '{}'.  ContentType='{}'.");
+	
+		ResponseEntity<byte[]> response = httpClient.post()
+										.uri(uri)
+										.body(debugInput(Objects.requireNonNullElseGet(in, ()->new byte[0]), uri.toString())) // if Debug is on, write out information about input stream 
+										.contentType(contentType != null ? MediaType.valueOf(contentType) : MediaType.APPLICATION_OCTET_STREAM) // supply default content type if it was omitted.
+										.retrieve()
+										.toEntity(byte[].class);
 
 		if (remainder.contains("af.submit.jsp")) {
-			logger.atDebug().addArgument(()->Boolean.valueOf(result == null).toString())
+			logger.atDebug().addArgument(()->Boolean.valueOf(response == null).toString())
 							.log("result == null is {}.");
-			MediaType mediaType = result.getMediaType();
+			MediaType mediaType = response.getHeaders().getContentType();
 			logger.atDebug()
-				  .addArgument(()->webTarget.getUri().toString())
+				  .addArgument(()->uri.toString())
 				  .addArgument(()->mediaType != null ? mediaType.toString() : "")
-				  .addArgument(()->result.getHeaderString("Transfer-Encoding"))
+				  .addArgument(()->response.getHeaders().getFirst("Transfer-Encoding"))
 				  .log("Returning POST response from target '{}'. contentType='{}'.  transfer-encoding='{}'.");
 		} else {
 			logger.atDebug()
-				  .addArgument(webTarget.getUri()::toString)
+				  .addArgument(uri::toString)
 				  .log("Returning POST response from target '{}'.");
 		}
 		
-		return Response.fromResponse(result).build();
+		return response;
     }
     
-    private InputStream debugInput(InputStream in, String target) {
-		try {
-			byte[] inputBytes = in.readAllBytes();
-			logger.atDebug()
-				  .log("Proxying POST request for target '{}'.  numberOfBytes proxied='{}'.", target, inputBytes.length);
-			logger.atTrace()
-				  .addArgument(target)
-				  .addArgument(()->new String(inputBytes, StandardCharsets.UTF_8))
-				  .log("Proxying POST request for target '{}'.  input bytes proxied='{}'.");
-			return new ByteArrayInputStream(inputBytes);
-		} catch (IOException e) {
-			logger.atError()
-				  .setCause(e)
-				  .log("Error reading input stream.");
-			return new ByteArrayInputStream(new byte[0]);
-		}
+    private static byte[] debugInput(byte[] inputBytes, String target) {
+		logger.atDebug()
+			  .log("Proxying POST request for target '{}'.  numberOfBytes proxied='{}'.", target, inputBytes.length);
+		logger.atTrace()
+			  .addArgument(target)
+			  .addArgument(()->new String(inputBytes, StandardCharsets.UTF_8))
+			  .log("Proxying POST request for target '{}'.  input bytes proxied='{}'.");
+		return inputBytes;
     }
+    
+	private static RestClient createClient(
+			AemConfiguration aemConfig, 
+			RestClient.Builder builder,
+			RestClientSsl restClientSsl
+			) {
+
+		if (aemConfig.useSsl()) {
+			configureSsl(builder, restClientSsl, aemConfig.sslBundle()); 
+		} else {
+			logger.info("Creating default client.");
+		}
+		
+		if (aemConfig.user() != null) {
+			configureBasicAuth(builder, aemConfig.user(), aemConfig.password());
+		}
+		
+		return builder.baseUrl(aemConfig.url())
+					  .build();
+	}
+
+	private static void configureBasicAuth(RestClient.Builder builder, String username, String password) {
+		builder.requestInterceptor(new BasicAuthenticationInterceptor(username, password));
+	}
+
+	private static void configureSsl(RestClient.Builder builder, RestClientSsl restClientSsl, String bundleName) {
+		if (restClientSsl != null && bundleName != null) {
+			logger.info("Using Client ssl bundle: '" + bundleName + "'.");
+			try {
+				builder.apply(restClientSsl.fromBundle(bundleName));
+			} catch (NoSuchSslBundleException e) {
+				// Eat the exception and fall through to the default client
+				// Default the SSL context (which includes the default trust store)
+				logger.warn("Unable to locate ssl bundle '" + bundleName + "'. Creating default client.");
+			}
+		} else if (restClientSsl == null && bundleName != null) {
+			throw new IllegalStateException("RestClientSsl is null, unable to configure SSL bundle '" + bundleName + "'.");
+		} else { /* bundlename == null  */
+			logger.info("AEM bundleName is null. Creating default client.");
+		}
+	}
 }

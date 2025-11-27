@@ -38,6 +38,25 @@
         <maven.compiler.release>17</maven.compiler.release>
 	</properties>
 
+	<build>
+		<!-- This project is just integration tests, so we don't need to isntall or deploy it. -->
+		<plugins>
+	        <plugin>
+	            <artifactId>maven-install-plugin</artifactId>
+	            <configuration>
+	                <skip>true</skip>
+	            </configuration>
+	        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 <!--		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
