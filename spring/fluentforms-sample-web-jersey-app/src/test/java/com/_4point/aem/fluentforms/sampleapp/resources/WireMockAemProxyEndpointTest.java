@@ -32,7 +32,9 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 @EnabledIf("com._4point.aem.fluentforms.sampleapp.resources.TestConstants#runWiremockTests")
 @WireMockTest()
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
-				classes = FluentFormsSpringApplication.class
+				classes = FluentFormsSpringApplication.class,
+				// Wiremock produces a lot of output, the following entries reduce that output.  They can be removed for debugging.
+				properties = {"logging.level.org.wiremock.spring=WARN", "logging.level.WireMock.wiremock=WARN"}
 				)
 @EnableWireMock(@ConfigureWireMock(
 					portProperties = "fluentforms.aem.port"
