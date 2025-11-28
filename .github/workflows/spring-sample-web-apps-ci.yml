@@ -1,4 +1,4 @@
-name: Spring Sample Web App CI
+name: Spring Sample Web Apps CI
 
 on: 
   push:
