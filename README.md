@@ -30,9 +30,13 @@ Spring context that can be utilized easily by any Spring Boot application.
 * Add starter to project using maven
 * Add AEM code to your project
 
-There is a [sample web application](spring/fluentforms-sample-web-app) that uses the Spring Boot 
+There is a [sample web application](spring/fluentforms-sample-webmvc-app) that uses the Spring Boot 
 starter library.  There are also documents outlining the [Spring Beans provided by the 
 starter library](spring/ConfigurationBeans.md)  and the [configuration properties](spring/ConfigurationProperties.md) that is uses.
+
+The default starter uses Spring MVC to implement reverse proxy endpoints that forward requests to AEM and uses the Spring RestClient to make Document Services calls to AEM.  For backwards compatibility with previous releases that used [Eclipse Jersey](https://eclipse-ee4j.github.io/jersey/) for these two functions, a Jersey Spring Boot starter is also available.
+
+The Jersey Spring Boot starter can be included in the project instead of the default starter.  This triggers the inclusion of Spring's `spring-boot-starter-jersey` and the fluent forms starter autoconfigures to use the older codebase that uses Jersey for proxying AEM and making calls to AEM Document Services.  See the [sample Jersey application](spring/fluentforms-sample-web-jersey-app) for the maven details.
 
 ## Java Client Library
 
