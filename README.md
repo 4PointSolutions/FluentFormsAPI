@@ -3,7 +3,8 @@
 # FluentForms API
 [![Fluent Forms CI](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/fluentforms-ci.yml/badge.svg)](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/fluentforms-ci.yml)
 [![REST Services CI](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/rest-services-ci.yml/badge.svg)](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/rest-services-ci.yml)
-[![Spring Boot Starter CI](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-boot-starter-ci.yml/badge.svg)](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-boot-starter-ci.yml)
+[![Spring Boot Starter CI](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-boot-webmvc-starter-ci.yml/badge.svg)](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-boot-webmvc-starter-ci.yml)
+[![Spring Boot Jersey Starter CI](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-boot-jersey-starter-ci.yml/badge.svg)](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-boot-jersey-starter-ci.yml)
 [![Spring Sample Web App CI](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-sample-web-apps-ci.yml/badge.svg)](https://github.com/4PointSolutions/FluentFormsAPI/actions/workflows/spring-sample-web-apps-ci.yml)
 
 The FluentForms API project is a set of Java libraries that allow remote access to 

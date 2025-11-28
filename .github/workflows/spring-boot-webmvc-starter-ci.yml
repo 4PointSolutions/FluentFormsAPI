@@ -39,7 +39,7 @@ jobs:
 
     - name: Build AutoConfigure with Maven
       if: (github.ref == 'refs/heads/master' || github.ref == 'refs/tags/*') &&  !matrix.experimental # Only run on main branch or tags and non-experimental
-      run: mvn -B deploy -s $GITHUB_WORKSPACE/settings.xml --file spring/fluentforms-spring-boot-autoconfigure
+      run: mvn -B deploy -DskipTests -s $GITHUB_WORKSPACE/settings.xml --file spring/fluentforms-spring-boot-autoconfigure # skip tests because they were run in the previous step
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
