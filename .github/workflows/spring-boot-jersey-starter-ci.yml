@@ -1,13 +1,13 @@
 name: Spring Boot Jersey Starter CI
 
-on: 
+on:
   push:
     paths:
-    - 'spring/fluentforms-jersey-spring-boot-**'
-    - '.github/workflows/spring-boot-jersey-starter-ci.yml'
+      - 'spring/fluentforms-jersey-spring-boot-**'
+      - '.github/workflows/spring-boot-jersey-starter-ci.yml'
   workflow_dispatch:
-    
- jobs:
+
+jobs:
   build:
     name: Java ${{ matrix.java }} build
     runs-on: ubuntu-latest
