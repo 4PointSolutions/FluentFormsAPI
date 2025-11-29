@@ -13,7 +13,7 @@ import javax.naming.ConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
+import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
 import org.springframework.boot.ssl.NoSuchSslBundleException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;

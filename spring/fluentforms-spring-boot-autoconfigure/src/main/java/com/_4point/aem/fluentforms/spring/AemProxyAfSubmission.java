@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
+import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
 import org.springframework.boot.ssl.NoSuchSslBundleException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
@@ -622,12 +622,15 @@ public class AemProxyAfSubmission {
 													  );
 		}
 		
-		// Transfer headers from JAX-RS construct to Spring construct (in order to keep JAX-RS encapsulated in this class)
+		// Transfer headers from WebMVC construct to Spring construct
 		private MultiValueMapAdapter<String, String> transferHeaders(HttpHeaders headers) {
 			if (logger.isDebugEnabled()) {
 				headers.forEach((k,v)->logger.atDebug().addArgument(k).addArgument(v.size()).log("Found Http header {} with {} values."));
 			}
-			return new MultiValueMapAdapter<String, String>(headers);
+			// Starting with Spring Framework 7, they do not recommend using MultiValueMap to store HttpHeaders but 
+			// that will require changing the AfSubmissionHandler.Submission interface which has larger implications so,
+			// for now, we're leaving in the deprecated call.
+			return new MultiValueMapAdapter<String, String>(headers.asMultiValueMap()); 
 		}
 		
 		// Convert the SubmitResponse object into a JAX-RS Response object.  
