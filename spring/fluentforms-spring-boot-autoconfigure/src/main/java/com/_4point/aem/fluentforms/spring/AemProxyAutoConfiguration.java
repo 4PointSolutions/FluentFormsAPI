@@ -1,7 +1,10 @@
 package com._4point.aem.fluentforms.spring;
 
 import java.util.List;
+import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -11,12 +14,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
+import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitLocalProcessor.InternalAfSubmitAemProxyProcessor;
-import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.SpringAfSubmitProcessor;
 
 /**
@@ -30,6 +35,9 @@ import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.SpringAfSubmitPro
 @EnableConfigurationProperties({AemConfiguration.class, AemProxyConfiguration.class})
 @ConditionalOnMissingBean(AemProxyImplemention.class)
 public class AemProxyAutoConfiguration {
+	private static final int MINIMUM_PART_COUNT = 20;
+	private static final String SERVER_TOMCAT_MAX_PART_COUNT = "server.tomcat.max-part-count";
+	private final static Logger logger = LoggerFactory.getLogger(AemProxyAutoConfiguration.class);
 	
 	/**
 	 * Marker bean to indicate that the Spring MVC-based AEM Proxy implementation is being used.
@@ -41,6 +49,30 @@ public class AemProxyAutoConfiguration {
 		return new AemProxyImplemention() {
 			// This is just a marker bean.
 		};
+	}
+	
+	// Spring Boot 4 lowered the max part count to 10 which is too low for AEM submissions, so we raise it.
+	@Bean
+	WebServerFactoryCustomizer<TomcatServletWebServerFactory> webserverFactoryCustomizer() {
+		return factory->factory.addConnectorCustomizers(c->
+			correctMaxPartCount(SERVER_TOMCAT_MAX_PART_COUNT, c.getMaxPartCount(), c::setMaxPartCount)
+		);
+	}
+	
+	private static void correctMaxPartCount(String settingName, Integer currentSetting, Consumer<Integer> settingSetter) {
+		if (currentSetting >= 0 && currentSetting < MINIMUM_PART_COUNT) {
+			settingSetter.accept(MINIMUM_PART_COUNT);
+			logger.atInfo()
+				  .addArgument(settingName)
+				  .addArgument(currentSetting)
+				  .addArgument(MINIMUM_PART_COUNT)
+				  .log("{} changed from {} to {}.");
+		} else {
+			logger.atInfo().addArgument(settingName)
+						   .addArgument(currentSetting)
+						   .log("{} remains at {}.");
+		}
+		
 	}
 	
 	@Bean

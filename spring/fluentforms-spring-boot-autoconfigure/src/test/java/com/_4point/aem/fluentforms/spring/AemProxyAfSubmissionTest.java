@@ -160,7 +160,8 @@ class AemProxyAfSubmissionTest {
 						"fluentforms.aem.useSsl=true",
 						"spring.ssl.bundle.jks.aem.truststore.location=file:src/test/resources/aemforms.p12",
 						"spring.ssl.bundle.jks.aem.truststore.password=Pa$$123",
-						"spring.ssl.bundle.jks.aem.truststore.type=PKCS12"
+						"spring.ssl.bundle.jks.aem.truststore.type=PKCS12",
+						"server.tomcat.max-part-count=" + AemProxyAutoConfigurationTest.MINIMUM_PARTS_COUNT,	// Normally supplied by AutoConfiguration
 						}
 					)
 	public static class AemProxyAfSubmissionTestWithAemAfSubmitProcessorTest {
@@ -242,7 +243,8 @@ class AemProxyAfSubmissionTest {
 							   AemProxyAfSubmissionTestWithLocalAfSubmitProcessorTest.MockSubmissionProcessor2.class}
 					,properties={
 //							"debug", 
-							"logging.level.com._4point.aem.fluentforms.spring=DEBUG"
+							"logging.level.com._4point.aem.fluentforms.spring=DEBUG",
+							"server.tomcat.max-part-count=" + AemProxyAutoConfigurationTest.MINIMUM_PARTS_COUNT,	// Normally supplied by AutoConfiguration
 						}
 					)
 	public static class AemProxyAfSubmissionTestWithLocalAfSubmitProcessorTest {
@@ -418,11 +420,12 @@ class AemProxyAfSubmissionTest {
 	 */
 	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, 
 					classes = {TestApplication.class, AemProxyAfSubmissionTestWithCustomAfSubmitProcessorTest.MockSubmitProcessor.class}
-//					,properties= { 
-//									"debug"
-//									,"logging.level.com._4point.aem.fluentforms.spring=DEBUG"
-//									,"logging.level.org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping=TRACE"
-//								 }
+					,properties= {
+									"server.tomcat.max-part-count=" + AemProxyAutoConfigurationTest.MINIMUM_PARTS_COUNT,	// Normally supplied by AutoConfiguration
+//									"debug",
+//									"logging.level.com._4point.aem.fluentforms.spring=DEBUG",
+//									"logging.level.org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping=TRACE",
+								 }
 					)
 	public static class AemProxyAfSubmissionTestWithCustomAfSubmitProcessorTest {
 		
