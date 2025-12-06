@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -17,6 +18,7 @@ import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
 import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Fallback;
 
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmitAemProxyProcessor;
@@ -29,11 +31,13 @@ import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.SpringAfSubmitPro
  * resources (.css, .js, etc.) that the browser will request.  These requests are forwarded to AEM.
  */
 @AutoConfiguration
+@ConditionalOnClass(RestClientSsl.class)
 @ConditionalOnWebApplication(type=Type.SERVLET)
 @ConditionalOnProperty(prefix="fluentforms.rproxy", name="enabled", havingValue="true", matchIfMissing=true )
 @ConditionalOnProperty(prefix="fluentforms.rproxy", name="type", havingValue="springmvc", matchIfMissing=true )
 @EnableConfigurationProperties({AemConfiguration.class, AemProxyConfiguration.class})
 @ConditionalOnMissingBean(AemProxyImplemention.class)
+@Fallback
 public class AemProxyAutoConfiguration {
 	private static final int MINIMUM_PART_COUNT = 20;
 	private static final String SERVER_TOMCAT_MAX_PART_COUNT = "server.tomcat.max-part-count";

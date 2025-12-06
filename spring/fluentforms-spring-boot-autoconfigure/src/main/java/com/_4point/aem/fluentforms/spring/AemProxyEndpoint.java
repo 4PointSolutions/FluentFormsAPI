@@ -13,6 +13,7 @@ import javax.naming.ConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
 import org.springframework.boot.ssl.NoSuchSslBundleException;
 import org.springframework.http.HttpHeaders;
@@ -43,6 +44,7 @@ import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputSt
  * get the AdaptiveForm or HTML5 Form using the FLuentForms libraries.
  *
  */
+@ConditionalOnClass(RestClientSsl.class)
 @CrossOrigin
 @RestController
 @RequestMapping("/aem")
