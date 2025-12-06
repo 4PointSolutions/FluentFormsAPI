@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.7</version>
+		<version>4.0.0</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com._4point.aem.fluentforms</groupId>
@@ -18,7 +18,6 @@
 		<java.version>17</java.version>
 		<wiremock.version>3.13.1</wiremock.version>
 		<wiremock-spring-boot.version>3.10.6</wiremock-spring-boot.version>
-		<htmlunit.version>4.16.0</htmlunit.version>
 		<fluentforms.jersey.spring.boot.starter.version>0.0.5-SNAPSHOT</fluentforms.jersey.spring.boot.starter.version>
 		<fp.hamcrest.matchers.version>0.0.4-SNAPSHOT</fp.hamcrest.matchers.version>
 	</properties>
@@ -103,7 +102,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
-			<artifactId>junit-jupiter</artifactId>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
