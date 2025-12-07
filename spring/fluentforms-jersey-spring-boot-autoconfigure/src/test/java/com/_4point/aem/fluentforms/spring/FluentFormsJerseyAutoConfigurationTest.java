@@ -32,7 +32,6 @@ import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
-import com._4point.aem.fluentforms.spring.rest_services.client.SpringRestClientRestClient;
 
 @SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class}, 
 				properties = {
