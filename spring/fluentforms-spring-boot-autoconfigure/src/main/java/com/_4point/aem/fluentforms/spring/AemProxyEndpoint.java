@@ -190,6 +190,16 @@ public class AemProxyEndpoint {
 		return new ReplacingInputStream(is, target, replacement);
 	}
     
+    /**
+     * This function acts as a reverse proxy for anything POSTed to the server.  It just forwards
+     * anything it receives on AEM and then returns the response.  It logs slightly differently 
+     * if the request is a form submission.
+     * 
+     * @param remainder
+     * @param contentType
+     * @param in
+     * @return
+     */
     @PostMapping("/{*remainder}")
     public ResponseEntity<byte[]> proxyPost(@PathVariable("remainder") String remainder, @RequestHeader(value = "Content-Type", required = false) String contentType, byte[] in) {
     	logger.atDebug().log("Proxying POST request. remainder={}", remainder);
@@ -223,8 +233,10 @@ public class AemProxyEndpoint {
 				  .log("Returning POST response from target '{}'.");
 		}
 		
-		return response;
-    }
+		return ResponseEntity.status(response.getStatusCode())
+				.headers(removeChunkedTransferEncoding(response.getHeaders()))
+				.body(response.getBody());
+}
     
     private static byte[] debugInput(byte[] inputBytes, String target) {
 		logger.atDebug()

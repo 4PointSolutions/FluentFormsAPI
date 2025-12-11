@@ -23,16 +23,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.web.client.RestClient;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
-@WireMockTest(httpPort = AemProxyEndpointTest.WIREMOCK_PORT)
+@WireMockTest()
 @SpringBootTest(classes = {com._4point.aem.fluentforms.spring.AemProxyEndpointTest.TestApplication.class}, 
 webEnvironment = WebEnvironment.RANDOM_PORT,
 properties = {
 "fluentforms.aem.servername=localhost", 
-"fluentforms.aem.port=" + AemProxyEndpointTest.WIREMOCK_PORT, 
 "fluentforms.aem.user=ENC(7FgD3ZsSExfUGRYlXNc++6C1upPBURNKq6HouzagnNZW4FsBwFs5+crawv+djhw6)",		 
 "fluentforms.aem.password=ENC(QmQ6iTm/+TOO8U3dDuBzJWH129vReWgYNdgqQwWhjWaQy6j8sMnk2/Auhehmlh3v)",
 //"fluentforms.aem.useSsl=true",
@@ -43,6 +44,10 @@ properties = {
 "jasypt.encryptor.salt-generator-classname=org.jasypt.salt.RandomSaltGenerator",
 "logging.level.com._4point.aem.fluentforms.spring.AemProxyEndpoint=DEBUG"
 })
+@EnableWireMock(@ConfigureWireMock(
+		portProperties = "fluentforms.aem.port"
+		)
+	)
 @Timeout(value = 5, unit = TimeUnit.MINUTES)	// Fail tests that take longer than this to prevent hanging.
 class AemProxyEndpointTest {
 	private final static Logger logger = LoggerFactory.getLogger(AemProxyEndpointTest.class);
