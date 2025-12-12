@@ -42,7 +42,9 @@ properties = {
 "jasypt.encryptor.password=4Point",
 "jasypt.encryptor.iv-generator-classname=org.jasypt.iv.RandomIvGenerator",
 "jasypt.encryptor.salt-generator-classname=org.jasypt.salt.RandomSaltGenerator",
-"logging.level.com._4point.aem.fluentforms.spring.AemProxyEndpoint=DEBUG"
+"logging.level.com._4point.aem.fluentforms.spring.AemProxyEndpoint=DEBUG",
+//Wiremock produces a lot of output, the following entries reduce that output.  They can be removed for debugging.
+"logging.level.org.wiremock.spring=WARN", "logging.level.WireMock.wiremock=WARN",
 })
 @EnableWireMock(@ConfigureWireMock(
 		portProperties = "fluentforms.aem.port"
@@ -52,7 +54,6 @@ properties = {
 class AemProxyEndpointTest {
 	private final static Logger logger = LoggerFactory.getLogger(AemProxyEndpointTest.class);
 
-	static final int WIREMOCK_PORT = 5504;
 	static final String AF_BASE_LOCATION = "/aem";
 
 	// The following is a string that contains all possible values that may be modified by the AemProxyEndpoint.

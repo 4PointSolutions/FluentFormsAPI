@@ -23,16 +23,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.web.client.RestClient;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
-@WireMockTest(httpPort = AemProxyJerseyEndpointTest.WIREMOCK_PORT)
+@WireMockTest()
 @SpringBootTest(classes = {com._4point.aem.fluentforms.spring.AemProxyJerseyEndpointTest.TestApplication.class}, 
 webEnvironment = WebEnvironment.RANDOM_PORT,
 properties = {
 "fluentforms.aem.servername=localhost", 
-"fluentforms.aem.port=" + AemProxyJerseyEndpointTest.WIREMOCK_PORT, 
 "fluentforms.aem.user=ENC(7FgD3ZsSExfUGRYlXNc++6C1upPBURNKq6HouzagnNZW4FsBwFs5+crawv+djhw6)",		 
 "fluentforms.aem.password=ENC(QmQ6iTm/+TOO8U3dDuBzJWH129vReWgYNdgqQwWhjWaQy6j8sMnk2/Auhehmlh3v)",
 //"fluentforms.aem.useSsl=true",
@@ -41,13 +42,18 @@ properties = {
 "jasypt.encryptor.password=4Point",
 "jasypt.encryptor.iv-generator-classname=org.jasypt.iv.RandomIvGenerator",
 "jasypt.encryptor.salt-generator-classname=org.jasypt.salt.RandomSaltGenerator",
-"logging.level.com._4point.aem.fluentforms.spring.AemProxyEndpoint=DEBUG"
+"logging.level.com._4point.aem.fluentforms.spring.AemProxyEndpoint=DEBUG",
+// Wiremock produces a lot of output, the following entries reduce that output.  They can be removed for debugging.
+"logging.level.org.wiremock.spring=WARN", "logging.level.WireMock.wiremock=WARN",
 })
-@Timeout(value = 5, unit = TimeUnit.MINUTES)	// Fail tests that take longer than this to prevent hanging.
+@EnableWireMock(@ConfigureWireMock(
+		portProperties = "fluentforms.aem.port"
+		)
+	)
+@Timeout(value = 30, unit = TimeUnit.SECONDS)	// Fail tests that take longer than this to prevent hanging.
 class AemProxyJerseyEndpointTest {
 	private final static Logger logger = LoggerFactory.getLogger(AemProxyJerseyEndpointTest.class);
 
-	static final int WIREMOCK_PORT = 5504;
 	static final String AF_BASE_LOCATION = "/aem";
 
 	// The following is a string that contains all possible values that may be modified by the AemProxyEndpoint.

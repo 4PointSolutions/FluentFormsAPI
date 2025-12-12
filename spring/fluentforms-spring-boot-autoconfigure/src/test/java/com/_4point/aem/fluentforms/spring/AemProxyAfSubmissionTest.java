@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Function;
@@ -39,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -69,19 +71,14 @@ class AemProxyAfSubmissionTest {
 	private static final String AEM_SUBMIT_ADAPTIVE_FORM_SERVICE_PATH = SUBMIT_ADAPTIVE_FORM_SERVICE_PATH.substring(4); // Same as above minus "/aem"
 	private static final String SAMPLE_RESPONSE_BODY = "body";
 
-//	record JakartaRestClient(WebTarget target, URI uri) {};
-//
-//	public static JakartaRestClient setUpRestClient(int port) {
-//		var uri = getBaseUri(port);
-//		var target = ClientBuilder.newClient() //newClient(clientConfig)
-//				 .property(ClientProperties.FOLLOW_REDIRECTS, Boolean.FALSE)	// Disable re-directs so that we can test for "thank you page" redirection.
-//				 .register(MultiPartFeature.class)
-//				 .target(uri);
-//		return new JakartaRestClient(target, uri);
-//	}
-
 	private static RestClient createRestClient(int port) {
+		// Configure the underlying HttpClient to not follow redirects
+		HttpClient httpClient = HttpClient.newBuilder()
+		    .followRedirects(HttpClient.Redirect.NEVER) // Use NEVER to prevent all redirects
+		    .build();
+
 		return RestClient.builder()
+						 .requestFactory(new JdkClientHttpRequestFactory(httpClient))
 						 .baseUrl(getBaseUri(port))		
 						 .build();
 	}
@@ -181,12 +178,10 @@ class AemProxyAfSubmissionTest {
 		@LocalServerPort
 		private int port;
 		
-//		private JakartaRestClient jrc;
 		private RestClient restClient;
 	
 		@BeforeEach
 		public void setUp() throws Exception {
-//			jrc = setUpRestClient(port);
 			restClient = createRestClient(port);
 		}
 	
@@ -203,16 +198,12 @@ class AemProxyAfSubmissionTest {
 			MultiValueMap<String, HttpEntity<?>> parts = getPdfForm.parts();
 			ResponseEntity<byte[]> response = restClient.post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
-//					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.body(parts)
 					.accept(MediaType.APPLICATION_PDF)
 					.retrieve()
 					.toEntity(byte[].class)
 					;
 					
-//					.target.path().request().accept(APPLICATION_PDF)
-//					.post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
-	
 			// then
 			assertThat(response, allOf(hasStatus(HttpStatus.OK), hasEntityMatching(equalTo(expectedResponseString.getBytes()))));
 			WireMock.verify(
@@ -255,12 +246,10 @@ class AemProxyAfSubmissionTest {
 		@LocalServerPort
 		private int port;
 
-//		private JakartaRestClient jrc;
 		private RestClient restClient;
 
 		@BeforeEach
 		public void setUp() throws Exception {
-//			jrc = setUpRestClient(port);
 			restClient = createRestClient(port);
 		}
 
@@ -278,12 +267,6 @@ class AemProxyAfSubmissionTest {
 					.toEntity(byte[].class)
 					;
 
-//			Response response = jrc.target
-//								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
-//								   .request()
-//								   .accept(MediaType.TEXT_PLAIN_TYPE)
-//								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
-
 			assertThat(response, allOf(hasStatus(HttpStatus.OK),hasEntityMatching(equalTo(AF_SUBMIT_LOCAL_PROCESSOR_RESPONSE.getBytes()))));
 		}
 		
@@ -299,11 +282,6 @@ class AemProxyAfSubmissionTest {
 					.retrieve()
 					.toBodilessEntity()
 					;
-//			Response response = jrc.target
-//								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
-//								   .request()
-//								   .accept(MediaType.TEXT_PLAIN_TYPE)
-//								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
 
 			assertThat(response, allOf(hasStatus(HttpStatus.TEMPORARY_REDIRECT), doesNotHaveEntity()));
 		}
@@ -314,17 +292,11 @@ class AemProxyAfSubmissionTest {
 
 			ResponseEntity<Void> response = restClient.post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
-//					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.body(getPdfForm.parts())
 					.accept(MediaType.TEXT_PLAIN)
 					.retrieve()
 					.toBodilessEntity()
 					;
-//			Response response = jrc.target
-//								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
-//								   .request()
-//								   .accept(MediaType.TEXT_PLAIN_TYPE)
-//								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
 
 			assertThat(response, allOf(hasStatus(HttpStatus.SEE_OTHER), doesNotHaveEntity()));
 		}
@@ -341,12 +313,6 @@ class AemProxyAfSubmissionTest {
 					.retrieve()
 					.toBodilessEntity()
 					;
-
-//			Response response = jrc.target
-//								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH+"anythingElse")
-//								   .request()
-//								   .accept(MediaType.TEXT_PLAIN_TYPE)
-//								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
 
 			assertThat(response, allOf(hasStatus(HttpStatus.OK), doesNotHaveEntity()));
 		}
@@ -432,12 +398,10 @@ class AemProxyAfSubmissionTest {
 		@LocalServerPort
 		private int port;
 
-//		private JakartaRestClient jrc;
 		private RestClient restClient;
 
 		@BeforeEach
 		public void setUp() throws Exception {
-//			jrc = setUpRestClient(port);
 			restClient = createRestClient(port);
 		}
 
@@ -448,17 +412,11 @@ class AemProxyAfSubmissionTest {
 			MultiValueMap<String, HttpEntity<?>> parts = getPdfForm.parts();
 			ResponseEntity<byte[]> response = restClient.post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
-//					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.body(parts)
 					.accept(MediaType.APPLICATION_PDF)
 					.retrieve()
 					.toEntity(byte[].class)
 					;
-//			Response response = jrc.target
-//								   .path(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
-//								   .request()
-//								   .accept(APPLICATION_PDF)
-//								   .post(Entity.entity(getPdfForm, getPdfForm.getMediaType()));
 
 			assertThat(response, allOf(hasStatus(HttpStatus.OK), hasEntityMatching(equalTo(SAMPLE_RESPONSE_BODY.getBytes()))));
 		}

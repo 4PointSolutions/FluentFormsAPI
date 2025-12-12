@@ -16,8 +16,8 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<wiremock.version>3.13.1</wiremock.version>
-		<wiremock-spring-boot.version>3.10.6</wiremock-spring-boot.version>
+		<wiremock.version>4.0.0-beta.22</wiremock.version>
+		<wiremock-spring-boot.version>4.0.8</wiremock-spring-boot.version>
 		<fluentforms.jersey.spring.boot.starter.version>0.0.5-SNAPSHOT</fluentforms.jersey.spring.boot.starter.version>
 		<fp.hamcrest.matchers.version>0.0.4-SNAPSHOT</fp.hamcrest.matchers.version>
 	</properties>

@@ -20,7 +20,8 @@
 		
 		<!-- Testing Dependencies -->
 		<fp.hamcrest.matchers.version>0.0.4-SNAPSHOT</fp.hamcrest.matchers.version>
-		<wiremock.version>4.0.0-beta.16</wiremock.version>
+		<wiremock.version>4.0.0-beta.22</wiremock.version>
+		<wiremock-spring-boot.version>4.0.8</wiremock-spring-boot.version>
 		<pitest.maven.plugin.version>1.20.2</pitest.maven.plugin.version>
 		<pitest.junit5.maven.plugin.version>1.2.3</pitest.junit5.maven.plugin.version>
 	</properties>
@@ -105,8 +106,20 @@
 		</dependency>
 		<dependency>
 			<groupId>org.wiremock</groupId>
-			<artifactId>wiremock-standalone</artifactId>
+			<artifactId>wiremock</artifactId>
 			<version>${wiremock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock-junit5</artifactId>
+			<version>${wiremock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wiremock.integrations</groupId>
+			<artifactId>wiremock-spring-boot</artifactId>
+			<version>${wiremock-spring-boot.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

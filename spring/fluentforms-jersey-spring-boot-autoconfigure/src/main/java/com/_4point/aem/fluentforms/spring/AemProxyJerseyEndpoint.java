@@ -204,7 +204,9 @@ public class AemProxyJerseyEndpoint {
 				  .log("Returning POST response from target '{}'.");
 		}
 		
-		return Response.fromResponse(result).build();
+		return Response.fromResponse(result)
+					   .header("Transfer-Encoding", null)			// Remove the Transfer-Encoding header
+					   .build();
     }
     
     private InputStream debugInput(InputStream in, String target) {
