@@ -12,8 +12,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
-import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jersey.autoconfigure.ResourceConfigCustomizer;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.boot.system.JavaVersion;
 import org.springframework.context.annotation.Bean;

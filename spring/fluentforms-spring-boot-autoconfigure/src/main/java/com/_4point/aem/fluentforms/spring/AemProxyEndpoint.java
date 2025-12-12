@@ -13,7 +13,8 @@ import javax.naming.ConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
 import org.springframework.boot.ssl.NoSuchSslBundleException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,6 +44,7 @@ import com._4point.aem.docservices.rest_services.client.helpers.ReplacingInputSt
  * get the AdaptiveForm or HTML5 Form using the FLuentForms libraries.
  *
  */
+@ConditionalOnClass(RestClientSsl.class)
 @CrossOrigin
 @RestController
 @RequestMapping("/aem")
@@ -188,6 +190,16 @@ public class AemProxyEndpoint {
 		return new ReplacingInputStream(is, target, replacement);
 	}
     
+    /**
+     * This function acts as a reverse proxy for anything POSTed to the server.  It just forwards
+     * anything it receives on AEM and then returns the response.  It logs slightly differently 
+     * if the request is a form submission.
+     * 
+     * @param remainder
+     * @param contentType
+     * @param in
+     * @return
+     */
     @PostMapping("/{*remainder}")
     public ResponseEntity<byte[]> proxyPost(@PathVariable("remainder") String remainder, @RequestHeader(value = "Content-Type", required = false) String contentType, byte[] in) {
     	logger.atDebug().log("Proxying POST request. remainder={}", remainder);
@@ -221,8 +233,10 @@ public class AemProxyEndpoint {
 				  .log("Returning POST response from target '{}'.");
 		}
 		
-		return response;
-    }
+		return ResponseEntity.status(response.getStatusCode())
+				.headers(removeChunkedTransferEncoding(response.getHeaders()))
+				.body(response.getBody());
+}
     
     private static byte[] debugInput(byte[] inputBytes, String target) {
 		logger.atDebug()

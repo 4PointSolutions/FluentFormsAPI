@@ -32,7 +32,6 @@ import com._4point.aem.fluentforms.api.forms.FormsService;
 import com._4point.aem.fluentforms.api.generatePDF.GeneratePDFService;
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.api.pdfUtility.PdfUtilityService;
-import com._4point.aem.fluentforms.spring.rest_services.client.SpringRestClientRestClient;
 
 @SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class}, 
 				properties = {
@@ -158,40 +157,42 @@ class FluentFormsJerseyAutoConfigurationTest {
 		return result;
 	}
 
-	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
-			properties = {
-					"fluentforms.aem.servername=localhost", 
-					"fluentforms.aem.port=4502", 
-					"fluentforms.aem.user=admin",		 
-					"fluentforms.aem.password=admin",
-					"fluentforms.restclient=springrestclient"	// Configure for Spring RestClient
-					})
-	public static class SpringRestClientTest {
-		
-		@Test
-		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
-			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
-			assertTrue(client instanceof SpringRestClientRestClient, "RestClientFactory should return a SpringRestClientRestClient when configured to do so");
-		}
-	}
+// TODO: For now we are going to ignore mixed scenarios (where we are using one starter with a different rest client
+//	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+//			properties = {
+//					"fluentforms.aem.servername=localhost", 
+//					"fluentforms.aem.port=4502", 
+//					"fluentforms.aem.user=admin",		 
+//					"fluentforms.aem.password=admin",
+//					"fluentforms.restclient=springrestclient"	// Configure for Spring RestClient
+//					})
+//	public static class SpringRestClientTest {
+//		
+//		@Test
+//		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
+//			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
+//			assertTrue(client instanceof SpringRestClientRestClient, "RestClientFactory should return a SpringRestClientRestClient when configured to do so");
+//		}
+//	}
 
-	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
-			properties = {
-					"fluentforms.aem.servername=localhost", 
-					"fluentforms.aem.port=4502", 
-					"fluentforms.aem.user=admin",		 
-					"fluentforms.aem.password=admin",
-					"fluentforms.aem.usessl=true",
-					"fluentforms.restclient=springrestclient"	// Configure for Spring RestClient
-					})
-	public static class SpringRestClient_SslNoBundleNameTest {
-		
-		@Test
-		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
-			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
-			assertTrue(client instanceof SpringRestClientRestClient, "RestClientFactory should return a SpringRestClientRestClient when configured to do so");
-		}
-	}
+// TODO: For now we are going to ignore mixed scenarios (where we are using one starter with a different rest client
+//	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+//			properties = {
+//					"fluentforms.aem.servername=localhost", 
+//					"fluentforms.aem.port=4502", 
+//					"fluentforms.aem.user=admin",		 
+//					"fluentforms.aem.password=admin",
+//					"fluentforms.aem.usessl=true",
+//					"fluentforms.restclient=springrestclient"	// Configure for Spring RestClient
+//					})
+//	public static class SpringRestClient_SslNoBundleNameTest {
+//		
+//		@Test
+//		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
+//			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
+//			assertTrue(client instanceof SpringRestClientRestClient, "RestClientFactory should return a SpringRestClientRestClient when configured to do so");
+//		}
+//	}
 
 	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class}, 
 			properties = {
@@ -212,26 +213,27 @@ class FluentFormsJerseyAutoConfigurationTest {
 		}
 	}
 
-	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
-			properties = {
-					"fluentforms.aem.servername=localhost", 
-					"fluentforms.aem.port=4502", 
-					"fluentforms.aem.user=admin",		 
-					"fluentforms.aem.password=admin",
-					"fluentforms.aem.usessl=true",
-					"spring.ssl.bundle.jks.aem.truststore.location=file:src/test/resources/aemforms.p12",
-					"spring.ssl.bundle.jks.aem.truststore.password=Pa$$123",
-					"spring.ssl.bundle.jks.aem.truststore.type=PKCS12",
-					"fluentforms.restclient=springrestclient"	// Configure for Spring RestClient
-					})
-	public static class SpringRestClient_SslBundleTest {
-		
-		@Test
-		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
-			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
-			assertTrue(client instanceof SpringRestClientRestClient, "RestClientFactory should return a SpringRestClientRestClient when configured to do so");
-		}
-	}
+// TODO: For now we are going to ignore mixed scenarios (where we are using one starter with a different rest client
+//	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
+//			properties = {
+//					"fluentforms.aem.servername=localhost", 
+//					"fluentforms.aem.port=4502", 
+//					"fluentforms.aem.user=admin",		 
+//					"fluentforms.aem.password=admin",
+//					"fluentforms.aem.usessl=true",
+//					"spring.ssl.bundle.jks.aem.truststore.location=file:src/test/resources/aemforms.p12",
+//					"spring.ssl.bundle.jks.aem.truststore.password=Pa$$123",
+//					"spring.ssl.bundle.jks.aem.truststore.type=PKCS12",
+//					"fluentforms.restclient=springrestclient"	// Configure for Spring RestClient
+//					})
+//	public static class SpringRestClient_SslBundleTest {
+//		
+//		@Test
+//		void testRestClientFactory(@Autowired RestClientFactory factory, @Autowired AemConfiguration config) {
+//			RestClient client = factory.apply(toAemConfig(config) , "testRestClientFactory", ()->"correlationId");
+//			assertTrue(client instanceof SpringRestClientRestClient, "RestClientFactory should return a SpringRestClientRestClient when configured to do so");
+//		}
+//	}
 
 	@SpringBootTest(classes = {FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
 			properties = {

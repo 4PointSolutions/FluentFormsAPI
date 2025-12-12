@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jersey.autoconfigure.ResourceConfigCustomizer;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class, AemProxyAutoConfiguration.class}, 
+@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.FluentFormsJerseyAutoConfigurationTest.TestApplication.class, FluentFormsAutoConfiguration.class}, 
 properties = {
 		"fluentforms.aem.servername=localhost", 
 		"fluentforms.aem.port=4502", 

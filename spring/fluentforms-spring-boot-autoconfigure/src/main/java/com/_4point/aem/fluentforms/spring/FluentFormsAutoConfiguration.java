@@ -5,12 +5,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
 import org.springframework.boot.ssl.NoSuchSslBundleException;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Fallback;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.client.RestClient;
@@ -69,27 +71,33 @@ public class FluentFormsAutoConfiguration {
 				  );
 	}
 
-	
-	// matchIfMissing is set to true so that, by default (if nothing is specified in the properties file), then the SpringRestClient is used.
-	@ConditionalOnProperty(prefix="fluentforms", name="restclient", havingValue="springrestclient", matchIfMissing=true )
-	@ConditionalOnMissingBean
-	@Fallback
-	@Bean
-	public RestClientFactory springRestClientFactory(AemConfiguration aemConfig, RestClient.Builder restClientBuilder, RestClientSsl restClientSsl) {
-		return SpringRestClientRestClient.factory(aemConfig.useSsl() ? restClientBuilder.apply(getSslBundle(aemConfig.sslBundle(), restClientSsl))
-																	 : restClientBuilder
-												); // Create a RestClientFactory using Spring RestClient implementation
-	}
 
-	private static Consumer<org.springframework.web.client.RestClient.Builder> getSslBundle(String sslBundleName, RestClientSsl restClientSsl) {
-		try {
-			return restClientSsl.fromBundle(sslBundleName);
-		} catch (NoSuchSslBundleException e) {
-			// Default to normal SSL context (which includes the default trust store)
-			// This is not ideal since misspelling the bundle name silently fails, but is required to avoid breaking existing code.  
-			// At dome point it should probably be changed to let the exception pass and only use the default SSL context 
-			// if the SSL bundle name is empty.
-			return b->{}; // No-op;
+	// To prevent class path exceptions when loading just the Jersey libraries (because RestSsl is unavailable) 
+	// we need to wrap the springRestClientFactory in it's own class.
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass(RestClientSsl.class)
+	public static class SpringRestClientFactoryProvider {
+		// matchIfMissing is set to true so that, by default (if nothing is specified in the properties file), then the SpringRestClient is used.
+		@ConditionalOnProperty(prefix="fluentforms", name="restclient", havingValue="springrestclient", matchIfMissing=true )
+		@ConditionalOnMissingBean
+		@Fallback
+		@Bean
+		public RestClientFactory springRestClientFactory(AemConfiguration aemConfig, RestClient.Builder restClientBuilder, RestClientSsl restClientSsl) {
+			return SpringRestClientRestClient.factory(aemConfig.useSsl() ? restClientBuilder.apply(getSslBundle(aemConfig.sslBundle(), restClientSsl))
+					: restClientBuilder
+					); // Create a RestClientFactory using Spring RestClient implementation
+		}
+		
+		private static Consumer<org.springframework.web.client.RestClient.Builder> getSslBundle(String sslBundleName, RestClientSsl restClientSsl) {
+			try {
+				return restClientSsl.fromBundle(sslBundleName);
+			} catch (NoSuchSslBundleException e) {
+				// Default to normal SSL context (which includes the default trust store)
+				// This is not ideal since misspelling the bundle name silently fails, but is required to avoid breaking existing code.  
+				// At dome point it should probably be changed to let the exception pass and only use the default SSL context 
+				// if the SSL bundle name is empty.
+				return b->{}; // No-op;
+			}
 		}
 	}
 		

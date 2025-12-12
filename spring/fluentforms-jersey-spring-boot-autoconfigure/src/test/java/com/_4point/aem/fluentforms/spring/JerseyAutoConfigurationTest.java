@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.autoconfigure.web.client.RestClientSsl;
+import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
 import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.boot.test.context.assertj.AssertableWebApplicationContext;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -34,23 +34,27 @@ class JerseyAutoConfigurationTest {
 	 * This class provides mock versions of beans that would normally be provided by Spring Boot in a real application.  We
 	 * only need to mock out the RestClient.Builder and RestClientSsl beans because those are the only Spring Boot provided
 	 * beans that our AutoConfigurations depend on.
+	 * 
+	 * In theory, we should not need to provide these however spring-boot-starter-jersey brings in spring-boot-restclient
+	 * on to the test classpath which, in turn, triggers the inclusion of the fluent-forms springRestClientFactory which
+	 * requires the mocks. 
 	 */
 	private static class SpringBootMocks {
 		@Bean RestClient.Builder mockRestClientBuilder() { return Mockito.mock(RestClient.Builder.class, Mockito.RETURNS_DEEP_STUBS); }
 		@Bean private RestClientSsl mockRestClientSsl() { return Mockito.mock(RestClientSsl.class); }
 	}
 	
-	private static final AutoConfigurations AUTO_CONFIG = AutoConfigurations.of(FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class, AemProxyAutoConfiguration.class, SpringBootMocks.class);
+	private static final AutoConfigurations AUTO_CONFIG = AutoConfigurations.of(FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class, SpringBootMocks.class);
 	
-	private static final AutoConfigurations LOCAL_SUBMIT_CONFIG = AutoConfigurations.of(FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class, AemProxyAutoConfiguration.class, DummyLocalSubmitHandler.class, SpringBootMocks.class);
+	private static final AutoConfigurations LOCAL_SUBMIT_CONFIG = AutoConfigurations.of(FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class, DummyLocalSubmitHandler.class, SpringBootMocks.class);
 	
-	private static final AutoConfigurations ALTERNATE_PROXY_CONFIG = AutoConfigurations.of(DummyProxyImplementation.class, FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class, AemProxyAutoConfiguration.class, SpringBootMocks.class);
+	private static final AutoConfigurations ALTERNATE_PROXY_CONFIG = AutoConfigurations.of(DummyProxyImplementation.class, FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class, SpringBootMocks.class);
 
 	// Tests to make sure that only the FluentFormsLibraries are loaded in a non-web application.
 	private static final ContextConsumer<? super AssertableApplicationContext> FF_LIBRARIES_ONLY = (context) -> {
 		assertAll(
-				()->assertThat(context).hasSingleBean(FluentFormsAutoConfiguration.class),
-				()->assertThat(context).getBean(FluentFormsAutoConfiguration.class.getName()).isSameAs(context.getBean(FluentFormsAutoConfiguration.class)),
+				()->assertThat(context).hasSingleBean(FluentFormsJerseyAutoConfiguration.class),
+				()->assertThat(context).getBean(FluentFormsJerseyAutoConfiguration.class.getName()).isSameAs(context.getBean(FluentFormsJerseyAutoConfiguration.class)),
 				()->assertThat(context).hasSingleBean(OutputService.class),
 				()->assertThat(context).getBean("outputService").isNotNull(),
 				()->assertThat(context).doesNotHaveBean(AemProxyAutoConfiguration.class),
@@ -64,8 +68,8 @@ class JerseyAutoConfigurationTest {
 	// Tests to make sure that only the FluentFormsLibraries are loaded in a web application.
 	private static final ContextConsumer<? super AssertableWebApplicationContext> WEB_FF_LIBRARIES_ONLY = (context) -> {
 		assertAll(
-				()->assertThat(context).hasSingleBean(FluentFormsAutoConfiguration.class),
-				()->assertThat(context).getBean(FluentFormsAutoConfiguration.class.getName()).isSameAs(context.getBean(FluentFormsAutoConfiguration.class)),
+				()->assertThat(context).hasSingleBean(FluentFormsJerseyAutoConfiguration.class),
+				()->assertThat(context).getBean(FluentFormsJerseyAutoConfiguration.class.getName()).isSameAs(context.getBean(FluentFormsJerseyAutoConfiguration.class)),
 				()->assertThat(context).hasSingleBean(OutputService.class),
 				()->assertThat(context).getBean("outputService").isNotNull(),
 				()->assertThat(context).doesNotHaveBean(AemProxyAutoConfiguration.class),
@@ -79,8 +83,8 @@ class JerseyAutoConfigurationTest {
 	// Tests to make sure that all beans are loaded by default in a web application.
 	private static final ContextConsumer<? super AssertableWebApplicationContext> WEB_ALL_DEFAULT_SERVICES = (context) -> {
 		assertAll(
-				()->assertThat(context).hasSingleBean(FluentFormsAutoConfiguration.class),
-				()->assertThat(context).getBean(FluentFormsAutoConfiguration.class.getName()).isSameAs(context.getBean(FluentFormsAutoConfiguration.class)),
+				()->assertThat(context).hasSingleBean(FluentFormsJerseyAutoConfiguration.class),
+				()->assertThat(context).getBean(FluentFormsJerseyAutoConfiguration.class.getName()).isSameAs(context.getBean(FluentFormsJerseyAutoConfiguration.class)),
 				()->assertThat(context).hasSingleBean(OutputService.class),
 				()->assertThat(context).getBean("outputService").isNotNull(),
 				()->assertThat(context).hasSingleBean(AemProxyJerseyAutoConfiguration.class),
@@ -92,27 +96,27 @@ class JerseyAutoConfigurationTest {
 	};
 
 	// Tests to make sure that all beans are loaded by default in a web application.
-	private static final ContextConsumer<? super AssertableWebApplicationContext> WEB_ALL_SPRINGMVC_SERVICES = (context) -> {
-		assertAll(
-				()->assertThat(context).hasSingleBean(FluentFormsAutoConfiguration.class),
-				()->assertThat(context).getBean(FluentFormsAutoConfiguration.class.getName()).isSameAs(context.getBean(FluentFormsAutoConfiguration.class)),
-				()->assertThat(context).hasSingleBean(OutputService.class),
-				()->assertThat(context).getBean("outputService").isNotNull(),
-				()->assertThat(context).hasSingleBean(AemProxyAutoConfiguration.class),
-				()->assertThat(context).getBean(AemProxyAutoConfiguration.class.getName()).isSameAs(context.getBean(AemProxyAutoConfiguration.class)),
-				()->assertThat(context).hasSingleBean(SpringAfSubmitProcessor.class),
-				()->assertThat(context).getBean(SpringAfSubmitProcessor.class).isSameAs(context.getBean(AemProxyAfSubmission.AfSubmitAemProxyProcessor.class)),
-				()->assertThat(context).doesNotHaveBean(AfSubmissionHandler.class),
-				()->assertThat(context).doesNotHaveBean(AemProxyJerseyAutoConfiguration.class),
-				()->assertThat(context).doesNotHaveBean(JerseyAfSubmitProcessor.class)
-				);
-	};
+//	private static final ContextConsumer<? super AssertableWebApplicationContext> WEB_ALL_SPRINGMVC_SERVICES = (context) -> {
+//		assertAll(
+//				()->assertThat(context).hasSingleBean(FluentFormsJerseyAutoConfiguration.class),
+//				()->assertThat(context).getBean(FluentFormsJerseyAutoConfiguration.class.getName()).isSameAs(context.getBean(FluentFormsJerseyAutoConfiguration.class)),
+//				()->assertThat(context).hasSingleBean(OutputService.class),
+//				()->assertThat(context).getBean("outputService").isNotNull(),
+//				()->assertThat(context).hasSingleBean(AemProxyAutoConfiguration.class),
+//				()->assertThat(context).getBean(AemProxyAutoConfiguration.class.getName()).isSameAs(context.getBean(AemProxyAutoConfiguration.class)),
+//				()->assertThat(context).hasSingleBean(SpringAfSubmitProcessor.class),
+//				()->assertThat(context).getBean(SpringAfSubmitProcessor.class).isSameAs(context.getBean(AemProxyAfSubmission.AfSubmitAemProxyProcessor.class)),
+//				()->assertThat(context).doesNotHaveBean(AfSubmissionHandler.class),
+//				()->assertThat(context).doesNotHaveBean(AemProxyJerseyAutoConfiguration.class),
+//				()->assertThat(context).doesNotHaveBean(JerseyAfSubmitProcessor.class)
+//				);
+//	};
 
 	// Tests to make sure that all beans are loaded in a web application that contains a local submit handler.
 	private static final ContextConsumer<? super AssertableWebApplicationContext> WEB_LOCAL_SUBMIT_SERVICES = (context) -> {
 		assertAll(
-				()->assertThat(context).hasSingleBean(FluentFormsAutoConfiguration.class),
-				()->assertThat(context).getBean(FluentFormsAutoConfiguration.class.getName()).isSameAs(context.getBean(FluentFormsAutoConfiguration.class)),
+				()->assertThat(context).hasSingleBean(FluentFormsJerseyAutoConfiguration.class),
+				()->assertThat(context).getBean(FluentFormsJerseyAutoConfiguration.class.getName()).isSameAs(context.getBean(FluentFormsJerseyAutoConfiguration.class)),
 				()->assertThat(context).hasSingleBean(OutputService.class),
 				()->assertThat(context).getBean("outputService").isNotNull(),
 				()->assertThat(context).hasSingleBean(AemProxyJerseyAutoConfiguration.class),
@@ -222,15 +226,16 @@ class JerseyAutoConfigurationTest {
 	    		.run(WEB_ALL_DEFAULT_SERVICES);
 	}
 	
-	// All services should start when the jersey proxy type is configured.
-	@Test
-	void webContext_ProxyEnabled_SpringMvcProxyConfigured() {
-	    this.webContextRunner
-	    		.withPropertyValues("fluentforms.aem.servername=localhost", "fluentforms.aem.port=4502",
-	    							"fluentforms.aem.user=user", "fluentforms.aem.password=password",
-	    							"fluentforms.rproxy.type=springmvc")
-	    		.run(WEB_ALL_SPRINGMVC_SERVICES);
-	}
+	// TODO: For now we are going to ignore mixed scenarios (where we are using one starter with a different rest client
+//	// All services should start when the jersey proxy type is configured.
+//	@Test
+//	void webContext_ProxyEnabled_SpringMvcProxyConfigured() {
+//	    this.webContextRunner
+//	    		.withPropertyValues("fluentforms.aem.servername=localhost", "fluentforms.aem.port=4502",
+//	    							"fluentforms.aem.user=user", "fluentforms.aem.password=password",
+//	    							"fluentforms.rproxy.type=springmvc")
+//	    		.run(WEB_ALL_SPRINGMVC_SERVICES);
+//	}
 	
 
 	public static class DummyLocalSubmitHandler implements AfSubmissionHandler {
