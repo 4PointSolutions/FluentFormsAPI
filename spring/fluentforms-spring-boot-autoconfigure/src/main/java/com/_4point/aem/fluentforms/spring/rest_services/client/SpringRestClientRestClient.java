@@ -203,7 +203,6 @@ public class SpringRestClientRestClient implements RestClient {
 	private final class RestClientMultipartPayloadBuilder extends SpringClientRequestBuilder implements MultipartPayload.Builder {
 		private final MultiValueMap<String, HttpEntity<?>> parts = new LinkedMultiValueMap<>();
 		
-		@SuppressWarnings("serial")
 		private void internalAdd(String fieldName, Object fieldData, MediaType contentType) {
 			parts.add(fieldName, new HttpEntity<>(fieldData, new HttpHeaders() {
 				{
