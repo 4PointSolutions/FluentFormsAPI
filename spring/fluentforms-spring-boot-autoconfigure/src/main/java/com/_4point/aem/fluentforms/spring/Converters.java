@@ -2,6 +2,7 @@ package com._4point.aem.fluentforms.spring;
 
 import java.nio.file.Path;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 
@@ -17,8 +18,8 @@ public class Converters {
 	public static class PathConverter implements Converter<String, Path> {
 
 		@Override
-		public Path convert(String source) {
-			return Path.of(source);
+		public Path convert(@Nullable String source) {
+			return Path.of(source == null ? "" : source);
 		}
 		
 	}
@@ -27,8 +28,8 @@ public class Converters {
 	public static class PathOrUrlConverter implements Converter<String, PathOrUrl> {
 
 		@Override
-		public PathOrUrl convert(String source) {
-			return PathOrUrl.from(source);
+		public PathOrUrl convert(@Nullable String source) {
+			return PathOrUrl.from(source == null ? "" : source);
 		}
 		
 	}

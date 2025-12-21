@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
@@ -25,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClient.ResponseSpec;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.UriBuilder;
 
@@ -72,7 +73,7 @@ public class AemProxyAfSubmission {
 	}
 
 	@PostMapping(path = CONTENT_FORMS_AF + "{*remainder}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.ALL_VALUE)
-    public ResponseEntity<byte[]> proxySubmitPost(@PathVariable("remainder") String remainder, /* @HeaderParam(CorrelationId.CORRELATION_ID_HDR) final String correlationIdHdr,*/ @RequestHeader HttpHeaders headers, final MultipartHttpServletRequest inFormData)  {
+    public ResponseEntity<byte[]> proxySubmitPost(@PathVariable String remainder, /* @HeaderParam(CorrelationId.CORRELATION_ID_HDR) final String correlationIdHdr,*/ @RequestHeader HttpHeaders headers, final MultipartHttpServletRequest inFormData)  {
 		logger.atInfo().addArgument(()->submitProcessor != null ?  submitProcessor.getClass().getName() : "null" ).log("Submit proxy called. SubmitProcessor={}");
 //		final String correlationId = CorrelationId.generate(correlationIdHdr);
 //		ProcessingMetadataBuilder pmBuilder = ProcessingMetadata.start(correlationId);
@@ -167,7 +168,7 @@ public class AemProxyAfSubmission {
 		
 		public AfSubmitAemProxyProcessor(AemConfiguration aemConfig, RestClientSsl restClientSsl) {
 			this.httpClient = Optional.of(RestClient.builder())
-									.map(b->b.baseUrl(aemConfig.url()))
+									.map(b->configurBaseUrl(b, aemConfig))
 									.map(b->configureBasicAuthentication(b, aemConfig))
 									.map(b->configureSsl(b, aemConfig, restClientSsl))
 									.get().build();	
@@ -175,29 +176,38 @@ public class AemProxyAfSubmission {
 //	    			JerseyClientFactory.createClient(sslBundles, aemConfig.sslBundle(), aemConfig.user(), aemConfig.password());
 		}
 
-		private static RestClient.Builder configureBasicAuthentication(
-				RestClient.Builder builder,
-				AemConfiguration aemConfig 
-				) {
-			ClientHttpRequestInterceptor basicAuth = new BasicAuthenticationInterceptor(aemConfig.user(), aemConfig.password());
-
-			return builder.requestInterceptor(basicAuth);
+		private static RestClient.Builder configurBaseUrl(RestClient.Builder builder, AemConfiguration aemConfig) {
+			@Nullable String baseUrl = aemConfig.url();
+			return baseUrl != null && !baseUrl.isBlank() 
+							? builder.baseUrl(baseUrl)
+						 	: builder;
+		}
+		
+		@SuppressWarnings("null") // useBasickAuth checks for null user/password
+		private static RestClient.Builder configureBasicAuthentication(RestClient.Builder builder, AemConfiguration aemConfig) {
+			return aemConfig.getCredentials()
+							.map (c->builder.requestInterceptor(new BasicAuthenticationInterceptor(c.user(), c.password())))
+							.orElse(builder);
 		}
 		
 		private static RestClient.Builder configureSsl(RestClient.Builder builder, AemConfiguration aemConfig, RestClientSsl restClientSsl) {
-			return aemConfig.useSsl() ? builder.apply(getSslBundle(aemConfig.sslBundle(), restClientSsl))
-						 			  : builder;			
+			@Nullable String sslBundleName = aemConfig.sslBundle();
+			return aemConfig.useSsl() && sslBundleName != null && !sslBundleName.isBlank() 
+							? builder.apply(getSslBundle(sslBundleName, restClientSsl))
+						 	: builder;			
 		}
 
+		private static final Consumer<RestClient.Builder> NO_OP_SSL_CONFIGURER = b->{};
+		
 		private static Consumer<RestClient.Builder> getSslBundle(String sslBundleName, RestClientSsl restClientSsl) {
 			try {
 				return restClientSsl.fromBundle(sslBundleName);
 			} catch (NoSuchSslBundleException e) {
 				// Default to normal SSL context (which includes the default trust store)
 				// This is not ideal since misspelling the bundle name silently fails, but is required to avoid breaking existing code.  
-				// At dome point it should probably be changed to let the exception pass and only use the default SSL context 
+				// At some point it should probably be changed to let the exception pass and only use the default SSL context 
 				// if the SSL bundle name is empty.
-				return b->{}; // No-op;
+				return NO_OP_SSL_CONFIGURER; // No-op;
 			}
 		}
 
@@ -210,14 +220,15 @@ public class AemProxyAfSubmission {
 	    	var headers = formSubmission.getRequestHeaders();
 //	    	String contentType = headers.getContentType().toString();
 //	    	String cookie = headers.getFirst("cookie");
-	    	ResponseEntity<byte[]> result = httpClient.post()
+	    	ResponseSpec responseSpec = httpClient.post()
 	    											  .uri(ub->appendPath(ub, remainder))	
 											    	  .body(new HttpEntity<>(formSubmission.getMultiFileMap(), headers))
 //											    	  .headers(h->{
 //											    		  h.set("cookie", cookie);
 //											    	  	  })
-											    	  .retrieve()
-											    	  .toEntity(byte[].class)
+											    	  .retrieve();
+			ResponseEntity<byte []> result = requireNonNull(responseSpec
+											    	  .toEntity(byte [].class));
 			    	  ;
 			    		
 //			WebTarget webTarget = httpClient.target(aemConfig.url())
@@ -233,22 +244,10 @@ public class AemProxyAfSubmission {
 			logger.atDebug().log(()->"AEM Response Location = " + result.getHeaders().getLocation());
 
 			// TODO: Add correlation ID header
+			byte @Nullable[] body = result.getBody();
 			return ResponseEntity.status(result.getStatusCode())
 								 .headers(removeChunkedTransferEncoding(result.getHeaders()))
-								 .body(result.getBody());
-//			String aemResponseEncoding = result.getHeaderString("Transfer-Encoding");
-//			if (aemResponseEncoding != null && aemResponseEncoding.equalsIgnoreCase("chunked")) {
-//				logger.atDebug().log("Returning chunked response from AEM.");
-//				return Response.status(result.getStatus()).entity(new ByteArrayInputStream(transferFromAem(result, logger)))
-//							   .type(result.getMediaType())
-////							   .header(CorrelationId.CORRELATION_ID_HDR, correlationId)
-//							   .build();
-//			} else  {
-//				logger.atDebug().log("Returning response from AEM.");
-//				return Response.fromResponse(result)
-////							   .header(CorrelationId.CORRELATION_ID_HDR, correlationId)
-//							   .build();
-//			}
+								 .body(body);
 		}
 		
 		private HttpHeaders removeChunkedTransferEncoding(HttpHeaders headers) {
@@ -267,6 +266,7 @@ public class AemProxyAfSubmission {
 			return uri;
 		}
 		
+		@SuppressWarnings("null") // StandardCharsets.UTF_8 is non-null
 		private static String getFormData(MultipartHttpServletRequest formSubmission) {	
 			try {
 				var formData = formSubmission.getFile("jcr:data");
@@ -340,7 +340,7 @@ public class AemProxyAfSubmission {
 			/**
 			 * A Normal response with a 200 HTTP status code (204 if the responseBytes variable is empty)
 			 */
-			public record Response(byte[] responseBytes, String mediaType) implements SubmitResponse {
+			public record Response(byte [] responseBytes, String mediaType) implements SubmitResponse {
 				/**
 				 * Creates a text response from a String
 				 * 
@@ -423,7 +423,7 @@ public class AemProxyAfSubmission {
 		 * 		an AfSubmissionHandler object
 		 */
 		public static AfSubmissionHandler canHandleFormNameEquals(String formName, Function<Submission, SubmitResponse> handlerLogic) {
-			Objects.requireNonNull(formName, "Form Name for submission handler cannot be null.");
+			requireNonNull(formName, "Form Name for submission handler cannot be null.");
 			return new AfSubmissionHandler() {
 
 				@Override
@@ -433,7 +433,7 @@ public class AemProxyAfSubmission {
 
 				@Override
 				public SubmitResponse processSubmission(Submission submission) {
-					return handlerLogic.apply(submission);
+					return requireNonNull(handlerLogic.apply(submission));
 				}
 			};
 		}
@@ -466,7 +466,7 @@ public class AemProxyAfSubmission {
 
 				@Override
 				public SubmitResponse processSubmission(Submission submission) {
-					return handlerLogic.apply(submission);
+					return requireNonNull(handlerLogic.apply(submission));
 				}
 			};
 		}
@@ -499,7 +499,7 @@ public class AemProxyAfSubmission {
 
 				@Override
 				public SubmitResponse processSubmission(Submission submission) {
-					return handlerLogic.apply(submission);
+					return requireNonNull(handlerLogic.apply(submission));
 				}
 			};
 		}
@@ -515,7 +515,7 @@ public class AemProxyAfSubmission {
 		 * 		an AfSubmissionHandler object
  		 */
  		public static AfSubmissionHandler canHandleFormNameMatchesRegex(String formNameRegEx, Function<Submission, SubmitResponse> handlerLogic) {
-			final var pattern = Pattern.compile(Objects.requireNonNull(formNameRegEx, "Form Name RegEx for submission handler cannot be null."));
+			final var pattern = Pattern.compile(requireNonNull(formNameRegEx, "Form Name RegEx for submission handler cannot be null."));
 
 			return new AfSubmissionHandler() {
 
@@ -526,7 +526,7 @@ public class AemProxyAfSubmission {
 
 				@Override
 				public SubmitResponse processSubmission(Submission submission) {
-					return handlerLogic.apply(submission);
+					return requireNonNull(handlerLogic.apply(submission));
 				}
 			};
 		}
@@ -589,10 +589,12 @@ public class AemProxyAfSubmission {
 			return extractFormName(removeLeadingSlash(guideContainerPath));
 		}
 
+		@SuppressWarnings("null") // JDK has not nullness annotations
 		private static String extractFormName(String relativePath) {
 			return relativePath.substring(0, relativePath.length() - REMAINDER_PATH_SUFFIX.length());
 		}
 
+		@SuppressWarnings("null") // JDK has not nullness annotations
 		private static String removeLeadingSlash(String path) {
 			return path.startsWith("/") ? path.substring(1) : path;
 		}
@@ -606,8 +608,8 @@ public class AemProxyAfSubmission {
 		// Create a AfSubmissionHandler.Submission object from the JAX-RS Request classes.
 		private AfSubmissionHandler.Submission formulateSubmission(MultipartHttpServletRequest inFormData, String formName) {
 			class ExtractedData {
-				String formData;
-				String redirectUrl;
+				@Nullable String formData;
+				@Nullable String redirectUrl;
 			};
 			final ExtractedData extractedData = new ExtractedData();
 			// Extract data some of the parts.
@@ -617,11 +619,11 @@ public class AemProxyAfSubmission {
 	        				"jcr:data",		(dataBytes)->{ extractedData.formData = new String(dataBytes, StandardCharsets.UTF_8); return null; }
 	        			);
 			transformFormData(inFormData, fieldFunctions, logger);
-			return new AfSubmissionHandler.Submission(requireNonNull(extractedData.formData, "Form data (jcr:data) part not found in Adaptive Form submission."), 
-					  								  formName, 
-					  								  requireNonNull(extractedData.redirectUrl, "Redirect URL (:redirect) part not found in Adaptive Form submission."), 
-					  								  transferHeaders(inFormData.getRequestHeaders())
-					  								  );
+			return new AfSubmissionHandler.Submission(requireNonNull(extractedData.formData, "Submission was missing form data (jcr:data) psrt") , 
+													  formName, 
+													  requireNonNull(extractedData.redirectUrl, "Submission was missing redirect URL (:redirect) part"), 
+													  transferHeaders(inFormData.getRequestHeaders())
+													  );
 		}
 		
 		// Transfer headers from WebMVC construct to Spring construct

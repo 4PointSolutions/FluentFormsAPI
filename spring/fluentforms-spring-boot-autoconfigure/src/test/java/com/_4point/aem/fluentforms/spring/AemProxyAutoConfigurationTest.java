@@ -1,9 +1,11 @@
 package com._4point.aem.fluentforms.spring;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.apache.catalina.connector.Connector;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,7 +43,7 @@ class AemProxyAutoConfigurationTest {
 
 	static class AemProxyAutoConfiguration_TomcatWenServerFactory_MaxPartsCount_Test {
 		
-		private static TomcatConnectorCustomizer customizer;
+		private static @Nullable TomcatConnectorCustomizer customizer;
 		private Connector mockConnector = Mockito.mock(Connector.class);
 		
 		@BeforeAll
@@ -68,7 +70,7 @@ class AemProxyAutoConfigurationTest {
 			when(mockConnector.getMaxPartCount()).thenReturn(getValue);
 			
 			// When
-			customizer.customize(mockConnector);
+			requireNonNull(customizer).customize(mockConnector);
 			
 			//Then
 			verify(mockConnector).getMaxPartCount();
@@ -85,7 +87,7 @@ class AemProxyAutoConfigurationTest {
 			doNothing().when(mockConnector).setMaxPartCount(updatedMaxPartCountCaptor.capture());
 			
 			// When
-			customizer.customize(mockConnector );
+			requireNonNull(customizer).customize(mockConnector );
 
 			// Then
 			verify(mockConnector).getMaxPartCount();

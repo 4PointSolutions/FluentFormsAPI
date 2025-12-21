@@ -96,6 +96,9 @@
         <!-- Project dependecies -->
         <aemfd.client.sdk.version>6.1.152</aemfd.client.sdk.version> <!-- fluentforms requires AEM 6.5 SP12 or later -->
         <io.wcm.maven.aem-dependencies.version>6.6.0.0000</io.wcm.maven.aem-dependencies.version>
+        
+        <!-- Eclipse dependencies (for null processing) -->
+        <eclipse.annotations.version>2.4.100</eclipse.annotations.version>
 
     </properties>
 
@@ -606,6 +609,12 @@
     </dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>org.eclipse.jdt.annotation</artifactId>
+			<version>${eclipse.annotations.version}</version>
+			<optional>true</optional>
+		</dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

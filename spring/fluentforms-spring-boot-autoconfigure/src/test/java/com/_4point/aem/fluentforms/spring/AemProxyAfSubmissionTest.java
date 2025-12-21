@@ -1,6 +1,7 @@
 package com._4point.aem.fluentforms.spring;
 
 import static com._4point.testing.matchers.javalang.ExceptionMatchers.*;
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,6 +17,8 @@ import org.hamcrest.Description;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,6 +44,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -178,7 +182,7 @@ class AemProxyAfSubmissionTest {
 		@LocalServerPort
 		private int port;
 		
-		private RestClient restClient;
+		private @Nullable RestClient restClient;
 	
 		@BeforeEach
 		public void setUp() throws Exception {
@@ -196,7 +200,7 @@ class AemProxyAfSubmissionTest {
 	
 			// when
 			MultiValueMap<String, HttpEntity<?>> parts = getPdfForm.parts();
-			ResponseEntity<byte[]> response = restClient.post()
+			ResponseEntity<byte[]> response = requireNonNull(restClient).post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
 					.body(parts)
 					.accept(MediaType.APPLICATION_PDF)
@@ -246,7 +250,7 @@ class AemProxyAfSubmissionTest {
 		@LocalServerPort
 		private int port;
 
-		private RestClient restClient;
+		private @Nullable RestClient restClient;
 
 		@BeforeEach
 		public void setUp() throws Exception {
@@ -258,7 +262,7 @@ class AemProxyAfSubmissionTest {
 		void testResponse() {
 			final FormDataMultiPart getPdfForm = mockFormData("foo1", "bar");
 
-			ResponseEntity<byte[]> response = restClient.post()
+			ResponseEntity<byte[]> response = requireNonNull(restClient).post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
 					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.body(getPdfForm.parts())
@@ -274,7 +278,7 @@ class AemProxyAfSubmissionTest {
 		void testRedirect() {
 			final FormDataMultiPart getPdfForm = mockFormData("foo2", "bar");
 
-			ResponseEntity<Void> response = restClient.post()
+			ResponseEntity<Void> response = requireNonNull(restClient).post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
 					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.body(getPdfForm.parts())
@@ -290,7 +294,7 @@ class AemProxyAfSubmissionTest {
 		void testSeeOther() {
 			final FormDataMultiPart getPdfForm = mockFormData("foo3", "bar");
 
-			ResponseEntity<Void> response = restClient.post()
+			ResponseEntity<Void> response = requireNonNull(restClient).post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
 					.body(getPdfForm.parts())
 					.accept(MediaType.TEXT_PLAIN)
@@ -305,7 +309,7 @@ class AemProxyAfSubmissionTest {
 		void testProxy() {
 			final FormDataMultiPart getPdfForm = mockFormData("foo2", "bar");
 
-			ResponseEntity<Void> response = restClient.post()
+			ResponseEntity<Void> response = requireNonNull(restClient).post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH+"anythingElse")
 					.contentType(MediaType.MULTIPART_FORM_DATA)
 					.body(getPdfForm.parts())
@@ -337,7 +341,7 @@ class AemProxyAfSubmissionTest {
 						()->assertEquals("bar", submission.formData()),
 						()->assertThat(submission.redirectUrl(), anyOf(equalTo("foo1"), equalTo("foo2"), equalTo("foo3"))),
 						()->assertEquals(MediaType.TEXT_PLAIN_VALUE, submission.headers().getFirst("accept")),
-						()->assertTrue(MediaType.MULTIPART_FORM_DATA.isCompatibleWith(MediaType.valueOf(submission.headers().getFirst("content-type"))))
+						()->assertTrue(MediaType.MULTIPART_FORM_DATA.isCompatibleWith(MediaType.valueOf(requireNonNull(submission.headers().getFirst("content-type")))))
 						);
 				try {
 					String redirectUrl = submission.redirectUrl();
@@ -365,7 +369,7 @@ class AemProxyAfSubmissionTest {
 			@Override
 			public SubmitResponse processSubmission(Submission submission) {
 				fail("MockSubmissionProcessor2.processSubmission should never be called");
-				return null;
+				throw new UnsupportedOperationException("Should never be called");
 			}
 		}
 
@@ -398,7 +402,7 @@ class AemProxyAfSubmissionTest {
 		@LocalServerPort
 		private int port;
 
-		private RestClient restClient;
+		private @Nullable RestClient restClient;
 
 		@BeforeEach
 		public void setUp() throws Exception {
@@ -410,7 +414,7 @@ class AemProxyAfSubmissionTest {
 			final FormDataMultiPart getPdfForm = mockFormData("foo", "bar");
 			
 			MultiValueMap<String, HttpEntity<?>> parts = getPdfForm.parts();
-			ResponseEntity<byte[]> response = restClient.post()
+			ResponseEntity<byte[]> response = requireNonNull(restClient).post()
 					.uri(SUBMIT_ADAPTIVE_FORM_SERVICE_PATH)
 					.body(parts)
 					.accept(MediaType.APPLICATION_PDF)
@@ -475,13 +479,14 @@ class AemProxyAfSubmissionTest {
 			var underTest = AfSubmissionHandler.canHandleFormNameEquals("formName", t->null);
 			assertEquals(expectedResult, underTest.canHandle(formNameIn));
 		}
-		
-		@DisplayName("Passing in null should produce a null pointer exception")
-		@Test
-		void testcanHandleFormNameEquals_Null() {
-			NullPointerException ex = assertThrows(NullPointerException.class, ()->AfSubmissionHandler.canHandleFormNameEquals(null, t->null));
-			assertThat(ex, exceptionMsgContainsAll("Form Name for submission handler cannot be null"));
-		}
+
+// Not required when using JSpecify annotations, since passing null will produce an error at compile time.
+//		@DisplayName("Passing in null should produce a null pointer exception")
+//		@Test
+//		void testcanHandleFormNameEquals_Null() {
+//			NullPointerException ex = assertThrows(NullPointerException.class, ()->AfSubmissionHandler.canHandleFormNameEquals(null, t->null));
+//			assertThat(ex, exceptionMsgContainsAll("Form Name for submission handler cannot be null"));
+//		}
 		
 		@ParameterizedTest
 		@CsvSource({
@@ -543,16 +548,16 @@ class AemProxyAfSubmissionTest {
 		return new TypeSafeDiagnosingMatcher<HttpStatusCode>() {
 
 			@Override
-			public void describeTo(Description description) {
-				description.appendText("HttpStatus with value " + statusCode.value());				
+			public void describeTo(@Nullable Description description) {
+				requireNonNull(description).appendText("HttpStatus with value " + statusCode.value());				
 			}
 
 			@Override
-			protected boolean matchesSafely(HttpStatusCode item, Description mismatchDescription) {
-				if (statusCode.isSameCodeAs(item)) {
+			protected boolean matchesSafely(@Nullable HttpStatusCode item, @Nullable Description mismatchDescription) {
+				if (statusCode.isSameCodeAs(requireNonNull(item))) {
 					return true;
 				} else {
-					mismatchDescription.appendText("was HttpStatus with value " + item.value());
+					requireNonNull(mismatchDescription).appendText("was HttpStatus with value " + item.value());
 					return false;
 				}
 			}
@@ -563,16 +568,16 @@ class AemProxyAfSubmissionTest {
 		return new TypeSafeDiagnosingMatcher<ResponseEntity<?>>() {
 
 			@Override
-			public void describeTo(Description description) {
-				description.appendText("ResponseEntity with no body");				
+			public void describeTo(@Nullable Description description) {
+				requireNonNull(description).appendText("ResponseEntity with no body");				
 			}
 
 			@Override
-			protected boolean matchesSafely(ResponseEntity<?> item, Description mismatchDescription) {
-				if (item.hasBody() == false) {
+			protected boolean matchesSafely(@Nullable ResponseEntity<?> item, @Nullable Description mismatchDescription) {
+				if (requireNonNull(item).hasBody() == false) {
 					return true;
 				} else {
-					mismatchDescription.appendText("was ResponseEntity with body of size " + ((byte[])item.getBody()).length);
+					requireNonNull(mismatchDescription).appendText("was ResponseEntity with body of size " + ((byte[])requireNonNull(requireNonNull(item).getBody())).length);
 					return false;
 				}
 			}
@@ -585,8 +590,8 @@ class AemProxyAfSubmissionTest {
 		return new FeatureMatcher<ResponseEntity<?>, HttpStatusCode>(isStatus(status), "ResponseEntity with status", "status") {
 
 			@Override
-			protected HttpStatusCode featureValueOf(ResponseEntity<?> actual) {
-				return actual.getStatusCode();
+			protected HttpStatusCode featureValueOf(@Nullable ResponseEntity<?> actual) {
+				return requireNonNull(actual).getStatusCode();
 			}
 		};
 	}
@@ -595,9 +600,17 @@ class AemProxyAfSubmissionTest {
 		return new FeatureMatcher<ResponseEntity<?>, byte[]>(matcher, "ResponseEntity with entity matching", "entity") {
 
 			@Override
-			protected byte[] featureValueOf(ResponseEntity<?> actual) {
-				return (byte[]) actual.getBody();
+			protected byte[] featureValueOf(@Nullable ResponseEntity<?> actual) {
+				return (byte[]) requireNonNull(requireNonNull(actual).getBody());
 			}
 		};
+	}
+	
+	private static RestClient restClientIssue() {
+		@NonNull String foo = System.getProperty("");
+		String baseUrl = "http://localhost/";
+		return RestClient.builder()
+				  		 .baseUrl(baseUrl)
+				  		 .build();
 	}
 }

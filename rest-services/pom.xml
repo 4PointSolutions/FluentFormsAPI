@@ -85,6 +85,9 @@
 		<sling.servlet-helpers.version>1.4.6</sling.servlet-helpers.version>
 		<fluentforms.version>0.0.5-SNAPSHOT</fluentforms.version>
 		<rest-services.version>0.0.5-SNAPSHOT</rest-services.version>
+        
+        <!-- Eclipse dependencies (for null processing) -->
+        <eclipse.annotations.version>2.4.100</eclipse.annotations.version>
 
 		<!-- Testing dependencies -->
         <mockito.version>5.18.0</mockito.version>
@@ -546,6 +549,12 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>org.eclipse.jdt.annotation</artifactId>
+			<version>${eclipse.annotations.version}</version>
+			<optional>true</optional>
+		</dependency>
 		<!-- Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

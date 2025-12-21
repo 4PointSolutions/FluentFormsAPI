@@ -1,5 +1,7 @@
 package com._4point.aem.fluentforms.spring;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.naming.ConfigurationException;
 
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -119,10 +122,10 @@ public class AemProxyEndpoint {
 				  					  .build()
 				  					  .toUri();
 		logger.atDebug().log(()->"Proxying GET request for target '" + uri.toString() + "'.");
-		ResponseEntity<byte[]> response = httpClient.get()
+		ResponseEntity<byte []> response = httpClient.get()
 													.uri(uri)
 													.retrieve()
-													.toEntity(byte[].class);
+													.toEntity(byte [].class);
 
 		if (logger.isDebugEnabled()) {
 			response.getHeaders().forEach((h, l)->logger.atDebug().log("For " + uri + ", Header:" + h + "=" + l.stream().map(o->(String)o).collect(Collectors.joining("','", "'", "'"))));
@@ -136,7 +139,7 @@ public class AemProxyEndpoint {
 		};
 		return ResponseEntity.status(response.getStatusCode())
 				.headers(removeChunkedTransferEncoding(response.getHeaders()))
-				.body(filterByteArray(response.getBody(), filter));
+				.body(filterByteArray(requireNonNull(response.getBody()), filter));
     }
 
     // Remove transfer-encoding header to prevent chunked encoding issues.
@@ -151,7 +154,7 @@ public class AemProxyEndpoint {
 	}
 
     // passes a byte array through an InputStream filter and returns the result as a byte array.
-    private static byte[] filterByteArray(byte[] input, Function<InputStream, InputStream> isFilter) {
+    private static byte[] filterByteArray(byte @NonNull[] input, Function<InputStream, InputStream> isFilter) {
     	try (var bais = new ByteArrayInputStream(input)) {
     		return isFilter.apply(bais).readAllBytes();
     	} catch (IOException e) {

@@ -36,6 +36,9 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.release>17</maven.compiler.release>
+        
+        <!-- Null processing -->
+        <jspecify.version>1.0.0</jspecify.version>
 	</properties>
 
 	<build>
@@ -71,6 +74,13 @@
 			<artifactId>jersey-hk2</artifactId>
 		</dependency>
 -->
+        <!-- Null processing (required by JSoup when null processing is enabled) -->
+		<dependency>
+			<groupId>org.jspecify</groupId>
+			<artifactId>jspecify</artifactId>
+			<version>${jspecify.version}</version>
+			<optional>true</optional>
+		</dependency>
         <dependency>
             <groupId>com._4point.aem</groupId>
             <artifactId>fluentforms.core</artifactId>

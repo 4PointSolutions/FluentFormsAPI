@@ -1,5 +1,6 @@
 package com._4point.aem.fluentforms.sampleapp;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,26 +14,26 @@ public class GitConfig {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Value("${git.build.time}")
-    private String commitBuildTime;
+    @Nullable private String commitBuildTime;
     @Value("${git.branch}")
-    private String branch;
+    @Nullable private String branch;
     @Value("${git.commit.time}")
-    private String commitTime;
+    @Nullable private String commitTime;
     @Value("${git.commit.id.abbrev}")
-    private String commitIdAbbrev;
+    @Nullable private String commitIdAbbrev;
     @Value("${git.dirty}")
-    private String dirty;
+    @Nullable private String dirty;
 
-    public String getCommitBuildTime() {
+    public @Nullable String getCommitBuildTime() {
 		return commitBuildTime;
 	}
-	public String getBranch() {
+	public @Nullable String getBranch() {
 		return branch;
 	}
-	public String getCommitTime() {
+	public @Nullable String getCommitTime() {
 		return commitTime;
 	}
-	public String getCommitIdAbbrev() {
+	public @Nullable String getCommitIdAbbrev() {
 		return commitIdAbbrev;
 	}
 	

@@ -209,7 +209,7 @@ class AutoConfigurationTest {
 
 		@Override
 		public SubmitResponse processSubmission(Submission submission) {
-			return null;
+			throw new UnsupportedOperationException("Not implemented");
 		}
 	}
 	

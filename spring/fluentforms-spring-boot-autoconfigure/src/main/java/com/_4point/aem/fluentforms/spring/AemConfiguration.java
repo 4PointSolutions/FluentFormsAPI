@@ -1,5 +1,7 @@
 package com._4point.aem.fluentforms.spring;
 
+import java.util.Optional;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
@@ -16,7 +18,7 @@ import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties
  *
  */
 @EnableEncryptableProperties
-@ConfigurationProperties("fluentforms.aem")
+@ConfigurationProperties(AemConfiguration.CONFIGURATION_PREFIX)
 public record AemConfiguration(
 	String servername,						// "aem.servername"
 	Integer port,							// "aem.port"
@@ -26,7 +28,33 @@ public record AemConfiguration(
 	@DefaultValue("aem") String sslBundle	// "aem.sslBundle"	- Spring SSL Bundle for trust store
 	) {
 
+	public static final String CONFIGURATION_PREFIX = "fluentforms.aem";
+
 	public String url() {
-		return "http" + (useSsl ? "s" : "") + "://" + servername + (port != null && port != 80 ? ":" + port : "") + "/";
+		return "http" + (useSsl ? "s" : "") + "://" + (servername != null ? servername : "localhost") + (port != null && port != 80 ? ":" + port : "") + "/";
+	}
+	
+	public record Credentials(String user, String password) {}
+	
+	public Optional<Credentials> getCredentials() {
+		boolean hasUser = hasUser();
+		boolean hasPassword = hasPassword();
+		if (hasUser && hasPassword) {
+			return Optional.of(new Credentials(user, password));
+		} else if (!hasUser && !hasPassword) {
+			return Optional.empty();
+		} else if (hasUser) {
+			throw new IllegalStateException("AEM user is specified but password is missing. (" + CONFIGURATION_PREFIX + ".password)");
+		} else { /* must be hasPassword() */
+			throw new IllegalStateException("AEM password is specified but user is missing. (" + CONFIGURATION_PREFIX + ".user)");
+		}
+	}
+	
+	private boolean hasUser() {
+		return user != null && !user.isBlank();
+	}
+	
+	private boolean hasPassword() {
+		return password != null && !password.isBlank();
 	}
 }

@@ -73,6 +73,16 @@ class AemConfigurationTest {
 		assertEquals("aem", underTest.sslBundle());
 	}
 
+	@Test
+	void testGetCredentials() {
+		var creds = underTest.getCredentials().orElseThrow();
+		assertAll(
+				()->assertEquals(EXPECTED_USER, creds.user()),
+				()->assertEquals(EXPECTED_PASSWORD, creds.password())
+				);
+	}
+
+
 	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.AemConfigurationTest.TestApplication.class}, 
 			properties = {
 					"fluentforms.aem.servername=" + EXPECTED_SERVERNAME, 
@@ -110,6 +120,63 @@ class AemConfigurationTest {
 		}
 	}
 	
+	@SpringBootTest(classes = {com._4point.aem.fluentforms.spring.AemConfigurationTest.TestApplication.class}, 
+			properties = {
+					// All properties are left to their default values
+	})
+	static class AemConfigurationTests_EmptyConfigs {
+		protected static final int EXPECTED_PORT = 80;
+
+		@Autowired
+		AemConfiguration underTest;
+
+		
+		@BeforeEach
+		void setUp() throws Exception {
+			assertNotNull(underTest);
+		}
+
+		@Test
+		void testGetServername() {
+			assertNull(underTest.servername());
+		}
+
+		@Test
+		void testGetPort() {
+			assertNull(underTest.port());
+		}
+
+		@Test
+		void testGetUser() {
+			assertNull(underTest.user());
+		}
+
+		@Test
+		void testGetPassword() {
+			assertNull(underTest.password());
+		}
+
+		@Test
+		void testGetUseSsl() {
+			assertEquals(false, underTest.useSsl());
+		}
+
+		@Test
+		void testGetSslBundle() {
+			assertEquals("aem", underTest.sslBundle());
+		}
+
+		@Test
+		void testGetUrl() {
+			assertEquals("http://" + EXPECTED_SERVERNAME + "/", underTest.url());
+		}
+
+		@Test
+		void testGetCredentials() {
+			assertTrue(underTest.getCredentials().isEmpty());
+		}
+	}
+
 	@SpringBootApplication
 	@EnableConfigurationProperties(AemConfiguration.class)
 	public static class TestApplication {
