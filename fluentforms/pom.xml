@@ -84,14 +84,14 @@
 		<pitest.junit5.maven.plugin.version>1.2.2</pitest.junit5.maven.plugin.version>
 
 		<!-- Testing dependencies -->
-        <mockito.version>5.18.0</mockito.version>
-        <junit.version>5.13.0</junit.version>
+        <mockito.version>5.21.0</mockito.version>
+        <junit.version>6.0.1</junit.version>
         <wcm.mocks.version>5.6.10</wcm.mocks.version>
         <slf4j-test.version>1.2.0</slf4j-test.version>
         <slf4j.version>2.0.17</slf4j.version>
         <hamcrest.version>3.0</hamcrest.version>
-        <equalsverifier.version>3.17.5</equalsverifier.version>
-        <xmlunit.version>2.10.2</xmlunit.version>
+        <equalsverifier.version>4.2.5</equalsverifier.version>
+        <xmlunit.version>2.10.4</xmlunit.version>
         
         <!-- Project dependecies -->
         <aemfd.client.sdk.version>6.1.152</aemfd.client.sdk.version> <!-- fluentforms requires AEM 6.5 SP12 or later -->
