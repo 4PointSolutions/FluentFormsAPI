@@ -1,12 +1,14 @@
 package com._4point.aem.fluentforms.spring;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -66,7 +68,7 @@ class AemProxyJerseyEndpointTest {
 	@LocalServerPort
 	private int port;
 
-	private RestClient restClient;
+	private @Nullable RestClient restClient;
 
 	@BeforeEach
 	void setup(WireMockRuntimeInfo wmRuntimeInfo) {
@@ -126,7 +128,7 @@ class AemProxyJerseyEndpointTest {
 		// Make rest call to the proxy endpoint
 		String result;
 		try {
-			result = restClient.get()
+			result = requireNonNull(restClient).get()
 									  .uri(endpoint)
 									  .retrieve()
 									  .body(String.class);
@@ -154,7 +156,7 @@ class AemProxyJerseyEndpointTest {
 		
 		// When
 		// Make rest call to the proxy endpoint
-		String result = restClient.post()
+		String result = requireNonNull(restClient).post()
 								  .uri(endpoint)
 								  .retrieve()
 								  .body(String.class);

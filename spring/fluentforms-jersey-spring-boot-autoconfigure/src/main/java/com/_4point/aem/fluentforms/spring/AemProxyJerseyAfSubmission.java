@@ -18,6 +18,7 @@ import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -329,8 +330,8 @@ public class AemProxyJerseyAfSubmission {
 		// Create a AfSubmissionHandler.Submission object from the JAX-RS Request classes.
 		private AfSubmissionHandler.Submission formulateSubmission(FormDataMultiPart inFormData, HttpHeaders headers, String formName) {
 			class ExtractedData {
-				String formData;
-				String redirectUrl;
+				@Nullable String formData;
+				@Nullable String redirectUrl;
 			};
 			final ExtractedData extractedData = new ExtractedData();
 			// Extract data some of the parts.
