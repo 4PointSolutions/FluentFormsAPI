@@ -15,11 +15,11 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        java: [ 21 ]
+        java: [ 25 ]
         experimental: [false]
-        include:
-          - java: 25
-            experimental: true
+#        include:
+#          - java: 25
+#            experimental: true
 
     steps:
     - uses: actions/checkout@v6
