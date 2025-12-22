@@ -4,16 +4,12 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.restclient.autoconfigure.RestClientSsl;
 import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.boot.test.context.assertj.AssertableWebApplicationContext;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.test.context.runner.ContextConsumer;
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestClient;
 
 import com._4point.aem.fluentforms.api.output.OutputService;
 import com._4point.aem.fluentforms.spring.AemProxyAfSubmission.AfSubmissionHandler;
@@ -30,25 +26,11 @@ import com._4point.aem.fluentforms.spring.AemProxyJerseyAfSubmission.JerseyAfSub
  */
 class JerseyAutoConfigurationTest {
 	
-	/**
-	 * This class provides mock versions of beans that would normally be provided by Spring Boot in a real application.  We
-	 * only need to mock out the RestClient.Builder and RestClientSsl beans because those are the only Spring Boot provided
-	 * beans that our AutoConfigurations depend on.
-	 * 
-	 * In theory, we should not need to provide these however spring-boot-starter-jersey brings in spring-boot-restclient
-	 * on to the test classpath which, in turn, triggers the inclusion of the fluent-forms springRestClientFactory which
-	 * requires the mocks. 
-	 */
-	private static class SpringBootMocks {
-		@Bean RestClient.Builder mockRestClientBuilder() { return Mockito.mock(RestClient.Builder.class, Mockito.RETURNS_DEEP_STUBS); }
-		@Bean private RestClientSsl mockRestClientSsl() { return Mockito.mock(RestClientSsl.class); }
-	}
+	private static final AutoConfigurations AUTO_CONFIG = AutoConfigurations.of(FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class);
 	
-	private static final AutoConfigurations AUTO_CONFIG = AutoConfigurations.of(FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class, SpringBootMocks.class);
+	private static final AutoConfigurations LOCAL_SUBMIT_CONFIG = AutoConfigurations.of(FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class, DummyLocalSubmitHandler.class);
 	
-	private static final AutoConfigurations LOCAL_SUBMIT_CONFIG = AutoConfigurations.of(FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class, DummyLocalSubmitHandler.class, SpringBootMocks.class);
-	
-	private static final AutoConfigurations ALTERNATE_PROXY_CONFIG = AutoConfigurations.of(DummyProxyImplementation.class, FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class, SpringBootMocks.class);
+	private static final AutoConfigurations ALTERNATE_PROXY_CONFIG = AutoConfigurations.of(DummyProxyImplementation.class, FluentFormsJerseyAutoConfiguration.class, AemProxyJerseyAutoConfiguration.class, FluentFormsAutoConfiguration.class);
 
 	// Tests to make sure that only the FluentFormsLibraries are loaded in a non-web application.
 	private static final ContextConsumer<? super AssertableApplicationContext> FF_LIBRARIES_ONLY = (context) -> {
