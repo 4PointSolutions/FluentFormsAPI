@@ -52,56 +52,55 @@
 
         <!-- Core Maven plugin versions -->
         <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
-        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
         <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
-        <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
+        <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
         <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
-        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+        <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
         <!-- Packaging Maven plugin versions -->
-        <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
-        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+        <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
         <!-- Tools Maven plugin versions -->
-        <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
-        <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
-        <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
+        <maven-dependency-plugin.version>3.9.0</maven-dependency-plugin.version>
+        <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
+        <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
 
         <!-- Other Maven plugin versions -->
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
-        <maven-sling-plugin.version>3.0.2</maven-sling-plugin.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <maven-sling-plugin.version>3.0.4</maven-sling-plugin.version>
         <htl-maven-plugin.version>2.0.4-1.4.0</htl-maven-plugin.version>
         <filevault-package-maven-plugin.version>1.4.0</filevault-package-maven-plugin.version>
-        <content-package-maven-plugin.version>1.0.4</content-package-maven-plugin.version>
+        <content-package-maven-plugin.version>1.0.6</content-package-maven-plugin.version>
         <maven-bundle-plugin.version>6.0.0</maven-bundle-plugin.version>
-        <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
+        <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
 
         <!-- Mutation Testing plugin versions -->
-		<pitest.maven.plugin.version>1.19.4</pitest.maven.plugin.version>
-		<pitest.junit5.maven.plugin.version>1.2.2</pitest.junit5.maven.plugin.version>
+		<pitest.maven.plugin.version>1.22.0</pitest.maven.plugin.version>
+		<pitest.junit5.maven.plugin.version>1.2.3</pitest.junit5.maven.plugin.version>
 
 		<!-- Project dependencies -->
-		<jersey.version>3.1.10</jersey.version>
-		<jaxb.version>4.0.2</jaxb.version>
-		<sling.servlet-helpers.version>1.4.6</sling.servlet-helpers.version>
+		<jersey.version>4.0.0</jersey.version>
+		<jaxb.version>4.0.4</jaxb.version>
 		<fluentforms.version>0.0.5-SNAPSHOT</fluentforms.version>
 		<rest-services.version>0.0.5-SNAPSHOT</rest-services.version>
 
 		<!-- Testing dependencies -->
         <mockito.version>5.21.0</mockito.version>
         <junit.version>6.0.1</junit.version>
-        <wcm.mocks.version>5.6.10</wcm.mocks.version> <!-- Versions later than this produce a org.reflections.ReflectionsException: Scanner TypeAnnotationsScanner was not configured error -->
+        <wcm.mocks.version>5.6.14</wcm.mocks.version> <!-- Versions later than this produce a org.reflections.ReflectionsException: Scanner TypeAnnotationsScanner was not configured error -->
         <slf4j-test.version>1.2.0</slf4j-test.version>
         <slf4j.version>2.0.17</slf4j.version>
         <hamcrest.version>3.0</hamcrest.version>
-        <pdfbox.version>3.0.5</pdfbox.version>
-        <jsoup.version>1.20.1</jsoup.version>
+        <pdfbox.version>3.0.6</pdfbox.version>
+        <jsoup.version>1.21.2</jsoup.version>
         <jcabi-xml-version>0.35.0</jcabi-xml-version>
         <xml-unit-version>2.10.4</xml-unit-version>
         <xerces-version>2.12.2</xerces-version>
-        <wiremock.version>3.4.2</wiremock.version>
-        <_4point-hamcrest-matchers.version>0.0.1-SNAPSHOT</_4point-hamcrest-matchers.version>
+        <wiremock.version>3.13.2</wiremock.version>
+        <_4point-hamcrest-matchers.version>0.0.4-SNAPSHOT</_4point-hamcrest-matchers.version>
         <junit-addons.version>1.4</junit-addons.version>
-        <testcontainers.version>1.21.1</testcontainers.version>
+        <testcontainers.version>2.0.3</testcontainers.version>
         <awaitility.version>4.3.0</awaitility.version>
         <aem-package-manager-api.version>0.0.1-SNAPSHOT</aem-package-manager-api.version>
 	</properties>
@@ -477,11 +476,6 @@
 				<artifactId>rest-services.jersey-client</artifactId>
 				<version>${rest-services.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.apache.sling</groupId>
-				<artifactId>org.apache.sling.servlet-helpers</artifactId>
-				<version>${sling.servlet-helpers.version}</version>
-			</dependency>
 			<!-- Jersey Dependencies -->
 			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
@@ -526,7 +520,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
-				<artifactId>junit-jupiter</artifactId>
+				<artifactId>testcontainers-junit-jupiter</artifactId>
 				<version>${testcontainers.version}</version>
 				<scope>test</scope>
 			</dependency>
