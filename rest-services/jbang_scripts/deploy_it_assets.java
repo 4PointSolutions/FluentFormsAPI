@@ -28,7 +28,10 @@ class deploy_it_assets implements Callable<Integer> {
 	private static final String AEM_SERVER_USER = "admin";
 	private static final String AEM_SERVER_PASSWORD = "admin";
 	private static final Path REST_SERVICES_PROJECT_DIR = Path.of("..");
-	private static final List<Path> SAMPLES_DIRS_LIST = List.of(Path.of("/opt", "adobe", "ff_it_files"), REST_SERVICES_PROJECT_DIR.resolve(Path.of("test_containers", "ff_it_files")));
+	private static final List<Path> SAMPLES_DIRS_LIST = List.of(
+			Path.of("/opt", "adobe", "ff_it_files"), 
+			REST_SERVICES_PROJECT_DIR.resolve(Path.of("test_containers", "ff_it_files"))
+			);
 	private static final Path SAMPLES_DIR = findSamplesDir(SAMPLES_DIRS_LIST);
 	private static final Path AF_TEST_FORMS_PATH = SAMPLES_DIR.resolve("sample00002test.zip");
 	private static final Path OF_TEST_FORMS_PATH = SAMPLES_DIR.resolve("SampleForm.xdp");
@@ -40,8 +43,8 @@ class deploy_it_assets implements Callable<Integer> {
 	// |   The testing instance must have the SampleForm.xdp uploaded into a directory named sample-forms that resides directly under the
 	// |   FormsAndDocuments within the CRX repository.  Without this, all the crx-related tests will fail.
 	// |
-	// |   The testing instance must have the sample0002test.zip and sampleForm_JSON.zip packages uploaded amd installed.
-	// |   These packages contain adaptive forms that reside directly under theFormsAndDocuments called sample0002test and sample-json-adaptive-form-1.  
+	// |   The testing instance must have the sample0002test.zip and sampleForm_JSON.zip packages uploaded an installed.
+	// |   These packages contain adaptive forms that reside directly under FormsAndDocuments called sample0002test and sample-json-adaptive-form-1.  
 	// |   Without these forms, all the adaptive forms tests will fail.
 	// |
 	// |	Protected mode must be turned off, per this: https://experienceleague.adobe.com/docs/experience-manager-65/forms/html5-forms/preview-xdp-forms-html.html?lang=en#disable-protected-mode
@@ -58,9 +61,12 @@ class deploy_it_assets implements Callable<Integer> {
         int exitCode = new CommandLine(new deploy_it_assets()).execute(args);
         System.exit(exitCode);
     }
-
     @Override
-    public Integer call() throws Exception { // your business logic goes here...
+    public Integer call() throws Exception { 
+    	return callWithArgs();
+    }
+
+    public Integer callWithArgs() throws Exception { // your business logic goes here...
 
     	System.out.println("ProjectDir = '" + REST_SERVICES_PROJECT_DIR.toRealPath().toAbsolutePath() + "'");
     	var pmClient = PackageManagerClient.builder()
