@@ -50,6 +50,17 @@ In order to create a containerized AEM integration test image...
 
 Once the container is built, configure the project as [outlined above](#containerized-aem-image-via-testcontainers) and run the tests.
 
+### Choosing Local Instance vs Containerized Instance vs Remote Instance
+
+Using a local AEM instance is convenient when developing the server-side libraries (`fluentforms.core` and `rest-services.server`) 
+because deployment of new libraries is easy (just copy the new `.jar` files into the local AEM instance's install directory.
+
+Using a containerized AEM instance is convenient for testing new versions of AEM as the installation and configuration of AEM 
+is automated by the docker instance creation.
+
+Using Remote AEM instances is useful when you have an existing AEM instance running on a remote server that you wish to test
+in order to make sure AEM is installed, configured, and functioning correctly.
+
 ## Testing New Releases of AEM
 
 Each time a new version of AEM is released, the integration tests in this project should be run against it.
