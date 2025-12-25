@@ -492,12 +492,6 @@
 				<artifactId>jersey-hk2</artifactId>
 				<version>${jersey.version}</version>
 			</dependency>
-			<!-- XML Bind is required to mock jax.rs.core.Response -->
-			<dependency>
-				<groupId>jakarta.xml.bind</groupId>
-				<artifactId>jakarta.xml.bind-api</artifactId>
-				<version>${jaxb.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>junit-addons</groupId>
 				<artifactId>junit-addons</artifactId>
