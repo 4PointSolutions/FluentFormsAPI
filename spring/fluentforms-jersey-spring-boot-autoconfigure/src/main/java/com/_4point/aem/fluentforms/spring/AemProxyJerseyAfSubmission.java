@@ -1,5 +1,7 @@
 package com._4point.aem.fluentforms.spring;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -338,9 +340,9 @@ public class AemProxyJerseyAfSubmission {
 	        				"jcr:data",		(dataBytes)->{ extractedData.formData = new String(dataBytes, StandardCharsets.UTF_8); return null; }
 	        			);
 			transformFormData(inFormData, fieldFunctions, logger);
-			return new AfSubmissionHandler.Submission(extractedData.formData, 
+			return new AfSubmissionHandler.Submission(requireNonNull(extractedData.formData, "Form data (jcr:data) part not found in Adaptive Form submission."), 
 													  formName, 
-													  extractedData.redirectUrl, 
+													  requireNonNull(extractedData.redirectUrl, "Redirect URL (:redirect) part not found in Adaptive Form submission."), 
 													  transferHeaders(headers)
 													  );
 		}
