@@ -582,7 +582,7 @@ public class AemProxyAfSubmission {
 	
 		private ResponseEntity<byte[]> processSubmission(AfSubmissionHandler handler, MultipartHttpServletRequest inFormData, String formName) {
 			logger.atInfo().addArgument(handler.getClass().getName()).log("Calling AfSubmissionHandler={}");
-			return formulateResponse(handler.processSubmission(formulateSubmission(inFormData, formName)));
+			return formulateResponse(requireNonNull(handler.processSubmission(formulateSubmission(inFormData, formName)), "SubmissionHandler code cannot return null"));
 		}
 		
 		private String determineFormName(String guideContainerPath) {
