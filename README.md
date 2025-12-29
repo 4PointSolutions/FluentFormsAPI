@@ -9,7 +9,7 @@
 
 The FluentForms API project is a set of Java libraries that allow remote access to 
 [Adobe Experience Manager Forms](https://experienceleague.adobe.com/docs/experience-manager-65/content/forms/getting-started/introduction-aem-forms.html?lang=en) (a.k.a. AEM Forms) 
-functionality. 
+functionality of an on-premise AEM instance. 
 
 In addition to providing remote access to AEM Forms functionality, it also provides a modern, typesafe, and [fluent](https://en.wikipedia.org/wiki/Fluent_interface) facade over the existing [AEM Forms APIs](https://developer.adobe.com/experience-manager/reference-materials/6-5/forms/javadocs/index.html).
 
@@ -23,6 +23,8 @@ client code to use than the layers below it.  The top layer is the Spring Boot S
 This is the easiest way to use the FluentForms integration with AEM.  The Spring Boot starter 
 publishes Spring beans into the
 Spring context that can be utilized easily by any Spring Boot application.
+
+A typical schenario is that the Fluent Forms Spring Boot starter is used by a Spring Boot application that contains custom application logic and that makes calls to an AEM Forms instance.  The Spring Boot application runs on either the same machine as AEM or on a machine that can make REST calls to a remote AEM server. 
 
 ### Getting started with the Spring Boot starter
 
@@ -66,6 +68,10 @@ writing OSGi bundles in Java that will run directly on the AEM server.
 ### Getting started with the Fluent Forms Core Libraries
 * Retrieve OSGi bundles and install into your AEM server
 * Add AEM code to your project
+
+# System Requirements
+
+The latest version of the Spring Boot starter and AEM libraries require Spring Boot 4.x, AEM 6.5 LTS (a.k.a. 6.6) and Java 17/21.  If compatibility with Spring Boot 3.x and  is required, use [version 0.0.4](https://github.com/4PointSolutions/FluentFormsAPI/releases/tag/v0.0.4).  If compatiblility with Spring Boot 3.x, AEM 6.5, and Java 8/11 is required, use [version 0.0.3](https://github.com/4PointSolutions/FluentFormsAPI/releases/tag/v0.0.3).
 
 
 # Retrieving the Fluent Forms OSGi Bundles
