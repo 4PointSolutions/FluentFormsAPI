@@ -9,3 +9,7 @@ In order to create an integration test container image, using the `ff_it_test` d
 After performing these steps then the integration tests should run successfully after `TestUtils.java` is modified to set 
 `AEM_TARGET_TYPE` to be `AemTargetType.TESTCONTAINERS`.  If the name of the integration test container image is
 different than the one in the steps above, then `AEM_IMAGE_NAME` may also need to be modified.
+
+The `ff_it_test_65.dockerfile` is provided for creating an integration test environment for AEM 6.5 (non-LTS).  This
+assumes that an AEM 6.5 non-LTS base container is available with FluentForms v0.0.3 installed.  It is useful to test that 
+v0.0.3 is still compatible with the latest AEM 6.5 service packs and with the client libraries running on later versions of Java.
