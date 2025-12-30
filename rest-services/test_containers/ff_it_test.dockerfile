@@ -1,4 +1,4 @@
-FROM aem:aem65ltssp1 AS ff_it_test
+FROM aem:aem65lts_sp1 AS ff_it_test
 
 ENV container="aem-lts-quickstart,aem-author,ubuntu,java21"
 
@@ -10,10 +10,10 @@ RUN mkdir -p /opt/adobe/ff_it_files
 COPY ff_it_files/* /opt/adobe/ff_it_files
 
 RUN /bin/bash -c "/opt/adobe/AEM*/runStart ; \
-jbang --java=21 /opt/adobe/aem_cntrl-0.0.1-SNAPSHOT.jar wflog --startup ; \
-jbang --java=21 /opt/adobe/ff_it_files/deploy_it_assets.jar ; \ 
+jbang --java=25 /opt/adobe/aem_cntrl-0.0.2-SNAPSHOT.jar wflog --startup ; \
+jbang --java=25 /opt/adobe/ff_it_files/deploy_it_assets.jar ; \ 
 /opt/adobe/AEM*/runStop ; \
-jbang --java=21 /opt/adobe/aem_cntrl-0.0.1-SNAPSHOT.jar wflog --shutdown"
+jbang --java=25 /opt/adobe/aem_cntrl-0.0.2-SNAPSHOT.jar wflog --shutdown"
 
 #NOTE: make sure to copy admin.password.file and license.properties files to the /opt/aem-config folder.
 # VOLUME ["/opt/aem-config/"]
