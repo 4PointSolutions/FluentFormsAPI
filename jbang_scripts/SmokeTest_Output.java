@@ -1,9 +1,12 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //REPOS mavencentral,github=https://maven.pkg.github.com/4PointSolutions/*
-//DEPS com._4point.aem:fluentforms.core:0.0.3-SNAPSHOT  com._4point.aem.docservices:rest-services.client:0.0.3-SNAPSHOT
-//JAVA 21+
+//DEPS com._4point.aem:fluentforms.core:0.0.5-SNAPSHOT  com._4point.aem.docservices:rest-services.client:0.0.5-SNAPSHOT
+//DEPS com._4point.aem.docservices.rest-services:rest-services.jersey-client:0.0.5-SNAPSHOT
+//JAVA 25+
 
 /*
+ * This script demonstrates how to use FluentForms to invoke AEM Forms OutputService to render a PDF form from an XDP
+ * 
  * 	This script uses the 4PointSolutions/FluentFormsAPI GitHub package repository.  GitHub requires a user to authenticate in order
  * 	to access a package repository.  In order for this script to work, you need to have your personal credentials configured
  * 	in your local settings.xml file (found in you $HOME/.m2 directory).
@@ -27,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.docservices.rest_services.client.output.RestServicesOutputServiceAdapter;
 import com._4point.aem.fluentforms.api.Document;
 import com._4point.aem.fluentforms.impl.UsageContext;
@@ -41,7 +45,7 @@ class SmokeTest {
 			Path outLocation = Files.createTempFile("AemOutput_SmokeTest", ".pdf");
 			
 			// If AEM is not localhost:4502 or does not use default credentials, change the values below. 
-			var adapter = RestServicesOutputServiceAdapter.builder()
+			var adapter = RestServicesOutputServiceAdapter.builder(JerseyRestClient.factory())
 					.machineName("localhost")
 					.port(4502)
 					.basicAuthentication("admin", "admin")

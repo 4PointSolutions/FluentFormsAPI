@@ -1,10 +1,17 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //REPOS mavencentral,github=https://maven.pkg.github.com/4PointSolutions/*
-//DEPS info.picocli:picocli:4.6.3
-//DEPS com._4point.aem:fluentforms.core:0.0.3-SNAPSHOT  com._4point.aem.docservices:rest-services.client:0.0.3-SNAPSHOT
-//JAVA 11+
+//DEPS info.picocli:picocli:4.7.7
+//DEPS com._4point.aem:fluentforms.core:0.0.5-SNAPSHOT  com._4point.aem.docservices:rest-services.client:0.0.5-SNAPSHOT
+//DEPS com._4point.aem.docservices.rest-services:rest-services.jersey-client:0.0.5-SNAPSHOT
+//JAVA 25+
 
 /*
+ * This script demonstrates how to use FluentForms to invoke AEM Forms FormsService to render an interactive PDF form from 
+ * an XDP that resides on the AEM server.  It can optionally use a local XML data file to populate the form with data.
+ * 
+ * For example, to invoke this script against an AEM instance configured for the project's integration tests:
+ * 	jbang invoke_forms.java -f /opt/adobe/ff_it_files/SampleForm.xdp -o result_forms.pdf
+ * 
  * 	This script uses the 4PointSolutions/FluentFormsAPI GitHub package repository.  GitHub requires a user to authenticate in order
  * 	to access a package repository.  In order for this script to work, you need to have your personal credentials configured
  * 	in your local settings.xml file (found in you $HOME/.m2 directory).
@@ -28,7 +35,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.concurrent.Callable;
 
 import com._4point.aem.docservices.rest_services.client.forms.RestServicesFormsServiceAdapter;
+import com._4point.aem.docservices.rest_services.client.jersey.JerseyRestClient;
 import com._4point.aem.fluentforms.api.Document;
+import com._4point.aem.fluentforms.api.PathOrUrl;
 import com._4point.aem.fluentforms.impl.SimpleDocumentFactoryImpl;
 import com._4point.aem.fluentforms.impl.UsageContext;
 import com._4point.aem.fluentforms.impl.forms.FormsServiceImpl;
@@ -43,7 +52,7 @@ import picocli.CommandLine.Option;
 class invoke_aem implements Callable<Integer> {
 
     @Option(names = {"-f", "--form"}, description = "A filepath to the XDP.", required = true)
-    private Path xdpLocation;
+    private String xdpLocation;
 
     @Option(names = {"-d", "--data"}, description = "A filepath to the XML data file. (Optional)")
     private Path xmlLocation;
@@ -59,9 +68,9 @@ class invoke_aem implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
     	
-		var adapter = RestServicesFormsServiceAdapter.builder()
+		var adapter = RestServicesFormsServiceAdapter.builder(JerseyRestClient.factory())
 				.machineName("localhost")
-				.port(4502)
+				.port(54740)
 				.basicAuthentication("admin", "admin")
 				.useSsl(false)
 				.build();
@@ -78,13 +87,10 @@ class invoke_aem implements Callable<Integer> {
 //				.setXci(xci)
 				.setTaggedPDF(true);
 
-		if (Files.exists(xdpLocation)) {
-			builder = builder.setContentRoot(xdpLocation.toAbsolutePath().getParent());
-		}
-		
+		PathOrUrl xdpPathOrUrl = PathOrUrl.from(xdpLocation);
 		Document pdfResult =  xmlLocation == null ? 
-				builder.executeOn(xdpLocation.getFileName()) :
-				builder.executeOn(xdpLocation.getFileName(), SimpleDocumentFactoryImpl.getFactory().create(xmlLocation.toFile()));
+				builder.executeOn(xdpPathOrUrl) :
+				builder.executeOn(xdpPathOrUrl, SimpleDocumentFactoryImpl.getFactory().create(Files.readAllBytes(xmlLocation)));
 
 		System.out.println("Writing output to " + outLocation);
 		Files.copy(pdfResult.getInputStream(), outLocation, StandardCopyOption.REPLACE_EXISTING);

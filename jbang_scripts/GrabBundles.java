@@ -1,9 +1,9 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //REPOS mavencentral,github=https://maven.pkg.github.com/rmcdouga/*
-//DEPS info.picocli:picocli:4.6.3
-//DEPS com.github.rmcdouga:github-package-repo:0.0.1-SNAPSHOT
-//DEPS org.slf4j:slf4j-simple:1.7.36
-//JAVA 17+
+//DEPS info.picocli:picocli:4.7.7
+//DEPS com.github.rmcdouga:github-package-repo:0.0.2-SNAPSHOT
+//DEPS org.slf4j:slf4j-simple:2.0.17
+//JAVA 25+
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -56,13 +56,13 @@ class GrabJars implements Callable<Integer> {
     	packages.repo("4PointSolutions", "FluentFormsAPI")
 				.group("com._4point.aem.docservices")
 				.artifact("rest-services.server")
-				.version("0.0.3-SNAPSHOT")
+				.version("0.0.3")
 				.copyTo(dest, StandardCopyOption.REPLACE_EXISTING);
 		
 		packages.repo("4PointSolutions", "FluentFormsAPI")
 				.group("com._4point.aem")
 				.artifact("fluentforms.core")
-				.version("0.0.3-SNAPSHOT")
+				.version("0.0.3")
 				.copyTo(dest, StandardCopyOption.REPLACE_EXISTING);
 
         return 0;
