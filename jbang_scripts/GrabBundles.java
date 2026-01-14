@@ -1,7 +1,6 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//REPOS mavencentral,github=https://maven.pkg.github.com/rmcdouga/*
 //DEPS info.picocli:picocli:4.7.7
-//DEPS com.github.rmcdouga:github-package-repo:0.0.2-SNAPSHOT
+//DEPS io.github.rmcdouga:github-package-repo:0.0.2
 //DEPS org.slf4j:slf4j-simple:2.0.17
 //JAVA 25+
 
@@ -19,22 +18,6 @@ import com.github.rmcdouga.ghrepo.GithubPackages.Repo.Group.Artifact.Version;
 /**
  * This JBang script will grab the latest bundles from the 4PointSolutions (GitHub) package repository.
  * 
- * NOTE: The GitHub package repositories require user authentication.  This script uses your maven 
- * credentials to log into the GitHub package repository.  This means that, in order to
- * pull down the .jars, a user needs to have setup their credentials in their local ~/.m2/settings.xml file.
- * 
- * Your settings.xml should look something like this:
- *  <?xml version="1.0"?>
- *  <settings xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/SETTINGS/1.0.0">
- *  	<servers>
- *  		<server>
- *  			<id>github</id>
- *  			<username>Your GitHub Username goes here</username>
- *  			<password>Your Personal Access Token goes here</password>
- *  		</server>
- *  	</servers>
- *  </settings>
- *  
  */
 @Command(name = "GrabBundles", mixinStandardHelpOptions = true, version = "GrabBundles 0.1",
         description = "GrabBundles will grab the latest bundle .jar files from the 4PointSolutions (GitHub) package repository.")
@@ -56,13 +39,13 @@ class GrabJars implements Callable<Integer> {
     	packages.repo("4PointSolutions", "FluentFormsAPI")
 				.group("com._4point.aem.docservices")
 				.artifact("rest-services.server")
-				.version("0.0.3")
+				.version("0.0.5-SNAPSHOT")
 				.copyTo(dest, StandardCopyOption.REPLACE_EXISTING);
 		
 		packages.repo("4PointSolutions", "FluentFormsAPI")
 				.group("com._4point.aem")
 				.artifact("fluentforms.core")
-				.version("0.0.3")
+				.version("0.0.5-SNAPSHOT")
 				.copyTo(dest, StandardCopyOption.REPLACE_EXISTING);
 
         return 0;
