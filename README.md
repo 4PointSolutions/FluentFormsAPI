@@ -73,6 +73,8 @@ writing OSGi bundles in Java that will run directly on the AEM server.
 
 The latest version of the Spring Boot starter and AEM libraries require Spring Boot 4.x, AEM 6.5 LTS (a.k.a. 6.6) and Java 17/21.  If compatibility with Spring Boot 3.x and  is required, use [version 0.0.4](https://github.com/4PointSolutions/FluentFormsAPI/releases/tag/v0.0.4).  If compatiblility with Spring Boot 3.x, AEM 6.5, and Java 8/11 is required, use [version 0.0.3](https://github.com/4PointSolutions/FluentFormsAPI/releases/tag/v0.0.3).
 
+See the [Migration Guide](MIGRATION_GUIDE.md) for details about mograting from one version to the next.
+
 
 # Retrieving the Fluent Forms OSGi Bundles
 
