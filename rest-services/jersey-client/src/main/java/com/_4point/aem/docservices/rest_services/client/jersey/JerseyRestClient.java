@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -79,6 +80,13 @@ public class JerseyRestClient implements RestClient {
 		return (aemConfig, target, correlationIdFn)->new JerseyRestClient(aemConfig, target, correlationIdFn, client);
 	}
 	
+	private static String constructCookiesValue(JerseyResponse.JerseyResponseCookies cookies) {
+		return cookies.cookies.entrySet()
+					 .stream()
+					 .map(entry -> entry.getKey() + "=" + entry.getValue().getValue())
+					 .collect(Collectors.joining("; "));
+	}
+
 	@Override
 	public MultipartPayload.Builder multipartPayloadBuilder() {
 		return new JerseyMultipartPayloadBuilder();
@@ -113,7 +121,8 @@ public class JerseyRestClient implements RestClient {
 		
 		@Override
 		public Cookies getCookies() {
-			return new JerseyResponseCookies(response.getCookies());
+			Map<String, NewCookie> cookies = response.getCookies();
+			return new JerseyResponseCookies(cookies);
 		}
 
 		private static Optional<Response> processResponse(jakarta.ws.rs.core.Response response, MediaType expectedMediaType) throws RestClientException {
@@ -162,7 +171,7 @@ public class JerseyRestClient implements RestClient {
 			@Override
 			public boolean isPresent() {
 				return !isEmpty();
-			}
+			}			
 		}
 	}
 
@@ -178,12 +187,18 @@ public class JerseyRestClient implements RestClient {
 	private final class JerseyMultipartPayload implements MultipartPayload {
 		private final List<PayloadBuilder.NameValuePair> queryParams;
 		private final List<PayloadBuilder.NameValuePair> requestHeaders;
+		private final List<Cookies> cookiesList;
 		private final FormDataMultiPart multipart;
 		
-		private JerseyMultipartPayload(FormDataMultiPart multipart, List<PayloadBuilder.NameValuePair> queryParams, List<PayloadBuilder.NameValuePair> requestHeaders) {
+		private JerseyMultipartPayload(FormDataMultiPart multipart, 
+									   List<PayloadBuilder.NameValuePair> queryParams, 
+									   List<PayloadBuilder.NameValuePair> requestHeaders,
+									   List<Cookies> cookiesList
+									   ) {
 			this.multipart = multipart;
 			this.queryParams = queryParams;
 			this.requestHeaders = requestHeaders;
+			this.cookiesList = cookiesList;
 		}
 
 		@Override
@@ -200,6 +215,14 @@ public class JerseyRestClient implements RestClient {
 			for(var requestHeader : requestHeaders) {
 				invokeBuilder = invokeBuilder.header(requestHeader.name, requestHeader.value);
 			}
+			for(var cookies : cookiesList) {
+//				for(var newCookie : ((JerseyResponse.JerseyResponseCookies)cookies).cookies.values()) {
+//					invokeBuilder = invokeBuilder.cookie(newCookie.getName(), newCookie.getValue());
+//				}
+				// For some reason, the Jersey client doesn't seem to be formatting cookies added via the cookie() method 
+				// correctly, so instead we are adding a Cookie header with the appropriate value.
+				invokeBuilder.header("Cookie", constructCookiesValue((JerseyResponse.JerseyResponseCookies) cookies));
+			}
 			try {
 				return JerseyResponse.processResponse(invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType())), acceptMediaType);
 			} catch (jakarta.ws.rs.ProcessingException e) {
@@ -212,7 +235,6 @@ public class JerseyRestClient implements RestClient {
 		public void close() throws IOException {
 			multipart.close();
 		}
-		
 	}
 	
 	/**
@@ -252,8 +274,18 @@ public class JerseyRestClient implements RestClient {
 		}
 		
 		@Override
+		public JerseyMultipartPayloadBuilder addCookies(Cookies cookies) {
+			super.addCookies(cookies);
+			return this;
+		}
+
+		@Override
 		public MultipartPayload build() {
-			return new JerseyMultipartPayload(multipart, Collections.unmodifiableList(super.queryParams), Collections.unmodifiableList(super.requestHeaders));
+			return new JerseyMultipartPayload(multipart, 
+											  Collections.unmodifiableList(super.queryParams), 
+											  Collections.unmodifiableList(super.requestHeaders),
+											  Collections.unmodifiableList(super.cookies)
+											  );
 		}
 	}
 
@@ -306,20 +338,31 @@ public class JerseyRestClient implements RestClient {
 			super.addHeader(name, value);
 			return this;
 		}
+		
+		@Override
+		public JerseyGetRequestBuilder addCookies(Cookies cookies) {
+			super.addCookies(cookies);
+			return this;
+		}
 
 		@Override
 		public GetRequest build() {
-			return new JerseyGetRequest(Collections.unmodifiableList(super.queryParams), Collections.unmodifiableList(super.requestHeaders));
+			return new JerseyGetRequest(Collections.unmodifiableList(super.queryParams), 
+										Collections.unmodifiableList(super.requestHeaders),
+										Collections.unmodifiableList(super.cookies)
+										);
 		}
 	}
 	
 	private final class JerseyGetRequest implements GetRequest {
 		private final List<PayloadBuilder.NameValuePair> queryParams;
 		private final List<PayloadBuilder.NameValuePair> requestHeaders;
+		private final List<Cookies> cookiesList;
 		
-		JerseyGetRequest(List<PayloadBuilder.NameValuePair> queryParams, List<PayloadBuilder.NameValuePair> requestHeaders) {
+		JerseyGetRequest(List<PayloadBuilder.NameValuePair> queryParams, List<PayloadBuilder.NameValuePair> requestHeaders, List<Cookies> cookiesList) {
 			this.queryParams = queryParams;
 			this.requestHeaders = requestHeaders;
+			this.cookiesList = cookiesList;
 		}
 
 		@Override
@@ -338,6 +381,14 @@ public class JerseyRestClient implements RestClient {
 			for(var requestHeader : requestHeaders) {
 				invokeBuilder = invokeBuilder.header(requestHeader.name, requestHeader.value);
 			}
+			for(var cookies : cookiesList) {
+//				for(var newCookie : ((JerseyResponse.JerseyResponseCookies)cookies).cookies.values()) {
+//					invokeBuilder = invokeBuilder.cookie(newCookie.getName(), newCookie.getValue());
+//				}
+				// For some reason, the Jersey client doesn't seem to be formatting cookies added via the cookie() method
+				// correctly, so instead we are adding a Cookie header with the appropriate value.
+				invokeBuilder.header("Cookie", constructCookiesValue((JerseyResponse.JerseyResponseCookies) cookies));
+			}
 			try {
 				return JerseyResponse.processResponse(invokeBuilder.get(), acceptMediaType);
 			} catch (jakarta.ws.rs.ProcessingException e) {
@@ -351,9 +402,17 @@ public class JerseyRestClient implements RestClient {
 		private record NameValuePair(String name, String value) {};
 		private List<NameValuePair> queryParams = new ArrayList<>();
 		private List<NameValuePair> requestHeaders = new ArrayList<>();
+		private List<Cookies> cookies = new ArrayList<>();
 
 		public PayloadBuilder queryParam(String name, String value) {
 			queryParams.add(new NameValuePair(name, value));
+			return this;
+		}
+
+		public PayloadBuilder addCookies(Cookies cookies) {
+			 if (cookies.isPresent()) {
+				 this.cookies.add(cookies);
+			 }
 			return this;
 		}
 

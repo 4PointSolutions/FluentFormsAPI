@@ -195,7 +195,6 @@ abstract class AbstractRestClientTest {
 	@Test
 	void testPostToServer_DocumentResponseWithNoCookies() throws Exception {
 		// Given
-		final String COOKIES_KEY = "Set-Cookie";
 		stubFor(post(ENDPOINT).willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)
 										  ));
 	
@@ -203,11 +202,6 @@ abstract class AbstractRestClientTest {
 		Response response = postToServerBuilder().performPostToServer(FIELD1_NAME, FIELD1_DATA).orElseThrow();
 
 		// Then
-		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
-		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
-		assertTrue(response.retrieveHeader(COOKIES_KEY).isEmpty());					// Should not be present
-		assertTrue(response.retrieveHeader(COOKIES_KEY.toUpperCase()).isEmpty());  // Should not be present
-		
 		Cookies cookies = response.getCookies();
 		assertFalse(cookies.isPresent());
 		assertTrue(cookies.isEmpty());
@@ -232,11 +226,6 @@ abstract class AbstractRestClientTest {
 		Response response = postToServerBuilder().performPostToServer(FIELD1_NAME, FIELD1_DATA).orElseThrow();
 
 		// Then
-		assertEquals(ContentType.APPLICATION_PDF, response.contentType());
-		assertEquals(MOCK_PDF_BYTES, new String(response.data().readAllBytes()));
-		assertEquals(COOKIES_VALUE, response.retrieveHeader(COOKIES_KEY).orElseThrow());				// Should retrieve the first header value, not the 2nd or 3rd one
-		assertEquals(COOKIES_VALUE, response.retrieveHeader(COOKIES_KEY.toUpperCase()).orElseThrow());  // Should retrieve the first header value, not the 3rd one
-		
 		Cookies cookies = response.getCookies();
 		assertTrue(cookies.isPresent());
 		assertFalse(cookies.isEmpty());
@@ -293,6 +282,57 @@ abstract class AbstractRestClientTest {
 																.withHeader("content-type", equalTo(ContentType.TEXT_HTML.contentType()))
 										)
 				.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
+				);
+	}
+
+	@DisplayName("PostToServer with 1 part and return 2 set-cookies in the response, send PostToServer with cookies from first response")
+	@Test
+	void testPostToServer_DocumentResponseWithCookie_PostWithCookies() throws Exception {
+		// Given
+		final String COOKIES_KEY = "Set-Cookie";
+		final String COOKIE1_VALUE = "cookie1=value1; HttpOnly";
+		final String COOKIE2_VALUE = "cookie2=value2; HttpOnly";
+		final String POST_HEADER_KEY = "post";
+		final String FIRST_POST_VALUE = "firstPost";
+		final String SECOND_POST_VALUE = "secondPost";
+		stubFor(post(ENDPOINT)
+				.withHeader(POST_HEADER_KEY, equalTo(FIRST_POST_VALUE))
+				.willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)
+											.withHeader(COOKIES_KEY, COOKIE1_VALUE)
+											.withHeader(COOKIES_KEY, COOKIE2_VALUE)
+										  ));
+		stubFor(post(ENDPOINT)
+				.withHeader(POST_HEADER_KEY, equalTo(SECOND_POST_VALUE))
+				.willReturn(okForContentType(ContentType.APPLICATION_PDF.contentType(), MOCK_PDF_BYTES)));
+	
+		// When
+		Response response1 = postToServerBuilder()
+								.headers(POST_HEADER_KEY, FIRST_POST_VALUE)
+								.performPostToServer(FIELD1_NAME, FIELD1_DATA).orElseThrow();
+
+		Response response2 = postToServerBuilder()
+								.headers(POST_HEADER_KEY, SECOND_POST_VALUE)
+								.cookies(response1.getCookies())
+								.performPostToServer(FIELD1_NAME, FIELD1_DATA).orElseThrow();
+
+		// Then
+		assertEquals(ContentType.APPLICATION_PDF, response1.contentType());
+		assertEquals(MOCK_PDF_BYTES, new String(response1.data().readAllBytes()));
+		assertEquals(ContentType.APPLICATION_PDF, response2.contentType());
+		assertEquals(MOCK_PDF_BYTES, new String(response2.data().readAllBytes()));
+		
+		verify(postRequestedFor(urlEqualTo(ENDPOINT))
+				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)))
+				.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
+				.withHeader(POST_HEADER_KEY, equalTo(FIRST_POST_VALUE))
+				);
+
+		verify(postRequestedFor(urlEqualTo(ENDPOINT))
+				.withAllRequestBodyParts(aMultipart(FIELD1_NAME).withBody(equalTo(FIELD1_DATA)))
+				.withHeader(RestClient.CORRELATION_ID_HTTP_HDR, equalTo(CORRELATION_ID_TEXT))
+				.withHeader(POST_HEADER_KEY, equalTo(SECOND_POST_VALUE))
+				.withCookie("cookie1", equalTo("value1"))
+				.withCookie("cookie2", equalTo("value2"))
 				);
 	}
 
@@ -443,6 +483,7 @@ abstract class AbstractRestClientTest {
 	private class PostToServerBuilder {
 		private String[] queryParams = new String[0];
 		private String[] headers = new String[0];
+		private Cookies cookies = null;;
 		
 		private PostToServerBuilder queryParams(String...strings) {
 			if (strings.length % 2 != 0) { 
@@ -459,7 +500,12 @@ abstract class AbstractRestClientTest {
 			headers = strings;
 			return this;
 		}
-		
+
+		private PostToServerBuilder cookies(Cookies cookies) {
+			this.cookies = cookies;
+			return this;
+		}
+	
 		private Optional<Response> performPostToServer(String...strings) throws RestClientException, Exception {
 			if (strings.length % 2 != 0) { 
 				throw new IllegalArgumentException("Odd number of Strings passed in, must be even. (" + strings.length + ").");
@@ -499,13 +545,17 @@ abstract class AbstractRestClientTest {
 			}
 		}
 
-		MultipartPayload.Builder addHeadersAndQueryParams(MultipartPayload.Builder builder) {
+		private MultipartPayload.Builder addHeadersAndQueryParams(MultipartPayload.Builder builder) {
 			for(int i = 0; i < queryParams.length; i+=2) {			// Add query Params
 				builder.queryParam(queryParams[i], queryParams[i+1]);
 			}
 
 			for(int i = 0; i < headers.length; i+=2) {			// Add headers
 				builder.addHeader(headers[i], headers[i+1]);
+			}
+			
+			if (cookies != null) {
+				builder.addCookies(cookies);
 			}
 			
 			return builder;
@@ -575,6 +625,105 @@ abstract class AbstractRestClientTest {
 		assertEquals(SAMPLE_HEADER_VALUE, response.retrieveHeader(SAMPLE_HEADER).orElseThrow());
 		verify(getRequestedFor(urlEqualTo(ENDPOINT))
 				.withoutQueryParam(FIELD1_NAME)
+				);
+	}
+
+	@DisplayName("GetFromServer with 2 query parameters and return no cookies in response")
+	@Test
+	void testGetFromServer_DocumentResponseNoCookies() throws Exception {
+		// Given
+		stubFor(get(urlPathEqualTo(ENDPOINT))
+				    .withQueryParams(Map.of(FIELD1_NAME, equalTo(FIELD1_DATA), FIELD2_NAME, equalTo(FIELD2_DATA)))
+				    .willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), MOCK_PDF_BYTES)));
+		
+		// When
+		Response response = performGetFromServer(FIELD1_NAME, FIELD1_DATA, FIELD2_NAME, FIELD2_DATA).orElseThrow();
+
+		// Then
+		Cookies cookies = response.getCookies();
+		assertFalse(cookies.isPresent());
+		assertTrue(cookies.isEmpty());
+		
+		verify(getRequestedFor(urlPathEqualTo(ENDPOINT))
+				.withQueryParam(FIELD1_NAME, equalTo(FIELD1_DATA))
+				.withQueryParam(FIELD2_NAME, equalTo(FIELD2_DATA))
+				);
+	}
+
+	@DisplayName("GetFromServer with no query parameters and return cookies in response")
+	@Test
+	void testGetFromServer_DocumentResponseWithCookies() throws Exception {
+		// Given
+		final String COOKIES_KEY = "Set-Cookie";
+		final String COOKIES_VALUE = "cookie1=value1; cookie2=value2; HttpOnly";
+		stubFor(get(ENDPOINT).willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), MOCK_PDF_BYTES)
+														 	.withHeader(COOKIES_KEY, COOKIES_VALUE)
+														  ));
+	
+		// When
+		Response response = performGetFromServer().orElseThrow();
+
+		// Then
+		Cookies cookies = response.getCookies();
+		assertTrue(cookies.isPresent());
+		assertFalse(cookies.isEmpty());
+
+		
+		verify(getRequestedFor(urlEqualTo(ENDPOINT))
+				.withoutQueryParam(FIELD1_NAME)
+				);
+	}
+
+	@DisplayName("GetFromServer with no query parameters and return cookies in response")
+	@Test
+	void testGetFromServer_DocumentResponseWithCookies_GetWithCookies() throws Exception {
+		// Given
+		final String COOKIES_KEY = "Set-Cookie";
+		final String COOKIE1_VALUE = "cookie1=value1; HttpOnly";
+		final String COOKIE2_VALUE = "cookie2=value2; HttpOnly";
+		final String GET_HEADER_KEY = "get";
+		final String FIRST_GET_VALUE = "firstGet";
+		final String SECOND_GET_VALUE = "secondGet";
+		stubFor(get(ENDPOINT)
+				.withHeader(GET_HEADER_KEY, equalTo(FIRST_GET_VALUE))
+				.willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), MOCK_PDF_BYTES)
+											.withHeader(COOKIES_KEY, COOKIE1_VALUE)
+											.withHeader(COOKIES_KEY, COOKIE2_VALUE)
+														  ));
+		stubFor(get(ENDPOINT)
+				.withHeader(GET_HEADER_KEY, equalTo(SECOND_GET_VALUE))
+				.willReturn(okForContentType(ContentType.TEXT_HTML.contentType(), MOCK_PDF_BYTES)));
+	
+		// When
+		Response response1 = underTest.getRequestBuilder()
+									   .addHeader(GET_HEADER_KEY, FIRST_GET_VALUE)
+									   .build()
+									   .getFromServer(ContentType.TEXT_HTML)
+									   .orElseThrow();
+
+		Response response2 = underTest.getRequestBuilder()
+				   					  .addHeader(GET_HEADER_KEY, SECOND_GET_VALUE)
+				   					  .addCookies(response1.getCookies())
+				   					  .build()
+				   					  .getFromServer(ContentType.TEXT_HTML)
+				   					  .orElseThrow();
+
+		// Then
+		assertEquals(ContentType.TEXT_HTML, response1.contentType());
+		assertEquals(MOCK_PDF_BYTES, new String(response1.data().readAllBytes()));
+		assertEquals(ContentType.TEXT_HTML, response2.contentType());
+		assertEquals(MOCK_PDF_BYTES, new String(response2.data().readAllBytes()));
+		
+		
+		verify(getRequestedFor(urlEqualTo(ENDPOINT))
+				.withoutQueryParam(FIELD1_NAME)
+				.withHeader(GET_HEADER_KEY, equalTo(FIRST_GET_VALUE))
+				);
+		verify(getRequestedFor(urlEqualTo(ENDPOINT))
+				.withoutQueryParam(FIELD1_NAME)
+				.withHeader(GET_HEADER_KEY, equalTo(SECOND_GET_VALUE))
+				.withCookie("cookie1", equalTo("value1"))
+				.withCookie("cookie2", equalTo("value2"))
 				);
 	}
 

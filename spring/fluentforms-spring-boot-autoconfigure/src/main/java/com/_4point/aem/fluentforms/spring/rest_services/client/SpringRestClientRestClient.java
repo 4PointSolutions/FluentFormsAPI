@@ -274,6 +274,11 @@ public class SpringRestClientRestClient implements RestClient {
         	addHeaderValue(name, value);
             return this;
 		}
+
+		@Override
+		public Builder addCookies(Cookies cookies) {
+			throw new UnsupportedOperationException("Adding cookies to multipart payloads is not currently supported.");
+		}
 	}
 
 	private class SpringClientGetRequest extends SpringClientRequest implements RestClient.GetRequest {
@@ -323,6 +328,11 @@ public class SpringRestClientRestClient implements RestClient {
         	addHeaderValue(name, value);
             return this;
         }
+
+		@Override
+		public GetRequest.Builder addCookies(Cookies cookies) {
+			throw new UnsupportedOperationException("Adding cookies to GET requests is not currently supported.");
+		}
     }
 	
 	private static class SpringRestClientHttpHeaders implements RestClient.HttpHeaders {

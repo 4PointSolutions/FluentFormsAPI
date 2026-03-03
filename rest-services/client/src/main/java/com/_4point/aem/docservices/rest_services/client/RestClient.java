@@ -159,6 +159,7 @@ public interface RestClient {
 			}
 			Builder queryParam(String name, String value);
 			Builder addHeader(String name, String value);
+			Builder addCookies(Cookies cookies);
 			MultipartPayload build();
 		}
 	}
@@ -190,6 +191,7 @@ public interface RestClient {
 		public interface Builder {
 			Builder queryParam(String name, String value);
 			Builder addHeader(String name, String value);
+			Builder addCookies(Cookies cookies);
 			GetRequest build();
 		}
 	}
