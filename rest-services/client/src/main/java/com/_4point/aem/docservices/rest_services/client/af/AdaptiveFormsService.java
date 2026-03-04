@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 
 import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.Cookies;
 import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.Response;
@@ -106,7 +107,9 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		builder = builder.queryParam("wcmmode", "disabled");
 		
 		if (!data.isEmpty()) {
-			builder = builder.queryParam(DATA_REF_PARAM, generateDataRefParam(postDataToDataCacheService(data)));
+			DataCacheResponse response = postDataToDataCacheService(data);
+			builder = builder.queryParam(DATA_REF_PARAM, generateDataRefParam(response.uuid()))
+							 .addCookies(response.cookies());
 		}
 
 		GetRequest getRequest = builder.build();
@@ -128,12 +131,14 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		return "service://FFPrefillService/" + uuid;
 	}
 	
-	private String postDataToDataCacheService(Document data) throws AdaptiveFormsServiceException {
+	private record DataCacheResponse(String uuid, Cookies cookies) {}
+	
+	private DataCacheResponse postDataToDataCacheService(Document data) throws AdaptiveFormsServiceException {
         try (MultipartPayload payload = dataCacheRestClient.multipartPayloadBuilder()
         												   .add(DATA_SERVICE_DATA_PARAM, data, getContentType(data))
         												   .build()) {
 			return payload.postToServer(ContentType.TEXT_PLAIN)
-						  .map(uncheck(AdaptiveFormsService::responseToString))
+						  .map(uncheck(AdaptiveFormsService::mapResponse))
 						  .orElseThrow();
 
         } catch (IOException e) {
@@ -152,8 +157,8 @@ public class AdaptiveFormsService extends RestServicesServiceAdapter {
 		}
 	}
 
-	private static String responseToString(Response result) throws IOException {
-		return new String(result.data().readAllBytes());
+	private static DataCacheResponse mapResponse(Response result) throws IOException {
+		return new DataCacheResponse(new String(result.data().readAllBytes()), result.getCookies());
 	}
 	
 	/**

@@ -3,17 +3,20 @@ package com._4point.aem.fluentforms.spring.rest_services.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpCookie;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -87,8 +90,9 @@ public class SpringRestClientRestClient implements RestClient {
 
 	private abstract class SpringClientRequestBuilder {
 		protected Function<UriBuilder, UriBuilder> uriBuilder = Function.identity();
-		protected Consumer<HttpHeaders> headerBuilder = correlationIdFn != null ? h->h.put(RestClient.CORRELATION_ID_HTTP_HDR, List.of(correlationIdFn.get())) 
+		protected Consumer<org.springframework.http.HttpHeaders> headerBuilder = correlationIdFn != null ? h->h.put(RestClient.CORRELATION_ID_HTTP_HDR, List.of(correlationIdFn.get())) 
         																	    : __->{};	// if correlationIdFn is available, use it as the base headerBuilder function.
+        protected Consumer<MultiValueMap<String, String>> cookiesConsumer = __->{};
 
         public void addQueryParam(String name, String value) {
             this.uriBuilder = uriBuilder.andThen(u->u.queryParam(name, value));
@@ -97,15 +101,24 @@ public class SpringRestClientRestClient implements RestClient {
         public void addHeaderValue(String name, String value) {
         	this.headerBuilder = headerBuilder.andThen(h->h.put(name, List.of(value)));
         }
+        
+        public void addCookieValues(Cookies cookies) {
+        	if (cookies == null || cookies.isEmpty() || !(cookies instanceof SpringClientResponse.SpringRestClientResponseCookies srcCookies)) {
+				return;
+			}
+        	this.cookiesConsumer = cookiesConsumer.andThen(mvm->srcCookies.cookies.stream().forEach(c->mvm.add(c.getName(), c.getValue())));
+        }
 	}
 
 	private abstract static class SpringClientRequest {
 	    private final Function<UriBuilder, UriBuilder> uriBuilder;
-	    private final Consumer<HttpHeaders> headerBuilder;
+	    private final Consumer<org.springframework.http.HttpHeaders> headerBuilder;
+		private final Consumer<MultiValueMap<String, String>> cookiesConsumer;
 
-        protected SpringClientRequest(Function<UriBuilder, UriBuilder> uriBuilder, Consumer<HttpHeaders> headerBuilder) {
+        protected SpringClientRequest(Function<UriBuilder, UriBuilder> uriBuilder, Consumer<org.springframework.http.HttpHeaders> headerBuilder, Consumer<MultiValueMap<String, String>> cookiesConsumer) {
 			this.uriBuilder = uriBuilder;
 			this.headerBuilder = headerBuilder;
+			this.cookiesConsumer = cookiesConsumer;
 		}
 
         protected Function<UriBuilder, URI> uriFunction() {
@@ -115,6 +128,7 @@ public class SpringRestClientRestClient implements RestClient {
 		protected Optional<Response> processRequest(RequestHeadersSpec<?> request, ContentType acceptContentType) throws RestClientException {
 			ResponseEntity<byte[]> result = request.accept(toMediaType(acceptContentType))
 												   .headers(headerBuilder)
+												   .cookies(cookiesConsumer)
 												   .retrieve()
 												   .toEntity(byte[].class);
 			
@@ -137,13 +151,13 @@ public class SpringRestClientRestClient implements RestClient {
 	
 	private static class SpringClientResponse implements RestClient.Response {
 		private final ResponseEntity<byte[]> responseEntity;
-		private final HttpHeaders headers;
+		private final org.springframework.http.HttpHeaders headers;
 
 		private SpringClientResponse(ResponseEntity<byte[]> responseEntity) {
 			this(responseEntity, responseEntity.getHeaders());
 		}
 
-		private SpringClientResponse(ResponseEntity<byte[]> responseEntity, HttpHeaders headers) {
+		private SpringClientResponse(ResponseEntity<byte[]> responseEntity, org.springframework.http.HttpHeaders headers) {
 			this.responseEntity = responseEntity;
 			this.headers = headers;
 		}
@@ -164,6 +178,44 @@ public class SpringRestClientRestClient implements RestClient {
 			return toContentType(headers.getContentType());
 		}
 
+		@Override
+		public HttpHeaders headers() {
+			return new SpringRestClientHttpHeaders(headers);
+		}
+
+		@Override
+		public Cookies getCookies() {
+			@Nullable List<String> list = headers.get(org.springframework.http.HttpHeaders.SET_COOKIE);
+			return SpringRestClientResponseCookies.from(list);
+		}
+
+		private static class SpringRestClientResponseCookies implements Cookies {
+			private final List<HttpCookie> cookies;
+
+			private SpringRestClientResponseCookies(List<HttpCookie> cookies) {
+				this.cookies = Collections.unmodifiableList(cookies);
+			}
+
+			private static SpringRestClientResponseCookies from(@Nullable List<String> cookieHeaderValues) {
+				List<HttpCookie> cookiesList = cookieHeaderValues == null ? List.of() 
+																		  : cookieHeaderValues.stream()
+																		  					  .map(HttpCookie::parse)
+																		  					  .flatMap(List::stream)	
+																		  					  .toList();
+				return new SpringRestClientResponseCookies(cookiesList);
+			}
+			
+			@Override
+			public boolean isEmpty() {
+				return cookies.isEmpty();
+			}
+
+			@Override
+			public boolean isPresent() {
+				return !isEmpty();
+			}
+			
+		}
 	}
 	
 	private static ContentType toContentType(MediaType mediaType) {
@@ -177,8 +229,12 @@ public class SpringRestClientRestClient implements RestClient {
 	public final class SpringRestClientMultipartPayload extends SpringClientRequest implements MultipartPayload {
 		private final MultiValueMap<String, HttpEntity<?>> multipartBody;
 		
-		private SpringRestClientMultipartPayload(Function<UriBuilder, UriBuilder> uriBuilder, Consumer<HttpHeaders> headerBuilder, MultiValueMap<String, HttpEntity<?>> multipartBody) {
-			super(uriBuilder, headerBuilder);
+		private SpringRestClientMultipartPayload(Function<UriBuilder, UriBuilder> uriBuilder, 
+												 Consumer<org.springframework.http.HttpHeaders> headerBuilder, 
+												 Consumer<MultiValueMap<String, String>> cookiesConsumer,
+												 MultiValueMap<String, HttpEntity<?>> multipartBody
+												 ) {
+			super(uriBuilder, headerBuilder, cookiesConsumer);
 			this.multipartBody = multipartBody;
 		}
 
@@ -203,9 +259,8 @@ public class SpringRestClientRestClient implements RestClient {
 	private final class RestClientMultipartPayloadBuilder extends SpringClientRequestBuilder implements MultipartPayload.Builder {
 		private final MultiValueMap<String, HttpEntity<?>> parts = new LinkedMultiValueMap<>();
 		
-		@SuppressWarnings("serial")
 		private void internalAdd(String fieldName, Object fieldData, MediaType contentType) {
-			parts.add(fieldName, new HttpEntity<>(fieldData, new HttpHeaders() {
+			parts.add(fieldName, new HttpEntity<>(fieldData, new org.springframework.http.HttpHeaders() {
 				{
 					setContentType(contentType);
 				}
@@ -232,7 +287,7 @@ public class SpringRestClientRestClient implements RestClient {
 
 		@Override
 		public MultipartPayload build() {
-			return new SpringRestClientMultipartPayload(uriBuilder, headerBuilder, parts);
+			return new SpringRestClientMultipartPayload(uriBuilder, headerBuilder, cookiesConsumer, parts);
 		}
 
 		@Override
@@ -246,12 +301,21 @@ public class SpringRestClientRestClient implements RestClient {
         	addHeaderValue(name, value);
             return this;
 		}
+
+		@Override
+		public Builder addCookies(Cookies cookies) {
+			addCookieValues(cookies);
+			return this;
+		}
 	}
 
 	private class SpringClientGetRequest extends SpringClientRequest implements RestClient.GetRequest {
         
-		private SpringClientGetRequest(Function<UriBuilder, UriBuilder> uriBuilder,	Consumer<HttpHeaders> headerBuilder) {
-			super(uriBuilder, headerBuilder);
+		private SpringClientGetRequest(Function<UriBuilder, UriBuilder> uriBuilder,	
+									   Consumer<org.springframework.http.HttpHeaders> headerBuilder, 
+									   Consumer<MultiValueMap<String, String>> cookiesConsumer
+									   ) {
+			super(uriBuilder, headerBuilder, cookiesConsumer);
 		}
 
 		@Override
@@ -268,9 +332,6 @@ public class SpringRestClientRestClient implements RestClient {
 	}
 
 	private class SpringClientGetRequestBuilder extends SpringClientRequestBuilder implements RestClient.GetRequest.Builder {
-//        private Function<UriBuilder, UriBuilder> uriBuilder = Function.identity();
-//        private Consumer<HttpHeaders> headerBuilder = correlationIdFn != null ? h->h.put(RestClient.CORRELATION_ID_HTTP_HDR, List.of(correlationIdFn.get())) 
-//        																	  : __->{};	// if correlationIdFn is available, use it as the base headerBuilder function.
         
         private SpringClientGetRequestBuilder() {
         }
@@ -281,7 +342,7 @@ public class SpringRestClientRestClient implements RestClient {
         
         @Override
         public GetRequest build() {
-            return new SpringClientGetRequest(uriBuilder, headerBuilder);
+			return new SpringClientGetRequest(uriBuilder, headerBuilder, cookiesConsumer);
         }
         
         @Override
@@ -295,5 +356,41 @@ public class SpringRestClientRestClient implements RestClient {
         	addHeaderValue(name, value);
             return this;
         }
+
+		@Override
+		public GetRequest.Builder addCookies(Cookies cookies) {
+			addCookieValues(cookies);
+			return this;
+		}
     }
+	
+	private static class SpringRestClientHttpHeaders implements RestClient.HttpHeaders {
+		private final org.springframework.http.HttpHeaders headers;
+
+		private SpringRestClientHttpHeaders(org.springframework.http.HttpHeaders headers) {
+			this.headers = headers;
+		}
+
+		@Override
+		public CaseHandling caseHandling() {
+			return CaseHandling.UPSHIFTS;
+		}
+
+		@Override
+		public List<HttpHeader> getHeaders(String headerName) {
+			return headers.headerSet().stream()
+									  .filter(e->e.getKey().equalsIgnoreCase(headerName))
+									  .mapMulti(SpringRestClientHttpHeaders::mapHeaderValues)
+									  .toList();
+		}
+		
+		private static void mapHeaderValues(Map.Entry<String, List<String>> headerEntry, Consumer<HttpHeader> valueConsumer) {
+			String headerName = headerEntry.getKey();
+			for(String headerValue : headerEntry.getValue()) {
+				valueConsumer.accept(new HttpHeader(headerName, headerValue));
+			}
+		}
+
+	}
+	
 }

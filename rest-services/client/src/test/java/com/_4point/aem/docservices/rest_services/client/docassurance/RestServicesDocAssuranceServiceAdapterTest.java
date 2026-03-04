@@ -225,6 +225,11 @@ public class RestServicesDocAssuranceServiceAdapterTest {
 					public MultipartPayload.Builder add(String fieldName, String fieldData) {
 						throw new UnsupportedOperationException("This version of add() should never be called.");
 					}
+
+					@Override
+					public MultipartPayload.Builder addCookies(Cookies cookies) {
+						throw new UnsupportedOperationException("This version of add() should never be called.");
+					}
 				};
 			}
 			

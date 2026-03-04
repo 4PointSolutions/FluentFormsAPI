@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com._4point.aem.docservices.rest_services.client.RestClient;
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.Cookies;
 import com._4point.aem.docservices.rest_services.client.RestClient.GetRequest;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.Response;
@@ -62,6 +63,7 @@ class AdaptiveFormsServiceTest {
 	@Mock(stubOnly = true) GetRequest.Builder mockGetRequestBuilder;
 	@Mock(stubOnly = true) Response mockPostResponse;
 	@Mock(stubOnly = true) Response mockGetResponse;
+	@Mock(stubOnly = true) Cookies mockCookies;
 
 	@Captor ArgumentCaptor<AemConfig> aemConfig;
 	@Captor ArgumentCaptor<String> servicePath;
@@ -172,6 +174,7 @@ class AdaptiveFormsServiceTest {
 			setupDataServiceMocks(setupMockPostResponse(DUMMY_GUID.getBytes(), ContentType.TEXT_PLAIN));
 			when(mockPayloadBuilder.add(eq("Data"), Mockito.any(Document.class), eq(scenario.contentType))).thenReturn(mockPayloadBuilder);
 			when(mockGetRequestBuilder.queryParam(eq("dataRef"), eq("service://FFPrefillService/" + DUMMY_GUID))).thenReturn(mockGetRequestBuilder);
+			when(mockGetRequestBuilder.addCookies(Mockito.any(Cookies.class))).thenReturn(mockGetRequestBuilder);
 		}
 		
 		AdaptiveFormsService underTest = createAdapter(mockClientFactory);
@@ -210,6 +213,7 @@ class AdaptiveFormsServiceTest {
 		setupDataServiceMocks(setupMockPostResponse(DUMMY_GUID.getBytes(), ContentType.TEXT_PLAIN));
 		when(mockPayloadBuilder.add(eq("Data"), Mockito.any(Document.class), Mockito.any(ContentType.class))).thenReturn(mockPayloadBuilder);
 		when(mockGetRequestBuilder.queryParam(eq("dataRef"), eq("service://FFPrefillService/" + DUMMY_GUID))).thenReturn(mockGetRequestBuilder);
+		when(mockGetRequestBuilder.addCookies(Mockito.any(Cookies.class))).thenReturn(mockGetRequestBuilder);
 	}
 	
 	@Test
@@ -258,6 +262,7 @@ class AdaptiveFormsServiceTest {
 	private Optional<Response> setupMockPostResponse(byte[] responseData, ContentType expectedContentType) {
 //		when(mockPostResponse.contentType()).thenReturn(expectedContentType);	// ContentType is not queries.
 		when(mockPostResponse.data()).thenReturn(new ByteArrayInputStream(responseData));
+		when(mockPostResponse.getCookies()).thenReturn(mockCookies);
 		return Optional.of(mockPostResponse);
 	}
 

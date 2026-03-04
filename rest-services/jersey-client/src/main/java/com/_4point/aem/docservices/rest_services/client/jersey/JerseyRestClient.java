@@ -6,8 +6,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -22,8 +25,8 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.Status.Family;
 import jakarta.ws.rs.core.Response.StatusType;
@@ -77,6 +80,13 @@ public class JerseyRestClient implements RestClient {
 		return (aemConfig, target, correlationIdFn)->new JerseyRestClient(aemConfig, target, correlationIdFn, client);
 	}
 	
+	private static String constructCookiesValue(JerseyResponse.JerseyResponseCookies cookies) {
+		return cookies.cookies.entrySet()
+					 .stream()
+					 .map(entry -> entry.getKey() + "=" + entry.getValue().getValue())
+					 .collect(Collectors.joining("; "));
+	}
+
 	@Override
 	public MultipartPayload.Builder multipartPayloadBuilder() {
 		return new JerseyMultipartPayloadBuilder();
@@ -101,9 +111,20 @@ public class JerseyRestClient implements RestClient {
 
 		@Override
 		public Optional<String> retrieveHeader(String header) {
-			return Optional.ofNullable(response.getHeaderString(header));
+			return Optional.ofNullable(response.getStringHeaders().getFirst(header));
+		}
+
+		@Override
+		public HttpHeaders headers() {
+			return new JerseyHttpHeaders(response.getStringHeaders());
 		}
 		
+		@Override
+		public Cookies getCookies() {
+			Map<String, NewCookie> cookies = response.getCookies();
+			return new JerseyResponseCookies(cookies);
+		}
+
 		private static Optional<Response> processResponse(jakarta.ws.rs.core.Response response, MediaType expectedMediaType) throws RestClientException {
 			try {
 				StatusType resultStatus = response.getStatusInfo();
@@ -122,7 +143,7 @@ public class JerseyRestClient implements RestClient {
 					throw new RestClientException("Call to server succeeded but server failed to return content.  This should never happen.");
 				}
 
-				String responseContentType = response.getHeaderString(HttpHeaders.CONTENT_TYPE);
+				String responseContentType = response.getHeaderString(jakarta.ws.rs.core.HttpHeaders.CONTENT_TYPE);
 				if ( responseContentType == null || !expectedMediaType.isCompatible(MediaType.valueOf(responseContentType))) {
 					String msg = "Response from AEM server was not of expected type (" + expectedMediaType.toString() + ").  " + (responseContentType != null ? "content-type='" + responseContentType + "'" : "content-type was null") + ".";
 					InputStream entityStream = (InputStream) response.getEntity();
@@ -133,6 +154,24 @@ public class JerseyRestClient implements RestClient {
 			} catch (IOException e) {
 				throw new RestClientException("IO Error while reading AEM response.", e);
 			}
+		}
+		
+		private static class JerseyResponseCookies implements Cookies {
+			private final Map<String, NewCookie> cookies;
+			
+			private JerseyResponseCookies(Map<String, NewCookie> cookies) {
+				this.cookies = cookies;
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return cookies.isEmpty();
+			}
+
+			@Override
+			public boolean isPresent() {
+				return !isEmpty();
+			}			
 		}
 	}
 
@@ -148,12 +187,18 @@ public class JerseyRestClient implements RestClient {
 	private final class JerseyMultipartPayload implements MultipartPayload {
 		private final List<PayloadBuilder.NameValuePair> queryParams;
 		private final List<PayloadBuilder.NameValuePair> requestHeaders;
+		private final List<Cookies> cookiesList;
 		private final FormDataMultiPart multipart;
 		
-		private JerseyMultipartPayload(FormDataMultiPart multipart, List<PayloadBuilder.NameValuePair> queryParams, List<PayloadBuilder.NameValuePair> requestHeaders) {
+		private JerseyMultipartPayload(FormDataMultiPart multipart, 
+									   List<PayloadBuilder.NameValuePair> queryParams, 
+									   List<PayloadBuilder.NameValuePair> requestHeaders,
+									   List<Cookies> cookiesList
+									   ) {
 			this.multipart = multipart;
 			this.queryParams = queryParams;
 			this.requestHeaders = requestHeaders;
+			this.cookiesList = cookiesList;
 		}
 
 		@Override
@@ -170,6 +215,14 @@ public class JerseyRestClient implements RestClient {
 			for(var requestHeader : requestHeaders) {
 				invokeBuilder = invokeBuilder.header(requestHeader.name, requestHeader.value);
 			}
+			for(var cookies : cookiesList) {
+//				for(var newCookie : ((JerseyResponse.JerseyResponseCookies)cookies).cookies.values()) {
+//					invokeBuilder = invokeBuilder.cookie(newCookie.getName(), newCookie.getValue());
+//				}
+				// For some reason, the Jersey client doesn't seem to be formatting cookies added via the cookie() method 
+				// correctly, so instead we are adding a Cookie header with the appropriate value.
+				invokeBuilder.header("Cookie", constructCookiesValue((JerseyResponse.JerseyResponseCookies) cookies));
+			}
 			try {
 				return JerseyResponse.processResponse(invokeBuilder.post(Entity.entity(multipart, multipart.getMediaType())), acceptMediaType);
 			} catch (jakarta.ws.rs.ProcessingException e) {
@@ -182,7 +235,6 @@ public class JerseyRestClient implements RestClient {
 		public void close() throws IOException {
 			multipart.close();
 		}
-		
 	}
 	
 	/**
@@ -222,8 +274,18 @@ public class JerseyRestClient implements RestClient {
 		}
 		
 		@Override
+		public JerseyMultipartPayloadBuilder addCookies(Cookies cookies) {
+			super.addCookies(cookies);
+			return this;
+		}
+
+		@Override
 		public MultipartPayload build() {
-			return new JerseyMultipartPayload(multipart, Collections.unmodifiableList(super.queryParams), Collections.unmodifiableList(super.requestHeaders));
+			return new JerseyMultipartPayload(multipart, 
+											  Collections.unmodifiableList(super.queryParams), 
+											  Collections.unmodifiableList(super.requestHeaders),
+											  Collections.unmodifiableList(super.cookies)
+											  );
 		}
 	}
 
@@ -276,20 +338,31 @@ public class JerseyRestClient implements RestClient {
 			super.addHeader(name, value);
 			return this;
 		}
+		
+		@Override
+		public JerseyGetRequestBuilder addCookies(Cookies cookies) {
+			super.addCookies(cookies);
+			return this;
+		}
 
 		@Override
 		public GetRequest build() {
-			return new JerseyGetRequest(Collections.unmodifiableList(super.queryParams), Collections.unmodifiableList(super.requestHeaders));
+			return new JerseyGetRequest(Collections.unmodifiableList(super.queryParams), 
+										Collections.unmodifiableList(super.requestHeaders),
+										Collections.unmodifiableList(super.cookies)
+										);
 		}
 	}
 	
 	private final class JerseyGetRequest implements GetRequest {
 		private final List<PayloadBuilder.NameValuePair> queryParams;
 		private final List<PayloadBuilder.NameValuePair> requestHeaders;
+		private final List<Cookies> cookiesList;
 		
-		JerseyGetRequest(List<PayloadBuilder.NameValuePair> queryParams, List<PayloadBuilder.NameValuePair> requestHeaders) {
+		JerseyGetRequest(List<PayloadBuilder.NameValuePair> queryParams, List<PayloadBuilder.NameValuePair> requestHeaders, List<Cookies> cookiesList) {
 			this.queryParams = queryParams;
 			this.requestHeaders = requestHeaders;
+			this.cookiesList = cookiesList;
 		}
 
 		@Override
@@ -308,6 +381,14 @@ public class JerseyRestClient implements RestClient {
 			for(var requestHeader : requestHeaders) {
 				invokeBuilder = invokeBuilder.header(requestHeader.name, requestHeader.value);
 			}
+			for(var cookies : cookiesList) {
+//				for(var newCookie : ((JerseyResponse.JerseyResponseCookies)cookies).cookies.values()) {
+//					invokeBuilder = invokeBuilder.cookie(newCookie.getName(), newCookie.getValue());
+//				}
+				// For some reason, the Jersey client doesn't seem to be formatting cookies added via the cookie() method
+				// correctly, so instead we are adding a Cookie header with the appropriate value.
+				invokeBuilder.header("Cookie", constructCookiesValue((JerseyResponse.JerseyResponseCookies) cookies));
+			}
 			try {
 				return JerseyResponse.processResponse(invokeBuilder.get(), acceptMediaType);
 			} catch (jakarta.ws.rs.ProcessingException e) {
@@ -321,15 +402,52 @@ public class JerseyRestClient implements RestClient {
 		private record NameValuePair(String name, String value) {};
 		private List<NameValuePair> queryParams = new ArrayList<>();
 		private List<NameValuePair> requestHeaders = new ArrayList<>();
+		private List<Cookies> cookies = new ArrayList<>();
 
 		public PayloadBuilder queryParam(String name, String value) {
 			queryParams.add(new NameValuePair(name, value));
 			return this;
 		}
 
+		public PayloadBuilder addCookies(Cookies cookies) {
+			 if (cookies.isPresent()) {
+				 this.cookies.add(cookies);
+			 }
+			return this;
+		}
+
 		public PayloadBuilder addHeader(String name, String value) {
 			requestHeaders.add(new NameValuePair(name, value));
 			return this;
+		}
+	}
+	
+	private static class JerseyHttpHeaders implements HttpHeaders {
+		private final jakarta.ws.rs.core.MultivaluedMap<String, String> headers;
+		
+		private JerseyHttpHeaders(jakarta.ws.rs.core.MultivaluedMap<String, String> headers) {
+			this.headers = headers;
+		}
+
+		@Override
+		public CaseHandling caseHandling() {
+			return CaseHandling.UPSHIFTS;
+		}
+
+		@Override
+		public List<HttpHeader> getHeaders(String headerName) {
+			return headers.entrySet()
+						  .stream()
+						  .filter(header -> header.getKey().equalsIgnoreCase(headerName))
+						  .mapMulti(JerseyHttpHeaders::mapHeaderValues)
+						  .toList();
+		}
+
+		private static void mapHeaderValues(Map.Entry<String, List<String>> headerEntry, Consumer<HttpHeader> valueConsumer) {
+			String headerName = headerEntry.getKey();
+			for(String headerValue : headerEntry.getValue()) {
+				valueConsumer.accept(new HttpHeader(headerName, headerValue));
+			}
 		}
 
 	}

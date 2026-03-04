@@ -14,6 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import com._4point.aem.docservices.rest_services.client.RestClient.ContentType;
+import com._4point.aem.docservices.rest_services.client.RestClient.Cookies;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload;
 import com._4point.aem.docservices.rest_services.client.RestClient.MultipartPayload.Builder;
 import com._4point.aem.fluentforms.api.Document;
@@ -67,6 +68,11 @@ class RestClientTest {
 
 		@Override
 		public MultipartPayload build() {
+			throw new UnsupportedOperationException("Not implemented");
+		}
+
+		@Override
+		public Builder addCookies(Cookies cookies) {
 			throw new UnsupportedOperationException("Not implemented");
 		}
 	};

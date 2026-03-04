@@ -159,6 +159,7 @@ public interface RestClient {
 			}
 			Builder queryParam(String name, String value);
 			Builder addHeader(String name, String value);
+			Builder addCookies(Cookies cookies);
 			MultipartPayload build();
 		}
 	}
@@ -190,6 +191,7 @@ public interface RestClient {
 		public interface Builder {
 			Builder queryParam(String name, String value);
 			Builder addHeader(String name, String value);
+			Builder addCookies(Cookies cookies);
 			GetRequest build();
 		}
 	}
@@ -209,6 +211,11 @@ public interface RestClient {
 	 */
 	public GetRequest.Builder getRequestBuilder(String additionalPath);
 	
+	public interface Cookies {
+		public boolean isEmpty();
+		public boolean isPresent();
+	};
+
 	/**
 	 * A response from the AEM Rest Service
 	 */
@@ -235,9 +242,44 @@ public interface RestClient {
 		 * @return
 		 */
 		public Optional<String> retrieveHeader(String header);
-		
+
+		public HttpHeaders headers();
+
+		public Cookies getCookies();
 	}
 
+	/**
+	 * Represents an HTTP header as a name / value pair.  
+	 * 
+	 * Note that there may be multiple headers with the same name, so HttpHeaders.getHeaders() returns a 
+	 * List<HttpHeader> rather than a single HttpHeader.
+	 */
+	public record HttpHeader(String name, String value) {};
+	
+	public interface HttpHeaders {
+		public enum CaseHandling {
+			PRESERVES_CASE, DOWNSHIFTS, UPSHIFTS;
+		}
+		
+		/**
+		 * 
+		 * Indicates how this implementation handles the case of HTTP header names.  
+		 * This is important to know when calling getHeaders() since HTTP header names are case-insensitive, 
+		 * but the actual case used may vary based on the implementation.
+	 	 * 
+		 * PRESERVES_CASE means that the header names are returned in the same case as they were sent by the server.
+		 * DOWNSHIFTS means that the header names are returned in all lower case.
+		 * UPSHIFTS means that the header names are returned in all upper case.
+		 *
+		 * @return How this implementation handles the case of HTTP header names.  
+		 * 
+		 */
+		public CaseHandling caseHandling();
+		
+		
+		public List<HttpHeader> getHeaders(String headerName);
+	}
+	
     @SuppressWarnings("serial")
 	public static class RestClientException extends Exception {
 
