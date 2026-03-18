@@ -227,7 +227,7 @@ public class RestServicesConvertPdfServiceAdapter extends RestServicesServiceAda
 		Objects.requireNonNull(inPdfDoc, "inPdfDoc argument cannot be null.");
 		Objects.requireNonNull(toPSOptionsSpec, "ToPSOptionsSpec argument cannot be null.");
 		
-		try (MultipartPayload payload = toImageRestClient.multipartPayloadBuilder()
+		try (MultipartPayload payload = toPsRestClient.multipartPayloadBuilder()
 														 .add(PDF_PARAM, inPdfDoc, ContentType.APPLICATION_PDF)
 														 .addStringVersion(COLOR_PARAM, toPSOptionsSpec.getColor())
 														 .addStringVersion(FONT_INCLUSION_PARAM, toPSOptionsSpec.getFontInclusion())

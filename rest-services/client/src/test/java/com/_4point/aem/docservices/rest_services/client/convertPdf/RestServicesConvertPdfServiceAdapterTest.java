@@ -123,7 +123,8 @@ public class RestServicesConvertPdfServiceAdapterTest {
 //	private static final MediaType APPLICATION_PS = new MediaType("application", "postscript");
 
 	@Mock(stubOnly = true) RestClientFactory mockClientFactory;
-	@Mock(stubOnly = true) RestClient mockClient;
+	@Mock(stubOnly = true) RestClient mockClientToImage;
+	@Mock(stubOnly = true) RestClient mockClientToPs;
 	@Mock(stubOnly = true) MultipartPayload mockPayload;
 	@Mock(stubOnly = true) MultipartPayload.Builder mockPayloadBuilder;
 	@Mock(stubOnly = true) Response mockResponse;
@@ -137,7 +138,8 @@ public class RestServicesConvertPdfServiceAdapterTest {
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		when(mockClientFactory.apply(aemConfig.capture(), servicePath.capture(), correlationIdFn.capture())).thenReturn(mockClient);
+		when(mockClientFactory.apply(aemConfig.capture(), Mockito.contains("ToImage"), correlationIdFn.capture())).thenReturn(mockClientToImage);
+		when(mockClientFactory.apply(aemConfig.capture(), Mockito.contains("ToPS"), correlationIdFn.capture())).thenReturn(mockClientToPs);
 	}
 
 	@Test
@@ -167,7 +169,7 @@ public class RestServicesConvertPdfServiceAdapterTest {
 	@Test
 	void testToImage_HappyPath() throws Exception {
 		byte[] responseData = "response Document Data".getBytes();
-		setupMocks(setupMockResponse(responseData, ContentType.IMAGE_JPEG));
+		setupMocks(mockClientToImage, setupMockResponse(responseData, ContentType.IMAGE_JPEG));
 			
 		RestServicesConvertPdfServiceAdapter underTest = createAdapter(mockClientFactory);
 		
@@ -240,7 +242,7 @@ public class RestServicesConvertPdfServiceAdapterTest {
 		var underTest = createAdapter(mockClientFactory);
 		when(toImageOptionsSpec.getImageConvertFormat()).thenReturn(ImageConvertFormat.TIFF);
 
-		var ex = mockForException(cause, ()->underTest.toImage(DUMMY_PDF, toImageOptionsSpec));
+		var ex = mockForException(mockClientToImage, cause, ()->underTest.toImage(DUMMY_PDF, toImageOptionsSpec));
 		
 		assertThat(ex, allOf(ExceptionMatchers.exceptionMsgContainsAll("Error while POSTing to server"),
 							 ExceptionMatchers.hasCause(cause)
@@ -255,7 +257,7 @@ public class RestServicesConvertPdfServiceAdapterTest {
 		var underTest = createAdapter(mockClientFactory);
 		when(toImageOptionsSpec.getImageConvertFormat()).thenReturn(ImageConvertFormat.PNG);
 		
-		var ex = mockForException(cause, ()->underTest.toImage(DUMMY_PDF, toImageOptionsSpec));
+		var ex = mockForException(mockClientToImage, cause, ()->underTest.toImage(DUMMY_PDF, toImageOptionsSpec));
 
 		assertThat(ex, allOf(ExceptionMatchers.exceptionMsgContainsAll("I/O Error while securing document"),
 				 			 ExceptionMatchers.hasCause(cause)
@@ -265,7 +267,7 @@ public class RestServicesConvertPdfServiceAdapterTest {
 	@Test
 	void testToPS_HappyPath() throws Exception {
 		byte[] responseData = "response Document Data".getBytes();
-		setupMocks(setupMockResponse(responseData, ContentType.APPLICATION_PS));
+		setupMocks(mockClientToPs, setupMockResponse(responseData, ContentType.APPLICATION_PS));
 		
 		RestServicesConvertPdfServiceAdapter underTest = createAdapter(mockClientFactory);
 
@@ -347,7 +349,7 @@ public class RestServicesConvertPdfServiceAdapterTest {
 		var toPSOptionsSpec = Mockito.mock(ToPSOptionsSpec.class);
 		var underTest = createAdapter(mockClientFactory);
 		
-		var ex = mockForException(cause, ()->underTest.toPS(DUMMY_PDF, toPSOptionsSpec));
+		var ex = mockForException(mockClientToPs, cause, ()->underTest.toPS(DUMMY_PDF, toPSOptionsSpec));
 		
 		assertThat(ex, allOf(ExceptionMatchers.exceptionMsgContainsAll("Error while POSTing to server"),
 							 ExceptionMatchers.hasCause(cause)
@@ -361,14 +363,14 @@ public class RestServicesConvertPdfServiceAdapterTest {
 		var toPSOptionsSpec = Mockito.mock(ToPSOptionsSpec.class);
 		var underTest = createAdapter(mockClientFactory);
 		
-		var ex = mockForException(cause, ()->underTest.toPS(DUMMY_PDF, toPSOptionsSpec));
+		var ex = mockForException(mockClientToPs, cause, ()->underTest.toPS(DUMMY_PDF, toPSOptionsSpec));
 		
 		assertThat(ex, allOf(ExceptionMatchers.exceptionMsgContainsAll("I/O Error while securing document"),
 	 			 ExceptionMatchers.hasCause(cause)
 			     ));
 	}
 
-	private <T extends Exception> ConvertPdfServiceException mockForException(T exception, Executable test) throws Exception {
+	private <T extends Exception> ConvertPdfServiceException mockForException(RestClient mockClient, T exception, Executable test) throws Exception {
 		
 		Builder mockPayloadBuilder2 = Mockito.mock(Builder.class, Answers.RETURNS_SELF);
 		when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder2);
@@ -395,7 +397,7 @@ public class RestServicesConvertPdfServiceAdapterTest {
 											  .build();
 	}
 
-	private void setupMocks(Optional<Response> mockedResponse) throws RestClientException {
+	private void setupMocks(RestClient mockClient, Optional<Response> mockedResponse) throws RestClientException {
 		when(mockClient.multipartPayloadBuilder()).thenReturn(mockPayloadBuilder);
 		when(mockPayloadBuilder.build()).thenReturn(mockPayload);
 		when(mockPayload.postToServer(acceptableContentType.capture())).thenReturn(mockedResponse);
@@ -406,4 +408,5 @@ public class RestServicesConvertPdfServiceAdapterTest {
 		when(mockResponse.data()).thenReturn(new ByteArrayInputStream(responseData));
 		return Optional.of(mockResponse);
 	}
+	
 }
