@@ -26,7 +26,7 @@ import com._4point.aem.fluentforms.impl.convertPdf.ConvertPdfServiceImpl;
 @Tag("client-tests")
 public class ToPSTest {
 
-	private static final boolean SAVE_RESULTS = true;
+	private static final boolean SAVE_RESULTS = false;
 
 	private ConvertPdfServiceImpl underTest;
 
