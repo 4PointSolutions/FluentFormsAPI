@@ -14,4 +14,7 @@ The `ff_it_test_65.dockerfile` is provided for creating an integration test envi
 assumes that an AEM 6.5 non-LTS base container is available with FluentForms v0.0.3 installed.  It is useful to test that 
 v0.0.3 is still compatible with the latest AEM 6.5 service packs and with the client libraries running on later versions of Java.
 
-Note: On Macs, you can add `--platform linux/amd64` to the command to generate an x86_64 image since AEM only supports x86_64 Linux variants. 
+#### Notes
+
+* On Macs, you can add `--platform linux/amd64` to the command to generate an x86_64 image since AEM only supports x86_64 Linux variants. 
+* When debugging, it is helpful to be able to see/monitor the AEM logs, examine the environment, etc.  Setting the Test Containers property `testcontainers.reuse.enable=true` in `~/.testcontainers.properties` will leave the container up and running after a test run (and during subsequent test runs).  See the [Test Containers Reusable Containers page](https://java.testcontainers.org/features/reuse/) for details.
