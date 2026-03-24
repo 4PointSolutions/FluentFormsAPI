@@ -50,7 +50,7 @@ public enum AemInstance {
 		if (!preparedForTests.get()) {
 			Integer mappedPort = aemPort();
 			
-			startAem(mappedPort);
+			startAem(mappedPort, targetType);
 			//	deploySampleFiles(mappedPort);
 			
 			preparedForTests.set(true);
@@ -59,11 +59,15 @@ public enum AemInstance {
 	}
 
 	// Make sure AEM is up before running the tests.
-	private static void startAem(Integer mappedPort) {
-		System.out.println(String.format("Checking if AEM is available on port %d.", mappedPort));
+	private static void startAem(Integer mappedPort, AemTargetType targetType) {
+		String targetMachine = switch (targetType) {
+			case LOCAL, TESTCONTAINERS -> "localhost";
+			case REMOTE_WINDOWS, REMOTE_LINUX -> TestUtils.TEST_MACHINE_NAME;
+		};
+		System.out.println(String.format("Checking if AEM is available on port %d of %s.", mappedPort, targetMachine));
 		HttpClient client = HttpClient.newHttpClient();
 		HttpRequest request = HttpRequest.newBuilder()
-		      .uri(URI.create(String.format("http://localhost:%d/", mappedPort)))
+		      .uri(URI.create(String.format("http://%s:%d/", targetMachine, mappedPort)))
 			  .header("Authorization", encodeBasic(TestUtils.TEST_USER, TestUtils.TEST_USER_PASSWORD))
 			  .GET()
 		      .build();
