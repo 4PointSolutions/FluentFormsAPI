@@ -96,3 +96,6 @@ target/
 
 # Maven artifact when using shade plugin
 dependency-reduced-pom.xml
+
+# MacOS specific files
+.DS_Store
