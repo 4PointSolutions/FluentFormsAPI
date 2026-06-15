@@ -32,9 +32,7 @@
 	 -->
 
 	<properties>
-		<!--  AEM may be running in Java 8, so compile for that until it's no longer supported. -->
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<!--  This setting only applies to building and running the integration tests, however the main project uses 17, so it also needs 17. -->
         <maven.compiler.release>17</maven.compiler.release>
 	</properties>
 

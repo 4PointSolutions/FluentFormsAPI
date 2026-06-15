@@ -42,9 +42,7 @@
 		<vault.user>admin</vault.user>
 		<vault.password>admin</vault.password>
 
-		<!--  AEM may be running in Java 8, so compile for that until it's no longer supported. -->
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+        <!--  AEM LTS will be running in Java 17 minimum, so compile for that until it's no longer supported. -->
         <maven.compiler.release>17</maven.compiler.release>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
