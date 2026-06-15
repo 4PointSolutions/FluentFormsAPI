@@ -75,7 +75,7 @@ The latest version of the Spring Boot starter and AEM libraries require Spring B
 
 The Fluent Forms libraries have been tested against each release up to and including AEM 6.5 LTS SP2 and AEM 6.5 SP25.
 
-See the [Migration Guide](MIGRATION_GUIDE.md) for details about mograting from one version to the next.
+See the [Migration Guide](MIGRATION_GUIDE.md) for details about migrating from one version to the next.
 
 
 # Retrieving the Fluent Forms OSGi Bundles
