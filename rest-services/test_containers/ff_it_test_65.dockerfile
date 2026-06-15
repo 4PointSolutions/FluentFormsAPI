@@ -1,4 +1,4 @@
-FROM aem:aem65sp24 AS ff_it_test
+FROM aem:aem65sp25 AS ff_it_test
 
 ENV container="aem-lts-quickstart,aem-author,ubuntu,java21"
 
