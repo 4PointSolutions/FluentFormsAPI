@@ -5,13 +5,18 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.6</version>
+		<version>4.1.0</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com._4point.aem.fluentforms</groupId>
 	<artifactId>fluentforms-sample-cli-app</artifactId>
 	<version>0.0.5-SNAPSHOT</version>
 	<name>Simple Sample App</name>
+
+	<properties>
+		<java.version>25</java.version>
+		<fluentforms.spring.boot.starter.version>0.0.5-SNAPSHOT</fluentforms.spring.boot.starter.version>
+	</properties>
 
 	<distributionManagement>
 		<repository>
@@ -33,9 +38,13 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com._4point.aem.fluentforms</groupId>
 			<artifactId>fluentforms-spring-boot-starter</artifactId>
-			<version>0.0.5-SNAPSHOT</version>
+			<version>${fluentforms.spring.boot.starter.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -67,4 +76,17 @@
 		</plugins>
 	</build>
 
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
 </project>
